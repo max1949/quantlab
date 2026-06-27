@@ -206,7 +206,13 @@ docker compose --profile workers up -d worker   # 可选: Celery worker
   - `Validation` 模型 + 异步(Celery `run_validation_task`)+ `/validations` 路由;迁移 `0006_validations`
   - 验证:真库 + **真 Celery worker** 端到端(动量因子在 RB 上 OOS 夏普 −0.73、稳健性 23.8「脆弱」,正确识别弱因子);测试合计 **81 passed**
   - 细节见 `backend/README.md`
-- [ ] Sprint 6:竞技系统(赛季 · 动态评分 · 排行榜)
+- [x] Sprint 6:竞技系统(赛季 · 动态评分 · 排行榜)
+  - engine `scoring.py`:Research Score 五维加权(样本外 30% · 稳定性 25% · 风控 20% · 跨品种 15% · 研究质量 10%)
+  - **动态衰减**:`final = base × decay`,衰减由近期(Walk-Forward 末段)表现决定,防止失效老因子霸榜
+  - `Season` / `Submission` 模型 + `/seasons`(列表/创建[L3]/提交/排行榜/我的提交);迁移 `0007_competition`
+  - 提交时**回填 `User.research_score`**(历史最佳),Sprint 1 预留字段正式启用
+  - 验证:真库 + **真 Celery worker** 端到端(动量因子提交得 base 32.26 × decay 0.43 = **final 13.87**,弱因子被正确低估,榜单回填用户积分);测试合计 **93 passed**
+  - 细节见 `backend/README.md`
 
 > 环境说明(重要):
 > - 本机是 **Windows Server 2019**,Docker Desktop **不支持**(仅支持 Win10/11 客户端),

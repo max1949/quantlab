@@ -16,7 +16,7 @@ app/
 ├── services/          # user · task · leveling · factor · market_data · backtest · validation
 ├── tasks/             # Celery: celery_app · backtest_tasks · validation_tasks
 └── auth/              # security.py (hash/JWT) · deps.py (当前用户/等级闸门)
-migrations/            # Alembic (0001..0006: baseline/users/academy/factors/backtests/validations)
+migrations/            # Alembic (0001..0007: baseline/users/academy/factors/backtests/validations/competition)
 tests/                 # pytest (SQLite 内存库; 含 ../engine/tests)
 ```
 
@@ -218,10 +218,28 @@ PostgreSQL 存索引 + Parquet 存 K 线。`MarketDataset`(品种/周期/区间/
 | GET | `/api/v1/validations` | 我的验证列表 |
 | GET | `/api/v1/validations/{id}` | 验证详情(OOS/WF/敏感性/稳健性) |
 
+## Sprint 6 — 竞技系统(赛季 · 动态评分 · 排行榜)
+
+把"通过科学验证的因子"计入赛季并排名。打分在 `engine/scoring.py`(同步计算,不需 worker):
+五维加权(样本外/稳定性/风控/跨品种/研究质量)+ 动态衰减,产出 `final = base × decay`。
+
+- `Season` / `Submission`(迁移 `0007`):一次提交 = 一次成功验证的得分快照(含各维度明细)。
+- 提交时**回填 `User.research_score`**(取历史最佳),Sprint 1 预留字段正式启用。
+- 赛季创建用 `require_level(L3)` 把关(高级研究员管理);提交对所有登录用户开放。
+- 默认赛季种子:`./scripts/seed-season.ps1`(幂等)。
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/v1/seasons` | 赛季列表 |
+| POST | `/api/v1/seasons` | 创建赛季(需 L3) |
+| POST | `/api/v1/seasons/{id}/submissions` | 提交已验证因子 → 算分 |
+| GET | `/api/v1/seasons/{id}/leaderboard` | 排行榜(按最终分降序) |
+| GET | `/api/v1/seasons/{id}/submissions/me` | 我在该赛季的提交 |
+
 ## 测试
 
 ```bash
-cd backend && pytest          # 用 SQLite 内存库, 不需 Postgres  (81 passed, 含 engine)
+cd backend && pytest          # 用 SQLite 内存库, 不需 Postgres  (93 passed, 含 engine)
 ```
 
 覆盖:**Sprint 1** — 注册/登录/`me`/密码哈希/JWT/等级闸门;
@@ -229,4 +247,5 @@ cd backend && pytest          # 用 SQLite 内存库, 不需 Postgres  (81 passe
 **Sprint 3** — 模板目录、建因子、参数校验、组合器 L0→403/L1→201、预览;
 **Sprint 4** — 数据集、回测成功、指标/研究报告/净值、快照、成本影响、错误分支;
 **Sprint 5** — 验证全流程(OOS/WF/敏感性/稳健性)、组合器敏感性退化、错误分支、鉴权;
-**engine** — 因子、成本、回测指标、研究报告、OOS/WF/敏感性/稳健性评分。
+**Sprint 6** — 赛季创建 L3 闸门、提交算分、排行榜排序、回填 research_score、重复/无效提交、鉴权;
+**engine** — 因子、成本、回测指标、研究报告、OOS/WF/敏感性/稳健性评分、Research Score 五维 + 衰减。

@@ -12,7 +12,7 @@
 | `backtest.py` | 回测(收益 / 风险 / 交易指标 + 净值) | Sprint 4 ✅ |
 | `report.py` | 研究报告(假设 / 方法 / 结果 / 结论) | Sprint 4 ✅ |
 | `walk_forward.py` | OOS / Walk-Forward / 敏感性 / 稳健性评分 | Sprint 5 ✅ |
-| `scoring.py` | Research Score + 动态衰减(Decay) | Sprint 5–6 |
+| `scoring.py` | Research Score 五维加权 + 动态衰减(Decay) | Sprint 6 ✅ |
 
 ## factor_engine（Sprint 3 已实现）
 
@@ -52,6 +52,15 @@
 - `walk_forward(..., n_splits)`:时间线分段逐段回测,看跨期一致性(positive_ratio)。
 - `sensitivity(variants, ...)`:参数扰动下表现是否稳定(而非单点尖峰)。
 - `robustness_score(oos, wf, sens)`:综合 0–100 稳健性评分 + 评级(稳健/中等/偏弱/脆弱)。
+
+## scoring（Sprint 6 已实现）
+
+把验证结果转成可排名的 **Research Score**,强调研究质量与稳健性,而非裸收益。
+
+- `research_score(validation)`:五维加权(样本外 30% · 稳定性 25% · 风控 20% · 跨品种 15% · 研究质量 10%),
+  各维归一到 0–1,加权得 0–100 基础分;输出 `base_score / decay_factor / final_score / dimensions`。
+- `apply_decay(base, recent_performance)`:**动态衰减** ∈ [0.4, 1.0],由近期(Walk-Forward 最后一段)表现决定。
+  市场会变、老因子会失效 → `final = base × decay`,防止失效老因子长期霸榜。
 
 ## 测试
 

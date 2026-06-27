@@ -10,6 +10,7 @@ from fastapi import APIRouter
 from backend.app.api.v1.routes import (
     auth,
     backtests,
+    competition,
     factors,
     tasks,
     users,
@@ -30,5 +31,6 @@ api_router.include_router(tasks.router, prefix="/tasks", tags=["academy"])
 api_router.include_router(factors.router, prefix="/factors", tags=["factor-lab"])
 api_router.include_router(backtests.router)  # /datasets · /backtests
 api_router.include_router(validations.router, prefix="/validations", tags=["validation"])
+api_router.include_router(competition.router, prefix="/seasons", tags=["competition"])
 
-# 后续 Sprint 继续在此挂载: seasons / leaderboard / ai / ...
+# 后续 Sprint 继续在此挂载: ai / simulated-trading / ...
