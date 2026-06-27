@@ -43,6 +43,7 @@ class UserOut(BaseModel):
     email: EmailStr
     username: str
     level: int
+    experience: int
     research_score: float
     is_active: bool
     created_at: datetime
@@ -51,6 +52,14 @@ class UserOut(BaseModel):
     @property
     def level_label(self) -> str:
         return UserLevel(self.level).label
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def experience_to_next_level(self) -> int | None:
+        # 延迟导入避免循环依赖 (leveling 依赖 models.user)。
+        from backend.app.services.leveling import experience_to_next_level
+
+        return experience_to_next_level(self.experience)
 
 
 class Token(BaseModel):

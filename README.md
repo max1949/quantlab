@@ -173,8 +173,15 @@ docker compose --profile workers up -d worker   # 可选: Celery worker
   - `alembic upgrade head` 链路 `0001 → 0002` 成功,`users` 表字段/索引符合设计
 - [x] 本机环境搭建(2026-06-28):原生 PostgreSQL 16 + Redis 5(均为开机自启服务)
   - 后端连**真库**端到端跑通:注册 → 登录 → JWT → `/users/me`,错误密码 401,数据已落库
-- [ ] git 初始化(待执行)
-- [ ] Sprint 2:学院系统(任务 · 等级成长 · 等级绑定权限)
+- [x] git 初始化 + 首次提交(Sprint 1 baseline)
+- [x] Sprint 2:学院系统(任务 · 等级成长 · 等级绑定权限)
+  - `User.experience` + 经验阈值自动升级(L0:0 / L1:100 / L2:300 / L3:700,见 `services/leveling.py`)
+  - `Task` / `UserTask` 模型;预置 L0→L3 成长主线任务(种子幂等)
+  - 接口:`GET /api/v1/tasks`、`GET /api/v1/tasks/{code}`、`POST /api/v1/tasks/{code}/complete`
+  - **等级绑定权限**:任务 `min_level` 决定锁定/可完成(403),与 `require_level()` 同源
+  - 迁移 `0003_academy`;测试合计 **26 passed**;真库端到端验证通过(完成→升级→闸门)
+  - 细节见 `backend/README.md`
+- [ ] Sprint 3:因子实验室(模板因子 · 组合器)
 
 > 环境说明(重要):
 > - 本机是 **Windows Server 2019**,Docker Desktop **不支持**(仅支持 Win10/11 客户端),

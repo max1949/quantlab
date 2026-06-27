@@ -14,7 +14,7 @@ import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Float, SmallInteger, String, func
+from sqlalchemy import Boolean, DateTime, Float, Integer, SmallInteger, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import Uuid
 
@@ -60,8 +60,14 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
 
     # 等级: 平台能力闸门 (默认 L0 观察员)。存为 SmallInteger,语义见 UserLevel。
+    # 由 experience 经阈值推导 (见 services/leveling.py), 完成任务后更新。
     level: Mapped[int] = mapped_column(
         SmallInteger, default=UserLevel.L0.value, server_default="0", nullable=False
+    )
+
+    # 累计经验值: 学院任务成长的核心计数器 (Sprint 2)。单调递增。
+    experience: Mapped[int] = mapped_column(
+        Integer, default=0, server_default="0", nullable=False
     )
 
     # 研究积分: Sprint 6 动态评分写入,这里仅占位 (默认 0)。

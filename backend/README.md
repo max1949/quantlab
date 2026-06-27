@@ -11,11 +11,11 @@ app/
 ├── api/v1/            # 路由层 (薄, 只编排)
 │   └── routes/        # auth.py · users.py · ...
 ├── core/              # config (env) · database (Session/Base)
-├── models/            # ORM: user.py (User, UserLevel)
-├── schemas/           # Pydantic: user.py
-├── services/          # 业务: user_service.py
+├── models/            # ORM: user.py (User, UserLevel) · task.py (Task, UserTask)
+├── schemas/           # Pydantic: user.py · task.py
+├── services/          # 业务: user_service.py · task_service.py · leveling.py
 └── auth/              # security.py (hash/JWT) · deps.py (当前用户/等级闸门)
-migrations/            # Alembic (0001 baseline · 0002 users)
+migrations/            # Alembic (0001 baseline · 0002 users · 0003 academy)
 tests/                 # pytest (SQLite 内存库)
 ```
 
@@ -89,11 +89,54 @@ uvicorn backend.app.main:app --reload   # 在仓库根执行, 保证 backend 包
 迁移在 `backend/` 下执行(`alembic.ini` 的 `script_location = migrations`)。
 新增模型后:`alembic revision --autogenerate -m "..."` → 审阅 → `alembic upgrade head`。
 
+## Sprint 2 — 学院系统(任务 · 等级成长 · 等级绑定权限)
+
+### 成长模型
+
+- `User.experience`:累计经验(单调递增)。
+- 等级由经验阈值推导(`services/leveling.py`):
+
+| 等级 | 累计经验阈值 |
+|---|---|
+| L0 | 0 |
+| L1 | 100 |
+| L2 | 300 |
+| L3 | 700 |
+
+完成任务 → `experience += xp_reward` → 经阈值重算等级(只升不降)。
+
+### 数据模型
+
+- `Task`:`code`(唯一编码)/ `title` / `description` / `category` / **`min_level`**(解锁所需等级)/ `xp_reward` / `order_index` / `is_active`。
+- `UserTask`:用户完成记录,`(user_id, task_id)` 唯一(保证幂等)。
+
+**等级绑定权限**:`Task.min_level` 决定可见/可完成。用户等级不足时任务 `locked`,
+完成请求返回 403。这与 `auth/deps.py::require_level` 是同一套"Level 决定能力"的落地。
+
+### 接口(均需 Bearer JWT)
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/v1/tasks` | 任务列表(含 `locked` / `completed` 状态) |
+| GET | `/api/v1/tasks/{code}` | 任务详情 |
+| POST | `/api/v1/tasks/{code}/complete` | 完成任务(结算经验/升级;`min_level` 闸门:403;重复:409) |
+
+`UserOut` 增补 `experience` 与 `experience_to_next_level`。
+
+### 种子任务
+
+预置一条 L0→L3 的成长主线(`task_service.DEFAULT_TASKS`)。幂等写入:
+
+```powershell
+.\scripts\seed-academy.ps1     # 或在仓库根: python -c "...seed_default_tasks(SessionLocal())"
+```
+
 ## 测试
 
 ```bash
-cd backend && pytest          # 用 SQLite 内存库, 不需 Postgres
+cd backend && pytest          # 用 SQLite 内存库, 不需 Postgres  (26 passed)
 ```
 
-覆盖:注册(成功/重复/弱口令/非法邮箱)、登录(邮箱与用户名/错密码/未知用户)、
-`/users/me`(有效/缺失/非法令牌)、密码哈希与 JWT 往返、等级闸门。
+覆盖:**Sprint 1** — 注册(成功/重复/弱口令/非法邮箱)、登录(邮箱与用户名/错密码/未知用户)、
+`/users/me`(有效/缺失/非法令牌)、密码哈希与 JWT 往返、等级闸门;
+**Sprint 2** — 经验阈值升级、任务列表锁定/进度、完成奖励、升级、`min_level` 403、重复完成 409、需鉴权。
