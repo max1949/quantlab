@@ -1,0 +1,88 @@
+# QuantLab AI - 本地一键编排 (Sprint 1 骨架, 暂不含业务逻辑)
+# 启动: docker compose up -d
+# 说明: 各服务先保证可启动 / 健康检查通过, 业务逻辑在后续 Sprint 填充。
+
+services:
+  # ---------------------------------------------------------------
+  # 数据层
+  # ---------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: quantlab_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-quantlab}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-quantlab}
+      POSTGRES_DB: ${POSTGRES_DB:-quantlab}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      # 首次初始化脚本 (建库 / 扩展 / 索引基础)
+      - ./infra/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-quantlab} -d ${POSTGRES_DB:-quantlab}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: quantlab_redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ---------------------------------------------------------------
+  # 接入层 / 业务服务层 (FastAPI)
+  # ---------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: quantlab_backend
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./backend:/app/backend
+      - ./engine:/app/engine
+      - ./data:/app/data
+    command: uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ---------------------------------------------------------------
+  # 异步计算层 (Celery Worker) —— 重计算与 API 解耦
+  # ---------------------------------------------------------------
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: quantlab_worker
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - postgres
+    volumes:
+      - ./backend:/app/backend
+      - ./engine:/app/engine
+      - ./data:/app/data
+    # Sprint 4 起启用真实任务; 骨架阶段先占位 (worker app 待补)
+    command: celery -A backend.app.tasks.celery_app worker --loglevel=info
+    profiles:
+      - workers
+
+volumes:
+  pg_data:
+  redis_data:
