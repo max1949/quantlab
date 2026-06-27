@@ -16,7 +16,7 @@ app/
 ├── services/          # user · task · leveling · factor · market_data · backtest · validation
 ├── tasks/             # Celery: celery_app · backtest_tasks · validation_tasks
 └── auth/              # security.py (hash/JWT) · deps.py (当前用户/等级闸门)
-migrations/            # Alembic (0001..0008: baseline/users/academy/factors/backtests/validations/competition/ai)
+migrations/            # Alembic (0001..0009: baseline/users/academy/factors/backtests/validations/competition/ai/research)
 tests/                 # pytest (SQLite 内存库; 含 ../engine/tests)
 ```
 
@@ -254,10 +254,25 @@ PostgreSQL 存索引 + Parquet 存 K 线。`MarketDataset`(品种/周期/区间/
 | POST | `/api/v1/ai/backtests/{id}/summary` | AI 总结回测研究报告(通俗版) |
 | GET | `/api/v1/ai/insights` | 我的 AI 洞察列表 |
 
+## Sprint 8.1 — 研究项目报告(研究生态化)
+
+产品方向从"交易化"转向"研究生态化"(vn.py 推迟为未来可插拔 Execution Adapter)。
+第一步:把"因子 + 回测 + 验证"**聚合成一篇人话研究报告**,让小白看到的不再是裸指标。
+
+- 计算在 `engine/research_report.py`(纯函数);`research_service` 取该因子**最新成功的回测 + 验证**聚合。
+- `ResearchReport`(迁移 `0009`):标题 / 假设 / 评级 / 阶段完成度 / 完整叙事 / 溯源(backtest_id, validation_id)/ 是否公开。
+- 公开报告可被他人查看,为后续**研究员主页 / 研究社区**铺路。
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST | `/api/v1/research/factors/{id}/report` | 为因子生成研究报告(需已有成功回测/验证) |
+| GET | `/api/v1/research/reports` | 我的研究报告列表 |
+| GET | `/api/v1/research/reports/{id}` | 报告详情(公开报告他人可见) |
+
 ## 测试
 
 ```bash
-cd backend && pytest          # 用 SQLite 内存库, 不需 Postgres  (107 passed, 含 engine)
+cd backend && pytest          # 用 SQLite 内存库, 不需 Postgres  (120 passed, 含 engine)
 ```
 
 覆盖:**Sprint 1** — 注册/登录/`me`/密码哈希/JWT/等级闸门;
@@ -267,4 +282,5 @@ cd backend && pytest          # 用 SQLite 内存库, 不需 Postgres  (107 pass
 **Sprint 5** — 验证全流程(OOS/WF/敏感性/稳健性)、组合器敏感性退化、错误分支、鉴权;
 **Sprint 6** — 赛季创建 L3 闸门、提交算分、排行榜排序、回填 research_score、重复/无效提交、鉴权;
 **Sprint 7** — AI 状态、验证复盘/回测总结本地降级、LLM mock 成功、LLM 失败回退本地、错误分支、鉴权;
-**engine** — 因子、成本、回测指标、研究报告、OOS/WF/敏感性/稳健性评分、Research Score 五维 + 衰减、AI 提示词/本地分析。
+**Sprint 8.1** — 仅回测/回测+验证生成报告、阶段标记、溯源、无研究 422、公开报告他人可见、鉴权;
+**engine** — 因子、成本、回测指标、研究报告、OOS/WF/敏感性/稳健性评分、Research Score 五维 + 衰减、AI 提示词/本地分析、研究项目报告聚合。

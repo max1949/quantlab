@@ -13,6 +13,7 @@ from backend.app.api.v1.routes import (
     backtests,
     competition,
     factors,
+    research,
     tasks,
     users,
     validations,
@@ -34,5 +35,6 @@ api_router.include_router(backtests.router)  # /datasets · /backtests
 api_router.include_router(validations.router, prefix="/validations", tags=["validation"])
 api_router.include_router(competition.router, prefix="/seasons", tags=["competition"])
 api_router.include_router(ai.router, prefix="/ai", tags=["ai"])
+api_router.include_router(research.router, prefix="/research", tags=["research"])
 
-# 后续 Sprint 继续在此挂载: simulated-trading / ...
+# 后续 Sprint 继续在此挂载: 研究员主页 / AI 研究 Agent / execution-adapter / ...

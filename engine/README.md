@@ -14,6 +14,7 @@
 | `walk_forward.py` | OOS / Walk-Forward / 敏感性 / 稳健性评分 | Sprint 5 ✅ |
 | `scoring.py` | Research Score 五维加权 + 动态衰减(Decay) | Sprint 6 ✅ |
 | `ai_advisor.py` | LLM 提示词构造 + 确定性本地分析(无网络) | Sprint 7 ✅ |
+| `research_report.py` | 研究项目报告(因子+回测+验证→叙事) | Sprint 8 ✅ |
 
 ## factor_engine（Sprint 3 已实现）
 
@@ -72,6 +73,15 @@
 - `local_validation_review(ctx)`:由 OOS/WF/敏感性/稳健性推导优点 / 风险(尤其过拟合) / 改进建议 + markdown。
 - `local_backtest_summary(ctx)`:由回测指标给通俗总结(关键表现 / 注意事项 / 下一步)。
 - 强调研究过程与稳健性,只给改进建议,**不给买卖信号**。
+
+## research_report（Sprint 8.1 已实现）
+
+把一个因子的研究全过程(因子定义 + 回测 + 科学验证)**聚合成一篇人话研究报告**:
+
+- `build_project_report(factor, symbol, backtest_metrics, validation, snapshot, ai_suggestions)`
+  → 标题(自动,如「RB · 20日动量「mom20」研究」)/ 研究假设 / 实验(含可复现快照)/
+  结果(样本内外对比 + 评级)/ 风险 / 下一步建议 + 完整 markdown + 阶段完成度。
+- 与 `report.py`(单次回测的指标报告)分工:这里面向**研究项目**,给小白看懂"研究讲了什么、靠不靠谱、下一步做什么"。
 
 ## 测试
 

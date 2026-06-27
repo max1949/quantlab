@@ -109,7 +109,11 @@ quantlab/
 | 5 | 验证系统 | OOS · Walk-Forward · Decay |
 | 6 | 竞技系统 | Season · 排行榜 · 研究积分(+ vn.py 接口预留) |
 | 7 | AI 助手 | 研究建议 · 报告总结(外部 LLM,可降级本地) ✅ |
-| 8 | 模拟交易 | vn.py 接口完整接入 |
+| 8 | **研究生态化** | 研究报告自动生成 · 研究员主页 · AI 研究 Agent |
+| 9+ | Execution Adapter | vn.py / QMT / 模拟盘(可插拔,核心不依赖) |
+
+> **方向修订(Sprint 8)**:核心是「量化研究员生产线 + 研究数据基础设施」,不是交易软件。
+> vn.py 推迟为未来的可插拔 **Execution Adapter**(Phase 3),先把研究生态做厚。
 
 > 开发纪律:按 Sprint 锁死推进。每个模块必须 **可运行 + 有测试 + 有 README**。
 
@@ -219,6 +223,12 @@ docker compose --profile workers up -d worker   # 可选: Celery worker
   - `AiInsight` 模型(迁移 `0008`)留存文本 + 结构化分析 + 来源(`llm`/`local`)+ 模型名;接口 `/ai`(status / 验证复盘 / 回测总结 / 洞察列表)
   - 验证:真库 + **真 Celery worker** 端到端(无 Key → `source=local`,AI 正确识别弱动量因子过拟合:衰减 0.59、OOS 夏普 −0.73、跨期一致性 25%);测试合计 **107 passed**
   - 只给研究改进建议,**不给买卖信号**;细节见 `backend/README.md`
+- [~] Sprint 8:研究生态化(产品方向从"交易化"转向"研究生产线";vn.py 推迟为可插拔 Execution Adapter)
+  - [x] **8.1 研究报告自动生成**:engine `research_report.py` 把「因子+回测+验证」聚合成人话叙事报告
+    - `ResearchReport` 模型(迁移 `0009`):标题/假设/评级/阶段完成度/完整叙事/溯源/公开;接口 `/research`(生成/列表/详情)
+    - 验证:真库 + 真 worker 端到端(自动生成「RB · 20日动量」报告,正确给出 OOS −0.73、稳健性 23.8「脆弱」、过拟合结论与改进建议);测试合计 **120 passed**
+  - [ ] 8.2 研究员主页(档案 + 统计 + 公开研究展示)
+  - [ ] 8.3 AI 研究 Agent(给研究方向 → 生成假设 + 推荐因子 + 测试方案)
 
 > 环境说明(重要):
 > - 本机是 **Windows Server 2019**,Docker Desktop **不支持**(仅支持 Win10/11 客户端),
