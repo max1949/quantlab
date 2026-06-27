@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 from engine.ai_advisor import (
+    DISCLAIMER,
     MENTOR_SYSTEM,
     build_backtest_summary_prompt,
+    build_research_plan_prompt,
     build_validation_review_prompt,
     local_backtest_summary,
+    local_research_plan,
     local_validation_review,
 )
 
@@ -92,3 +95,20 @@ def test_backtest_summary_strong_recommends_validation():
     p = build_backtest_summary_prompt(ctx)
     assert p["system"] == MENTOR_SYSTEM
     assert "下一步" in p["user"]
+
+
+def test_research_plan_has_hypotheses_and_no_trade_advice():
+    plan = local_research_plan("黄金")
+    assert plan["theme"] == "黄金"
+    assert len(plan["hypotheses"]) >= 2
+    assert all("factor_template" in h for h in plan["hypotheses"])
+    assert plan["experiments"]
+    assert plan["disclaimer"] == DISCLAIMER
+    assert "黄金" in plan["markdown"] and "不构成" in plan["markdown"]
+
+
+def test_research_plan_prompt_constrains_no_trade_signal():
+    p = build_research_plan_prompt("螺纹钢")
+    assert p["system"] == MENTOR_SYSTEM
+    assert "螺纹钢" in p["user"]
+    assert "不要" in p["user"]  # 约束: 不给买卖点/不承诺收益

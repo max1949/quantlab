@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>QuantLab AI · 研究 OS 演示</title>
+<style>
+  :root {
+    --bg: #0f1419; --panel: #1a222e; --line: #2a3543; --fg: #e6edf3;
+    --muted: #8b98a5; --accent: #4cc2ff; --ok: #3fb950; --warn: #d29922; --bad: #f85149;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 14px/1.6 -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif; }
+  header { padding: 20px 28px; border-bottom: 1px solid var(--line);
+    display: flex; align-items: baseline; gap: 12px; }
+  header h1 { font-size: 18px; margin: 0; }
+  header span { color: var(--muted); font-size: 13px; }
+  main { display: grid; grid-template-columns: 360px 1fr; gap: 0; min-height: calc(100vh - 62px); }
+  .left { padding: 22px 24px; border-right: 1px solid var(--line); }
+  .right { padding: 22px 24px; overflow: auto; }
+  h2 { font-size: 14px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: .08em; margin: 22px 0 10px; }
+  h2:first-child { margin-top: 0; }
+  label { display: block; color: var(--muted); margin: 10px 0 4px; font-size: 13px; }
+  input { width: 100%; padding: 9px 11px; background: #0b0f14; border: 1px solid var(--line);
+    border-radius: 8px; color: var(--fg); }
+  button { cursor: pointer; border: none; border-radius: 8px; padding: 11px 14px;
+    font-weight: 600; font-size: 14px; }
+  .primary { background: var(--accent); color: #042b3d; width: 100%; margin-top: 14px; }
+  .primary:disabled { opacity: .5; cursor: not-allowed; }
+  .ghost { background: var(--panel); color: var(--fg); border: 1px solid var(--line);
+    margin-top: 8px; width: 100%; }
+  .steps { list-style: none; padding: 0; margin: 8px 0 0; }
+  .steps li { padding: 8px 10px; border-radius: 8px; margin-bottom: 5px;
+    background: var(--panel); display: flex; align-items: center; gap: 10px; color: var(--muted); }
+  .steps li .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--line); flex: none; }
+  .steps li.done { color: var(--fg); }
+  .steps li.done .dot { background: var(--ok); }
+  .steps li.active { color: var(--accent); }
+  .steps li.active .dot { background: var(--accent); }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px 20px; margin-bottom: 16px; }
+  .card h3 { margin: 0 0 10px; font-size: 15px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+  .stat { background: #0b0f14; border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .stat .n { font-size: 22px; font-weight: 700; }
+  .stat .l { color: var(--muted); font-size: 12px; }
+  pre { background: #0b0f14; border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px; white-space: pre-wrap; word-break: break-word; font-size: 13px; max-height: 460px; overflow: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; }
+  .pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px;
+    background: #0b0f14; border: 1px solid var(--line); }
+  .muted { color: var(--muted); }
+  #log { font-size: 12.5px; color: var(--muted); }
+  .bad { color: var(--bad); }
+</style>
+</head>
+<body>
+<header>
+  <h1>QuantLab AI</h1>
+  <span>研究 OS 闭环演示 · 注册 → 项目 → 因子 → 回测 → 验证 → 报告 → 排行榜</span>
+</header>
+<main>
+  <section class="left">
+    <h2>开始</h2>
+    <label>研究员用户名</label>
+    <input id="username" placeholder="留空则随机生成" />
+    <label>研究方向 (标的)</label>
+    <input id="symbol" value="RB" />
+    <button class="primary" id="run">一键走完整研究闭环</button>
+    <button class="ghost" id="plan">先让 AI 给个研究计划</button>
+
+    <h2>流程</h2>
+    <ul class="steps" id="steps"></ul>
+    <div id="log"></div>
+  </section>
+  <section class="right" id="out">
+    <div class="card muted">点击左侧「一键走完整研究闭环」开始。后端需已启动并完成数据/赛季/挑战种子 (见 README_DEVELOPMENT)。</div>
+  </section>
+</main>
+
+<script>
+const API = "/api/v1";
+let TOKEN = null;
+const STEP_DEFS = [
+  ["reg", "注册 + 登录"],
+  ["enroll", "报名 30 天挑战"],
+  ["project", "创建研究项目"],
+  ["factor", "创建因子"],
+  ["backtest", "回测"],
+  ["validate", "科学验证"],
+  ["report", "生成研究报告"],
+  ["publish", "发布到研究 Feed"],
+  ["submit", "提交赛季 + 排行榜"],
+  ["profile", "研究主页 + 积分"],
+];
+
+function renderSteps(state) {
+  document.getElementById("steps").innerHTML = STEP_DEFS.map(([k, label]) => {
+    const cls = state[k] || "";
+    return `<li class="${cls}"><span class="dot"></span>${label}</li>`;
+  }).join("");
+}
+function log(msg, bad) { const el = document.getElementById("log");
+  el.innerHTML += `<div class="${bad ? "bad" : ""}">› ${msg}</div>`; }
+
+async function api(path, method = "GET", body = null) {
+  const headers = { "Content-Type": "application/json" };
+  if (TOKEN) headers["Authorization"] = "Bearer " + TOKEN;
+  const res = await fetch(API + path, { method, headers, body: body ? JSON.stringify(body) : null });
+  const text = await res.text();
+  let data = null; try { data = text ? JSON.parse(text) : null; } catch { data = text; }
+  if (!res.ok) throw new Error((data && data.detail) ? data.detail : ("HTTP " + res.status));
+  return data;
+}
+
+document.getElementById("plan").onclick = async () => {
+  try {
+    await ensureLogin();
+    const theme = document.getElementById("symbol").value || "RB";
+    const plan = await api("/ai/research-plan", "POST", { theme });
+    document.getElementById("out").innerHTML =
+      `<div class="card"><h3>AI 研究计划 · ${theme} <span class="pill">${plan.source}</span></h3><pre>${esc(plan.content)}</pre></div>`;
+  } catch (e) { log(e.message, true); }
+};
+
+async function ensureLogin() {
+  if (TOKEN) return;
+  let u = document.getElementById("username").value.trim();
+  if (!u) u = "researcher" + Math.floor(Math.random() * 100000);
+  document.getElementById("username").value = u;
+  const pw = "s3cret-pass";
+  try { await api("/auth/register", "POST", { email: u + "@quantlab.ai", username: u, password: pw }); } catch (e) {}
+  const r = await api("/auth/login", "POST", { identifier: u, password: pw });
+  TOKEN = r.access_token;
+}
+
+function esc(s) { return (s || "").replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
+
+document.getElementById("run").onclick = async () => {
+  const btn = document.getElementById("run"); btn.disabled = true;
+  const state = {}; renderSteps(state);
+  document.getElementById("log").innerHTML = "";
+  const out = document.getElementById("out"); out.innerHTML = "";
+  const symbol = document.getElementById("symbol").value || "RB";
+  const mark = (k) => { state[k] = "done"; renderSteps(state); };
+  const active = (k) => { state[k] = "active"; renderSteps(state); };
+  try {
+    active("reg"); await ensureLogin(); mark("reg"); log("登录成功");
+
+    active("enroll");
+    try { await api("/challenges/30d-research/enroll", "POST"); log("已报名 30 天挑战"); } catch (e) { log("挑战种子未就绪 (跳过): " + e.message); }
+    mark("enroll");
+
+    active("project");
+    const proj = await api("/projects", "POST", { title: symbol + " 趋势研究", symbol, question: "趋势是否具有延续性?" });
+    mark("project"); log("项目: " + proj.title);
+
+    active("factor");
+    const factor = await api("/factors/template", "POST",
+      { name: "mom-" + Date.now(), template_type: "momentum", params: { window: 20 }, project_id: proj.id });
+    mark("factor"); log("因子已建");
+
+    active("backtest");
+    const bt = await api("/backtests", "POST", { factor_id: factor.id, symbol });
+    mark("backtest"); log("回测: " + bt.status);
+
+    active("validate");
+    const val = await api("/validations", "POST", { factor_id: factor.id, symbol, oos_ratio: 0.3, n_splits: 4 });
+    mark("validate"); log("验证: " + val.status + (val.robustness ? " · 稳健性 " + val.robustness.score + "/100 (" + val.robustness.grade + ")" : ""));
+
+    active("report");
+    const rep = await api("/research/reports/generate", "POST", { project_id: proj.id });
+    mark("report"); log("研究报告已生成");
+
+    active("publish");
+    try { await api("/projects/" + proj.id + "/publish", "POST"); log("已发布到研究 Feed"); } catch (e) { log("发布跳过: " + e.message); }
+    mark("publish");
+
+    active("submit");
+    let leaderboard = null;
+    try {
+      const seasons = await api("/seasons");
+      if (seasons.length) {
+        await api("/seasons/" + seasons[0].id + "/submissions", "POST", { validation_id: val.id });
+        leaderboard = await api("/seasons/" + seasons[0].id + "/leaderboard");
+        log("已提交赛季, 进入排行榜");
+      } else { log("无开放赛季 (跳过, 见 seed-season)"); }
+    } catch (e) { log("赛季提交跳过: " + e.message); }
+    mark("submit");
+
+    active("profile");
+    const prof = await api("/researchers/me");
+    let prog = null; try { prog = await api("/challenges/30d-research/progress"); } catch (e) {}
+    mark("profile");
+
+    render(rep, prof, leaderboard, prog, proj);
+  } catch (e) {
+    log(e.message, true);
+  } finally { btn.disabled = false; }
+};
+
+function render(rep, prof, leaderboard, prog, proj) {
+  const out = document.getElementById("out");
+  let html = "";
+
+  html += `<div class="card"><h3>研究主页 · ${prof.username} <span class="pill">${prof.level_label}</span></h3>
+    <div class="grid">
+      <div class="stat"><div class="n">${prof.research_score}</div><div class="l">Research Score</div></div>
+      <div class="stat"><div class="n">${prof.project_count}</div><div class="l">研究项目</div></div>
+      <div class="stat"><div class="n">${prof.factor_count}</div><div class="l">因子</div></div>
+      <div class="stat"><div class="n">${prof.effective_validation_count}/${prof.validation_count}</div><div class="l">有效/总验证</div></div>
+      <div class="stat"><div class="n">${prof.report_count}</div><div class="l">研究报告</div></div>
+    </div>
+    <div style="margin-top:10px">方向: ${(prof.tags || []).map(t => `<span class="pill">${esc(t)}</span>`).join(" ") || "<span class='muted'>—</span>"}</div>
+  </div>`;
+
+  if (prog) {
+    html += `<div class="card"><h3>30 天挑战 · ${prog.completed_count}/${prog.total} (${prog.percent}%)</h3>
+      <ul class="steps">${prog.milestones.map(m => `<li class="${m.completed ? "done" : ""}"><span class="dot"></span>Day${m.day} · ${esc(m.title)}</li>`).join("")}</ul></div>`;
+  }
+
+  if (leaderboard && leaderboard.length) {
+    html += `<div class="card"><h3>赛季排行榜</h3><table>
+      <tr><th>#</th><th>研究员</th><th>标的</th><th>最终分</th></tr>
+      ${leaderboard.slice(0, 8).map(r => `<tr><td>${r.rank}</td><td>${esc(r.username)}</td><td>${esc(r.symbol)}</td><td>${r.final_score}</td></tr>`).join("")}
+    </table></div>`;
+  }
+
+  const grade = rep.grade || "—";
+  html += `<div class="card"><h3>研究报告 <span class="pill">稳健性: ${grade}</span></h3>
+    <pre>${esc((rep.narrative && rep.narrative.markdown) || rep.summary)}</pre></div>`;
+
+  out.innerHTML = html;
+}
+
+renderSteps({});
+</script>
+</body>
+</html>

@@ -14,6 +14,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
+    Integer,
     String,
     Text,
     func,
@@ -33,13 +34,27 @@ class ResearchReport(Base):
     owner_id: Mapped[uuid.UUID] = mapped_column(
         Uuid, ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
     )
+    # 所属研究项目 (Sprint 8); 可空 -> 兼容因子级独立报告。
+    project_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("research_projects.id", ondelete="SET NULL"), index=True, nullable=True
+    )
     factor_id: Mapped[uuid.UUID] = mapped_column(
         Uuid, ForeignKey("factors.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    # 因子版本快照 (factor.version), 保证报告可复现。
+    factor_version: Mapped[int] = mapped_column(
+        Integer, default=1, server_default="1", nullable=False
     )
     symbol: Mapped[str] = mapped_column(String(32), nullable=False)
 
     title: Mapped[str] = mapped_column(String(200), nullable=False)
+    # 结构化报告字段 (与 narrative 一致, 便于直接展示/检索)。
+    summary: Mapped[str] = mapped_column(Text, nullable=False, default="")
     hypothesis: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    methodology: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    result: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    risk_analysis: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    improvement_suggestion: Mapped[str] = mapped_column(Text, nullable=False, default="")
     grade: Mapped[str | None] = mapped_column(String(16), nullable=True)
 
     # 研究阶段完成度 {factor, backtest, validation}

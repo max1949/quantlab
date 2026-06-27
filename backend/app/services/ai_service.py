@@ -131,6 +131,18 @@ def summarize_backtest(db: Session, owner: User, backtest_id: uuid.UUID) -> AiIn
     )
 
 
+def research_plan(db: Session, owner: User, theme: str) -> AiInsight:
+    """AI 研究指导: 给方向 -> 研究假设 + 推荐因子 + 实验计划 (不给交易建议)。"""
+    local = ai_advisor.local_research_plan(theme)
+    prompt = ai_advisor.build_research_plan_prompt(theme)
+    content, source, model = _generate(prompt, local)
+    # 主题没有业务 uuid, 用 uuid5 派生一个稳定 id 作为 target。
+    target_id = uuid.uuid5(uuid.NAMESPACE_DNS, f"theme:{theme}")
+    return _persist(
+        db, owner, "research_plan", "theme", target_id, content, source, model, local,
+    )
+
+
 def list_insights(db: Session, owner_id: uuid.UUID, limit: int = 50) -> list[AiInsight]:
     return list(
         db.execute(

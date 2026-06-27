@@ -14,11 +14,24 @@ from sqlalchemy.orm import Session
 
 from engine import factor_engine as fe
 from backend.app.models.factor import Factor, FactorKind
+from backend.app.models.project import ResearchProject
 from backend.app.models.user import User, UserLevel
 
 
 class FactorNotFoundError(Exception):
     pass
+
+
+def _validated_project_id(
+    db: Session, owner_id: uuid.UUID, project_id: uuid.UUID | None
+) -> uuid.UUID | None:
+    """若指定项目, 校验其归属当前用户; 否则返回 None (独立因子)。"""
+    if project_id is None:
+        return None
+    proj = db.get(ResearchProject, project_id)
+    if proj is None or proj.owner_id != owner_id:
+        raise FactorValidationError("研究项目不存在或无权使用")
+    return project_id
 
 
 class FactorValidationError(Exception):
@@ -88,7 +101,8 @@ def _ensure_name_free(db: Session, owner_id: uuid.UUID, name: str) -> None:
 
 
 def create_template_factor(
-    db: Session, owner: User, name: str, template_type: str, params: dict
+    db: Session, owner: User, name: str, template_type: str, params: dict,
+    project_id: uuid.UUID | None = None,
 ) -> Factor:
     """创建模板因子 (L0+)。校验模板与参数。"""
     try:
@@ -96,9 +110,11 @@ def create_template_factor(
     except fe.FactorError as exc:
         raise FactorValidationError(str(exc))
 
+    pid = _validated_project_id(db, owner.id, project_id)
     _ensure_name_free(db, owner.id, name)
     factor = Factor(
         owner_id=owner.id,
+        project_id=pid,
         name=name,
         kind=FactorKind.TEMPLATE.value,
         template_type=template_type,
@@ -111,7 +127,8 @@ def create_template_factor(
 
 
 def create_stack_factor(
-    db: Session, owner: User, name: str, components: list[dict]
+    db: Session, owner: User, name: str, components: list[dict],
+    project_id: uuid.UUID | None = None,
 ) -> Factor:
     """创建因子组合器 (需 L1)。组件须为本人已有因子。"""
     if owner.level < STACK_MIN_LEVEL:
@@ -136,9 +153,11 @@ def create_stack_factor(
     if sum(abs(c["weight"]) for c in clean_components) == 0:
         raise FactorValidationError("组合器权重不能全为 0")
 
+    pid = _validated_project_id(db, owner.id, project_id)
     _ensure_name_free(db, owner.id, name)
     factor = Factor(
         owner_id=owner.id,
+        project_id=pid,
         name=name,
         kind=FactorKind.STACK.value,
         template_type=None,

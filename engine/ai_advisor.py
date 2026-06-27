@@ -232,3 +232,72 @@ def build_backtest_summary_prompt(context: dict) -> dict:
         + json.dumps(payload, ensure_ascii=False, default=str, indent=2)
     )
     return {"system": MENTOR_SYSTEM, "user": user}
+
+
+# --------------------------------------------------------------------------- #
+# 研究指导 (Research Plan) —— 给方向, 出可执行研究计划
+# --------------------------------------------------------------------------- #
+
+DISCLAIMER = "本计划仅为研究方法建议, 不构成任何交易建议, 不承诺收益。"
+
+# 候选研究假设库: 假设 -> 对应模板因子。
+_PLAN_HYPOTHESES = [
+    {
+        "name": "趋势延续假设",
+        "factor_template": "momentum",
+        "rationale": "若该品种存在趋势惯性, 过去强势未来可能延续, 用动量因子捕捉。",
+    },
+    {
+        "name": "均值回归假设",
+        "factor_template": "mean_reversion",
+        "rationale": "若价格围绕均值波动, 偏离后倾向回归, 用均值回归因子捕捉。",
+    },
+    {
+        "name": "波动率状态假设",
+        "factor_template": "volatility",
+        "rationale": "若波动率变化预示收益分布变化, 用波动率因子作为状态/过滤信号。",
+    },
+]
+
+_PLAN_EXPERIMENTS = [
+    "窗口周期测试: 对因子窗口参数 (如 MA/动量周期) 做网格扫描, 找稳健区间而非单点最优。",
+    "参数敏感性测试: 在最优附近扰动参数, 确认表现不是尖峰 (抗过拟合)。",
+    "样本外 + Walk-Forward 验证: 检验收益在样本外与不同时间段是否稳定。",
+    "跨品种验证: 在其它相关品种上复跑, 检验逻辑的外部有效性而非单一品种巧合。",
+]
+
+
+def local_research_plan(theme: str) -> dict:
+    """由研究方向 (品种/主题) 生成确定性研究计划 (无 LLM 时直接使用)。"""
+    theme = (theme or "目标品种").strip()
+    hypotheses = _PLAN_HYPOTHESES
+    experiments = _PLAN_EXPERIMENTS
+
+    lines = [f"# 研究计划: {theme}", "", "## 研究假设"]
+    for i, h in enumerate(hypotheses, 1):
+        lines.append(f"{i}. **{h['name']}** (因子: {h['factor_template']}) — {h['rationale']}")
+    lines += ["", "## 推荐实验"]
+    lines += [f"- {e}" for e in experiments]
+    lines += ["", "## 建议路径",
+              "先用单因子跑通 回测 → 样本外验证, 再考虑组合因子; 全程固定数据快照保证可复现。",
+              "", f"> {DISCLAIMER}"]
+
+    return {
+        "theme": theme,
+        "hypotheses": hypotheses,
+        "experiments": experiments,
+        "disclaimer": DISCLAIMER,
+        "markdown": "\n".join(lines),
+    }
+
+
+def build_research_plan_prompt(theme: str) -> dict:
+    """构造研究指导的 LLM 提示词。强约束: 只给研究方法, 不给交易建议。"""
+    user = (
+        f"我想研究「{theme}」。请作为量化研究导师, 给出一份研究计划:\n"
+        "1) 2-3 个研究假设, 每个对应可量化的因子方向;\n"
+        "2) 推荐的实验步骤 (参数测试 / 敏感性 / 样本外 / 跨品种);\n"
+        "3) 一句话研究路径建议。\n"
+        "要求: 只给研究方法与因子方向, 不要给具体买卖点位, 不要承诺收益。"
+    )
+    return {"system": MENTOR_SYSTEM, "user": user}

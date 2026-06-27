@@ -59,7 +59,8 @@ def create_template_factor(
 ) -> FactorOut:
     try:
         factor = factor_service.create_template_factor(
-            db, current_user, payload.name, payload.template_type, payload.params
+            db, current_user, payload.name, payload.template_type, payload.params,
+            project_id=payload.project_id,
         )
     except factor_service.FactorValidationError as exc:
         raise HTTPException(
@@ -90,6 +91,7 @@ def create_stack_factor(
             current_user,
             payload.name,
             [c.model_dump() for c in payload.components],
+            project_id=payload.project_id,
         )
     except factor_service.StackPermissionError:
         raise HTTPException(

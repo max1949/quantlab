@@ -12,12 +12,18 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from pydantic import BaseModel, Field
+
 from backend.app.auth.deps import CurrentUser
 from backend.app.core.database import get_db
 from backend.app.schemas.ai import AiStatusOut, InsightOut
 from backend.app.services import ai_service
 
 router = APIRouter()
+
+
+class ResearchPlanRequest(BaseModel):
+    theme: str = Field(min_length=1, max_length=120)  # 研究方向, 如"黄金"/"螺纹钢趋势"
 
 
 @router.get("/status", response_model=AiStatusOut, summary="AI 助手状态 (是否接入 LLM)")
@@ -34,6 +40,21 @@ def my_insights(
         InsightOut.model_validate(i)
         for i in ai_service.list_insights(db, current_user.id)
     ]
+
+
+@router.post(
+    "/research-plan",
+    response_model=InsightOut,
+    status_code=status.HTTP_201_CREATED,
+    summary="AI 研究指导: 给方向 → 研究假设 + 推荐因子 + 实验计划 (不给交易建议)",
+)
+def research_plan(
+    payload: ResearchPlanRequest,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> InsightOut:
+    insight = ai_service.research_plan(db, current_user, payload.theme)
+    return InsightOut.model_validate(insight)
 
 
 @router.post(

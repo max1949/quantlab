@@ -269,10 +269,34 @@ PostgreSQL 存索引 + Parquet 存 K 线。`MarketDataset`(品种/周期/区间/
 | GET | `/api/v1/research/reports` | 我的研究报告列表 |
 | GET | `/api/v1/research/reports/{id}` | 报告详情(公开报告他人可见) |
 
+## Sprint 8 — 产品化与研究生态(Research OS)
+
+把系统从"研究原型"升级为可被真实小白使用的 MVP,串起完整闭环:
+**注册 → 项目 → 因子 → 回测 → 验证 → 报告 → 发布 → 赛季 → 排行榜 → 主页/积分**。
+不做实盘/下单/vn.py(推迟为未来可插拔 Execution Adapter)。
+
+迁移 `0010_research_os`:新增 `research_projects` / `research_nodes` / `research_edges` /
+`challenges` / `challenge_progress`;`factors` 加 `project_id`;`research_reports` 升级
+(`project_id` + `summary/methodology/result/risk_analysis/improvement_suggestion` + `factor_version`)。
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST/GET | `/api/v1/projects` | 创建 / 我的研究项目(顶层容器) |
+| GET | `/api/v1/projects/{id}` | 项目详情(公开项目他人可见) |
+| POST | `/api/v1/projects/{id}/publish` | 发布到研究 Feed(需已有产物) |
+| GET | `/api/v1/projects/{id}/graph` | 研究路径图谱(假设→实验→验证→结果) |
+| POST | `/api/v1/research/reports/generate` | 生成报告(传 `project_id` 或 `factor_id`) |
+| GET | `/api/v1/research/feed` | 研究 Feed(`sort=latest|top`) |
+| GET | `/api/v1/researchers/{id}` · `/me` | 研究员主页(统计 + 方向标签) |
+| POST | `/api/v1/ai/research-plan` | AI 研究指导(给方向→假设+推荐因子+实验) |
+| GET/POST | `/api/v1/challenges` · `/{code}/enroll` · `/{code}/progress` | 30 天研究挑战(自动判定里程碑) |
+
+极简前端单页:后端启动后访问 `http://127.0.0.1:8000/`(详见根目录 `README_PRODUCT.md` / `README_DEVELOPMENT.md`)。
+
 ## 测试
 
 ```bash
-cd backend && pytest          # 用 SQLite 内存库, 不需 Postgres  (120 passed, 含 engine)
+cd backend && pytest          # eager 模式 + 测试库, 不需 worker  (136 passed)
 ```
 
 覆盖:**Sprint 1** — 注册/登录/`me`/密码哈希/JWT/等级闸门;
@@ -283,4 +307,7 @@ cd backend && pytest          # 用 SQLite 内存库, 不需 Postgres  (120 pass
 **Sprint 6** — 赛季创建 L3 闸门、提交算分、排行榜排序、回填 research_score、重复/无效提交、鉴权;
 **Sprint 7** — AI 状态、验证复盘/回测总结本地降级、LLM mock 成功、LLM 失败回退本地、错误分支、鉴权;
 **Sprint 8.1** — 仅回测/回测+验证生成报告、阶段标记、溯源、无研究 422、公开报告他人可见、鉴权;
-**engine** — 因子、成本、回测指标、研究报告、OOS/WF/敏感性/稳健性评分、Research Score 五维 + 衰减、AI 提示词/本地分析、研究项目报告聚合。
+**Sprint 8** — 项目创建/因子归属、项目报告 + 显式字段、研究路径图谱(假设→实验→验证→结果)、
+发布闸门、研究 Feed、研究员主页统计/方向标签、AI 研究指导(本地)、30 天挑战自动判定、
+以及 `test_full_path.py` **完整闭环**(注册→项目→因子→回测→验证→报告→赛季→排行榜→主页→挑战);
+**engine** — 因子、成本、回测指标、研究报告、OOS/WF/敏感性/稳健性评分、Research Score 五维 + 衰减、AI 提示词/本地分析(含研究计划)、研究项目报告聚合。

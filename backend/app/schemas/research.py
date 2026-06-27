@@ -9,11 +9,13 @@ from pydantic import BaseModel, ConfigDict
 
 
 class ReportSummary(BaseModel):
-    """列表用精简视图。"""
+    """列表/Feed 用精简视图。"""
 
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
+    owner_id: uuid.UUID
+    project_id: uuid.UUID | None
     factor_id: uuid.UUID
     symbol: str
     title: str
@@ -28,13 +30,27 @@ class ReportDetail(BaseModel):
 
     id: uuid.UUID
     owner_id: uuid.UUID
+    project_id: uuid.UUID | None
     factor_id: uuid.UUID
+    factor_version: int
     symbol: str
     title: str
+    summary: str
     hypothesis: str
+    methodology: str
+    result: str
+    risk_analysis: str
+    improvement_suggestion: str
     grade: str | None
     stages: dict
     narrative: dict
     based_on: dict
     is_public: bool
     created_at: datetime
+
+
+class GenerateReportRequest(BaseModel):
+    """二选一: 传 project_id 生成项目报告, 或 factor_id 生成因子报告。"""
+
+    project_id: uuid.UUID | None = None
+    factor_id: uuid.UUID | None = None

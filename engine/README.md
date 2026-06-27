@@ -72,7 +72,9 @@
 - `build_validation_review_prompt(ctx)` / `build_backtest_summary_prompt(ctx)`:构造 `system`+`user` 提示词。
 - `local_validation_review(ctx)`:由 OOS/WF/敏感性/稳健性推导优点 / 风险(尤其过拟合) / 改进建议 + markdown。
 - `local_backtest_summary(ctx)`:由回测指标给通俗总结(关键表现 / 注意事项 / 下一步)。
-- 强调研究过程与稳健性,只给改进建议,**不给买卖信号**。
+- `local_research_plan(theme)` / `build_research_plan_prompt(theme)`(Sprint 8):**研究指导** ——
+  给一个方向,产出研究假设(对应可量化因子)+ 推荐实验(窗口/敏感性/样本外/跨品种)+ markdown。
+- 强调研究过程与稳健性,只给研究方法 / 改进建议,**不给买卖信号、不承诺收益**。
 
 ## research_report（Sprint 8.1 已实现）
 
@@ -82,6 +84,7 @@
   → 标题(自动,如「RB · 20日动量「mom20」研究」)/ 研究假设 / 实验(含可复现快照)/
   结果(样本内外对比 + 评级)/ 风险 / 下一步建议 + 完整 markdown + 阶段完成度。
 - 与 `report.py`(单次回测的指标报告)分工:这里面向**研究项目**,给小白看懂"研究讲了什么、靠不靠谱、下一步做什么"。
+- `TEMPLATE_LABELS`:模板类型→中文方向标签(供研究员主页方向标签聚合复用)。
 
 ## 测试
 

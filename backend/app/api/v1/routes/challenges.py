@@ -1,0 +1,48 @@
+"""30 天研究挑战路由 (Sprint 8): 列表 / 报名 / 进度 (自动判定)。"""
+
+from __future__ import annotations
+
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from backend.app.auth.deps import CurrentUser
+from backend.app.core.database import get_db
+from backend.app.schemas.challenge import ChallengeOut, ProgressOut
+from backend.app.services import challenge_service
+
+router = APIRouter()
+
+
+@router.get("", response_model=list[ChallengeOut], summary="挑战列表")
+def list_challenges(
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> list[ChallengeOut]:
+    return [ChallengeOut.model_validate(c) for c in challenge_service.list_challenges(db)]
+
+
+@router.post("/{code}/enroll", response_model=ProgressOut, summary="报名挑战")
+def enroll(
+    code: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> ProgressOut:
+    try:
+        challenge_service.enroll(db, current_user, code)
+        return ProgressOut(**challenge_service.evaluate(db, current_user, code))
+    except challenge_service.ChallengeNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="挑战不存在")
+
+
+@router.get("/{code}/progress", response_model=ProgressOut, summary="我的挑战进度 (实时按产物判定)")
+def progress(
+    code: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> ProgressOut:
+    try:
+        return ProgressOut(**challenge_service.evaluate(db, current_user, code))
+    except challenge_service.ChallengeNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="挑战不存在")

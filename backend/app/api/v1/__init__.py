@@ -11,9 +11,12 @@ from backend.app.api.v1.routes import (
     ai,
     auth,
     backtests,
+    challenges,
     competition,
     factors,
+    projects,
     research,
+    researchers,
     tasks,
     users,
     validations,
@@ -36,5 +39,8 @@ api_router.include_router(validations.router, prefix="/validations", tags=["vali
 api_router.include_router(competition.router, prefix="/seasons", tags=["competition"])
 api_router.include_router(ai.router, prefix="/ai", tags=["ai"])
 api_router.include_router(research.router, prefix="/research", tags=["research"])
+api_router.include_router(projects.router, prefix="/projects", tags=["project"])
+api_router.include_router(researchers.router, prefix="/researchers", tags=["researcher"])
+api_router.include_router(challenges.router, prefix="/challenges", tags=["challenge"])
 
-# 后续 Sprint 继续在此挂载: 研究员主页 / AI 研究 Agent / execution-adapter / ...
+# 后续 Sprint 继续在此挂载: execution-adapter (vn.py/QMT, Phase 3) / ...

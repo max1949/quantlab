@@ -32,6 +32,7 @@ class TemplateFactorCreate(BaseModel):
     name: str = Field(min_length=1, max_length=120)
     template_type: str
     params: dict[str, int] = Field(default_factory=dict)
+    project_id: uuid.UUID | None = None  # 可选: 归入某研究项目
 
 
 class StackComponent(BaseModel):
@@ -44,6 +45,7 @@ class StackFactorCreate(BaseModel):
 
     name: str = Field(min_length=1, max_length=120)
     components: list[StackComponent] = Field(min_length=1)
+    project_id: uuid.UUID | None = None  # 可选: 归入某研究项目
 
 
 # ---- 出参 ----
@@ -52,6 +54,7 @@ class FactorOut(BaseModel):
 
     id: uuid.UUID
     owner_id: uuid.UUID
+    project_id: uuid.UUID | None
     name: str
     kind: str
     template_type: str | None

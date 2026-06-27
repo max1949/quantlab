@@ -24,6 +24,10 @@ class FactorNotFoundError(Exception):
     pass
 
 
+class ProjectNotFoundError(Exception):
+    pass
+
+
 class NoResearchYetError(Exception):
     """因子还没有任何成功的回测或验证, 无法生成报告。"""
 
@@ -76,11 +80,10 @@ def _snapshot_brief(db: Session, snapshot_id: uuid.UUID | None) -> dict | None:
     }
 
 
-def generate_for_factor(db: Session, owner: User, factor_id: uuid.UUID) -> ResearchReport:
-    factor = db.get(Factor, factor_id)
-    if factor is None or factor.owner_id != owner.id:
-        raise FactorNotFoundError(str(factor_id))
-
+def _build_report_row(
+    db: Session, owner: User, factor: Factor, project_id: uuid.UUID | None
+) -> ResearchReport:
+    factor_id = factor.id
     bt = _latest_success_backtest(db, owner.id, factor_id)
     val = _latest_success_validation(db, owner.id, factor_id)
     if bt is None and val is None:
@@ -98,7 +101,6 @@ def generate_for_factor(db: Session, owner: User, factor_id: uuid.UUID) -> Resea
             "sensitivity": val.sensitivity,
             "robustness": val.robustness,
         }
-        # 用本地确定性分析丰富"下一步建议"(无需 LLM)
         review = ai_advisor.local_validation_review(
             {"factor": _factor_brief(factor), "symbol": symbol, **validation_payload}
         )
@@ -113,12 +115,21 @@ def generate_for_factor(db: Session, owner: User, factor_id: uuid.UUID) -> Resea
         ai_suggestions=ai_suggestions,
     )
 
+    result_text = "\n".join(sections.get("result_summary") or []) or "尚无回测/验证结果。"
+    summary = (sections.get("result_summary") or [sections["title"]])[0]
     report = ResearchReport(
         owner_id=owner.id,
+        project_id=project_id,
         factor_id=factor_id,
+        factor_version=factor.version,
         symbol=symbol,
         title=sections["title"],
+        summary=summary,
         hypothesis=sections["hypothesis"],
+        methodology=sections["experiment"],
+        result=result_text,
+        risk_analysis="\n".join(sections.get("risks") or []),
+        improvement_suggestion="\n".join(sections.get("next_steps") or []),
         grade=sections.get("grade"),
         stages=sections["stages"],
         narrative=sections,
@@ -131,6 +142,41 @@ def generate_for_factor(db: Session, owner: User, factor_id: uuid.UUID) -> Resea
     db.commit()
     db.refresh(report)
     return report
+
+
+def generate_for_factor(db: Session, owner: User, factor_id: uuid.UUID) -> ResearchReport:
+    factor = db.get(Factor, factor_id)
+    if factor is None or factor.owner_id != owner.id:
+        raise FactorNotFoundError(str(factor_id))
+    return _build_report_row(db, owner, factor, factor.project_id)
+
+
+def _representative_factor(db: Session, owner_id: uuid.UUID, project_id: uuid.UUID) -> Factor | None:
+    """项目代表性因子: 优先有成功验证的, 其次有成功回测的, 再次任意。"""
+    factors = list(
+        db.execute(select(Factor).where(Factor.project_id == project_id)).scalars().all()
+    )
+    if not factors:
+        return None
+    for f in factors:
+        if _latest_success_validation(db, owner_id, f.id):
+            return f
+    for f in factors:
+        if _latest_success_backtest(db, owner_id, f.id):
+            return f
+    return factors[0]
+
+
+def generate_for_project(db: Session, owner: User, project_id: uuid.UUID) -> ResearchReport:
+    from backend.app.models.project import ResearchProject
+
+    proj = db.get(ResearchProject, project_id)
+    if proj is None or proj.owner_id != owner.id:
+        raise ProjectNotFoundError(str(project_id))
+    factor = _representative_factor(db, owner.id, project_id)
+    if factor is None:
+        raise NoResearchYetError(str(project_id))
+    return _build_report_row(db, owner, factor, project_id)
 
 
 def get_report(db: Session, report_id: uuid.UUID) -> ResearchReport | None:
@@ -148,3 +194,24 @@ def list_my_reports(db: Session, owner_id: uuid.UUID, limit: int = 50) -> list[R
         .scalars()
         .all()
     )
+
+
+_GRADE_RANK = {"稳健": 3, "中等": 2, "偏弱": 1, "脆弱": 0}
+
+
+def feed(db: Session, sort: str = "latest", limit: int = 30) -> list[ResearchReport]:
+    """研究 Feed: 公开报告。sort=latest(最新) | top(高评分优先)。"""
+    rows = list(
+        db.execute(
+            select(ResearchReport)
+            .where(ResearchReport.is_public.is_(True))
+            .order_by(ResearchReport.created_at.desc())
+            .limit(200)
+        ).scalars().all()
+    )
+    if sort == "top":
+        rows.sort(
+            key=lambda r: (_GRADE_RANK.get(r.grade or "", -1), r.created_at),
+            reverse=True,
+        )
+    return rows[:limit]

@@ -48,6 +48,10 @@ class Factor(Base):
     owner_id: Mapped[uuid.UUID] = mapped_column(
         Uuid, ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
     )
+    # 所属研究项目 (Sprint 8); 可空 -> 兼容未归入项目的独立因子。
+    project_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("research_projects.id", ondelete="SET NULL"), index=True, nullable=True
+    )
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     kind: Mapped[str] = mapped_column(String(20), nullable=False)
 

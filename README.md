@@ -49,7 +49,7 @@
 4. **等级绑定权限**:Level 决定能力(L0 模板 → L1 组合器 → L2 Python → L3 vn.py)。
 5. **回测产出研究报告**:不仅给数字,生成可读的"研究报告"(假设/方法/结果/结论)。
 6. **数据存储 V1**:PostgreSQL 存索引 + Parquet 存 K 线(不上 TimescaleDB)。
-7. **vn.py 前移**:Sprint 6 预留小接口,模拟交易作为强刺激尽早出现(Sprint 8 完整接入)。
+7. **vn.py 推迟**:方向修订后聚焦"研究生产线",实盘/下单/vn.py 推迟为未来可插拔 Execution Adapter(非当前核心)。
 
 ---
 
@@ -223,12 +223,15 @@ docker compose --profile workers up -d worker   # 可选: Celery worker
   - `AiInsight` 模型(迁移 `0008`)留存文本 + 结构化分析 + 来源(`llm`/`local`)+ 模型名;接口 `/ai`(status / 验证复盘 / 回测总结 / 洞察列表)
   - 验证:真库 + **真 Celery worker** 端到端(无 Key → `source=local`,AI 正确识别弱动量因子过拟合:衰减 0.59、OOS 夏普 −0.73、跨期一致性 25%);测试合计 **107 passed**
   - 只给研究改进建议,**不给买卖信号**;细节见 `backend/README.md`
-- [~] Sprint 8:研究生态化(产品方向从"交易化"转向"研究生产线";vn.py 推迟为可插拔 Execution Adapter)
+- [x] Sprint 8:产品化与研究生态(Research OS;方向从"交易化"转向"研究生产线";vn.py 推迟为可插拔 Execution Adapter)
   - [x] **8.1 研究报告自动生成**:engine `research_report.py` 把「因子+回测+验证」聚合成人话叙事报告
     - `ResearchReport` 模型(迁移 `0009`):标题/假设/评级/阶段完成度/完整叙事/溯源/公开;接口 `/research`(生成/列表/详情)
-    - 验证:真库 + 真 worker 端到端(自动生成「RB · 20日动量」报告,正确给出 OOS −0.73、稳健性 23.8「脆弱」、过拟合结论与改进建议);测试合计 **120 passed**
-  - [ ] 8.2 研究员主页(档案 + 统计 + 公开研究展示)
-  - [ ] 8.3 AI 研究 Agent(给研究方向 → 生成假设 + 推荐因子 + 测试方案)
+  - [x] **8.2 Research OS 核心**:`ResearchProject` 顶层容器 + 报告升级(`project_id` + 显式字段)+ **研究路径图谱**(`/projects/{id}/graph`:假设→实验→验证→结果);因子可归入项目
+  - [x] **8.3 研究生态面**:研究员主页 `/researchers/{id}`(项目/因子/有效验证/报告数 + 方向标签 + 积分)+ 研究 Feed `/research/feed`(最新/高分)
+  - [x] **8.4 AI 研究指导 + 30 天挑战**:`/ai/research-plan`(给方向→假设+推荐因子+实验,不给交易建议)+ `/challenges`(里程碑自动判定:Day1 因子→Day7 OOS→Day15 组合→Day30 报告)
+  - [x] **8.5 极简前端单页 + 完整闭环测试 + 产品/开发文档**:`frontend/index.html`(FastAPI 同源托管,`/app/`「一键走完整闭环」)
+    - 迁移 `0010_research_os`;新增 `README_PRODUCT.md` / `README_DEVELOPMENT.md`
+    - 验证:真库迁移 + 端到端实测(项目报告 final 13.87 回填主页、挑战 3/4、AI 计划本地 3 假设、Feed/图谱完整);测试合计 **136 passed(后端)+ 53 passed(engine)**
 
 > 环境说明(重要):
 > - 本机是 **Windows Server 2019**,Docker Desktop **不支持**(仅支持 Win10/11 客户端),

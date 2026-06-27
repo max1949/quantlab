@@ -6,10 +6,18 @@ from backend.app.models.ai import (  # noqa: F401
     InsightSource,
 )
 from backend.app.models.backtest import Backtest, BacktestStatus  # noqa: F401
+from backend.app.models.challenge import Challenge, ChallengeProgress  # noqa: F401
 from backend.app.models.competition import (  # noqa: F401
     Season,
     SeasonStatus,
     Submission,
+)
+from backend.app.models.project import (  # noqa: F401
+    NodeKind,
+    ProjectStatus,
+    ResearchEdge,
+    ResearchNode,
+    ResearchProject,
 )
 from backend.app.models.factor import Factor, FactorKind  # noqa: F401
 from backend.app.models.market import DataSnapshot, MarketDataset  # noqa: F401
@@ -39,4 +47,11 @@ __all__ = [
     "InsightKind",
     "InsightSource",
     "ResearchReport",
+    "ResearchProject",
+    "ResearchNode",
+    "ResearchEdge",
+    "ProjectStatus",
+    "NodeKind",
+    "Challenge",
+    "ChallengeProgress",
 ]
