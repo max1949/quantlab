@@ -1,5 +1,10 @@
 # ORM 模型包。
 # 模型需在此导入, 以便 Alembic autogenerate 能发现 (env.py 会 import 本包)。
+from backend.app.models.ai import (  # noqa: F401
+    AiInsight,
+    InsightKind,
+    InsightSource,
+)
 from backend.app.models.backtest import Backtest, BacktestStatus  # noqa: F401
 from backend.app.models.competition import (  # noqa: F401
     Season,
@@ -29,4 +34,7 @@ __all__ = [
     "Season",
     "SeasonStatus",
     "Submission",
+    "AiInsight",
+    "InsightKind",
+    "InsightSource",
 ]

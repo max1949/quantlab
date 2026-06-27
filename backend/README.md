@@ -16,7 +16,7 @@ app/
 ├── services/          # user · task · leveling · factor · market_data · backtest · validation
 ├── tasks/             # Celery: celery_app · backtest_tasks · validation_tasks
 └── auth/              # security.py (hash/JWT) · deps.py (当前用户/等级闸门)
-migrations/            # Alembic (0001..0007: baseline/users/academy/factors/backtests/validations/competition)
+migrations/            # Alembic (0001..0008: baseline/users/academy/factors/backtests/validations/competition/ai)
 tests/                 # pytest (SQLite 内存库; 含 ../engine/tests)
 ```
 
@@ -236,10 +236,28 @@ PostgreSQL 存索引 + Parquet 存 K 线。`MarketDataset`(品种/周期/区间/
 | GET | `/api/v1/seasons/{id}/leaderboard` | 排行榜(按最终分降序) |
 | GET | `/api/v1/seasons/{id}/submissions/me` | 我在该赛季的提交 |
 
+## Sprint 7 — AI 研究助手(研究建议 · 报告总结)
+
+把研究产物喂给**外部 LLM**(OpenAI 兼容,DeepSeek/OpenAI/Moonshot 皆可)生成自然语言复盘。
+计算与提示词在 `engine/ai_advisor.py`(纯函数);唯一联网处是 `services/llm_client.py`。
+
+- **可插拔降级**:未配置 `LLM_API_KEY`(或调用失败)时自动改用 engine 本地规则分析,
+  接口形状不变,响应里 `source` 标注 `llm` / `local`——**无 Key、无网络也能用且可测**。
+- 配置(`.env`):`AI_ENABLED` / `LLM_BASE_URL` / `LLM_API_KEY` / `LLM_MODEL`。
+- `AiInsight`(迁移 `0008`)留存每次生成:最终文本 + 结构化分析 + 来源 + 模型名。
+- 只给研究改进建议,**不给买卖信号**。
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/v1/ai/status` | 是否已接入 LLM(否则本地降级) |
+| POST | `/api/v1/ai/validations/{id}/review` | AI 复盘验证(优点/风险/改进建议) |
+| POST | `/api/v1/ai/backtests/{id}/summary` | AI 总结回测研究报告(通俗版) |
+| GET | `/api/v1/ai/insights` | 我的 AI 洞察列表 |
+
 ## 测试
 
 ```bash
-cd backend && pytest          # 用 SQLite 内存库, 不需 Postgres  (93 passed, 含 engine)
+cd backend && pytest          # 用 SQLite 内存库, 不需 Postgres  (107 passed, 含 engine)
 ```
 
 覆盖:**Sprint 1** — 注册/登录/`me`/密码哈希/JWT/等级闸门;
@@ -248,4 +266,5 @@ cd backend && pytest          # 用 SQLite 内存库, 不需 Postgres  (93 passe
 **Sprint 4** — 数据集、回测成功、指标/研究报告/净值、快照、成本影响、错误分支;
 **Sprint 5** — 验证全流程(OOS/WF/敏感性/稳健性)、组合器敏感性退化、错误分支、鉴权;
 **Sprint 6** — 赛季创建 L3 闸门、提交算分、排行榜排序、回填 research_score、重复/无效提交、鉴权;
-**engine** — 因子、成本、回测指标、研究报告、OOS/WF/敏感性/稳健性评分、Research Score 五维 + 衰减。
+**Sprint 7** — AI 状态、验证复盘/回测总结本地降级、LLM mock 成功、LLM 失败回退本地、错误分支、鉴权;
+**engine** — 因子、成本、回测指标、研究报告、OOS/WF/敏感性/稳健性评分、Research Score 五维 + 衰减、AI 提示词/本地分析。

@@ -13,6 +13,7 @@
 | `report.py` | 研究报告(假设 / 方法 / 结果 / 结论) | Sprint 4 ✅ |
 | `walk_forward.py` | OOS / Walk-Forward / 敏感性 / 稳健性评分 | Sprint 5 ✅ |
 | `scoring.py` | Research Score 五维加权 + 动态衰减(Decay) | Sprint 6 ✅ |
+| `ai_advisor.py` | LLM 提示词构造 + 确定性本地分析(无网络) | Sprint 7 ✅ |
 
 ## factor_engine（Sprint 3 已实现）
 
@@ -61,6 +62,16 @@
   各维归一到 0–1,加权得 0–100 基础分;输出 `base_score / decay_factor / final_score / dimensions`。
 - `apply_decay(base, recent_performance)`:**动态衰减** ∈ [0.4, 1.0],由近期(Walk-Forward 最后一段)表现决定。
   市场会变、老因子会失效 → `final = base × decay`,防止失效老因子长期霸榜。
+
+## ai_advisor（Sprint 7 已实现）
+
+引擎层只做**纯计算**(不联网):把研究产物拼成提示词,并给出一套确定性的规则分析,
+保证"没配 LLM 也能用、且可测"。真正的网络调用在 `backend/app/services/llm_client.py`。
+
+- `build_validation_review_prompt(ctx)` / `build_backtest_summary_prompt(ctx)`:构造 `system`+`user` 提示词。
+- `local_validation_review(ctx)`:由 OOS/WF/敏感性/稳健性推导优点 / 风险(尤其过拟合) / 改进建议 + markdown。
+- `local_backtest_summary(ctx)`:由回测指标给通俗总结(关键表现 / 注意事项 / 下一步)。
+- 强调研究过程与稳健性,只给改进建议,**不给买卖信号**。
 
 ## 测试
 

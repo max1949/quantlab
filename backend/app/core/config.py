@@ -35,6 +35,15 @@ class Settings(BaseSettings):
     # Celery eager 模式: True 时任务同步执行 (测试用, 不需 worker)。
     celery_task_always_eager: bool = False
 
+    # AI 研究助手 (Sprint 7): 外部 LLM (OpenAI 兼容接口)。
+    # 未配置 api_key 时自动降级为 engine 本地规则分析 (无网络也可用)。
+    ai_enabled: bool = True               # 总开关
+    llm_base_url: str = "https://api.deepseek.com/v1"
+    llm_api_key: str = ""                 # 留空 -> 走本地降级
+    llm_model: str = "deepseek-chat"
+    llm_timeout_seconds: float = 30.0
+    llm_temperature: float = 0.4
+
 
 @lru_cache
 def get_settings() -> Settings:

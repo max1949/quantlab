@@ -108,7 +108,7 @@ quantlab/
 | 4 | 回测系统 | 成本 · **研究报告** · 数据快照 |
 | 5 | 验证系统 | OOS · Walk-Forward · Decay |
 | 6 | 竞技系统 | Season · 排行榜 · 研究积分(+ vn.py 接口预留) |
-| 7 | AI 助手 | 研究建议 · 报告总结(外部 LLM API) |
+| 7 | AI 助手 | 研究建议 · 报告总结(外部 LLM,可降级本地) ✅ |
 | 8 | 模拟交易 | vn.py 接口完整接入 |
 
 > 开发纪律:按 Sprint 锁死推进。每个模块必须 **可运行 + 有测试 + 有 README**。
@@ -213,6 +213,12 @@ docker compose --profile workers up -d worker   # 可选: Celery worker
   - 提交时**回填 `User.research_score`**(历史最佳),Sprint 1 预留字段正式启用
   - 验证:真库 + **真 Celery worker** 端到端(动量因子提交得 base 32.26 × decay 0.43 = **final 13.87**,弱因子被正确低估,榜单回填用户积分);测试合计 **93 passed**
   - 细节见 `backend/README.md`
+- [x] Sprint 7:AI 研究助手(研究建议 · 报告总结)
+  - engine `ai_advisor.py`(纯函数,不联网):LLM 提示词构造 + **确定性本地规则分析**(优点/风险/改进建议)
+  - 唯一联网处 `services/llm_client.py`:OpenAI 兼容(DeepSeek/OpenAI/…),**可插拔降级**——无 Key/调用失败自动回退本地分析,接口形状不变
+  - `AiInsight` 模型(迁移 `0008`)留存文本 + 结构化分析 + 来源(`llm`/`local`)+ 模型名;接口 `/ai`(status / 验证复盘 / 回测总结 / 洞察列表)
+  - 验证:真库 + **真 Celery worker** 端到端(无 Key → `source=local`,AI 正确识别弱动量因子过拟合:衰减 0.59、OOS 夏普 −0.73、跨期一致性 25%);测试合计 **107 passed**
+  - 只给研究改进建议,**不给买卖信号**;细节见 `backend/README.md`
 
 > 环境说明(重要):
 > - 本机是 **Windows Server 2019**,Docker Desktop **不支持**(仅支持 Win10/11 客户端),
