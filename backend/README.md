@@ -11,13 +11,15 @@ app/
 ├── api/v1/            # 路由层 (薄, 只编排)
 │   └── routes/        # auth.py · users.py · ...
 ├── core/              # config (env) · database (Session/Base)
-├── models/            # ORM: user.py (User, UserLevel) · task.py (Task, UserTask)
-├── schemas/           # Pydantic: user.py · task.py
-├── services/          # 业务: user_service.py · task_service.py · leveling.py
+├── models/            # ORM: user.py · task.py · factor.py
+├── schemas/           # Pydantic: user.py · task.py · factor.py
+├── services/          # 业务: user_service · task_service · leveling · factor_service
 └── auth/              # security.py (hash/JWT) · deps.py (当前用户/等级闸门)
-migrations/            # Alembic (0001 baseline · 0002 users · 0003 academy)
-tests/                 # pytest (SQLite 内存库)
+migrations/            # Alembic (0001 baseline · 0002 users · 0003 academy · 0004 factors)
+tests/                 # pytest (SQLite 内存库; 含 ../engine/tests)
 ```
+
+> 计算与 Web 解耦: 因子计算逻辑在 `engine/`(纯函数), `factor_service` 仅做持久化与权限。
 
 ## Sprint 1 — 用户系统
 
@@ -131,12 +133,42 @@ uvicorn backend.app.main:app --reload   # 在仓库根执行, 保证 backend 包
 .\scripts\seed-academy.ps1     # 或在仓库根: python -c "...seed_default_tasks(SessionLocal())"
 ```
 
+## Sprint 3 — 因子实验室(模板因子 · 组合器)
+
+计算在 `engine/factor_engine.py`(纯函数);后端只管定义、持久化、权限。
+
+### 数据模型 `Factor`
+
+`owner_id` / `name`(同人唯一)/ `kind`(`template` | `stack`)/ `template_type` /
+`spec`(JSON 定义)/ `version`。
+
+- `template`:`spec = {"params": {...}}`
+- `stack`:`spec = {"components": [{"factor_id", "weight"}, ...]}`
+
+**等级绑定权限**:模板因子 L0 可建;**组合器需 L1**(路由用 `require_level(UserLevel.L1)`,
+对应"L0 模板 → L1 组合器")。
+
+### 接口(均需 Bearer JWT)
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/v1/factors/templates` | 模板因子目录(含参数规格) |
+| GET | `/api/v1/factors` | 我的因子列表 |
+| POST | `/api/v1/factors/template` | 创建模板因子(L0+) |
+| POST | `/api/v1/factors/stack` | 创建组合器(**需 L1**;不足 403) |
+| GET | `/api/v1/factors/{id}` | 因子详情 |
+| POST | `/api/v1/factors/{id}/preview` | 在样本行情上预览(返回摘要统计) |
+| DELETE | `/api/v1/factors/{id}` | 删除因子 |
+
+预览使用 `engine.sample_price_frame`(确定性);真实行情数据在 Sprint 4 接入。
+
 ## 测试
 
 ```bash
-cd backend && pytest          # 用 SQLite 内存库, 不需 Postgres  (26 passed)
+cd backend && pytest          # 用 SQLite 内存库, 不需 Postgres  (51 passed, 含 engine)
 ```
 
-覆盖:**Sprint 1** — 注册(成功/重复/弱口令/非法邮箱)、登录(邮箱与用户名/错密码/未知用户)、
-`/users/me`(有效/缺失/非法令牌)、密码哈希与 JWT 往返、等级闸门;
-**Sprint 2** — 经验阈值升级、任务列表锁定/进度、完成奖励、升级、`min_level` 403、重复完成 409、需鉴权。
+覆盖:**Sprint 1** — 注册/登录/`me`/密码哈希/JWT/等级闸门;
+**Sprint 2** — 经验升级、任务锁定/完成、`min_level` 403、重复 409;
+**Sprint 3** — 模板目录、建模板因子、参数校验 422、重名 409、组合器 L0→403/L1→201、预览统计、列表/删除;
+**engine** — 各模板输出、RSI 边界、标准化、组合器加权、样本数据确定性。

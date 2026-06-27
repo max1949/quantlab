@@ -181,7 +181,13 @@ docker compose --profile workers up -d worker   # 可选: Celery worker
   - **等级绑定权限**:任务 `min_level` 决定锁定/可完成(403),与 `require_level()` 同源
   - 迁移 `0003_academy`;测试合计 **26 passed**;真库端到端验证通过(完成→升级→闸门)
   - 细节见 `backend/README.md`
-- [ ] Sprint 3:因子实验室(模板因子 · 组合器)
+- [x] Sprint 3:因子实验室(模板因子 · 组合器)
+  - `engine/factor_engine.py` 落地:5 个模板因子(动量/均线/RSI/波动率/均值回归)+ 组合器(标准化加权)+ 确定性样本数据
+  - `Factor` 模型(template/stack,JSON spec,版本号);接口:模板目录 / 建模板因子 / 建组合器 / 预览 / 列表 / 删除
+  - **等级绑定权限**:模板 L0、组合器 `require_level(L1)`(L0→403,L1→201)
+  - 迁移 `0004_factors`;测试合计 **51 passed**(含 engine 纯函数);真库端到端验证通过
+  - 计算与 Web 解耦:计算在 `engine/`(纯函数),后端仅持久化与权限
+- [ ] Sprint 4:回测系统(成本 · 研究报告 · 数据快照)
 
 > 环境说明(重要):
 > - 本机是 **Windows Server 2019**,Docker Desktop **不支持**(仅支持 Win10/11 客户端),
