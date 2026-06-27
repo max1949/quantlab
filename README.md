@@ -140,6 +140,12 @@ quantlab/
 # 数据库迁移 (在 backend/ 下)
 cd backend; ..\.venv\Scripts\python.exe -m alembic upgrade head
 
+# 生成样本行情数据 (回测用)
+.\scripts\seed-market-data.ps1
+
+# 启动 Celery worker (回测异步计算; Windows 用 solo 池)
+.\.venv\Scripts\python.exe -m celery -A backend.app.tasks.celery_app worker --loglevel=info --pool=solo
+
 # 测试
 cd backend; ..\.venv\Scripts\python.exe -m pytest
 ```
@@ -187,7 +193,14 @@ docker compose --profile workers up -d worker   # 可选: Celery worker
   - **等级绑定权限**:模板 L0、组合器 `require_level(L1)`(L0→403,L1→201)
   - 迁移 `0004_factors`;测试合计 **51 passed**(含 engine 纯函数);真库端到端验证通过
   - 计算与 Web 解耦:计算在 `engine/`(纯函数),后端仅持久化与权限
-- [ ] Sprint 4:回测系统(成本 · 研究报告 · 数据快照)
+- [x] Sprint 4:回测系统(成本 · 研究报告 · 数据快照 · 异步)
+  - engine:`cost_model`(手续费+滑点)+ `backtest`(收益/风险/交易指标+净值)+ `report`(研究报告)
+  - 数据 V1:Parquet 存 K 线 + PG 存索引(`MarketDataset`);`DataSnapshot`(内容哈希)保证**可复现**
+  - **异步**:`POST /backtests` 入队 → **Celery worker** 计算 → 落库;`GET /backtests/{id}` 轮询
+  - 接口:`/datasets`、`/backtests`(创建/列表/详情);迁移 `0005_backtests`
+  - 验证:真库 + **真 Celery worker** 端到端(pending→worker 2.2s→success,绑定快照、出研究报告);测试合计 **67 passed**
+  - 细节见 `backend/README.md`
+- [ ] Sprint 5:科学验证(样本外 · Walk-Forward · 稳健性)
 
 > 环境说明(重要):
 > - 本机是 **Windows Server 2019**,Docker Desktop **不支持**(仅支持 Win10/11 客户端),

@@ -28,8 +28,12 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 1440
 
-    # 行情数据目录 (V1: Parquet 存储)
-    market_data_dir: str = "/app/data/market_data"
+    # 行情数据目录 (V1: Parquet 存储)。相对路径: 从运行 cwd 解析,
+    # 本机原生从仓库根运行 -> data/market_data; Docker cwd=/app -> /app/data/market_data。
+    market_data_dir: str = "data/market_data"
+
+    # Celery eager 模式: True 时任务同步执行 (测试用, 不需 worker)。
+    celery_task_always_eager: bool = False
 
 
 @lru_cache

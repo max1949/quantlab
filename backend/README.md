@@ -11,15 +11,17 @@ app/
 ├── api/v1/            # 路由层 (薄, 只编排)
 │   └── routes/        # auth.py · users.py · ...
 ├── core/              # config (env) · database (Session/Base)
-├── models/            # ORM: user.py · task.py · factor.py
-├── schemas/           # Pydantic: user.py · task.py · factor.py
-├── services/          # 业务: user_service · task_service · leveling · factor_service
+├── models/            # ORM: user · task · factor · market · backtest
+├── schemas/           # Pydantic: user · task · factor · backtest
+├── services/          # user · task · leveling · factor · market_data · backtest
+├── tasks/             # Celery: celery_app · backtest_tasks
 └── auth/              # security.py (hash/JWT) · deps.py (当前用户/等级闸门)
-migrations/            # Alembic (0001 baseline · 0002 users · 0003 academy · 0004 factors)
+migrations/            # Alembic (0001..0005: baseline/users/academy/factors/backtests)
 tests/                 # pytest (SQLite 内存库; 含 ../engine/tests)
 ```
 
-> 计算与 Web 解耦: 因子计算逻辑在 `engine/`(纯函数), `factor_service` 仅做持久化与权限。
+> 计算与 Web 解耦: 计算逻辑在 `engine/`(纯函数), service 仅做持久化/权限/编排。
+> 重计算(回测)走 Celery worker, 与 API 解耦。
 
 ## Sprint 1 — 用户系统
 
@@ -162,13 +164,50 @@ uvicorn backend.app.main:app --reload   # 在仓库根执行, 保证 backend 包
 
 预览使用 `engine.sample_price_frame`(确定性);真实行情数据在 Sprint 4 接入。
 
+## Sprint 4 — 回测系统(成本 · 研究报告 · 数据快照 · 异步)
+
+计算在 `engine/`(cost_model / backtest / report);后端负责数据、快照、编排与异步。
+
+### 数据存储 V1
+
+PostgreSQL 存索引 + Parquet 存 K 线。`MarketDataset`(品种/周期/区间/行数/路径),
+`DataSnapshot`(区间 + 内容哈希,**保证回测可复现**)。无真实行情源时用确定性样本数据:
+
+```powershell
+.\scripts\seed-market-data.ps1     # 生成 RB/AU/IF 样本 Parquet + 登记索引
+```
+
+### 异步回测(Celery)
+
+`POST /backtests` 只创建回测(`pending`)并**入队**,真正计算在 **Celery worker** 执行:
+绑定因子 + 数据快照 + 成本配置 → 跑 `engine.run_backtest` → 落库指标/净值/研究报告 →
+状态 `success`/`failed`。`GET /backtests/{id}` 轮询结果。
+
+启动 worker(本机原生,Windows 用 solo 池):
+
+```powershell
+.\.venv\Scripts\python.exe -m celery -A backend.app.tasks.celery_app worker --loglevel=info --pool=solo
+```
+
+> 测试用 `celery_task_always_eager=True` 同步执行,不需 worker/Redis。
+
+### 接口(均需 Bearer JWT)
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/v1/datasets` | 可用行情数据集 |
+| POST | `/api/v1/backtests` | 创建并运行回测(异步;返回 `pending`/结果) |
+| GET | `/api/v1/backtests` | 我的回测列表 |
+| GET | `/api/v1/backtests/{id}` | 回测详情(状态/指标/净值/研究报告) |
+
 ## 测试
 
 ```bash
-cd backend && pytest          # 用 SQLite 内存库, 不需 Postgres  (51 passed, 含 engine)
+cd backend && pytest          # 用 SQLite 内存库, 不需 Postgres  (67 passed, 含 engine)
 ```
 
 覆盖:**Sprint 1** — 注册/登录/`me`/密码哈希/JWT/等级闸门;
 **Sprint 2** — 经验升级、任务锁定/完成、`min_level` 403、重复 409;
-**Sprint 3** — 模板目录、建模板因子、参数校验 422、重名 409、组合器 L0→403/L1→201、预览统计、列表/删除;
-**engine** — 各模板输出、RSI 边界、标准化、组合器加权、样本数据确定性。
+**Sprint 3** — 模板目录、建因子、参数校验、组合器 L0→403/L1→201、预览;
+**Sprint 4** — 数据集列表、回测成功、指标/研究报告/净值、快照绑定、成本影响、错误分支、鉴权;
+**engine** — 因子(模板/标准化/组合器)、成本、回测指标、研究报告评级。

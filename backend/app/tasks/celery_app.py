@@ -1,7 +1,7 @@
 """Celery 应用 (异步计算层)。
 
-骨架阶段仅完成 Celery 实例装配, 真实任务 (回测 / 验证 / 因子计算)
-从 Sprint 4 起在 backend/app/tasks/ 下定义并注册。
+重计算与 API 解耦: 回测等任务在 worker 进程执行。任务模块通过 include 注册,
+worker 启动时即可发现 (Sprint 4 起: 回测; 后续增补验证 / 因子计算)。
 """
 
 from celery import Celery
@@ -14,6 +14,7 @@ celery_app = Celery(
     "quantlab",
     broker=settings.celery_broker_url,
     backend=settings.celery_result_backend,
+    include=["backend.app.tasks.backtest_tasks"],
 )
 
 celery_app.conf.update(
@@ -21,4 +22,5 @@ celery_app.conf.update(
     task_serializer="json",
     result_serializer="json",
     accept_content=["json"],
+    task_always_eager=settings.celery_task_always_eager,
 )

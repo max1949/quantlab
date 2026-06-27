@@ -8,8 +8,9 @@
 | 文件 | 职责 | 落地 Sprint |
 |---|---|---|
 | `factor_engine.py` | 因子计算(模板 / 组合器 / Python) | Sprint 3 ✅ |
-| `cost_model.py` | 成本模型(手续费 / 滑点 / 冲击成本) | Sprint 4 |
-| `backtest.py` | 回测(收益 / 风险 / 交易指标 + 净值) | Sprint 4 |
+| `cost_model.py` | 成本模型(手续费 / 滑点 / 冲击成本) | Sprint 4 ✅ |
+| `backtest.py` | 回测(收益 / 风险 / 交易指标 + 净值) | Sprint 4 ✅ |
+| `report.py` | 研究报告(假设 / 方法 / 结果 / 结论) | Sprint 4 ✅ |
 | `walk_forward.py` | OOS / Walk-Forward / 敏感性 / 衰减 | Sprint 5 |
 | `scoring.py` | Research Score + 动态衰减(Decay) | Sprint 5–6 |
 
@@ -33,6 +34,14 @@
 - `compute_factor_stack([(series, weight), ...])` — 组合器:标准化后按权重(绝对值归一)线性组合
 - `summarize(series)` — JSON 友好的摘要统计
 - `sample_price_frame(n, seed)` — **确定性**样本行情(真行情 Sprint 4 接 Parquet)
+
+## cost_model / backtest / report（Sprint 4 已实现）
+
+- `cost_model.CostConfig(fee_rate, slippage_bps)` + `apply_costs(positions, cfg)`:按换手量计交易成本(成本是回测一等公民)。
+- `backtest.run_backtest(signal, ohlcv, cost_config)`:信号取符号成仓位(上期仓位避免前视),
+  扣成本算净值,输出 `metrics`(总/年化收益、年化波动、夏普、最大回撤、胜率、交易次数、换手)+ `equity_curve`。
+- `report.build_research_report(...)`:由因子元信息 + 成本 + 指标 + 数据快照合成研究报告
+  (假设/方法/结果/结论 + Markdown),评级看风险调整后表现而非单看收益。
 
 ## 测试
 

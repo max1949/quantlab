@@ -1,0 +1,145 @@
+"""行情数据服务 (Sprint 4): Parquet 读写 + 索引登记 + 数据快照。
+
+V1: PostgreSQL 存索引 (MarketDataset) + Parquet 存 K 线。
+没有真实行情源时, 用确定性生成器产出样本 OHLCV (按品种派生随机种子),
+保证"可复现"。真实数据接入后, 只需替换 generate/ingest 部分。
+"""
+
+from __future__ import annotations
+
+import hashlib
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from backend.app.core.config import get_settings
+from backend.app.models.market import DataSnapshot, MarketDataset
+
+settings = get_settings()
+
+DEFAULT_SYMBOLS = ["RB", "AU", "IF"]
+
+
+def market_dir() -> Path:
+    p = Path(settings.market_data_dir)
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+
+def dataset_path(symbol: str, timeframe: str = "1d") -> Path:
+    return market_dir() / f"{symbol}_{timeframe}.parquet"
+
+
+def _symbol_seed(symbol: str) -> int:
+    return int(hashlib.sha256(symbol.encode()).hexdigest(), 16) % (2**32)
+
+
+def generate_sample_ohlcv(symbol: str, n: int = 504, start: float = 100.0) -> pd.DataFrame:
+    """确定性样本 OHLCV (按品种派生种子, 不同品种走势不同)。"""
+    rng = np.random.default_rng(_symbol_seed(symbol))
+    rets = rng.normal(loc=0.0003, scale=0.018, size=n)
+    close = start * np.cumprod(1.0 + rets)
+    index = pd.date_range("2023-01-02", periods=n, freq="B")
+    # 由 close 反推合理的 OHLC
+    daily_range = np.abs(rng.normal(0.0, 0.01, size=n)) * close
+    open_ = np.concatenate([[start], close[:-1]])
+    high = np.maximum(open_, close) + daily_range
+    low = np.minimum(open_, close) - daily_range
+    volume = rng.integers(1_000, 50_000, size=n)
+    return pd.DataFrame(
+        {"open": open_, "high": high, "low": low, "close": close, "volume": volume},
+        index=index,
+    )
+
+
+def load_ohlcv(symbol: str, timeframe: str = "1d") -> pd.DataFrame:
+    path = dataset_path(symbol, timeframe)
+    if not path.exists():
+        raise FileNotFoundError(f"行情数据不存在: {symbol} ({path})")
+    df = pd.read_parquet(path)
+    df.index = pd.to_datetime(df.index)
+    return df
+
+
+def register_dataset(
+    db: Session, symbol: str, df: pd.DataFrame, timeframe: str = "1d"
+) -> MarketDataset:
+    """登记/更新行情索引。"""
+    path = dataset_path(symbol, timeframe)
+    existing = db.execute(
+        select(MarketDataset).where(
+            MarketDataset.symbol == symbol, MarketDataset.timeframe == timeframe
+        )
+    ).scalar_one_or_none()
+
+    start_d = df.index.min().date()
+    end_d = df.index.max().date()
+    if existing is None:
+        existing = MarketDataset(
+            symbol=symbol,
+            timeframe=timeframe,
+            start_date=start_d,
+            end_date=end_d,
+            rows=int(df.shape[0]),
+            path=str(path),
+        )
+        db.add(existing)
+    else:
+        existing.start_date = start_d
+        existing.end_date = end_d
+        existing.rows = int(df.shape[0])
+        existing.path = str(path)
+    db.commit()
+    db.refresh(existing)
+    return existing
+
+
+def list_datasets(db: Session) -> list[MarketDataset]:
+    return list(
+        db.execute(select(MarketDataset).order_by(MarketDataset.symbol)).scalars().all()
+    )
+
+
+def get_dataset(db: Session, symbol: str, timeframe: str = "1d") -> MarketDataset | None:
+    return db.execute(
+        select(MarketDataset).where(
+            MarketDataset.symbol == symbol, MarketDataset.timeframe == timeframe
+        )
+    ).scalar_one_or_none()
+
+
+def seed_sample_market_data(db: Session, symbols: list[str] | None = None) -> dict:
+    """生成并登记样本行情 (幂等: 覆盖写 Parquet + upsert 索引)。"""
+    symbols = symbols or DEFAULT_SYMBOLS
+    out = []
+    for sym in symbols:
+        df = generate_sample_ohlcv(sym)
+        df.to_parquet(dataset_path(sym))
+        ds = register_dataset(db, sym, df)
+        out.append({"symbol": sym, "rows": ds.rows})
+    return {"datasets": out, "dir": str(market_dir())}
+
+
+def content_hash(df: pd.DataFrame) -> str:
+    """数据内容哈希 (用于快照可复现校验)。"""
+    hashed = pd.util.hash_pandas_object(df, index=True).values
+    return hashlib.sha256(hashed.tobytes()).hexdigest()
+
+
+def create_snapshot(db: Session, symbol: str, df: pd.DataFrame, timeframe: str = "1d") -> DataSnapshot:
+    """为本次回测所用数据建立不可变快照。"""
+    snap = DataSnapshot(
+        symbol=symbol,
+        timeframe=timeframe,
+        start_date=df.index.min().date(),
+        end_date=df.index.max().date(),
+        rows=int(df.shape[0]),
+        content_hash=content_hash(df),
+    )
+    db.add(snap)
+    db.commit()
+    db.refresh(snap)
+    return snap

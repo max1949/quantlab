@@ -14,9 +14,25 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from backend.app.core.config import get_settings
 from backend.app.core.database import Base, get_db
 from backend.app.main import app
 import backend.app.models  # noqa: F401  注册 ORM 模型到 Base.metadata
+
+
+@pytest.fixture(autouse=True)
+def _test_settings(tmp_path_factory) -> Generator:
+    """测试期配置: 回测同步执行 (eager, 不需 worker); 行情数据写临时目录。"""
+    settings = get_settings()
+    prev_eager = settings.celery_task_always_eager
+    prev_dir = settings.market_data_dir
+    settings.celery_task_always_eager = True
+    settings.market_data_dir = str(tmp_path_factory.mktemp("market_data"))
+    try:
+        yield
+    finally:
+        settings.celery_task_always_eager = prev_eager
+        settings.market_data_dir = prev_dir
 
 
 @pytest.fixture()
