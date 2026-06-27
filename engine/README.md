@@ -11,7 +11,7 @@
 | `cost_model.py` | 成本模型(手续费 / 滑点 / 冲击成本) | Sprint 4 ✅ |
 | `backtest.py` | 回测(收益 / 风险 / 交易指标 + 净值) | Sprint 4 ✅ |
 | `report.py` | 研究报告(假设 / 方法 / 结果 / 结论) | Sprint 4 ✅ |
-| `walk_forward.py` | OOS / Walk-Forward / 敏感性 / 衰减 | Sprint 5 |
+| `walk_forward.py` | OOS / Walk-Forward / 敏感性 / 稳健性评分 | Sprint 5 ✅ |
 | `scoring.py` | Research Score + 动态衰减(Decay) | Sprint 5–6 |
 
 ## factor_engine（Sprint 3 已实现）
@@ -42,6 +42,16 @@
   扣成本算净值,输出 `metrics`(总/年化收益、年化波动、夏普、最大回撤、胜率、交易次数、换手)+ `equity_curve`。
 - `report.build_research_report(...)`:由因子元信息 + 成本 + 指标 + 数据快照合成研究报告
   (假设/方法/结果/结论 + Markdown),评级看风险调整后表现而非单看收益。
+
+## walk_forward（Sprint 5 已实现）
+
+把"一次回测"升级为"可信验证",抑制过拟合。输入 `compute_signal(df)->Series` 闭包,
+在各切片上**独立**算信号(避免泄漏):
+
+- `evaluate_oos(...)`:样本内/样本外 holdout 对比 + 夏普衰减。
+- `walk_forward(..., n_splits)`:时间线分段逐段回测,看跨期一致性(positive_ratio)。
+- `sensitivity(variants, ...)`:参数扰动下表现是否稳定(而非单点尖峰)。
+- `robustness_score(oos, wf, sens)`:综合 0–100 稳健性评分 + 评级(稳健/中等/偏弱/脆弱)。
 
 ## 测试
 

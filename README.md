@@ -200,7 +200,13 @@ docker compose --profile workers up -d worker   # 可选: Celery worker
   - 接口:`/datasets`、`/backtests`(创建/列表/详情);迁移 `0005_backtests`
   - 验证:真库 + **真 Celery worker** 端到端(pending→worker 2.2s→success,绑定快照、出研究报告);测试合计 **67 passed**
   - 细节见 `backend/README.md`
-- [ ] Sprint 5:科学验证(样本外 · Walk-Forward · 稳健性)
+- [x] Sprint 5:科学验证(样本外 · Walk-Forward · 稳健性)
+  - engine `walk_forward.py`:OOS holdout(+衰减)、Walk-Forward 分段一致性、参数敏感性、综合稳健性评分
+  - 关键:每段独立用本段数据算信号(**无前视泄漏**),抑制过拟合
+  - `Validation` 模型 + 异步(Celery `run_validation_task`)+ `/validations` 路由;迁移 `0006_validations`
+  - 验证:真库 + **真 Celery worker** 端到端(动量因子在 RB 上 OOS 夏普 −0.73、稳健性 23.8「脆弱」,正确识别弱因子);测试合计 **81 passed**
+  - 细节见 `backend/README.md`
+- [ ] Sprint 6:竞技系统(赛季 · 动态评分 · 排行榜)
 
 > 环境说明(重要):
 > - 本机是 **Windows Server 2019**,Docker Desktop **不支持**(仅支持 Win10/11 客户端),

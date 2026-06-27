@@ -14,7 +14,10 @@ celery_app = Celery(
     "quantlab",
     broker=settings.celery_broker_url,
     backend=settings.celery_result_backend,
-    include=["backend.app.tasks.backtest_tasks"],
+    include=[
+        "backend.app.tasks.backtest_tasks",
+        "backend.app.tasks.validation_tasks",
+    ],
 )
 
 celery_app.conf.update(

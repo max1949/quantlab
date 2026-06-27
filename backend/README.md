@@ -11,12 +11,12 @@ app/
 ├── api/v1/            # 路由层 (薄, 只编排)
 │   └── routes/        # auth.py · users.py · ...
 ├── core/              # config (env) · database (Session/Base)
-├── models/            # ORM: user · task · factor · market · backtest
-├── schemas/           # Pydantic: user · task · factor · backtest
-├── services/          # user · task · leveling · factor · market_data · backtest
-├── tasks/             # Celery: celery_app · backtest_tasks
+├── models/            # ORM: user · task · factor · market · backtest · validation
+├── schemas/           # Pydantic: user · task · factor · backtest · validation
+├── services/          # user · task · leveling · factor · market_data · backtest · validation
+├── tasks/             # Celery: celery_app · backtest_tasks · validation_tasks
 └── auth/              # security.py (hash/JWT) · deps.py (当前用户/等级闸门)
-migrations/            # Alembic (0001..0005: baseline/users/academy/factors/backtests)
+migrations/            # Alembic (0001..0006: baseline/users/academy/factors/backtests/validations)
 tests/                 # pytest (SQLite 内存库; 含 ../engine/tests)
 ```
 
@@ -200,14 +200,33 @@ PostgreSQL 存索引 + Parquet 存 K 线。`MarketDataset`(品种/周期/区间/
 | GET | `/api/v1/backtests` | 我的回测列表 |
 | GET | `/api/v1/backtests/{id}` | 回测详情(状态/指标/净值/研究报告) |
 
+## Sprint 5 — 科学验证(样本外 · Walk-Forward · 稳健性)
+
+把"一次回测"升级为"可信验证",抑制过拟合。计算在 `engine/walk_forward.py`,
+后端构造在任意切片上算因子信号的闭包(template/stack 通用),异步执行(Celery)。
+
+`Validation`(迁移 `0006`)绑定因子 + 数据快照 + 成本,产出:
+
+- `oos`:样本内/外对比 + 夏普衰减
+- `walk_forward`:分段(`n_splits`)逐段回测 + 跨期一致性
+- `sensitivity`:模板因子扫窗口参数(组合器退化为单点)
+- `robustness`:综合 0–100 评分 + 评级(稳健/中等/偏弱/脆弱)
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST | `/api/v1/validations` | 创建并运行验证(异步;返回 `pending`/结果) |
+| GET | `/api/v1/validations` | 我的验证列表 |
+| GET | `/api/v1/validations/{id}` | 验证详情(OOS/WF/敏感性/稳健性) |
+
 ## 测试
 
 ```bash
-cd backend && pytest          # 用 SQLite 内存库, 不需 Postgres  (67 passed, 含 engine)
+cd backend && pytest          # 用 SQLite 内存库, 不需 Postgres  (81 passed, 含 engine)
 ```
 
 覆盖:**Sprint 1** — 注册/登录/`me`/密码哈希/JWT/等级闸门;
 **Sprint 2** — 经验升级、任务锁定/完成、`min_level` 403、重复 409;
 **Sprint 3** — 模板目录、建因子、参数校验、组合器 L0→403/L1→201、预览;
-**Sprint 4** — 数据集列表、回测成功、指标/研究报告/净值、快照绑定、成本影响、错误分支、鉴权;
-**engine** — 因子(模板/标准化/组合器)、成本、回测指标、研究报告评级。
+**Sprint 4** — 数据集、回测成功、指标/研究报告/净值、快照、成本影响、错误分支;
+**Sprint 5** — 验证全流程(OOS/WF/敏感性/稳健性)、组合器敏感性退化、错误分支、鉴权;
+**engine** — 因子、成本、回测指标、研究报告、OOS/WF/敏感性/稳健性评分。

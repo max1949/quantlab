@@ -7,7 +7,14 @@ Sprint 1: 暴露 ping + 用户系统 (auth / users)。
 
 from fastapi import APIRouter
 
-from backend.app.api.v1.routes import auth, backtests, factors, tasks, users
+from backend.app.api.v1.routes import (
+    auth,
+    backtests,
+    factors,
+    tasks,
+    users,
+    validations,
+)
 
 api_router = APIRouter()
 
@@ -22,5 +29,6 @@ api_router.include_router(users.router, prefix="/users", tags=["users"])
 api_router.include_router(tasks.router, prefix="/tasks", tags=["academy"])
 api_router.include_router(factors.router, prefix="/factors", tags=["factor-lab"])
 api_router.include_router(backtests.router)  # /datasets · /backtests
+api_router.include_router(validations.router, prefix="/validations", tags=["validation"])
 
-# 后续 Sprint 继续在此挂载: validations / seasons / leaderboard / ...
+# 后续 Sprint 继续在此挂载: seasons / leaderboard / ai / ...

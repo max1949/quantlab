@@ -5,6 +5,7 @@ from backend.app.models.factor import Factor, FactorKind  # noqa: F401
 from backend.app.models.market import DataSnapshot, MarketDataset  # noqa: F401
 from backend.app.models.task import Task, TaskStatus, UserTask  # noqa: F401
 from backend.app.models.user import User, UserLevel  # noqa: F401
+from backend.app.models.validation import Validation, ValidationStatus  # noqa: F401
 
 __all__ = [
     "User",
@@ -18,4 +19,6 @@ __all__ = [
     "DataSnapshot",
     "Backtest",
     "BacktestStatus",
+    "Validation",
+    "ValidationStatus",
 ]
