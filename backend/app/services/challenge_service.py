@@ -7,6 +7,7 @@ Day1 第一个因子 → Day7 首次 OOS → Day15 组合因子 → Day30 研究
 from __future__ import annotations
 
 import uuid
+from datetime import datetime, timezone
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -16,17 +17,23 @@ from backend.app.models.factor import Factor, FactorKind
 from backend.app.models.research import ResearchReport
 from backend.app.models.user import User
 from backend.app.models.validation import Validation, ValidationStatus
+from backend.app.services import growth_service
 
 DEFAULT_CODE = "30d-research"
 DEFAULT_MILESTONES = [
-    {"day": 1, "code": "first_factor", "title": "创建第一个因子", "check": "factor"},
-    {"day": 7, "code": "first_oos", "title": "完成第一次科学验证 (OOS)", "check": "validation_success"},
-    {"day": 15, "code": "stack_factor", "title": "创建第一个组合因子", "check": "stack_factor"},
-    {"day": 30, "code": "first_report", "title": "产出第一份研究报告", "check": "report"},
+    {"day": 1, "code": "first_factor", "title": "创建第一个因子", "check": "factor", "reward_points": 20},
+    {"day": 7, "code": "first_oos", "title": "完成第一次科学验证 (OOS)", "check": "validation_success", "reward_points": 40},
+    {"day": 15, "code": "stack_factor", "title": "创建第一个组合因子", "check": "stack_factor", "reward_points": 40},
+    {"day": 30, "code": "first_report", "title": "产出第一份研究报告", "check": "report", "reward_points": 100},
 ]
+CHALLENGE_COMPLETE_BONUS = 200  # 全部完成额外奖励
 
 
 class ChallengeNotFoundError(Exception):
+    pass
+
+
+class ChallengeNotCompletedError(Exception):
     pass
 
 
@@ -106,22 +113,44 @@ def evaluate(db: Session, user: User, code: str) -> dict:
     ch = get_by_code(db, code)
     prog = enroll(db, user, code)
     stats = _user_stats(db, user.id)
+    rewarded = set(prog.rewarded or [])
 
     milestones_status = []
     done_codes = []
+    newly_awarded = 0
     for m in ch.milestones:
         done = stats.get(m["check"], 0) >= 1
         if done:
             done_codes.append(m["code"])
+            # 新完成的里程碑发放 reward_points (幂等: 记录在 rewarded)。
+            if m["code"] not in rewarded:
+                pts = int(m.get("reward_points", 0))
+                if pts:
+                    growth_service.award_reward_points(db, user, pts, commit=False)
+                    newly_awarded += pts
+                rewarded.add(m["code"])
         milestones_status.append(
-            {"day": m["day"], "code": m["code"], "title": m["title"], "completed": done}
+            {
+                "day": m["day"], "code": m["code"], "title": m["title"],
+                "completed": done, "reward_points": int(m.get("reward_points", 0)),
+            }
         )
 
+    total = len(ch.milestones)
+    all_done = len(done_codes) == total and total > 0
+
+    # 全部完成 -> 生成证书 + 一次性奖金 (幂等)。
+    if all_done and not prog.certificate_code:
+        prog.certificate_code = f"QLAB-{code.upper()}-{user.username}-{uuid.uuid4().hex[:6].upper()}"
+        prog.completed_at = datetime.now(timezone.utc)
+        growth_service.award_reward_points(db, user, CHALLENGE_COMPLETE_BONUS, commit=False)
+        newly_awarded += CHALLENGE_COMPLETE_BONUS
+
     prog.completed = done_codes
+    prog.rewarded = sorted(rewarded)
     db.commit()
     db.refresh(prog)
 
-    total = len(ch.milestones)
     return {
         "code": ch.code,
         "title": ch.title,
@@ -131,4 +160,21 @@ def evaluate(db: Session, user: User, code: str) -> dict:
         "percent": round(100.0 * len(done_codes) / total, 1) if total else 0.0,
         "milestones": milestones_status,
         "enrolled_at": prog.enrolled_at,
+        "newly_awarded_points": newly_awarded,
+        "reward_points": user.reward_points,
+        "certificate_code": prog.certificate_code,
+        "completed_at": prog.completed_at,
+    }
+
+
+def get_certificate(db: Session, user: User, code: str) -> dict:
+    """领取证书 (需挑战已全部完成)。"""
+    res = evaluate(db, user, code)
+    if not res["certificate_code"]:
+        raise ChallengeNotCompletedError(code)
+    return {
+        "certificate_code": res["certificate_code"],
+        "challenge_title": res["title"],
+        "username": user.username,
+        "completed_at": res["completed_at"],
     }

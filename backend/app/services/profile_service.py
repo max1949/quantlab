@@ -23,7 +23,7 @@ def _count(db: Session, stmt) -> int:
     return int(db.execute(stmt).scalar_one() or 0)
 
 
-def build_profile(db: Session, user: User) -> dict:
+def build_profile(db: Session, user: User, viewer: User | None = None) -> dict:
     uid = user.id
 
     project_count = _count(
@@ -58,21 +58,32 @@ def build_profile(db: Session, user: User) -> dict:
     tags = [TEMPLATE_LABELS.get(tt, tt) for tt, _ in tt_rows if tt]
 
     level = UserLevel(user.level)
-    return {
+    from backend.app.services import social_service
+
+    follow_counts = social_service.counts(db, uid)
+    out = {
         "user_id": str(uid),
         "username": user.username,
         "level": user.level,
         "level_label": level.label,
         "research_score": round(user.research_score or 0.0, 2),
+        "reward_points": user.reward_points or 0,
+        "research_contribution_score": round(user.research_contribution_score or 0.0, 2),
         "experience": user.experience,
         "project_count": project_count,
         "factor_count": factor_count,
         "validation_count": validation_count,
         "effective_validation_count": effective_validation_count,
         "report_count": report_count,
+        "followers": follow_counts["followers"],
+        "following": follow_counts["following"],
+        "is_following": False,
         "tags": tags,
         "joined_at": user.created_at,
     }
+    if viewer is not None and viewer.id != uid:
+        out["is_following"] = social_service.is_following(db, viewer.id, uid)
+    return out
 
 
 def get_user(db: Session, user_id: uuid.UUID) -> User | None:

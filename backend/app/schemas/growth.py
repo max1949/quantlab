@@ -1,0 +1,103 @@
+"""Growth OS 出入参 schema (Sprint 9A)。"""
+
+from __future__ import annotations
+
+import uuid
+from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict, Field
+
+from backend.app.models.user import UserType
+
+
+# ---- onboarding ----
+class ChooseTypeRequest(BaseModel):
+    user_type: UserType
+
+
+class NextStepOut(BaseModel):
+    user_type: str
+    user_type_label: str
+    intro: str
+    stage: str
+    title: str
+    action: str
+    cta_path: str
+    recommended_template: str | None = None
+
+
+# ---- 研究模板 ----
+class TemplateOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    code: str
+    title: str
+    symbol: str
+    factor_template: str
+    default_params: dict
+    hypothesis: str
+    description: str
+    tags: list
+
+
+class StartTemplateRequest(BaseModel):
+    with_factor: bool = True
+
+
+class StartTemplateResult(BaseModel):
+    project_id: uuid.UUID
+    factor_id: uuid.UUID | None
+    template_code: str
+
+
+# ---- 分享卡片 ----
+class ShareOut(BaseModel):
+    token: str
+    share_path: str
+    card: dict
+    views: int
+
+
+class ShareCardOut(BaseModel):
+    """公开 (免登录) 分享页数据。"""
+
+    token: str
+    card: dict
+    views: int
+    created_at: datetime
+
+
+# ---- 多维榜单 ----
+class LeaderRow(BaseModel):
+    rank: int
+    user_id: str
+    username: str
+    level: int
+    metric_label: str
+    metric_value: float | int
+
+
+# ---- 邀请 ----
+class ReferralOut(BaseModel):
+    code: str
+    share_path: str
+    invited: int
+    activated: int
+    reward_points_earned: int
+
+
+# ---- 埋点 ----
+class EventIn(BaseModel):
+    event: str = Field(min_length=1, max_length=64)
+    props: dict = Field(default_factory=dict)
+
+
+# ---- AI 导师 ----
+class MentorOut(BaseModel):
+    stage: str
+    title: str
+    action: str
+    cta_path: str
+    message: str
+    recommended_template: str | None = None
+    disclaimer: str

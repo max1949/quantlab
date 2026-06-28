@@ -141,6 +141,13 @@ def _build_report_row(
     db.add(report)
     db.commit()
     db.refresh(report)
+
+    # Growth OS 钩子: 报告=完成一次研究 -> 刷新研究信用、激活邀请、埋点。
+    from backend.app.services import growth_service, referral_service
+
+    growth_service.recompute_contribution_score(db, owner)
+    referral_service.activate_if_referred(db, owner)
+    growth_service.log_event(db, "generate_report", owner.id, {"report_id": str(report.id)})
     return report
 
 

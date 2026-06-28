@@ -21,6 +21,7 @@ from backend.app.models.user import User, UserLevel
 from backend.app.services import user_service
 
 bearer_scheme = HTTPBearer(auto_error=True)
+optional_bearer_scheme = HTTPBearer(auto_error=False)
 
 _CREDENTIALS_EXC = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -55,6 +56,37 @@ def get_current_user(
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+def get_optional_user(
+    credentials: Annotated[
+        HTTPAuthorizationCredentials | None, Depends(optional_bearer_scheme)
+    ],
+    db: Annotated[Session, Depends(get_db)],
+) -> User | None:
+    """匿名允许: 有有效令牌则返回用户, 否则 None (用于埋点等公开端点)。"""
+    if credentials is None:
+        return None
+    try:
+        payload = decode_token(credentials.credentials)
+    except jwt.PyJWTError:
+        return None
+    if payload.get("type") != ACCESS_TOKEN_TYPE:
+        return None
+    subject = payload.get("sub")
+    if not subject:
+        return None
+    try:
+        user_id = uuid.UUID(str(subject))
+    except ValueError:
+        return None
+    user = user_service.get_by_id(db, user_id)
+    if user is None or not user.is_active:
+        return None
+    return user
+
+
+OptionalUser = Annotated[User | None, Depends(get_optional_user)]
 
 
 def require_level(min_level: UserLevel):

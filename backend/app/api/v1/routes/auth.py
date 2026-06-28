@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from backend.app.auth.security import create_access_token
 from backend.app.core.database import get_db
 from backend.app.schemas.user import Token, UserCreate, UserLogin, UserOut
-from backend.app.services import user_service
+from backend.app.services import growth_service, referral_service, user_service
 
 router = APIRouter()
 
@@ -22,7 +22,7 @@ router = APIRouter()
     "/register",
     response_model=UserOut,
     status_code=status.HTTP_201_CREATED,
-    summary="注册新用户 (默认等级 L0 观察员)",
+    summary="注册新用户 (默认等级 L0 观察员; 可带 user_type 分流与 ref 邀请码)",
 )
 def register(
     payload: UserCreate,
@@ -35,6 +35,10 @@ def register(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"{exc.field} 已被注册",
         )
+    if payload.ref:
+        referral_service.link_referral(db, user, payload.ref)
+    growth_service.log_event(db, "register", user.id, {"user_type": user.user_type})
+    db.refresh(user)
     return UserOut.model_validate(user)
 
 

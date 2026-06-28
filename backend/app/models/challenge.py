@@ -37,8 +37,10 @@ class Challenge(Base):
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     days: Mapped[int] = mapped_column(Integer, default=30, server_default="30", nullable=False)
-    # 里程碑列表: [{day, code, title, check}], check 为自动判定条件键。
+    # 里程碑列表: [{day, code, title, check, reward_points}], check 为自动判定条件键。
     milestones: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    # 可选: 限定给某分流身份 (Sprint 9); 空=通用。
+    user_type: Mapped[str | None] = mapped_column(String(16), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
@@ -61,6 +63,13 @@ class ChallengeProgress(Base):
         Uuid, ForeignKey("challenges.id", ondelete="CASCADE"), index=True, nullable=False
     )
     completed: Mapped[list] = mapped_column(JSON, nullable=False, default=list)  # 里程碑 code 列表
+    # 已发放奖励的里程碑 code (防重复发奖)。
+    rewarded: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    # 全部完成时生成的证书编号 (可空 -> 未完成)。
+    certificate_code: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     enrolled_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

@@ -17,6 +17,7 @@ from pydantic import BaseModel, Field
 from backend.app.auth.deps import CurrentUser
 from backend.app.core.database import get_db
 from backend.app.schemas.ai import AiStatusOut, InsightOut
+from backend.app.schemas.growth import MentorOut
 from backend.app.services import ai_service
 
 router = APIRouter()
@@ -24,6 +25,14 @@ router = APIRouter()
 
 class ResearchPlanRequest(BaseModel):
     theme: str = Field(min_length=1, max_length=120)  # 研究方向, 如"黄金"/"螺纹钢趋势"
+
+
+@router.get("/mentor/next", response_model=MentorOut, summary="AI 研究导师: 下一步提醒 (基于当前进度)")
+def mentor_next(
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> MentorOut:
+    return MentorOut(**ai_service.mentor_next(db, current_user))
 
 
 @router.get("/status", response_model=AiStatusOut, summary="AI 助手状态 (是否接入 LLM)")

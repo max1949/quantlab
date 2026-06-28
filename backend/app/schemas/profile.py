@@ -13,11 +13,16 @@ class ResearcherProfile(BaseModel):
     level: int
     level_label: str
     research_score: float
+    reward_points: int
+    research_contribution_score: float
     experience: int
     project_count: int
     factor_count: int
     validation_count: int
     effective_validation_count: int
     report_count: int
+    followers: int
+    following: int
+    is_following: bool
     tags: list[str]
     joined_at: datetime

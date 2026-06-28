@@ -293,10 +293,36 @@ PostgreSQL 存索引 + Parquet 存 K 线。`MarketDataset`(品种/周期/区间/
 
 极简前端单页:后端启动后访问 `http://127.0.0.1:8000/`(详见根目录 `README_PRODUCT.md` / `README_DEVELOPMENT.md`)。
 
+## Sprint 9A — Growth OS 增长内核(产品化)
+
+把"可运行的研究系统"升级为"会自增长的产品":在研究闭环之上叠加获取/激活/留存/传播四个循环。
+**两套互不合并的分数**是核心设计:
+
+- `reward_points`(游戏激励):完成里程碑/邀请激活/分享等行为奖励,鼓励参与;
+- `research_contribution_score`(研究信用):由真实研究产物质量沉淀(有效验证×10 + 报告×8 + 发布项目×5 + 被关注×2),不被游戏行为稀释;
+- 竞技 `research_score`(Sprint 6 历史最佳)继续独立保留。
+
+迁移 `0011_growth_os`:`users` 加 `reward_points / research_contribution_score / user_type / onboarding_done / referred_by`;
+新增 `referrals / research_templates / research_shares / user_follows / user_events`;`challenges/progress` 加奖励与证书字段。
+
+| 模块 | 方法 路径 | 说明 |
+|---|---|---|
+| 分流 | `POST /api/v1/onboarding/choose-type` · `GET /onboarding/next` | 选身份(新手/Python/交易经验)+ 个性化下一步 |
+| 模板 | `GET /api/v1/research/templates` · `POST /research/templates/{code}/start` | 研究模板库 + 一键建项目(+默认因子) |
+| 分享 | `POST /api/v1/research/reports/{id}/share` · `GET /share/{token}` | 研究分享卡片 + 公开免登录页 |
+| 关注 | `POST/DELETE /api/v1/researchers/{id}/follow` · `GET /me/feed` | 关注网络 + 关注 Feed |
+| 榜单 | `GET /api/v1/leaderboards/{kind}` | researcher/contributor/newcomer/improved 多维全站榜 |
+| 邀请 | `GET /api/v1/me/referral`(邀请码=username);注册带 `ref` | 被邀请者首次研究 → 邀请人发奖 |
+| 导师 | `GET /api/v1/ai/mentor/next` | AI 研究导师:基于进度的下一步提醒(不给交易建议) |
+| 挑战 | `GET /api/v1/challenges/{code}/certificate` | 全部里程碑完成 → 证书 + 完成奖金 |
+| 埋点 | `POST /api/v1/events`(允许匿名) · `GET /events/funnel`(L3) | 增长漏斗 |
+
+注册种子:`seed-market-data` / `seed-season` / `seed-challenge` / `seed-templates`。
+
 ## 测试
 
 ```bash
-cd backend && pytest          # eager 模式 + 测试库, 不需 worker  (136 passed)
+cd backend && pytest          # eager 模式 + 测试库, 不需 worker  (152 passed)
 ```
 
 覆盖:**Sprint 1** — 注册/登录/`me`/密码哈希/JWT/等级闸门;
@@ -310,4 +336,7 @@ cd backend && pytest          # eager 模式 + 测试库, 不需 worker  (136 pa
 **Sprint 8** — 项目创建/因子归属、项目报告 + 显式字段、研究路径图谱(假设→实验→验证→结果)、
 发布闸门、研究 Feed、研究员主页统计/方向标签、AI 研究指导(本地)、30 天挑战自动判定、
 以及 `test_full_path.py` **完整闭环**(注册→项目→因子→回测→验证→报告→赛季→排行榜→主页→挑战);
+**Sprint 9A** — 分流注册/onboarding、研究模板一键开局、分享卡片+公开页、关注/关注Feed、
+多维榜单、邀请裂变激活发奖、AI 导师下一步、挑战奖励+证书、匿名埋点、两套分数隔离,
+以及 `test_growth_loop.py` **增长闭环**(访客→带邀请码注册→模板开局→研究→分享→邀请激活→榜单→挑战证书);
 **engine** — 因子、成本、回测指标、研究报告、OOS/WF/敏感性/稳健性评分、Research Score 五维 + 衰减、AI 提示词/本地分析(含研究计划)、研究项目报告聚合。

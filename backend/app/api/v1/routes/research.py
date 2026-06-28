@@ -14,14 +14,50 @@ from sqlalchemy.orm import Session
 
 from backend.app.auth.deps import CurrentUser
 from backend.app.core.database import get_db
+from backend.app.schemas.growth import (
+    ShareOut,
+    StartTemplateRequest,
+    StartTemplateResult,
+    TemplateOut,
+)
 from backend.app.schemas.research import (
     GenerateReportRequest,
     ReportDetail,
     ReportSummary,
 )
-from backend.app.services import research_service
+from backend.app.services import research_service, share_service, template_service
 
 router = APIRouter()
+
+
+# --- 研究模板库 (Sprint 9A): 一键开局 ---
+@router.get("/templates", response_model=list[TemplateOut], summary="研究模板库")
+def list_research_templates(
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> list[TemplateOut]:
+    return [TemplateOut.model_validate(t) for t in template_service.list_templates(db)]
+
+
+@router.post(
+    "/templates/{code}/start",
+    response_model=StartTemplateResult,
+    status_code=status.HTTP_201_CREATED,
+    summary="从模板一键创建研究项目 (+默认因子)",
+)
+def start_from_template(
+    code: str,
+    payload: StartTemplateRequest,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> StartTemplateResult:
+    try:
+        res = template_service.start(db, current_user, code, with_factor=payload.with_factor)
+    except template_service.TemplateNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="模板不存在")
+    return StartTemplateResult(
+        project_id=res["project"].id, factor_id=res["factor_id"], template_code=res["template_code"]
+    )
 
 
 @router.post(
@@ -115,3 +151,23 @@ def report_detail(
     if report.owner_id != current_user.id and not report.is_public:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="该报告未公开")
     return ReportDetail.model_validate(report)
+
+
+@router.post(
+    "/reports/{report_id}/share",
+    response_model=ShareOut,
+    status_code=status.HTTP_201_CREATED,
+    summary="生成研究分享卡片 (公开可转发 /share/{token})",
+)
+def share_report(
+    report_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> ShareOut:
+    try:
+        share = share_service.create_share(db, current_user, uuid.UUID(report_id))
+    except (share_service.ReportNotFoundError, ValueError):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="报告不存在")
+    return ShareOut(
+        token=share.token, share_path=f"/share/{share.token}", card=share.card, views=share.views
+    )

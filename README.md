@@ -232,6 +232,11 @@ docker compose --profile workers up -d worker   # 可选: Celery worker
   - [x] **8.5 极简前端单页 + 完整闭环测试 + 产品/开发文档**:`frontend/index.html`(FastAPI 同源托管,`/app/`「一键走完整闭环」)
     - 迁移 `0010_research_os`;新增 `README_PRODUCT.md` / `README_DEVELOPMENT.md`
     - 验证:真库迁移 + 端到端实测(项目报告 final 13.87 回填主页、挑战 3/4、AI 计划本地 3 假设、Feed/图谱完整);测试合计 **136 passed(后端)+ 53 passed(engine)**
+- [~] Sprint 9:Growth OS(产品化与自增长;方向锁定"研究人才平台",不接 vn.py)
+  - [x] **9A 后端增长内核**:分流/onboarding、研究模板一键开局、分享卡片 + 公开页 `/share/{token}`、关注/关注 Feed、多维榜单(researcher/contributor/newcomer/improved)、邀请裂变(被邀请者首次研究激活发奖)、AI 研究导师 `/ai/mentor/next`、30 天挑战奖励 + 证书、匿名埋点 + 漏斗
+    - **两套互不合并的分数**:`reward_points`(游戏激励)与 `research_contribution_score`(研究信用),竞技 `research_score` 仍独立
+    - 迁移 `0011_growth_os`(已落真库)+ 种子 `seed-templates`;`test_growth.py` / `test_growth_loop.py` 守护增长闭环;测试合计 **152 passed(后端)+ 53 passed(engine)**
+  - [ ] 9B React SPA 多页前端(首页/Dashboard/工作台/报告/主页/榜单/挑战/分享页,FastAPI 同源托管)
 
 > 环境说明(重要):
 > - 本机是 **Windows Server 2019**,Docker Desktop **不支持**(仅支持 Win10/11 客户端),

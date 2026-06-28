@@ -13,8 +13,13 @@ from backend.app.api.v1.routes import (
     backtests,
     challenges,
     competition,
+    events,
     factors,
+    leaderboards,
+    me,
+    onboarding,
     projects,
+    public,
     research,
     researchers,
     tasks,
@@ -42,5 +47,12 @@ api_router.include_router(research.router, prefix="/research", tags=["research"]
 api_router.include_router(projects.router, prefix="/projects", tags=["project"])
 api_router.include_router(researchers.router, prefix="/researchers", tags=["researcher"])
 api_router.include_router(challenges.router, prefix="/challenges", tags=["challenge"])
+
+# Growth OS (Sprint 9A)
+api_router.include_router(onboarding.router, prefix="/onboarding", tags=["onboarding"])
+api_router.include_router(me.router, prefix="/me", tags=["me"])
+api_router.include_router(leaderboards.router, prefix="/leaderboards", tags=["leaderboard"])
+api_router.include_router(events.router, prefix="/events", tags=["growth"])
+api_router.include_router(public.router, prefix="/share", tags=["public"])
 
 # 后续 Sprint 继续在此挂载: execution-adapter (vn.py/QMT, Phase 3) / ...

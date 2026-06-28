@@ -24,6 +24,7 @@ class MilestoneStatus(BaseModel):
     code: str
     title: str
     completed: bool
+    reward_points: int = 0
 
 
 class ProgressOut(BaseModel):
@@ -35,3 +36,14 @@ class ProgressOut(BaseModel):
     percent: float
     milestones: list[MilestoneStatus]
     enrolled_at: datetime
+    newly_awarded_points: int = 0
+    reward_points: int = 0
+    certificate_code: str | None = None
+    completed_at: datetime | None = None
+
+
+class CertificateOut(BaseModel):
+    certificate_code: str
+    challenge_title: str
+    username: str
+    completed_at: datetime | None

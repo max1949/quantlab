@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from backend.app.auth.deps import CurrentUser
 from backend.app.core.database import get_db
-from backend.app.schemas.challenge import ChallengeOut, ProgressOut
+from backend.app.schemas.challenge import CertificateOut, ChallengeOut, ProgressOut
 from backend.app.services import challenge_service
 
 router = APIRouter()
@@ -36,7 +36,7 @@ def enroll(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="挑战不存在")
 
 
-@router.get("/{code}/progress", response_model=ProgressOut, summary="我的挑战进度 (实时按产物判定)")
+@router.get("/{code}/progress", response_model=ProgressOut, summary="我的挑战进度 (实时按产物判定, 自动发奖)")
 def progress(
     code: str,
     current_user: CurrentUser,
@@ -46,3 +46,19 @@ def progress(
         return ProgressOut(**challenge_service.evaluate(db, current_user, code))
     except challenge_service.ChallengeNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="挑战不存在")
+
+
+@router.get("/{code}/certificate", response_model=CertificateOut, summary="领取完成证书 (需全部里程碑完成)")
+def certificate(
+    code: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> CertificateOut:
+    try:
+        return CertificateOut(**challenge_service.get_certificate(db, current_user, code))
+    except challenge_service.ChallengeNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="挑战不存在")
+    except challenge_service.ChallengeNotCompletedError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="挑战尚未全部完成, 暂不能领证书"
+        )

@@ -11,7 +11,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, computed_field
 
-from backend.app.models.user import UserLevel
+from backend.app.models.user import UserLevel, UserType
 
 
 class UserCreate(BaseModel):
@@ -25,6 +25,9 @@ class UserCreate(BaseModel):
         description="字母 / 数字 / 下划线, 3-50 位",
     )
     password: str = Field(min_length=8, max_length=128)
+    # Sprint 9: 注册即可分流身份 (也可注册后再选); ref = 邀请人 username。
+    user_type: UserType | None = None
+    ref: str | None = Field(default=None, max_length=50)
 
 
 class UserLogin(BaseModel):
@@ -45,6 +48,10 @@ class UserOut(BaseModel):
     level: int
     experience: int
     research_score: float
+    reward_points: int
+    research_contribution_score: float
+    user_type: str
+    onboarding_done: bool
     is_active: bool
     created_at: datetime
 
@@ -52,6 +59,11 @@ class UserOut(BaseModel):
     @property
     def level_label(self) -> str:
         return UserLevel(self.level).label
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def user_type_label(self) -> str:
+        return UserType(self.user_type).label
 
     @computed_field  # type: ignore[prop-decorator]
     @property

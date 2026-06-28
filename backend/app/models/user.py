@@ -14,7 +14,16 @@ import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Float, Integer, SmallInteger, String, func
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    SmallInteger,
+    String,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import Uuid
 
@@ -40,6 +49,22 @@ class UserLevel(enum.IntEnum):
             UserLevel.L1: "研究学徒",
             UserLevel.L2: "研究员",
             UserLevel.L3: "高级研究员",
+        }[self]
+
+
+class UserType(str, enum.Enum):
+    """新用户分流身份 (Sprint 9): 决定 onboarding 路线与默认节奏。"""
+
+    NEWBIE = "newbie"   # 完全新手 (从模板因子起步)
+    PYTHON = "python"   # 有 Python 基础
+    TRADER = "trader"   # 有交易经验
+
+    @property
+    def label(self) -> str:
+        return {
+            UserType.NEWBIE: "完全新手",
+            UserType.PYTHON: "Python 用户",
+            UserType.TRADER: "交易经验用户",
         }[self]
 
 
@@ -70,9 +95,31 @@ class User(Base):
         Integer, default=0, server_default="0", nullable=False
     )
 
-    # 研究积分: Sprint 6 动态评分写入,这里仅占位 (默认 0)。
+    # 研究积分 (Sprint 6 竞技): 历史最佳 Research Score (五维×衰减), 竞技身份指标。
     research_score: Mapped[float] = mapped_column(
         Float, default=0.0, server_default="0", nullable=False
+    )
+
+    # --- Sprint 9 Growth OS: 两套互不合并的分数 ---
+    # reward_points: 游戏化激励积分 (完成里程碑/邀请/分享等行为奖励), 可涨不沉淀研究质量。
+    reward_points: Mapped[int] = mapped_column(
+        Integer, default=0, server_default="0", nullable=False
+    )
+    # research_contribution_score: 长期研究信用 (由真实研究产物质量沉淀), 不被游戏行为稀释。
+    research_contribution_score: Mapped[float] = mapped_column(
+        Float, default=0.0, server_default="0", nullable=False
+    )
+
+    # 分流身份 (Sprint 9): 决定 onboarding 路线。
+    user_type: Mapped[str] = mapped_column(
+        String(16), default=UserType.NEWBIE.value, server_default="newbie", nullable=False
+    )
+    onboarding_done: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default="false", nullable=False
+    )
+    # 邀请人 (Sprint 9 裂变); 可空。
+    referred_by: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
 
     is_active: Mapped[bool] = mapped_column(

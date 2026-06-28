@@ -129,6 +129,14 @@ def execute(db: Session, validation_id) -> Validation | None:
         v.finished_at = datetime.now(timezone.utc)
         db.commit()
         db.refresh(v)
+    # 验证成功后刷新研究信用分 (有效验证沉淀)。
+    if v.status == ValidationStatus.SUCCESS.value:
+        from backend.app.models.user import User
+        from backend.app.services import growth_service
+
+        owner = db.get(User, v.owner_id)
+        if owner is not None:
+            growth_service.recompute_contribution_score(db, owner)
     return v
 
 

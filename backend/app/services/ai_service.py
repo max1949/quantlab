@@ -143,6 +143,28 @@ def research_plan(db: Session, owner: User, theme: str) -> AiInsight:
     )
 
 
+def mentor_next(db: Session, user: User) -> dict:
+    """AI 研究导师: 基于当前进度给"下一步"提醒 (确定性, 复用 onboarding 路线)。
+
+    定位: 提醒/引导, 不给交易建议、不承诺收益。
+    """
+    from backend.app.services import onboarding_service
+
+    step = onboarding_service.next_step(db, user)
+    message = f"{step['title']} —— {step['action']}"
+    if step["stage"] == "keep_going":
+        message = "你已经走完了第一个完整研究闭环! " + step["action"]
+    return {
+        "stage": step["stage"],
+        "title": step["title"],
+        "action": step["action"],
+        "cta_path": step["cta_path"],
+        "message": message,
+        "recommended_template": step.get("recommended_template"),
+        "disclaimer": "仅为研究流程提醒, 不构成交易建议。",
+    }
+
+
 def list_insights(db: Session, owner_id: uuid.UUID, limit: int = 50) -> list[AiInsight]:
     return list(
         db.execute(

@@ -45,6 +45,7 @@ cd ..
 .\scripts\seed-market-data.ps1
 .\scripts\seed-season.ps1
 .\scripts\seed-challenge.ps1
+.\scripts\seed-templates.ps1    # Sprint 9A: 研究模板库 (一键开局)
 ```
 
 ## 启动
@@ -84,7 +85,7 @@ cd ..
 ## 数据库迁移规范
 
 - 改 ORM 模型后,新增 `backend/migrations/versions/00XX_*.py`,`down_revision` 指向上一版本。
-- 当前最新:`0010_research_os`(研究项目/图谱/挑战 + 报告升级 + 因子 `project_id`)。
+- 当前最新:`0011_growth_os`(增长字段 + 邀请/模板/分享/关注/埋点 + 挑战奖励证书)。
 - 升级:`alembic upgrade head`;回滚:`alembic downgrade -1`。
 
 ## AI / LLM 配置 (可选)
