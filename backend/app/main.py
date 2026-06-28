@@ -7,7 +7,7 @@
 from pathlib import Path
 
 from fastapi import FastAPI
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from backend.app.api.v1 import api_router
@@ -30,11 +30,35 @@ def health() -> dict:
     return {"status": "ok", "env": settings.app_env}
 
 
-# 极简前端单页演示 (Sprint 8): 走完整 Research OS 闭环。
-_FRONTEND_DIR = Path(__file__).resolve().parents[2] / "frontend"
-if (_FRONTEND_DIR / "index.html").exists():
-    @app.get("/", include_in_schema=False)
-    def _root() -> RedirectResponse:
-        return RedirectResponse(url="/app/")
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_REACT_DIST = _REPO_ROOT / "frontend-react" / "dist"
+_LEGACY_FRONTEND_DIR = _REPO_ROOT / "frontend"
 
-    app.mount("/app", StaticFiles(directory=str(_FRONTEND_DIR), html=True), name="frontend")
+
+@app.get("/", include_in_schema=False)
+def _root() -> RedirectResponse:
+    return RedirectResponse(url="/app/")
+
+
+# Sprint 9B: React SPA (Vite 构建产物) 挂在 /app。
+# SPA 路由 (如 /app/projects/123) 刷新需回退到 index.html (html=True 已支持顶层,
+# 这里再加一个 catch-all 兜底深层路由)。
+if (_REACT_DIST / "index.html").exists():
+    _spa_index = _REACT_DIST / "index.html"
+
+    @app.get("/app/{full_path:path}", include_in_schema=False)
+    def _spa_fallback(full_path: str) -> FileResponse:
+        candidate = _REACT_DIST / full_path
+        if full_path and candidate.is_file():
+            return FileResponse(str(candidate))
+        return FileResponse(str(_spa_index))
+
+    app.mount("/app", StaticFiles(directory=str(_REACT_DIST), html=True), name="frontend")
+
+# Sprint 8 旧版极简 demo 保留在 /app-legacy。
+if (_LEGACY_FRONTEND_DIR / "index.html").exists():
+    app.mount(
+        "/app-legacy",
+        StaticFiles(directory=str(_LEGACY_FRONTEND_DIR), html=True),
+        name="frontend-legacy",
+    )
