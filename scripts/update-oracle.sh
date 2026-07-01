@@ -22,19 +22,35 @@ source "$INSTALL_DIR/.venv/bin/activate"
 set -a && source "$INSTALL_DIR/.env" && set +a
 cd "$INSTALL_DIR/backend" && alembic upgrade head && cd "$INSTALL_DIR"
 
-# 异步任务: 启用 Celery worker (回测/验证不阻塞 API)
-if grep -q '^CELERY_TASK_ALWAYS_EAGER=true' "$INSTALL_DIR/.env" 2>/dev/null; then
-  sed -i 's/^CELERY_TASK_ALWAYS_EAGER=true/CELERY_TASK_ALWAYS_EAGER=false/' "$INSTALL_DIR/.env"
-  echo "==> CELERY_TASK_ALWAYS_EAGER=false"
+# 异步任务: 仅当 Redis 可用时启用 Celery worker + 关闭 eager
+_redis_ok=false
+if redis-cli ping 2>/dev/null | grep -q PONG; then
+  _redis_ok=true
+elif systemctl restart redis 2>/dev/null && sleep 2 && redis-cli ping 2>/dev/null | grep -q PONG; then
+  _redis_ok=true
 fi
-if [[ -f "$INSTALL_DIR/scripts/quantlab-worker.service" ]]; then
-  APP_USER=$(stat -c '%U' "$INSTALL_DIR" 2>/dev/null || echo quantlab)
-  sed "s/User=quantlab/User=${APP_USER}/" "$INSTALL_DIR/scripts/quantlab-worker.service" \
-    > /etc/systemd/system/quantlab-worker.service
-  systemctl daemon-reload
-  systemctl enable quantlab-worker
-  systemctl restart quantlab-worker
-  echo "==> quantlab-worker restarted"
+
+if [[ "$_redis_ok" == true ]]; then
+  if grep -q '^CELERY_TASK_ALWAYS_EAGER=true' "$INSTALL_DIR/.env" 2>/dev/null; then
+    sed -i 's/^CELERY_TASK_ALWAYS_EAGER=true/CELERY_TASK_ALWAYS_EAGER=false/' "$INSTALL_DIR/.env"
+    echo "==> CELERY_TASK_ALWAYS_EAGER=false (Redis OK)"
+  fi
+  if [[ -f "$INSTALL_DIR/scripts/quantlab-worker.service" ]]; then
+    APP_USER=$(stat -c '%U' "$INSTALL_DIR" 2>/dev/null || echo quantlab)
+    sed "s/User=quantlab/User=${APP_USER}/" "$INSTALL_DIR/scripts/quantlab-worker.service" \
+      > /etc/systemd/system/quantlab-worker.service
+    systemctl daemon-reload
+    systemctl enable quantlab-worker
+    systemctl restart quantlab-worker
+    echo "==> quantlab-worker restarted"
+  fi
+else
+  if grep -q '^CELERY_TASK_ALWAYS_EAGER=false' "$INSTALL_DIR/.env" 2>/dev/null; then
+    sed -i 's/^CELERY_TASK_ALWAYS_EAGER=false/CELERY_TASK_ALWAYS_EAGER=true/' "$INSTALL_DIR/.env"
+    echo "==> Redis unavailable — CELERY_TASK_ALWAYS_EAGER=true (sync fallback)"
+  fi
+  systemctl stop quantlab-worker 2>/dev/null || true
+  systemctl disable quantlab-worker 2>/dev/null || true
 fi
 
 systemctl restart quantlab
