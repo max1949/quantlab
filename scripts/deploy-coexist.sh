@@ -15,9 +15,14 @@
 #
 set -euo pipefail
 
-REPO_URL="${REPO_URL:-https://github.com/max1949/quantlab.git}"
+REPO_URL="${REPO_URL:-git@github.com:max1949/quantlab.git}"
 INSTALL_DIR="${INSTALL_DIR:-/opt/quantlab}"
-APP_USER="${APP_USER:-ubuntu}"
+if id ubuntu &>/dev/null; then
+  APP_USER="${APP_USER:-ubuntu}"
+else
+  APP_USER="${APP_USER:-root}"
+fi
+export GIT_SSH_COMMAND="${GIT_SSH_COMMAND:-}"
 QUANTLAB_PORT="${QUANTLAB_PORT:-8010}"
 # 已有 Postgres/Redis 时设为 1，跳过 apt 安装
 SKIP_INSTALL_PG="${SKIP_INSTALL_PG:-0}"
@@ -81,9 +86,9 @@ fi
 echo "==> 拉取代码到 ${INSTALL_DIR}..."
 mkdir -p "$(dirname "$INSTALL_DIR")"
 if [[ -d "$INSTALL_DIR/.git" ]]; then
-  sudo -u "$APP_USER" git -C "$INSTALL_DIR" pull --ff-only
+  sudo -u "$APP_USER" env GIT_SSH_COMMAND="$GIT_SSH_COMMAND" git -C "$INSTALL_DIR" pull --ff-only
 else
-  sudo -u "$APP_USER" git clone "$REPO_URL" "$INSTALL_DIR"
+  sudo -u "$APP_USER" env GIT_SSH_COMMAND="$GIT_SSH_COMMAND" git clone "$REPO_URL" "$INSTALL_DIR"
 fi
 chown -R "$APP_USER:$APP_USER" "$INSTALL_DIR"
 
