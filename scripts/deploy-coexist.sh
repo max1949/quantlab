@@ -99,10 +99,19 @@ ensure_pg_local_auth() {
   for f in /var/lib/pgsql/data/pg_hba.conf /var/lib/pgsql/*/data/pg_hba.conf; do
     [[ -f "$f" ]] && pg_hba="$f" && break
   done
-  if [[ -n "$pg_hba" ]] && ! grep -q 'quantlab.*127.0.0.1' "$pg_hba"; then
-    echo "host    quantlab    quantlab    127.0.0.1/32    md5" >>"$pg_hba"
-    systemctl reload "$PG_SERVICE" 2>/dev/null || systemctl restart "$PG_SERVICE" 2>/dev/null || true
+  if [[ -z "$pg_hba" ]]; then
+    return
   fi
+  if grep -q 'quantlab.*127.0.0.1' "$pg_hba"; then
+    return
+  fi
+  local line='host    quantlab    quantlab    127.0.0.1/32    md5'
+  if grep -q '^host.*127.0.0.1/32.*ident' "$pg_hba"; then
+    sed -i "/^host.*127.0.0.1\/32.*ident/i ${line}" "$pg_hba"
+  else
+    echo "$line" >>"$pg_hba"
+  fi
+  systemctl reload "$PG_SERVICE" 2>/dev/null || systemctl restart "$PG_SERVICE" 2>/dev/null || true
 }
 
 echo "==> 安装系统依赖（不启动/不重载其他网站）..."
@@ -158,7 +167,9 @@ END \$\$;
 SELECT 'CREATE DATABASE quantlab OWNER quantlab'
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'quantlab')\gexec
 GRANT ALL PRIVILEGES ON DATABASE quantlab TO quantlab;
+ALTER USER quantlab WITH PASSWORD '${DB_PASS}';
 SQL
+    ensure_pg_local_auth
   fi
 fi
 
