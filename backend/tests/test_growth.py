@@ -91,6 +91,26 @@ def test_share_card_public(client, db_session):
     assert card["views"] >= 1
 
 
+def test_share_html_preview_has_og(client, db_session):
+    seed_sample_market_data(db_session)
+    h = _register(client, "iris")
+    _, rep = _full_research(client, h, db_session)
+    token = client.post(f"{BASE}/research/reports/{rep['id']}/share", headers=h).json()["token"]
+    html = client.get(f"/share/{token}").text
+    assert 'property="og:title"' in html
+    assert "/app/share/" in html
+
+
+def test_public_feed_no_auth(client, db_session):
+    seed_sample_market_data(db_session)
+    h = _register(client, "jade")
+    _, rep = _full_research(client, h, db_session)
+    client.post(f"{BASE}/research/reports/{rep['id']}/share", headers=h)
+    feed = client.get(f"{BASE}/public/feed").json()
+    assert isinstance(feed, list)
+    assert any(r["id"] == rep["id"] for r in feed)
+
+
 def test_share_missing_report_404(client, db_session):
     import uuid
     h = _register(client, "seth")

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { getPublicFeed } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import { EmptyState, ErrorBox, PageTitle, Spinner } from "../components/ui";
@@ -10,6 +11,7 @@ import ReportCard from "../components/ReportCard";
 export default function Feed() {
   const user = useAuth((s) => s.user);
   const f = useLocale((s) => s.dict.feed);
+  useDocumentTitle(`${f.title} · QuantLab AI`);
   const feed = useQuery({
     queryKey: ["public-feed"],
     queryFn: getPublicFeed,

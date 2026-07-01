@@ -245,16 +245,16 @@ docker compose --profile workers up -d worker   # 可选: Celery worker
   - **刻意不做** `checkout` 在线支付;商业化以**月卡/兑换码**为主
   - 迁移 `0012_membership`;前端 `/pricing` 兑换页
 
-## 下一步产品迭代(锁定方向, vn.py/在线支付仍不做)
+## 产品迭代状态(锁定方向, vn.py/在线支付仍不做)
 
-| 优先级 | 主题 | 说明 |
+| 优先级 | 主题 | 状态 |
 |---|---|---|
-| P0 | 同步流程固化 | 本地开发后执行 `.\scripts\sync-to-oracle.ps1 -BuildFrontend` |
-| P1 | 广场/项目体验打磨 | Feed 空态、项目引导、移动端适配 |
-| P2 | 学院任务前端露出 | Dashboard 与任务进度更可见 |
-| P3 | 广场 SEO/免登录预览 | 拉新:公开分享页与部分 Feed 可匿名浏览 |
-| P4 | 运营工具 | 批量发卡、简单管理后台 |
-| 远期 | Python 因子沙箱 · Execution Adapter | 高阶用户与实盘,非当前主线 |
+| P0 | 同步流程固化 | ✅ `sync-to-oracle.ps1` · Oracle 更新用 `scripts/update-oracle.sh` |
+| P1 | 广场/项目体验打磨 | ✅ Feed 空态/访客横幅 · 项目进度条与下一步高亮 |
+| P2 | 学院任务前端露出 | ✅ Dashboard `AcademyTasks` 组件 |
+| P3 | 广场 SEO/免登录预览 | ✅ `/api/v1/public/feed` · `/share/{token}` OG 预览页 · `robots.txt` |
+| P4 | 运营工具 | ✅ 本地 `generate-redeem-codes.ps1` · 远程 `batch-codes-remote.ps1` · Admin API |
+| 远期 | Python 因子沙箱 · Execution Adapter | 未开始,非当前主线 |
 
 ## 生产同步(Windows 开发机 → Oracle)
 
@@ -263,11 +263,18 @@ docker compose --profile workers up -d worker   # 可选: Celery worker
 .\scripts\sync-to-oracle.ps1 -BuildFrontend
 ```
 
-Oracle 拉代码(私有库需 Deploy Key):
+Oracle 拉代码(私有库需 Deploy Key; **推荐一键脚本**, 避免 `dist/` 与 git 冲突):
+
+```bash
+sudo bash /opt/quantlab/scripts/update-oracle.sh
+```
+
+等价手动步骤:
 
 ```bash
 cd /opt/quantlab
-GIT_SSH_COMMAND='ssh -i /root/.ssh/quantlab_deploy -o IdentitiesOnly=yes' git pull
+GIT_SSH_COMMAND='ssh -i /root/.ssh/quantlab_deploy -o IdentitiesOnly=yes' git fetch origin
+git reset --hard origin/master
 systemctl restart quantlab
 ```
 

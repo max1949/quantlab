@@ -7,11 +7,12 @@
 from pathlib import Path
 
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, PlainTextResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from backend.app.api.v1 import api_router
 from backend.app.core.config import get_settings
+from backend.app.web import share_preview
 
 settings = get_settings()
 
@@ -35,6 +36,12 @@ async def security_headers(request: Request, call_next):
 
 
 app.include_router(api_router, prefix="/api/v1")
+app.include_router(share_preview.router)
+
+
+@app.get("/robots.txt", include_in_schema=False, response_class=PlainTextResponse)
+def robots_txt() -> str:
+    return "User-agent: *\nAllow: /app/\nAllow: /share/\n"
 
 
 @app.get("/health", tags=["system"])
@@ -73,7 +80,7 @@ async def spa_path_shortcuts(request: Request, call_next):
         if not skip:
             if path == "/":
                 return RedirectResponse(url="/app/")
-            if path in _SPA_SHORTCUTS or path.startswith("/share/"):
+            if path in _SPA_SHORTCUTS:
                 return RedirectResponse(url=f"/app{path}")
     return await call_next(request)
 

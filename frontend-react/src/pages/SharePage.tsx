@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getShareCard, trackEvent } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { useLocale } from "../store/locale";
 import { GradeBadge, Spinner } from "../components/ui";
 
@@ -18,6 +19,8 @@ export default function SharePage() {
   useEffect(() => {
     void trackEvent("share_view", { token });
   }, [token]);
+
+  useDocumentTitle(q.data?.card?.title ? `${q.data.card.title} · ${dict.brand}` : undefined);
 
   return (
     <div className="flex min-h-full items-center justify-center bg-gradient-to-b from-brand-50 to-white px-4 py-10">
