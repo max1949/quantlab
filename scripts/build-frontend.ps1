@@ -14,4 +14,4 @@ if (-not (Test-Path (Join-Path $fe "node_modules"))) {
 
 Write-Host "构建前端 (npm run build)..."
 npm run build
-Write-Host "完成。打开 http://127.0.0.1:8000/app/ 查看 (需后端运行中)。"
+Write-Host "Done. Open http://127.0.0.1:8000/app/ (backend must be running)."

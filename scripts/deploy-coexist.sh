@@ -223,6 +223,11 @@ else
   echo "保留已有 .env"
 fi
 
+echo "==> PostgreSQL schema（quantlab + search_path，与 Windows/Docker 一致）..."
+if [[ -f "$INSTALL_DIR/infra/db/init.sql" ]]; then
+  sudo -u postgres psql -v ON_ERROR_STOP=1 -d quantlab -f "$INSTALL_DIR/infra/db/init.sql"
+fi
+
 echo "==> 迁移 + 种子（仅 quantlab 库）..."
 sudo -u "$APP_USER" bash <<EOSU
 set -euo pipefail

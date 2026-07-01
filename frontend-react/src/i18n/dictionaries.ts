@@ -327,7 +327,7 @@ const en = {
     enrollFail: "Enrollment failed",
     certIssued: (code: string) => `Certificate issued: ${code}`,
     certNotReady: "Not all milestones completed yet",
-    empty: "No challenges available (run scripts/seed-challenge.ps1)",
+    empty: "No challenges available yet",
     completed: (done: number, total: number, pts: number) =>
       `${done}/${total} done · ${pts} reward pts`,
     certLabel: (code: string) => `Cert ${code}`,
@@ -744,7 +744,7 @@ const zh = {
     enrollFail: "报名失败",
     certIssued: (code: string) => `证书已颁发: ${code}`,
     certNotReady: "尚未全部完成",
-    empty: "暂无可参加的挑战 (运行 scripts/seed-challenge.ps1 初始化)",
+    empty: "暂无可参加的挑战，请刷新页面或联系管理员",
     completed: (done: number, total: number, pts: number) =>
       `已完成 ${done}/${total} · 奖励积分 ${pts}`,
     certLabel: (code: string) => `证书 ${code}`,

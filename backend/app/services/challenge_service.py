@@ -57,7 +57,11 @@ def seed_default_challenge(db: Session) -> dict:
 
 
 def list_challenges(db: Session) -> list[Challenge]:
-    return list(db.execute(select(Challenge).order_by(Challenge.created_at.asc())).scalars().all())
+    rows = list(db.execute(select(Challenge).order_by(Challenge.created_at.asc())).scalars().all())
+    if not rows:
+        seed_default_challenge(db)
+        rows = list(db.execute(select(Challenge).order_by(Challenge.created_at.asc())).scalars().all())
+    return rows
 
 
 def get_by_code(db: Session, code: str) -> Challenge:

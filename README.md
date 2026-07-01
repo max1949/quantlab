@@ -4,7 +4,7 @@
 >
 > 本仓库不是"做一个回测网站"。核心资产是 **研究行为数据 + 可复现的研究过程**,目标是沉淀 AI 量化研究基础设施。
 
-当前阶段:**Sprint 1 — 项目骨架(已搭建,暂不含业务逻辑)**。
+当前阶段:**Sprint 9B 产品前端 + Oracle 生产部署**；核心研究链路(Sprint 1–9A)已闭环。
 
 ---
 
@@ -55,7 +55,7 @@
 
 ## 技术栈
 
-- 前端:Next.js · React · TailwindCSS
+- 前端:**React + Vite + TailwindCSS**(`frontend-react/`, 生产构建托管于 `/app`)
 - 后端:Python · FastAPI
 - 异步计算:Celery + Redis
 - 数据库:PostgreSQL(业务/研究元数据);行情:Parquet + PG 索引
@@ -89,7 +89,8 @@ quantlab/
 │   ├── walk_forward.py · scoring.py
 │   └── tests/
 ├── sandbox/                # 用户 Python 因子隔离执行 (后置开放)
-├── frontend/               # Next.js (后续 Sprint 初始化)
+├── frontend-react/         # React SPA (Sprint 9B, 生产前端)
+├── frontend/               # Sprint 8 极简 demo (保留于 /app-legacy)
 ├── data/                   # market_data (Parquet) / raw / snapshots
 └── infra/
     ├── db/init.sql         # PostgreSQL 初始化 (扩展 / schema)
@@ -232,13 +233,47 @@ docker compose --profile workers up -d worker   # 可选: Celery worker
   - [x] **8.5 极简前端单页 + 完整闭环测试 + 产品/开发文档**:`frontend/index.html`(FastAPI 同源托管,`/app/`「一键走完整闭环」)
     - 迁移 `0010_research_os`;新增 `README_PRODUCT.md` / `README_DEVELOPMENT.md`
     - 验证:真库迁移 + 端到端实测(项目报告 final 13.87 回填主页、挑战 3/4、AI 计划本地 3 假设、Feed/图谱完整);测试合计 **136 passed(后端)+ 53 passed(engine)**
-- [~] Sprint 9:Growth OS(产品化与自增长;方向锁定"研究人才平台",不接 vn.py)
+- [x] Sprint 9:Growth OS(产品化与自增长;方向锁定"研究人才平台",不接 vn.py)
   - [x] **9A 后端增长内核**:分流/onboarding、研究模板一键开局、分享卡片 + 公开页 `/share/{token}`、关注/关注 Feed、多维榜单(researcher/contributor/newcomer/improved)、邀请裂变(被邀请者首次研究激活发奖)、AI 研究导师 `/ai/mentor/next`、30 天挑战奖励 + 证书、匿名埋点 + 漏斗
     - **两套互不合并的分数**:`reward_points`(游戏激励)与 `research_contribution_score`(研究信用),竞技 `research_score` 仍独立
     - 迁移 `0011_growth_os`(已落真库)+ 种子 `seed-templates`;`test_growth.py` / `test_growth_loop.py` 守护增长闭环;测试合计 **152 passed(后端)+ 53 passed(engine)**
-  - [ ] 9B React SPA 多页前端(首页/Dashboard/工作台/报告/主页/榜单/挑战/分享页,FastAPI 同源托管)
+  - [x] **9B React SPA 多页前端**:Landing/登录/工作台/模板库/项目/报告/广场/榜单/挑战/邀请/会员页;FastAPI 同源 `/app`;中英 i18n
+  - [x] **9C 生产部署**:Oracle Linux 共存(`q.ziyingke.com`)+ Cloudflare 隧道;脚本见 `docs/oracle-coexist.md`、`scripts/deploy-coexist.sh`
+  - [x] **数据同步**:Windows 开发库 → Oracle,`scripts/sync-to-oracle.ps1`(业务表+行情 Parquet+可选前端构建)
+- [x] Sprint 10:会员与月卡(不做在线支付)
+  - 套餐/权益闸门、`POST /billing/redeem` 兑换码开通;与 ai.ziyingke.com 共用 Supabase 卡密池
+  - **刻意不做** `checkout` 在线支付;商业化以**月卡/兑换码**为主
+  - 迁移 `0012_membership`;前端 `/pricing` 兑换页
 
-> 环境说明(重要):
+## 下一步产品迭代(锁定方向, vn.py/在线支付仍不做)
+
+| 优先级 | 主题 | 说明 |
+|---|---|---|
+| P0 | 同步流程固化 | 本地开发后执行 `.\scripts\sync-to-oracle.ps1 -BuildFrontend` |
+| P1 | 广场/项目体验打磨 | Feed 空态、项目引导、移动端适配 |
+| P2 | 学院任务前端露出 | Dashboard 与任务进度更可见 |
+| P3 | 广场 SEO/免登录预览 | 拉新:公开分享页与部分 Feed 可匿名浏览 |
+| P4 | 运营工具 | 批量发卡、简单管理后台 |
+| 远期 | Python 因子沙箱 · Execution Adapter | 高阶用户与实盘,非当前主线 |
+
+## 生产同步(Windows 开发机 → Oracle)
+
+```powershell
+# 在仓库根目录: 导出业务数据 + 上传 + Oracle 导入 + 补种模板/挑战
+.\scripts\sync-to-oracle.ps1 -BuildFrontend
+```
+
+Oracle 拉代码(私有库需 Deploy Key):
+
+```bash
+cd /opt/quantlab
+GIT_SSH_COMMAND='ssh -i /root/.ssh/quantlab_deploy -o IdentitiesOnly=yes' git pull
+systemctl restart quantlab
+```
+
+仅补业务数据(不动 users):`sudo bash /opt/quantlab/scripts/repair-data-oracle.sh`
+
+> **环境说明(重要):**
 > - 本机是 **Windows Server 2019**,Docker Desktop **不支持**(仅支持 Win10/11 客户端),
 >   且 WSL2 在 Server 2019 不可用,无法跑 Linux 容器。故改用**原生 PostgreSQL + Redis**(见"本地运行 A")。
 > - Docker Compose 路线保留给将来的 **Linux 部署机**(见"本地运行 B")。
