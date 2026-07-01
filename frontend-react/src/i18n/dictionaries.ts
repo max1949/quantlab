@@ -297,6 +297,10 @@ const en = {
     progressSteps: (done: number, total: number) => `${done} / ${total} steps`,
     nextUp: "Up next",
     dataTimeframe: "Data timeframe",
+    dataBars: (n: number) => `${n.toLocaleString()} bars`,
+    dataBarsCapped: (eff: number, total: number) =>
+      `${eff.toLocaleString()} bars (plan cap · ${total.toLocaleString()} in library)`,
+    dataPlanHint: "Minute data & longer history → Researcher plan",
     qualityPass: "Ready for feed — passes research quality gate",
     qualityFail: "Not ready to publish — fix these first",
   },
@@ -770,6 +774,10 @@ const zh = {
     progressSteps: (done: number, total: number) => `已完成 ${done} / ${total} 步`,
     nextUp: "当前建议",
     dataTimeframe: "数据周期",
+    dataBars: (n: number) => `${n.toLocaleString()} 根K线`,
+    dataBarsCapped: (eff: number, total: number) =>
+      `${eff.toLocaleString()} 根 (套餐上限 · 库内共 ${total.toLocaleString()} 根)`,
+    dataPlanHint: "分钟线 / 更长历史 → 研究员月卡",
     qualityPass: "已达广场发布标准",
     qualityFail: "尚未达发布门槛 — 请先完成以下项",
   },

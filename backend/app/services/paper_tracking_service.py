@@ -13,6 +13,7 @@ from backend.app.models.factor import Factor
 from backend.app.models.paper import PaperSnapshot
 from backend.app.models.validation import Validation, ValidationStatus
 from backend.app.services import factor_service, market_data
+from backend.app.services import market_data_policy as mdp
 from engine.backtest import run_backtest
 from engine.cost_model import CostConfig
 from engine.paper_decay import assess_paper_decay
@@ -57,7 +58,12 @@ def compute_paper_nav(
     snap = db.get(DataSnapshot, val.snapshot_id) if val.snapshot_id else None
     timeframe = snap.timeframe if snap else "1d"
     symbol = val.symbol
-    ohlcv = market_data.load_ohlcv(symbol, timeframe)
+    from backend.app.models.user import User
+
+    owner = db.get(User, owner_id)
+    if owner is None:
+        raise PaperTrackingError("用户不存在")
+    ohlcv = mdp.load_for_user(db, owner, symbol, timeframe)
     tail = ohlcv.iloc[-bars:] if ohlcv.shape[0] > bars else ohlcv
     signal = factor_service._compute_series(db, owner_id, factor, tail)
     cfg = CostConfig(**(val.cost_config or {}))

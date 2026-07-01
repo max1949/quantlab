@@ -37,12 +37,19 @@ class FeatureState(BaseModel):
     min_tier_name: str
 
 
+class MarketDataEntitlement(BaseModel):
+    allowed_timeframes: list[str]
+    limits: dict
+    summary: str
+
+
 class EntitlementsOut(BaseModel):
     level: int
     level_name: str
     tier: int
     tier_name: str
     features: list[FeatureState]
+    market_data: MarketDataEntitlement
 
 
 class RedeemIn(BaseModel):

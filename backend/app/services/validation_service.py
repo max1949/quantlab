@@ -23,7 +23,9 @@ from backend.app.models.factor import Factor, FactorKind
 from backend.app.models.validation import Validation, ValidationStatus
 from backend.app.models.market import DataSnapshot
 from backend.app.services import factor_service, market_data
+from backend.app.services import market_data_policy as mdp
 from backend.app.services.backtest_service import DatasetNotFoundError
+from backend.app.models.user import User
 
 
 def _as_uuid(value) -> uuid.UUID:
@@ -77,7 +79,7 @@ def create_validation(
     factor = factor_service.get_factor(db, owner.id, factor_id)  # 可能抛 FactorNotFound
     if market_data.get_dataset(db, symbol, timeframe) is None:
         raise DatasetNotFoundError(symbol)
-    df = market_data.load_ohlcv(symbol, timeframe)
+    df = mdp.load_for_user(db, owner, symbol, timeframe)
     snapshot = market_data.create_snapshot(db, symbol, df, timeframe)
 
     v = Validation(
@@ -111,7 +113,10 @@ def execute(db: Session, validation_id) -> Validation | None:
 
         snap = db.get(DataSnapshot, v.snapshot_id) if v.snapshot_id else None
         tf = snap.timeframe if snap else "1d"
-        ohlcv = market_data.load_ohlcv(v.symbol, tf)
+        owner = db.get(User, v.owner_id)
+        if owner is None:
+            raise factor_service.FactorNotFoundError(str(v.factor_id))
+        ohlcv = mdp.load_for_snapshot(db, owner, v.symbol, snap)
         cfg = CostConfig(**(v.cost_config or {}))
         signal_fn = _signal_fn(db, v.owner_id, factor)
 
@@ -146,7 +151,6 @@ def execute(db: Session, validation_id) -> Validation | None:
         db.refresh(v)
     # 验证成功后刷新研究信用分 (有效验证沉淀)。
     if v.status == ValidationStatus.SUCCESS.value:
-        from backend.app.models.user import User
         from backend.app.services import growth_service
 
         owner = db.get(User, v.owner_id)
@@ -215,7 +219,7 @@ def run_orthogonalize(
     controls = [factor_service.get_factor(db, owner.id, fid) for fid in control_factor_ids]
     if market_data.get_dataset(db, symbol) is None:
         raise DatasetNotFoundError(symbol)
-    ohlcv = market_data.load_ohlcv(symbol)
+    ohlcv = mdp.load_for_user(db, owner, symbol, "1d")
     target_signal = factor_service._compute_series(db, owner.id, target, ohlcv)
     control_signals = {
         f.name: factor_service._compute_series(db, owner.id, f, ohlcv)
@@ -242,7 +246,7 @@ def run_robustness_test(
     factor = factor_service.get_factor(db, owner.id, factor_id)
     if market_data.get_dataset(db, symbol) is None:
         raise DatasetNotFoundError(symbol)
-    ohlcv = market_data.load_ohlcv(symbol)
+    ohlcv = mdp.load_for_user(db, owner, symbol, "1d")
     cfg = CostConfig(**(cost_config or {}))
     variants = _sensitivity_variants(factor, db, owner.id)
     sens = wf.sensitivity(variants, ohlcv, cfg)
@@ -269,7 +273,7 @@ def run_overfit_check(
     factor = factor_service.get_factor(db, owner.id, factor_id)
     if market_data.get_dataset(db, symbol) is None:
         raise DatasetNotFoundError(symbol)
-    ohlcv = market_data.load_ohlcv(symbol)
+    ohlcv = mdp.load_for_user(db, owner, symbol, "1d")
     cfg = CostConfig(**(cost_config or {}))
     signal_fn = _signal_fn(db, owner.id, factor)
     oos = wf.evaluate_oos(signal_fn, ohlcv, cfg, oos_ratio)

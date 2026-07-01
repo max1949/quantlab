@@ -16,6 +16,8 @@ class DatasetOut(BaseModel):
     start_date: date
     end_date: date
     rows: int
+    effective_rows: int | None = None
+    tier_cap: int | None = None
 
 
 class BacktestCreate(BaseModel):

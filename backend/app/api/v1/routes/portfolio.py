@@ -17,17 +17,18 @@ from backend.app.schemas.portfolio import (
     PortfolioOptimizeOut,
 )
 from backend.app.services import market_data
+from backend.app.services import market_data_policy as mdp
 from engine import portfolio as pf
 
 router = APIRouter()
 
 
-def _load_returns(db: Session, symbols: list[str]):
+def _load_returns(db: Session, user: User, symbols: list[str]):
     closes = {}
     for sym in symbols:
         if market_data.get_dataset(db, sym) is None:
             raise FileNotFoundError(sym)
-        closes[sym] = market_data.load_ohlcv(sym)["close"]
+        closes[sym] = mdp.load_for_user(db, user, sym, "1d")["close"]
     return pf.returns_from_closes(closes)
 
 
@@ -42,7 +43,7 @@ def optimize_portfolio(
     db: Annotated[Session, Depends(get_db)],
 ) -> PortfolioOptimizeOut:
     try:
-        returns = _load_returns(db, payload.symbols)
+        returns = _load_returns(db, current_user, payload.symbols)
         result = pf.optimize_weights(returns, payload.method)
     except FileNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"行情不存在: {exc}")
@@ -62,7 +63,7 @@ def paper_simulate(
     db: Annotated[Session, Depends(get_db)],
 ) -> PaperSimulateOut:
     try:
-        returns = _load_returns(db, payload.symbols)
+        returns = _load_returns(db, current_user, payload.symbols)
         result = pf.simulate_portfolio(returns, payload.weights, payload.rebalance)
     except FileNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"行情不存在: {exc}")

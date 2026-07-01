@@ -20,6 +20,8 @@ from backend.app.core.config import get_settings
 from backend.app.models.backtest import Backtest, BacktestStatus
 from backend.app.models.market import DataSnapshot
 from backend.app.services import factor_service, market_data
+from backend.app.services import market_data_policy as mdp
+from backend.app.models.user import User
 
 
 class DatasetNotFoundError(Exception):
@@ -43,7 +45,7 @@ def create_backtest(
 
     if market_data.get_dataset(db, symbol, timeframe) is None:
         raise DatasetNotFoundError(symbol)
-    df = market_data.load_ohlcv(symbol, timeframe)
+    df = mdp.load_for_user(db, owner, symbol, timeframe)
     snapshot = market_data.create_snapshot(db, symbol, df, timeframe)
 
     bt = Backtest(
@@ -76,7 +78,10 @@ def execute(db: Session, backtest_id) -> Backtest | None:
 
         snap = db.get(DataSnapshot, bt.snapshot_id) if bt.snapshot_id else None
         tf = snap.timeframe if snap else "1d"
-        ohlcv = market_data.load_ohlcv(bt.symbol, tf)
+        owner = db.get(User, bt.owner_id)
+        if owner is None:
+            raise factor_service.FactorNotFoundError(str(bt.factor_id))
+        ohlcv = mdp.load_for_snapshot(db, owner, bt.symbol, snap)
         signal = factor_service._compute_series(db, bt.owner_id, factor, ohlcv)
 
         cfg = CostConfig(**(bt.cost_config or {}))
@@ -163,7 +168,7 @@ def run_cross_section_analysis(
     for sym in symbols:
         if market_data.get_dataset(db, sym) is None:
             raise DatasetNotFoundError(sym)
-        ohlcv = market_data.load_ohlcv(sym)
+        ohlcv = mdp.load_for_user(db, owner, sym, "1d")
         signals[sym] = factor_service._compute_series(db, owner.id, factor, ohlcv)
         closes[sym] = ohlcv["close"]
     cfg = CostConfig(**(cost_config or {}))
@@ -193,7 +198,7 @@ def run_cost_sensitivity(
     factor = factor_service.get_factor(db, owner.id, factor_id)
     if market_data.get_dataset(db, symbol) is None:
         raise DatasetNotFoundError(symbol)
-    ohlcv = market_data.load_ohlcv(symbol)
+    ohlcv = mdp.load_for_user(db, owner, symbol, "1d")
     signal = factor_service._compute_series(db, owner.id, factor, ohlcv)
     results = []
     for fee in fee_rates:

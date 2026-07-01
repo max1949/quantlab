@@ -310,6 +310,8 @@ export interface MarketDataset {
   start_date: string;
   end_date: string;
   rows: number;
+  effective_rows?: number | null;
+  tier_cap?: number | null;
 }
 
 export async function listDatasets(): Promise<MarketDataset[]> {

@@ -151,12 +151,19 @@ export interface FeatureState {
   min_tier_name: string;
 }
 
+export interface MarketDataEntitlement {
+  allowed_timeframes: string[];
+  limits: Record<string, { max_bars: number | null; label: string }>;
+  summary: string;
+}
+
 export interface Entitlements {
   level: number;
   level_name: string;
   tier: number;
   tier_name: string;
   features: FeatureState[];
+  market_data: MarketDataEntitlement;
 }
 
 export interface FormulaHelp {

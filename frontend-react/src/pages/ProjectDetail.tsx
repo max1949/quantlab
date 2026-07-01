@@ -195,6 +195,15 @@ export default function ProjectDetail() {
     },
   ];
 
+  const activeDataset = datasets.data?.find(
+    (d) => d.symbol === symbol && d.timeframe === activeTimeframe,
+  );
+  const barCount = activeDataset?.effective_rows ?? activeDataset?.rows ?? null;
+  const barsCapped =
+    Boolean(activeDataset) &&
+    activeDataset!.tier_cap != null &&
+    activeDataset!.rows > (activeDataset!.effective_rows ?? activeDataset!.rows);
+
   return (
     <div>
       <PageTitle title={proj.title} subtitle={proj.question || proj.description} />
@@ -245,11 +254,17 @@ export default function ProjectDetail() {
               </option>
             ))}
           </select>
-          {datasets.data && (
+          {barCount != null && (
             <span className="text-xs text-slate-400">
-              {datasets.data.find((d) => d.symbol === symbol && d.timeframe === activeTimeframe)?.rows?.toLocaleString() ?? ""}{" "}
-              bars
+              {barsCapped
+                ? p.dataBarsCapped(barCount, activeDataset!.rows)
+                : p.dataBars(barCount)}
             </span>
+          )}
+          {barsCapped && (
+            <Link to="/pricing" className="text-xs text-brand-600 hover:underline dark:text-brand-400">
+              {p.dataPlanHint}
+            </Link>
           )}
         </div>
       )}

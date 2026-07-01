@@ -41,7 +41,7 @@ PLANS: list[dict] = [
         "features": [
             "模板因子 (5 种)",
             "因子组合器",
-            "历史回测 (真实行情)",
+            "历史回测 (日线 · 近1年)",
             "样本外 + Walk-Forward 验证",
             "自动研究报告",
             "研究广场 / 榜单 / 30天挑战",
@@ -57,8 +57,9 @@ PLANS: list[dict] = [
         "features": [
             "免费版全部功能",
             "公式因子 (自己写表达式)",
-            "Python 因子 (沙箱隔离)",
             "截面多标的回测",
+            "分钟线回测 (近1年)",
+            "日线回测 (近2年)",
             "成本敏感性分析",
             "多因子正交化",
             "参数稳健性测试",
@@ -71,9 +72,10 @@ PLANS: list[dict] = [
         "tier": 2,
         "price_cny": 2999,
         "period_days": 30,
-        "tagline": "准职业工作流: 组合优化 + 模拟实盘",
+        "tagline": "准职业工作流: 组合优化 + 全历史行情",
         "features": [
             "研究员卡全部功能",
+            "全历史分钟线 / 日线 (vn.py 级深度)",
             "组合优化 (均值方差 / 风险平价)",
             "模拟实盘 paper trading",
             "优先支持",
@@ -174,6 +176,8 @@ def feature_state(user_level: int, tier: int, key: str) -> dict:
 
 
 def entitlements(db: Session, user: User) -> dict:
+    from backend.app.services import market_data_policy as mdp
+
     tier = current_tier(db, user)
     feats = [feature_state(user.level, tier, k) for k in FEATURES]
     return {
@@ -182,6 +186,7 @@ def entitlements(db: Session, user: User) -> dict:
         "tier": tier,
         "tier_name": TIER_NAMES.get(tier, "免费"),
         "features": feats,
+        "market_data": mdp.entitlement_payload(db, user),
     }
 
 

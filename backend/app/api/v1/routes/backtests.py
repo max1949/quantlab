@@ -25,6 +25,7 @@ from backend.app.schemas.backtest import (
 )
 from backend.app.models.user import User
 from backend.app.services import backtest_service, factor_service, market_data
+from backend.app.services import market_data_policy as mdp
 
 router = APIRouter()
 
@@ -39,7 +40,7 @@ def list_datasets(
     current_user: CurrentUser,
     db: Annotated[Session, Depends(get_db)],
 ) -> list[DatasetOut]:
-    return [DatasetOut.model_validate(d) for d in market_data.list_datasets(db)]
+    return [DatasetOut(**d) for d in mdp.list_datasets_for_user(db, current_user)]
 
 
 @router.post(
@@ -72,6 +73,8 @@ def create_backtest(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="行情数据集不存在 (先生成样本数据: scripts/seed-market-data.ps1)",
         )
+    except mdp.MarketDataAccessError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
     return BacktestDetail.model_validate(bt)
 
 
@@ -106,6 +109,8 @@ def cross_section_backtest(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"行情数据集不存在: {exc}",
         )
+    except mdp.MarketDataAccessError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
@@ -143,6 +148,8 @@ def cost_sensitivity(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"行情数据集不存在: {exc}",
         )
+    except mdp.MarketDataAccessError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
     return CostSensitivityOut(**result)
 
 

@@ -23,6 +23,7 @@ from backend.app.schemas.validation import (
     ValidationSummary,
 )
 from backend.app.services import backtest_service, factor_service, validation_service
+from backend.app.services import market_data_policy as mdp
 
 router = APIRouter()
 
@@ -49,6 +50,8 @@ def orthogonalize(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="因子不存在")
     except backtest_service.DatasetNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"行情不存在: {exc}")
+    except mdp.MarketDataAccessError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
     return OrthogonalizeOut(**result)
@@ -76,6 +79,8 @@ def robustness_test(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="因子不存在")
     except backtest_service.DatasetNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"行情不存在: {exc}")
+    except mdp.MarketDataAccessError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
     return RobustnessTestOut(**result)
 
 
@@ -103,6 +108,8 @@ def overfit_check(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="因子不存在")
     except backtest_service.DatasetNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"行情不存在: {exc}")
+    except mdp.MarketDataAccessError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
     return OverfitCheckOut(**result)
 
 
@@ -135,6 +142,8 @@ def create_validation(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="行情数据集不存在 (先生成样本数据: scripts/seed-market-data.ps1)",
         )
+    except mdp.MarketDataAccessError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
     return ValidationDetail.model_validate(v)
 
 

@@ -102,6 +102,24 @@ def load_ohlcv(symbol: str, timeframe: str = "1d") -> pd.DataFrame:
     return df
 
 
+def slice_to_snapshot(df: pd.DataFrame, snap: DataSnapshot | None) -> pd.DataFrame:
+    """按数据快照的日期区间切片 (回测/验证执行时与创建时一致)。"""
+    if snap is None or df.empty:
+        return df
+    start = pd.Timestamp(snap.start_date)
+    end = pd.Timestamp(snap.end_date)
+    if hasattr(df.index, "normalize"):
+        try:
+            if df.index.max().hour != 0 or df.index.min().hour != 0:
+                end = end + pd.Timedelta(days=1) - pd.Timedelta(microseconds=1)
+        except (TypeError, ValueError):
+            pass
+    out = df.loc[(df.index >= start) & (df.index <= end)]
+    if snap.rows and len(out) > snap.rows:
+        out = out.iloc[-snap.rows :]
+    return out
+
+
 def register_dataset(
     db: Session, symbol: str, df: pd.DataFrame, timeframe: str = "1d"
 ) -> MarketDataset:
