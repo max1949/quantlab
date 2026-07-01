@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 
 # 允许引用的行情列 (变量名)
-ALLOWED_VARS = ("open", "high", "low", "close", "volume")
+ALLOWED_VARS = ("open", "high", "low", "close", "volume", "open_interest")
 
 
 class FormulaError(ValueError):

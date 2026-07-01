@@ -257,6 +257,8 @@ const en = {
     progressLabel: "Research progress",
     progressSteps: (done: number, total: number) => `${done} / ${total} steps`,
     nextUp: "Up next",
+    qualityPass: "Ready for feed — passes research quality gate",
+    qualityFail: "Not ready to publish — fix these first",
   },
   l2Analysis: {
     title: "L2 Advanced analysis",
@@ -688,6 +690,8 @@ const zh = {
     progressLabel: "研究进度",
     progressSteps: (done: number, total: number) => `已完成 ${done} / ${total} 步`,
     nextUp: "当前建议",
+    qualityPass: "已达广场发布标准",
+    qualityFail: "尚未达发布门槛 — 请先完成以下项",
   },
   l2Analysis: {
     title: "L2 进阶分析",

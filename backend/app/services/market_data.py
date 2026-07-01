@@ -194,6 +194,84 @@ def seed_real_market_data(
     return {"datasets": out, "dir": str(market_dir())}
 
 
+def import_vnpy_sqlite(
+    db: Session,
+    sqlite_path: str | Path,
+    *,
+    symbol: str | None = None,
+    interval: str = "1m",
+    timeframe: str | None = None,
+    exchange: str | None = None,
+) -> dict:
+    """从 vn.py 本地 SQLite (dbbardata) 导入 K 线到 Parquet + 索引。
+
+    symbol: 输出品种名 (默认用库内 symbol); timeframe: 输出周期标签 (默认与 interval 相同)。
+    """
+    import sqlite3
+
+    path = Path(sqlite_path)
+    if not path.is_file():
+        raise FileNotFoundError(f"vn.py 数据库不存在: {path}")
+
+    conn = sqlite3.connect(str(path))
+    try:
+        q = "SELECT symbol, exchange, datetime, interval, volume, open_interest, open_price, high_price, low_price, close_price FROM dbbardata"
+        clauses: list[str] = []
+        params: list[str] = []
+        if symbol:
+            clauses.append("symbol = ?")
+            params.append(symbol)
+        if exchange:
+            clauses.append("exchange = ?")
+            params.append(exchange)
+        if interval:
+            clauses.append("interval = ?")
+            params.append(interval)
+        if clauses:
+            q += " WHERE " + " AND ".join(clauses)
+        q += " ORDER BY datetime"
+        raw = pd.read_sql(q, conn, params=params)
+    finally:
+        conn.close()
+
+    if raw.empty:
+        raise ValueError("vn.py 数据库中没有匹配的 K 线")
+
+    out_symbol = symbol or str(raw.iloc[0]["symbol"])
+    out_tf = timeframe or interval
+    raw["datetime"] = pd.to_datetime(raw["datetime"], errors="coerce")
+    raw = raw.dropna(subset=["datetime"])
+    if raw.empty:
+        raise ValueError("vn.py 数据 datetime 无法解析")
+
+    df = pd.DataFrame(
+        {
+            "open": pd.to_numeric(raw["open_price"], errors="coerce").to_numpy(),
+            "high": pd.to_numeric(raw["high_price"], errors="coerce").to_numpy(),
+            "low": pd.to_numeric(raw["low_price"], errors="coerce").to_numpy(),
+            "close": pd.to_numeric(raw["close_price"], errors="coerce").to_numpy(),
+            "volume": pd.to_numeric(raw["volume"], errors="coerce").to_numpy(),
+            "open_interest": pd.to_numeric(raw["open_interest"], errors="coerce").to_numpy(),
+        },
+        index=pd.DatetimeIndex(raw["datetime"]),
+    )
+    df = df.dropna(subset=["close"]).sort_index()
+    df = df[~df.index.duplicated(keep="last")]
+    if df.empty:
+        raise ValueError("vn.py 数据清洗后为空")
+
+    df.to_parquet(dataset_path(out_symbol, out_tf))
+    ds = register_dataset(db, out_symbol, df, out_tf)
+    return {
+        "symbol": out_symbol,
+        "timeframe": out_tf,
+        "rows": ds.rows,
+        "start": str(ds.start_date),
+        "end": str(ds.end_date),
+        "path": str(dataset_path(out_symbol, out_tf)),
+    }
+
+
 def content_hash(df: pd.DataFrame) -> str:
     """数据内容哈希 (用于快照可复现校验)。"""
     hashed = pd.util.hash_pandas_object(df, index=True).values

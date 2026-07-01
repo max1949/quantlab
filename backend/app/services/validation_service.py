@@ -111,11 +111,21 @@ def execute(db: Session, validation_id) -> Validation | None:
         cfg = CostConfig(**(v.cost_config or {}))
         signal_fn = _signal_fn(db, v.owner_id, factor)
 
-        oos = wf.evaluate_oos(signal_fn, ohlcv, cfg, v.oos_ratio)
-        walk = wf.walk_forward(signal_fn, ohlcv, cfg, v.n_splits)
+        from backend.app.core.config import get_settings
+
+        settings = get_settings()
+        holdout_ratio = settings.sealed_holdout_ratio
+        n = ohlcv.shape[0]
+        cut = int(n * (1.0 - holdout_ratio))
+        dev_ohlcv = ohlcv.iloc[:cut] if cut >= 80 else ohlcv
+
+        oos = wf.evaluate_oos(signal_fn, dev_ohlcv, cfg, v.oos_ratio)
+        walk = wf.walk_forward(signal_fn, dev_ohlcv, cfg, v.n_splits)
         variants = _sensitivity_variants(factor, db, v.owner_id)
-        sens = wf.sensitivity(variants, ohlcv, cfg)
+        sens = wf.sensitivity(variants, dev_ohlcv, cfg)
+        sealed = wf.evaluate_sealed_holdout(signal_fn, ohlcv, cfg, holdout_ratio)
         robustness = wf.robustness_score(oos, walk, sens)
+        robustness["sealed_holdout"] = sealed
 
         v.oos = oos
         v.walk_forward = walk

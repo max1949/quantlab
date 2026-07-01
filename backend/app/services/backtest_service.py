@@ -36,14 +36,15 @@ def create_backtest(
     factor_id: uuid.UUID,
     symbol: str,
     cost_config: dict | None,
+    timeframe: str = "1d",
 ) -> Backtest:
     """创建回测 (pending) 并绑定数据快照。校验因子归属与数据集存在。"""
     factor = factor_service.get_factor(db, owner.id, factor_id)  # 可能抛 FactorNotFound
 
-    if market_data.get_dataset(db, symbol) is None:
+    if market_data.get_dataset(db, symbol, timeframe) is None:
         raise DatasetNotFoundError(symbol)
-    df = market_data.load_ohlcv(symbol)
-    snapshot = market_data.create_snapshot(db, symbol, df)
+    df = market_data.load_ohlcv(symbol, timeframe)
+    snapshot = market_data.create_snapshot(db, symbol, df, timeframe)
 
     bt = Backtest(
         owner_id=owner.id,
@@ -73,7 +74,9 @@ def execute(db: Session, backtest_id) -> Backtest | None:
         if factor is None:
             raise factor_service.FactorNotFoundError(str(bt.factor_id))
 
-        ohlcv = market_data.load_ohlcv(bt.symbol)
+        snap = db.get(DataSnapshot, bt.snapshot_id) if bt.snapshot_id else None
+        tf = snap.timeframe if snap else "1d"
+        ohlcv = market_data.load_ohlcv(bt.symbol, tf)
         signal = factor_service._compute_series(db, bt.owner_id, factor, ohlcv)
 
         cfg = CostConfig(**(bt.cost_config or {}))
@@ -121,14 +124,19 @@ def execute(db: Session, backtest_id) -> Backtest | None:
 
 
 def create_and_run(
-    db: Session, owner, factor_id: uuid.UUID, symbol: str, cost_config: dict | None
+    db: Session,
+    owner,
+    factor_id: uuid.UUID,
+    symbol: str,
+    cost_config: dict | None,
+    timeframe: str = "1d",
 ) -> Backtest:
     """创建回测并触发执行。
 
     - eager 模式 (测试/无 worker): 同步执行, 复用当前会话, 响应即含结果。
     - 否则: 派发到 Celery worker (重计算与 API 解耦), 响应为 pending。
     """
-    bt = create_backtest(db, owner, factor_id, symbol, cost_config)
+    bt = create_backtest(db, owner, factor_id, symbol, cost_config, timeframe)
     if get_settings().celery_task_always_eager:
         execute(db, bt.id)
         db.refresh(bt)

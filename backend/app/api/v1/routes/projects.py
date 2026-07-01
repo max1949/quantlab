@@ -75,6 +75,19 @@ def get_project(
     return _project_out(_load_visible(db, current_user, project_id), locale)
 
 
+@router.get("/{project_id}/quality", summary="发布质量评估 (是否达广场门槛)")
+def project_quality(
+    project_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> dict:
+    from backend.app.services import research_quality_service as rq
+
+    project_service.get_owned_project(db, current_user.id, uuid.UUID(project_id))
+    verdict = rq.assess_project(db, uuid.UUID(project_id))
+    return {"passed": verdict.passed, "reasons": verdict.reasons, "scorecard": verdict.scorecard}
+
+
 @router.post("/{project_id}/publish", response_model=ProjectOut, summary="发布项目到研究 Feed")
 def publish_project(
     project_id: str,
@@ -90,6 +103,11 @@ def publish_project(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="项目还没有任何研究产物 (先在项目下造因子), 不能发布",
+        )
+    except project_service.ProjectQualityRejectedError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"message": "研究质量未达发布门槛", "reasons": exc.reasons},
         )
     return _project_out(p, locale)
 

@@ -185,6 +185,22 @@ def get_factor(
     return FactorOut.model_validate(factor)
 
 
+@router.get("/{factor_id}/paper-preview", summary="模拟跟踪预览 (验证后最近行情)")
+def paper_preview(
+    factor_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> dict:
+    from backend.app.services.research_quality_service import ResearchQualityError, paper_nav_preview
+
+    try:
+        return paper_nav_preview(db, uuid.UUID(factor_id), current_user.id)
+    except (factor_service.FactorNotFoundError, ValueError):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="因子不存在")
+    except ResearchQualityError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=exc.reasons)
+
+
 @router.post(
     "/{factor_id}/preview",
     response_model=FactorPreview,

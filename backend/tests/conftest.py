@@ -30,6 +30,8 @@ def _test_settings(tmp_path_factory) -> Generator:
     settings.market_data_dir = str(tmp_path_factory.mktemp("market_data"))
     settings.captcha_disabled = True
     settings.rate_limit_disabled = True
+    prev_gate = settings.research_gate_enabled
+    settings.research_gate_enabled = False
     try:
         yield
     finally:
@@ -37,6 +39,7 @@ def _test_settings(tmp_path_factory) -> Generator:
         settings.market_data_dir = prev_dir
         settings.captcha_disabled = False
         settings.rate_limit_disabled = False
+        settings.research_gate_enabled = prev_gate
 
 
 @pytest.fixture()

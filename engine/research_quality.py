@@ -1,0 +1,96 @@
+"""研究质量闸门 — 判断因子是否达到「可发布 / 可分享」标准。
+
+目标: 把「回测好看」和「可能经得起样本外 + 封印段检验」分开,
+减少广场上的幻觉因子。
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class QualityThresholds:
+    min_oos_sharpe: float = 0.0
+    min_robustness_score: float = 35.0
+    min_backtest_sharpe: float = 0.0
+    require_sealed_holdout_positive: bool = True
+    min_sealed_holdout_sharpe: float = 0.0
+
+
+@dataclass
+class QualityVerdict:
+    passed: bool
+    reasons: list[str]
+    scorecard: dict
+
+
+def evaluate_sealed_holdout_metrics(sealed: dict | None) -> float | None:
+    if not sealed or sealed.get("skipped"):
+        return None
+    metrics = sealed.get("metrics") or {}
+    s = metrics.get("sharpe")
+    return float(s) if s is not None else None
+
+
+def assess_publish_readiness(
+    *,
+    backtest_metrics: dict | None,
+    validation_status: str | None,
+    validation_oos: dict | None,
+    validation_robustness: dict | None,
+    thresholds: QualityThresholds | None = None,
+) -> QualityVerdict:
+    """根据最新回测 + 验证结果给出是否允许公开发布。"""
+    th = thresholds or QualityThresholds()
+    reasons: list[str] = []
+
+    if validation_status != "success":
+        reasons.append("需要完成并通过科学验证")
+
+    oos_sharpe = None
+    if validation_oos:
+        oos_sharpe = (validation_oos.get("out_of_sample") or {}).get("sharpe")
+    if oos_sharpe is None:
+        reasons.append("缺少样本外夏普结果")
+    elif float(oos_sharpe) < th.min_oos_sharpe:
+        reasons.append(f"样本外夏普 {float(oos_sharpe):.2f} 低于门槛 {th.min_oos_sharpe:.2f}")
+
+    rob_score = None
+    rob_grade = None
+    if validation_robustness:
+        rob_score = validation_robustness.get("score")
+        rob_grade = validation_robustness.get("grade")
+    if rob_score is None:
+        reasons.append("缺少稳健性评分")
+    elif float(rob_score) < th.min_robustness_score:
+        reasons.append(
+            f"稳健性评分 {float(rob_score):.1f} ({rob_grade or '?'}) "
+            f"低于发布门槛 {th.min_robustness_score:.1f}"
+        )
+
+    bt_sharpe = (backtest_metrics or {}).get("sharpe")
+    if bt_sharpe is None:
+        reasons.append("需要成功的回测结果")
+    elif float(bt_sharpe) < th.min_backtest_sharpe:
+        reasons.append(f"全样本回测夏普 {float(bt_sharpe):.2f} 需 ≥ {th.min_backtest_sharpe:.2f}")
+
+    sealed = (validation_robustness or {}).get("sealed_holdout")
+    sealed_sharpe = evaluate_sealed_holdout_metrics(sealed)
+    if th.require_sealed_holdout_positive:
+        if sealed_sharpe is None:
+            reasons.append("封印 holdout 段数据不足或尚未计算")
+        elif sealed_sharpe < th.min_sealed_holdout_sharpe:
+            reasons.append(
+                f"封印 holdout 段夏普 {sealed_sharpe:.2f} 未达门槛 "
+                f"{th.min_sealed_holdout_sharpe:.2f}（该段未参与调参）"
+            )
+
+    scorecard = {
+        "backtest_sharpe": bt_sharpe,
+        "oos_sharpe": oos_sharpe,
+        "robustness_score": rob_score,
+        "robustness_grade": rob_grade,
+        "sealed_holdout_sharpe": sealed_sharpe,
+    }
+    return QualityVerdict(passed=len(reasons) == 0, reasons=reasons, scorecard=scorecard)

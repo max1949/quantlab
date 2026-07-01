@@ -54,6 +54,15 @@ class Settings(BaseSettings):
     # 运营批量发卡 (留空则禁用 /admin/billing 接口)
     admin_api_key: str = ""
 
+    # 研究质量闸门 (发布/分享)
+    research_gate_enabled: bool = True
+    sealed_holdout_ratio: float = 0.15
+    publish_min_oos_sharpe: float = 0.0
+    publish_min_robustness_score: float = 35.0
+    publish_min_backtest_sharpe: float = 0.0
+    publish_require_sealed_holdout: bool = True
+    publish_min_sealed_holdout_sharpe: float = 0.0
+
 
 @lru_cache
 def get_settings() -> Settings:

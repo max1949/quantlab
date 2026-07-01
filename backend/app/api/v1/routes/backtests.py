@@ -61,6 +61,7 @@ def create_backtest(
             payload.factor_id,
             payload.symbol,
             {"fee_rate": payload.fee_rate, "slippage_bps": payload.slippage_bps},
+            payload.timeframe,
         )
     except factor_service.FactorNotFoundError:
         raise HTTPException(

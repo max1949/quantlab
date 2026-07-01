@@ -254,7 +254,7 @@ docker compose --profile workers up -d worker   # 可选: Celery worker
 | P2 | 学院任务前端露出 | ✅ Dashboard `AcademyTasks` 组件 |
 | P3 | 广场 SEO/免登录预览 | ✅ `/api/v1/public/feed` · `/share/{token}` OG 预览页 · `robots.txt` |
 | P4 | 运营工具 | ✅ 本地 `generate-redeem-codes.ps1` · 远程 `batch-codes-remote.ps1` · Admin API |
-| 远期 | Python 因子沙箱 · Execution Adapter | 未开始,非当前主线 |
+| 远期 | Python 因子沙箱 · Execution Adapter | 进行中: 公式因子+闸门+vn.py 导入 · 沙箱/实盘 Adapter 待续 |
 
 ## 生产同步(Windows 开发机 → Oracle)
 

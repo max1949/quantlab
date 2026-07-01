@@ -33,6 +33,14 @@ class ProjectNotPublishableError(Exception):
     """项目尚无任何研究产物, 不能发布。"""
 
 
+class ProjectQualityRejectedError(Exception):
+    """研究质量未达发布门槛。"""
+
+    def __init__(self, reasons: list[str]):
+        self.reasons = reasons
+        super().__init__("; ".join(reasons))
+
+
 def create_project(
     db: Session, owner: User, title: str, symbol: str = "", question: str = "",
     description: str = "", tags: list | None = None,
@@ -88,9 +96,14 @@ def _has_artifacts(db: Session, project_id: uuid.UUID) -> bool:
 
 
 def publish_project(db: Session, owner_id: uuid.UUID, project_id: uuid.UUID) -> ResearchProject:
+    from backend.app.services import research_quality_service as rq
+
     p = get_owned_project(db, owner_id, project_id)
     if not _has_artifacts(db, project_id):
         raise ProjectNotPublishableError(str(project_id))
+    verdict = rq.assess_project(db, project_id)
+    if not verdict.passed:
+        raise ProjectQualityRejectedError(verdict.reasons)
     p.status = ProjectStatus.PUBLISHED.value
     db.commit()
     db.refresh(p)

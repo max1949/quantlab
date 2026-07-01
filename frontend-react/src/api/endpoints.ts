@@ -135,6 +135,17 @@ export async function getGraph(id: string): Promise<Graph> {
   return data;
 }
 
+export interface ProjectQuality {
+  passed: boolean;
+  reasons: string[];
+  scorecard: Record<string, number | string | null>;
+}
+
+export async function getProjectQuality(id: string): Promise<ProjectQuality> {
+  const { data } = await api.get<ProjectQuality>(`/projects/${id}/quality`);
+  return data;
+}
+
 export async function publishProject(id: string): Promise<Project> {
   const { data } = await api.post<Project>(`/projects/${id}/publish`);
   return data;

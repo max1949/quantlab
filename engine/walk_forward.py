@@ -141,6 +141,29 @@ def sensitivity(
     return {"points": points, "summary": summary}
 
 
+def evaluate_sealed_holdout(
+    compute_signal,
+    ohlcv: pd.DataFrame,
+    cost_config: CostConfig | None = None,
+    holdout_ratio: float = 0.15,
+) -> dict:
+    """封印 holdout: 最后 holdout_ratio 段数据不参与 WF/敏感性, 仅做最终检验。"""
+    cfg = cost_config or CostConfig()
+    n = ohlcv.shape[0]
+    cut = int(n * (1.0 - holdout_ratio))
+    if cut < 80 or n - cut < 30:
+        return {"skipped": True, "reason": "数据长度不足以划分封印段", "holdout_ratio": holdout_ratio}
+    sealed = ohlcv.iloc[cut:]
+    metrics = run_backtest(compute_signal(sealed), sealed, cfg)["metrics"]
+    return {
+        "holdout_ratio": holdout_ratio,
+        "bars": int(sealed.shape[0]),
+        "start": sealed.index.min().isoformat() if len(sealed) else None,
+        "end": sealed.index.max().isoformat() if len(sealed) else None,
+        "metrics": metrics,
+    }
+
+
 def robustness_score(oos: dict, wf: dict, sens: dict | None) -> dict:
     """综合稳健性评分 (0-100) 与评级。看的是稳定性, 不是单段高收益。"""
     oos_sharpe = oos.get("out_of_sample", {}).get("sharpe")

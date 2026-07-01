@@ -41,9 +41,18 @@ def _build_card(report: ResearchReport, owner: User) -> dict:
 
 
 def create_share(db: Session, owner: User, report_id: uuid.UUID) -> ResearchShare:
+    from backend.app.services import research_quality_service as rq
+    from backend.app.services.research_quality_service import ResearchQualityError
+
     report = db.get(ResearchReport, report_id)
     if report is None or report.owner_id != owner.id:
         raise ReportNotFoundError(str(report_id))
+
+    if report.project_id:
+        try:
+            rq.require_project_publishable(db, report.project_id)
+        except ResearchQualityError as exc:
+            raise ReportNotFoundError("; ".join(exc.reasons)) from exc
 
     existing = db.execute(
         select(ResearchShare).where(ResearchShare.report_id == report_id)

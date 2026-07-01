@@ -7,6 +7,7 @@ import {
   generateReport,
   getGraph,
   getProject,
+  getProjectQuality,
   listFactors,
   publishProject,
   trackEvent,
@@ -34,6 +35,11 @@ export default function ProjectDetail() {
   const project = useQuery({ queryKey: ["project", id], queryFn: () => getProject(id) });
   const factors = useQuery({ queryKey: ["factors"], queryFn: listFactors });
   const graph = useQuery({ queryKey: ["graph", id], queryFn: () => getGraph(id) });
+  const quality = useQuery({
+    queryKey: ["project-quality", id],
+    queryFn: () => getProjectQuality(id),
+    enabled: Boolean(id),
+  });
 
   const projectFactors = useMemo(
     () => (factors.data ?? []).filter((f) => f.project_id === id),
@@ -57,6 +63,7 @@ export default function ProjectDetail() {
   function refreshAll() {
     void qc.invalidateQueries({ queryKey: ["graph", id] });
     void qc.invalidateQueries({ queryKey: ["project", id] });
+    void qc.invalidateQueries({ queryKey: ["project-quality", id] });
     void qc.invalidateQueries({ queryKey: ["projects"] });
   }
 
@@ -224,6 +231,27 @@ export default function ProjectDetail() {
           />
         </div>
       </div>
+
+      {quality.data && (
+        <div
+          className={`mb-6 card border ${
+            quality.data.passed
+              ? "border-emerald-200 bg-emerald-50/40 dark:border-emerald-900 dark:bg-emerald-950/30"
+              : "border-amber-200 bg-amber-50/40 dark:border-amber-900 dark:bg-amber-950/20"
+          }`}
+        >
+          <p className="font-semibold text-slate-800 dark:text-slate-100">
+            {quality.data.passed ? p.qualityPass : p.qualityFail}
+          </p>
+          {!quality.data.passed && quality.data.reasons.length > 0 && (
+            <ul className="mt-2 list-inside list-disc text-sm text-slate-600 dark:text-slate-300">
+              {quality.data.reasons.map((r) => (
+                <li key={r}>{r}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-3">
