@@ -92,11 +92,11 @@ else
 fi
 chown -R "$APP_USER:$APP_USER" "$INSTALL_DIR"
 
-echo "==> Python 虚拟环境..."
+echo "==> Python 虚拟环境 (${PYTHON_BIN})..."
 sudo -u "$APP_USER" bash <<EOSU
 set -euo pipefail
 cd "$INSTALL_DIR"
-python3 -m venv .venv
+${PYTHON_BIN} -m venv .venv
 source .venv/bin/activate
 pip install -q -U pip wheel
 pip install -q -r backend/requirements.txt
