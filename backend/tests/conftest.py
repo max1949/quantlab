@@ -28,11 +28,15 @@ def _test_settings(tmp_path_factory) -> Generator:
     prev_dir = settings.market_data_dir
     settings.celery_task_always_eager = True
     settings.market_data_dir = str(tmp_path_factory.mktemp("market_data"))
+    settings.captcha_disabled = True
+    settings.rate_limit_disabled = True
     try:
         yield
     finally:
         settings.celery_task_always_eager = prev_eager
         settings.market_data_dir = prev_dir
+        settings.captcha_disabled = False
+        settings.rate_limit_disabled = False
 
 
 @pytest.fixture()

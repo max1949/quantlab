@@ -8,9 +8,16 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from backend.app.auth.deps import CurrentUser
+from backend.app.auth.deps import CurrentUser, require_feature
 from backend.app.core.database import get_db
+from backend.app.models.user import User
 from backend.app.schemas.validation import (
+    OrthogonalizeCreate,
+    OrthogonalizeOut,
+    OverfitCheckCreate,
+    OverfitCheckOut,
+    RobustnessTestCreate,
+    RobustnessTestOut,
     ValidationCreate,
     ValidationDetail,
     ValidationSummary,
@@ -18,6 +25,85 @@ from backend.app.schemas.validation import (
 from backend.app.services import backtest_service, factor_service, validation_service
 
 router = APIRouter()
+
+
+@router.post(
+    "/orthogonalize",
+    response_model=OrthogonalizeOut,
+    summary="L3 因子正交化 (需 L3 + 研究员会员)",
+)
+def orthogonalize(
+    payload: OrthogonalizeCreate,
+    current_user: Annotated[User, Depends(require_feature("factor_orthogonalize"))],
+    db: Annotated[Session, Depends(get_db)],
+) -> OrthogonalizeOut:
+    try:
+        result = validation_service.run_orthogonalize(
+            db,
+            current_user,
+            payload.target_factor_id,
+            payload.control_factor_ids,
+            payload.symbol,
+        )
+    except factor_service.FactorNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="因子不存在")
+    except backtest_service.DatasetNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"行情不存在: {exc}")
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    return OrthogonalizeOut(**result)
+
+
+@router.post(
+    "/robustness",
+    response_model=RobustnessTestOut,
+    summary="L3 参数稳健性测试 (需 L3 + 研究员会员)",
+)
+def robustness_test(
+    payload: RobustnessTestCreate,
+    current_user: Annotated[User, Depends(require_feature("robustness_test"))],
+    db: Annotated[Session, Depends(get_db)],
+) -> RobustnessTestOut:
+    try:
+        result = validation_service.run_robustness_test(
+            db,
+            current_user,
+            payload.factor_id,
+            payload.symbol,
+            {"fee_rate": payload.fee_rate, "slippage_bps": payload.slippage_bps},
+        )
+    except factor_service.FactorNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="因子不存在")
+    except backtest_service.DatasetNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"行情不存在: {exc}")
+    return RobustnessTestOut(**result)
+
+
+@router.post(
+    "/overfit-check",
+    response_model=OverfitCheckOut,
+    summary="L3 过拟合红旗检查 (需 L3 + 研究员会员)",
+)
+def overfit_check(
+    payload: OverfitCheckCreate,
+    current_user: Annotated[User, Depends(require_feature("overfit_check"))],
+    db: Annotated[Session, Depends(get_db)],
+) -> OverfitCheckOut:
+    try:
+        result = validation_service.run_overfit_check(
+            db,
+            current_user,
+            payload.factor_id,
+            payload.symbol,
+            {"fee_rate": payload.fee_rate, "slippage_bps": payload.slippage_bps},
+            payload.oos_ratio,
+            payload.n_splits,
+        )
+    except factor_service.FactorNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="因子不存在")
+    except backtest_service.DatasetNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"行情不存在: {exc}")
+    return OverfitCheckOut(**result)
 
 
 @router.post(

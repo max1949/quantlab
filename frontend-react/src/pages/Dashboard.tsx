@@ -1,6 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../store/auth";
+import { useLocale } from "../store/locale";
+import { useLevelLabel } from "../i18n/useLevelLabel";
 import {
   getMentor,
   getNextStep,
@@ -13,6 +15,9 @@ import { GradeBadge, PageTitle, Spinner, Stat } from "../components/ui";
 export default function Dashboard() {
   const user = useAuth((s) => s.user)!;
   const navigate = useNavigate();
+  const d = useLocale((s) => s.dict.dashboard);
+  const stages = useLocale((s) => s.dict.stages);
+  const levelName = useLevelLabel(user.level);
 
   const nextStep = useQuery({ queryKey: ["next-step"], queryFn: getNextStep });
   const mentor = useQuery({ queryKey: ["mentor"], queryFn: getMentor });
@@ -22,27 +27,24 @@ export default function Dashboard() {
   return (
     <div>
       <PageTitle
-        title={`欢迎, ${user.username}`}
-        subtitle={nextStep.data?.intro ?? "你的量化研究工作台"}
+        title={d.welcome(user.username)}
+        subtitle={nextStep.data?.intro ?? d.subtitle}
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="研究信用分" value={user.research_contribution_score.toFixed(1)} />
-        <Stat label="奖励积分" value={user.reward_points} />
-        <Stat label="竞技评分" value={user.research_score.toFixed(1)} />
-        <Stat label="等级" value={user.level_label} />
+        <Stat label={d.creditScore} value={user.research_contribution_score.toFixed(1)} />
+        <Stat label={d.rewardPoints} value={user.reward_points} />
+        <Stat label={d.arenaScore} value={user.research_score.toFixed(1)} />
+        <Stat label={d.level} value={levelName} />
       </div>
 
-      {/* 你的下一步 */}
       <div className="mt-6 rounded-2xl bg-gradient-to-r from-brand-600 to-brand-500 p-6 text-white shadow-md">
         {nextStep.isLoading ? (
-          <p>正在为你规划下一步…</p>
+          <p>{d.planning}</p>
         ) : nextStep.data ? (
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-wide text-brand-100">
-                你的下一步
-              </p>
+              <p className="text-xs uppercase tracking-wide text-brand-100">{d.nextStep}</p>
               <h2 className="mt-1 text-xl font-bold">{nextStep.data.title}</h2>
               <p className="mt-1 text-sm text-brand-50">{nextStep.data.action}</p>
             </div>
@@ -57,37 +59,33 @@ export default function Dashboard() {
                 )
               }
             >
-              {stageToCtaLabel(nextStep.data.stage)}
+              {stageToCtaLabel(nextStep.data.stage, stages)}
             </button>
           </div>
         ) : null}
       </div>
 
-      {/* AI 导师 */}
       {mentor.data && (
         <div className="mt-4 card border-brand-100 bg-brand-50/40">
           <div className="flex items-start gap-3">
             <span className="text-2xl">🤖</span>
             <div>
               <p className="font-semibold text-slate-800">
-                AI 研究导师 · {mentor.data.title}
+                {d.aiMentor} · {mentor.data.title}
               </p>
               <p className="mt-1 text-sm text-slate-600">{mentor.data.message}</p>
-              <p className="mt-2 text-xs text-slate-400">
-                {mentor.data.disclaimer}
-              </p>
+              <p className="mt-2 text-xs text-slate-400">{mentor.data.disclaimer}</p>
             </div>
           </div>
         </div>
       )}
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        {/* 我的项目 */}
         <div className="card">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="font-semibold">我的研究项目</h3>
+            <h3 className="font-semibold">{d.myProjects}</h3>
             <Link to="/projects" className="text-sm text-brand-600">
-              全部
+              {d.allProjects}
             </Link>
           </div>
           {projects.isLoading ? (
@@ -100,9 +98,7 @@ export default function Dashboard() {
                     to={`/projects/${p.id}`}
                     className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-slate-50"
                   >
-                    <span className="truncate font-medium text-slate-700">
-                      {p.title}
-                    </span>
+                    <span className="truncate font-medium text-slate-700">{p.title}</span>
                     <span className="badge">{p.status}</span>
                   </Link>
                 </li>
@@ -110,17 +106,16 @@ export default function Dashboard() {
             </ul>
           ) : (
             <p className="py-4 text-sm text-slate-400">
-              还没有项目,{" "}
+              {d.noProjects}{" "}
               <Link to="/templates" className="text-brand-600">
-                从模板开始
+                {d.fromTemplate}
               </Link>
             </p>
           )}
         </div>
 
-        {/* 我的报告 */}
         <div className="card">
-          <h3 className="mb-3 font-semibold">我的研究报告</h3>
+          <h3 className="mb-3 font-semibold">{d.myReports}</h3>
           {reports.isLoading ? (
             <Spinner />
           ) : reports.data && reports.data.length > 0 ? (
@@ -131,16 +126,14 @@ export default function Dashboard() {
                     to={`/reports/${r.id}`}
                     className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-slate-50"
                   >
-                    <span className="truncate font-medium text-slate-700">
-                      {r.title}
-                    </span>
+                    <span className="truncate font-medium text-slate-700">{r.title}</span>
                     <GradeBadge grade={r.grade} />
                   </Link>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="py-4 text-sm text-slate-400">还没有研究报告</p>
+            <p className="py-4 text-sm text-slate-400">{d.noReports}</p>
           )}
         </div>
       </div>

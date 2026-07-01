@@ -110,7 +110,7 @@ def complete_task(db: Session, user: User, code: str) -> dict:
 
 # --------------------------------------------------------------------------
 # 默认任务种子 (幂等): 一条 L0→L3 的成长主线。
-# 经验阈值: L1=100, L2=300, L3=700 (见 leveling.LEVEL_THRESHOLDS)。
+# 经验阈值: L1=100, L2=300, L3=700, L4=1500 (见 leveling.LEVEL_THRESHOLDS)。
 # --------------------------------------------------------------------------
 DEFAULT_TASKS: list[dict] = [
     {

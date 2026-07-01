@@ -101,3 +101,46 @@ def require_level(min_level: UserLevel):
         return current_user
 
     return _checker
+
+
+def require_feature(key: str):
+    """权益闸门: 同时校验"能力等级"和"付费档位"。
+
+    不足时返回 403, detail 为结构化对象 (含还差等级/还差档位), 供前端弹出升级引导。
+    """
+
+    def _checker(
+        current_user: CurrentUser,
+        db: Annotated[Session, Depends(get_db)],
+    ) -> User:
+        from backend.app.services import membership_service as ms
+
+        st = ms.can_use(db, current_user, key)
+        if not st["allowed"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={
+                    "error": "feature_locked",
+                    "feature": key,
+                    "label": st["label"],
+                    "level_ok": st["level_ok"],
+                    "tier_ok": st["tier_ok"],
+                    "min_level": st["min_level"],
+                    "min_level_name": st["min_level_name"],
+                    "min_tier": st["min_tier"],
+                    "min_tier_name": st["min_tier_name"],
+                    "message": _lock_message(st),
+                },
+            )
+        return current_user
+
+    return _checker
+
+
+def _lock_message(st: dict) -> str:
+    parts = []
+    if not st["level_ok"]:
+        parts.append(f"需要达到 {st['min_level_name']} 等级")
+    if not st["tier_ok"]:
+        parts.append(f"需要开通「{st['min_tier_name']}」会员")
+    return " 且 ".join(parts) or "暂无权限"

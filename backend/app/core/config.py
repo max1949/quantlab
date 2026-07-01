@@ -25,6 +25,9 @@ class Settings(BaseSettings):
 
     # 认证
     secret_key: str = "change-me-in-production"
+    captcha_secret: str = ""
+    captcha_disabled: bool = False
+    rate_limit_disabled: bool = False
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 1440
 
@@ -42,7 +45,11 @@ class Settings(BaseSettings):
     llm_api_key: str = ""                 # 留空 -> 走本地降级
     llm_model: str = "deepseek-chat"
     llm_timeout_seconds: float = 30.0
-    llm_temperature: float = 0.4
+    # 卡密池 (与 ai.ziyingke.com 共用 Supabase membership_cards)
+    card_pool_supabase_url: str = ""
+    card_pool_service_key: str = ""
+    # Optional: direct Postgres URI for one-time Supabase DDL (card pool migration)
+    card_pool_database_url: str = ""
 
 
 @lru_cache

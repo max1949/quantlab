@@ -9,6 +9,8 @@ from sqlalchemy.orm import Session
 
 from backend.app.auth.deps import CurrentUser
 from backend.app.core.database import get_db
+from backend.app.core.locale import RequestLocale
+from backend.app.i18n.content import localize_challenge, localize_progress
 from backend.app.schemas.challenge import CertificateOut, ChallengeOut, ProgressOut
 from backend.app.services import challenge_service
 
@@ -18,20 +20,25 @@ router = APIRouter()
 @router.get("", response_model=list[ChallengeOut], summary="挑战列表")
 def list_challenges(
     current_user: CurrentUser,
+    locale: RequestLocale,
     db: Annotated[Session, Depends(get_db)],
 ) -> list[ChallengeOut]:
-    return [ChallengeOut.model_validate(c) for c in challenge_service.list_challenges(db)]
+    return [
+        ChallengeOut(**localize_challenge(c, locale))
+        for c in challenge_service.list_challenges(db)
+    ]
 
 
 @router.post("/{code}/enroll", response_model=ProgressOut, summary="报名挑战")
 def enroll(
     code: str,
     current_user: CurrentUser,
+    locale: RequestLocale,
     db: Annotated[Session, Depends(get_db)],
 ) -> ProgressOut:
     try:
         challenge_service.enroll(db, current_user, code)
-        return ProgressOut(**challenge_service.evaluate(db, current_user, code))
+        return ProgressOut(**localize_progress(challenge_service.evaluate(db, current_user, code), locale))
     except challenge_service.ChallengeNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="挑战不存在")
 
@@ -40,10 +47,11 @@ def enroll(
 def progress(
     code: str,
     current_user: CurrentUser,
+    locale: RequestLocale,
     db: Annotated[Session, Depends(get_db)],
 ) -> ProgressOut:
     try:
-        return ProgressOut(**challenge_service.evaluate(db, current_user, code))
+        return ProgressOut(**localize_progress(challenge_service.evaluate(db, current_user, code), locale))
     except challenge_service.ChallengeNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="挑战不存在")
 
@@ -52,10 +60,14 @@ def progress(
 def certificate(
     code: str,
     current_user: CurrentUser,
+    locale: RequestLocale,
     db: Annotated[Session, Depends(get_db)],
 ) -> CertificateOut:
     try:
-        return CertificateOut(**challenge_service.get_certificate(db, current_user, code))
+        cert = challenge_service.get_certificate(db, current_user, code)
+        prog = localize_progress(challenge_service.evaluate(db, current_user, code), locale)
+        cert["challenge_title"] = prog["title"]
+        return CertificateOut(**cert)
     except challenge_service.ChallengeNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="挑战不存在")
     except challenge_service.ChallengeNotCompletedError:

@@ -13,7 +13,12 @@ import {
 } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
 import { useUi } from "../store/ui";
+import { useLocale } from "../store/locale";
 import { ErrorBox, PageTitle, Spinner } from "../components/ui";
+import FactorLab from "../components/FactorLab";
+import AdvancedAnalysis from "../components/AdvancedAnalysis";
+import L3ResearchTools from "../components/L3ResearchTools";
+import L4PortfolioTools from "../components/L4PortfolioTools";
 import type { Graph } from "../api/types";
 
 type StepKey = "factor" | "backtest" | "validation" | "report" | "publish";
@@ -23,15 +28,22 @@ export default function ProjectDetail() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const notify = useUi((s) => s.notify);
+  const p = useLocale((s) => s.dict.projectDetail);
+  const lk = useLocale((s) => s.dict.locked);
 
   const project = useQuery({ queryKey: ["project", id], queryFn: () => getProject(id) });
   const factors = useQuery({ queryKey: ["factors"], queryFn: listFactors });
   const graph = useQuery({ queryKey: ["graph", id], queryFn: () => getGraph(id) });
 
-  const projectFactor = useMemo(
-    () => factors.data?.find((f) => f.project_id === id) ?? null,
+  const projectFactors = useMemo(
+    () => (factors.data ?? []).filter((f) => f.project_id === id),
     [factors.data, id],
   );
+  const [selectedFactorId, setSelectedFactorId] = useState<string>("");
+  const projectFactor =
+    projectFactors.find((f) => f.id === selectedFactorId) ??
+    projectFactors[0] ??
+    null;
 
   const symbol = project.data?.symbol || "";
 
@@ -54,10 +66,10 @@ export default function ProjectDetail() {
     onMutate: () => setBusy("backtest"),
     onSuccess: (bt) => {
       void trackEvent("backtest_run", { project: id, status: bt.status });
-      notify(`回测完成 (${bt.status})`, "success");
+      notify(p.backtestDone(bt.status), "success");
       refreshAll();
     },
-    onError: (e) => notify(apiErrorMessage(e, "回测失败"), "error"),
+    onError: (e) => notify(apiErrorMessage(e, p.backtestFail), "error"),
     onSettled: () => setBusy(null),
   });
 
@@ -67,10 +79,10 @@ export default function ProjectDetail() {
     onMutate: () => setBusy("validation"),
     onSuccess: (v) => {
       void trackEvent("validation_run", { project: id, status: v.status });
-      notify(`科学验证完成 (${v.status})`, "success");
+      notify(p.validationDone(v.status), "success");
       refreshAll();
     },
-    onError: (e) => notify(apiErrorMessage(e, "验证失败"), "error"),
+    onError: (e) => notify(apiErrorMessage(e, p.validationFail), "error"),
     onSettled: () => setBusy(null),
   });
 
@@ -79,11 +91,11 @@ export default function ProjectDetail() {
     onMutate: () => setBusy("report"),
     onSuccess: (r) => {
       void trackEvent("report_generated", { project: id });
-      notify("研究报告已生成!", "success");
+      notify(p.reportDone, "success");
       refreshAll();
       navigate(`/reports/${r.id}`);
     },
-    onError: (e) => notify(apiErrorMessage(e, "生成报告失败"), "error"),
+    onError: (e) => notify(apiErrorMessage(e, p.reportFail), "error"),
     onSettled: () => setBusy(null),
   });
 
@@ -92,18 +104,18 @@ export default function ProjectDetail() {
     onMutate: () => setBusy("publish"),
     onSuccess: () => {
       void trackEvent("project_published", { project: id });
-      notify("项目已发布到研究广场!", "success");
+      notify(p.publishDone, "success");
       refreshAll();
     },
-    onError: (e) => notify(apiErrorMessage(e, "发布失败"), "error"),
+    onError: (e) => notify(apiErrorMessage(e, p.publishFail), "error"),
     onSettled: () => setBusy(null),
   });
 
   if (project.isLoading) return <Spinner />;
   if (project.isError)
-    return <ErrorBox message={apiErrorMessage(project.error, "项目不存在")} />;
+    return <ErrorBox message={apiErrorMessage(project.error, p.notFound)} />;
 
-  const p = project.data!;
+  const proj = project.data!;
 
   const steps: {
     key: StepKey;
@@ -116,67 +128,87 @@ export default function ProjectDetail() {
   }[] = [
     {
       key: "factor",
-      title: "1. 起步因子",
-      desc: projectFactor
-        ? `已就绪: ${projectFactor.name}`
-        : "该项目还没有因子",
-      cta: "已完成",
+      title: p.stepFactor,
+      desc: projectFactor ? p.stepFactorReady(projectFactor.name) : p.stepFactorEmpty,
+      cta: p.stepFactorDone,
       pending: false,
       disabled: true,
     },
     {
       key: "backtest",
-      title: "2. 跑回测",
-      desc: "看因子在历史行情上的表现",
-      cta: "运行回测",
+      title: p.stepBacktest,
+      desc: p.stepBacktestDesc,
+      cta: p.runBacktest,
       run: () => runBacktest.mutate(),
       pending: busy === "backtest",
       disabled: !projectFactor || done.backtest,
     },
     {
       key: "validation",
-      title: "3. 科学验证",
-      desc: "样本外 + Walk-Forward 检验是否过拟合",
-      cta: "运行验证",
+      title: p.stepValidation,
+      desc: p.stepValidationDesc,
+      cta: p.runValidation,
       run: () => runValidation.mutate(),
       pending: busy === "validation",
       disabled: !projectFactor || !done.backtest || done.validation,
     },
     {
       key: "report",
-      title: "4. 生成研究报告",
-      desc: "聚合因子+回测+验证, 写成人话报告",
-      cta: "生成报告",
+      title: p.stepReport,
+      desc: p.stepReportDesc,
+      cta: p.genReport,
       run: () => genReport.mutate(),
       pending: busy === "report",
       disabled: !done.backtest,
     },
     {
       key: "publish",
-      title: "5. 发布分享",
-      desc: "公开到研究广场, 让更多人看到",
-      cta: p.status === "published" ? "已发布" : "发布项目",
+      title: p.stepPublish,
+      desc: p.stepPublishDesc,
+      cta: proj.status === "published" ? p.published : p.publishProject,
       run: () => publish.mutate(),
       pending: busy === "publish",
-      disabled: !done.report || p.status === "published",
+      disabled: !done.report || proj.status === "published",
     },
   ];
 
   return (
     <div>
-      <PageTitle title={p.title} subtitle={p.question || p.description} />
+      <PageTitle title={proj.title} subtitle={proj.question || proj.description} />
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <span className="badge">状态 {p.status}</span>
-        {p.symbol && <span className="badge">标的 {p.symbol}</span>}
-        {p.tags?.map((t) => (
+        <span className="badge">
+          {p.status} {proj.status}
+        </span>
+        {proj.symbol && (
+          <span className="badge">
+            {p.symbol} {proj.symbol}
+          </span>
+        )}
+        {proj.tags?.map((t) => (
           <span key={t} className="badge">
             #{t}
           </span>
         ))}
       </div>
 
+      {projectFactors.length > 1 && (
+        <div className="mb-4 flex items-center gap-2 text-sm">
+          <span className="text-slate-500">{p.factorForRun}</span>
+          <select
+            className="input max-w-xs"
+            value={projectFactor?.id ?? ""}
+            onChange={(e) => setSelectedFactorId(e.target.value)}
+          >
+            {projectFactors.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       <div className="grid gap-4 lg:grid-cols-2">
-        {/* 引导步骤 */}
         <div className="space-y-3">
           {steps.map((s) => {
             const finished = done[s.key as keyof typeof done];
@@ -200,7 +232,7 @@ export default function ProjectDetail() {
                     disabled={s.disabled || s.pending}
                     onClick={s.run}
                   >
-                    {s.pending ? "运行中…" : s.cta}
+                    {s.pending ? lk.running : s.cta}
                   </button>
                 )}
               </div>
@@ -208,24 +240,46 @@ export default function ProjectDetail() {
           })}
         </div>
 
-        {/* 研究路径图谱 */}
         <div className="card">
-          <h3 className="mb-3 font-semibold">研究路径图谱</h3>
+          <h3 className="mb-3 font-semibold">{p.graphTitle}</h3>
           {graph.isLoading ? (
             <Spinner />
           ) : graph.data && graph.data.nodes.length > 0 ? (
             <GraphView graph={graph.data} />
           ) : (
-            <p className="py-6 text-center text-sm text-slate-400">
-              完成上面的步骤, 这里会自动画出你的研究路径
-            </p>
+            <p className="py-6 text-center text-sm text-slate-400">{p.graphEmpty}</p>
           )}
         </div>
       </div>
 
+      <div className="mt-4">
+        <FactorLab projectId={id} />
+      </div>
+
+      <div className="mt-4">
+        <AdvancedAnalysis
+          projectId={id}
+          factorId={projectFactor?.id ?? null}
+          symbol={symbol}
+        />
+      </div>
+
+      <div className="mt-4">
+        <L3ResearchTools
+          projectId={id}
+          factors={projectFactors}
+          selectedFactorId={projectFactor?.id ?? null}
+          symbol={symbol}
+        />
+      </div>
+
+      <div className="mt-4">
+        <L4PortfolioTools projectId={id} />
+      </div>
+
       <p className="mt-6 text-sm text-slate-400">
         <Link to="/projects" className="text-brand-600">
-          ← 返回项目列表
+          {p.backToProjects}
         </Link>
       </p>
     </div>
@@ -261,7 +315,6 @@ function GraphView({ graph }: { graph: Graph }) {
 }
 
 function computeDone(graph: Graph | undefined, status: string | undefined) {
-  // 图谱节点用 ref_type 区分实际产物 (factor/backtest/validation/report)。
   const refTypes = new Set(
     (graph?.nodes ?? []).map((n) => n.ref_type).filter(Boolean) as string[],
   );

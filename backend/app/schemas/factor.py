@@ -23,6 +23,9 @@ class FactorTemplateOut(BaseModel):
     description: str
     params: list[ParamSpecOut]
     requires: list[str]
+    min_level: int = 0
+    min_tier: int = 0
+    allowed: bool = True
 
 
 # ---- 创建 ----
@@ -46,6 +49,25 @@ class StackFactorCreate(BaseModel):
     name: str = Field(min_length=1, max_length=120)
     components: list[StackComponent] = Field(min_length=1)
     project_id: uuid.UUID | None = None  # 可选: 归入某研究项目
+
+
+class FormulaFactorCreate(BaseModel):
+    """创建公式因子 (L2 + 研究员会员)。"""
+
+    name: str = Field(min_length=1, max_length=120)
+    expr: str = Field(min_length=1, max_length=500)
+    project_id: uuid.UUID | None = None
+
+
+class FormulaFnDoc(BaseModel):
+    name: str
+    desc: str
+
+
+class FormulaHelpOut(BaseModel):
+    variables: list[str]
+    functions: list[FormulaFnDoc]
+    examples: list[str]
 
 
 # ---- 出参 ----

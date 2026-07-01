@@ -133,6 +133,8 @@ def test_leaderboards_kinds(client, db_session):
     for kind in ("researcher", "contributor", "newcomer", "improved"):
         rows = client.get(f"{BASE}/leaderboards/{kind}", headers=h)
         assert rows.status_code == 200, kind
+        anon = client.get(f"{BASE}/leaderboards/{kind}")
+        assert anon.status_code == 200, kind
     assert client.get(f"{BASE}/leaderboards/bogus", headers=h).status_code == 404
 
 
@@ -161,7 +163,7 @@ def test_ai_mentor_next(client, db_session, monkeypatch):
     h = _register(client, "zane")
     m = client.get(f"{BASE}/ai/mentor/next", headers=h).json()
     assert m["stage"] == "create_project"
-    assert "不构成交易建议" in m["disclaimer"]
+    assert "trading advice" in m["disclaimer"] or "不构成交易建议" in m["disclaimer"]
 
 
 def test_event_tracking_anonymous_allowed(client, db_session):
@@ -172,4 +174,3 @@ def test_event_tracking_anonymous_allowed(client, db_session):
 def test_growth_requires_auth(client):
     assert client.get(f"{BASE}/onboarding/next").status_code == 403
     assert client.get(f"{BASE}/me/referral").status_code == 403
-    assert client.get(f"{BASE}/leaderboards/researcher").status_code == 403

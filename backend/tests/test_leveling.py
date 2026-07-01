@@ -18,17 +18,21 @@ def test_level_for_experience_thresholds():
     assert level_for_experience(300) == UserLevel.L2
     assert level_for_experience(699) == UserLevel.L2
     assert level_for_experience(700) == UserLevel.L3
-    assert level_for_experience(10_000) == UserLevel.L3
+    assert level_for_experience(1499) == UserLevel.L3
+    assert level_for_experience(1500) == UserLevel.L4
+    assert level_for_experience(10_000) == UserLevel.L4
 
 
 def test_next_level():
     assert next_level(UserLevel.L0) == UserLevel.L1
     assert next_level(UserLevel.L2) == UserLevel.L3
-    assert next_level(UserLevel.L3) is None
+    assert next_level(UserLevel.L3) == UserLevel.L4
+    assert next_level(UserLevel.L4) is None
 
 
 def test_experience_to_next_level():
     assert experience_to_next_level(0) == 100
     assert experience_to_next_level(100) == 200  # L1, 距 L2(300) 还差 200
     assert experience_to_next_level(250) == 50
-    assert experience_to_next_level(700) is None  # 满级
+    assert experience_to_next_level(700) == 800  # L3, 距 L4(1500)
+    assert experience_to_next_level(1500) is None  # 满级

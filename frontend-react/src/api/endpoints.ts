@@ -4,17 +4,30 @@ import type {
   Certificate,
   ChallengeOut,
   ChallengeProgress,
+  CostSensitivity,
+  CrossSectionBacktest,
+  Entitlements,
   Factor,
+  FactorPreview,
+  FactorTemplateMeta,
+  FormulaHelp,
   Graph,
   LeaderRow,
+  Plan,
+  SubscriptionStatus,
   LeaderboardKind,
   Mentor,
   NextStep,
+  OrthogonalizeResult,
+  OverfitCheck,
+  PaperSimulate,
+  PortfolioOptimize,
   Project,
   Referral,
   ReportDetail,
   ReportSummary,
   ResearcherProfile,
+  RobustnessTest,
   ShareCardPublic,
   ShareOut,
   Template,
@@ -25,20 +38,32 @@ import type {
 } from "./types";
 
 // ---- auth ----
+export async function fetchCaptcha(): Promise<{ token: string; svg: string }> {
+  const { data } = await api.get<{ token: string; svg: string }>("/auth/captcha");
+  return data;
+}
+
 export async function register(body: {
   email: string;
   username: string;
   password: string;
   user_type?: UserType;
   ref?: string | null;
-}): Promise<User> {
-  const { data } = await api.post<User>("/auth/register", body);
+  captcha_token?: string;
+  captcha_answer?: string;
+}): Promise<{ access_token: string; user: User }> {
+  const { data } = await api.post<{ access_token: string; user: User }>(
+    "/auth/register",
+    body
+  );
   return data;
 }
 
 export async function login(body: {
   identifier: string;
   password: string;
+  captcha_token?: string;
+  captcha_answer?: string;
 }): Promise<Token> {
   const { data } = await api.post<Token>("/auth/login", body);
   return data;
@@ -121,6 +146,87 @@ export async function listFactors(): Promise<Factor[]> {
   return data;
 }
 
+export async function getFactorTemplates(): Promise<FactorTemplateMeta[]> {
+  const { data } = await api.get<FactorTemplateMeta[]>("/factors/templates");
+  return data;
+}
+
+export async function createTemplateFactor(body: {
+  name: string;
+  template_type: string;
+  params: Record<string, number>;
+  project_id?: string;
+}): Promise<Factor> {
+  const { data } = await api.post<Factor>("/factors/template", body);
+  return data;
+}
+
+export async function createStackFactor(body: {
+  name: string;
+  components: { factor_id: string; weight: number }[];
+  project_id?: string;
+}): Promise<Factor> {
+  const { data } = await api.post<Factor>("/factors/stack", body);
+  return data;
+}
+
+export async function previewFactor(factorId: string): Promise<FactorPreview> {
+  const { data } = await api.post<FactorPreview>(`/factors/${factorId}/preview`);
+  return data;
+}
+
+export async function getFormulaHelp(): Promise<FormulaHelp> {
+  const { data } = await api.get<FormulaHelp>("/factors/formula/help");
+  return data;
+}
+
+export async function createFormulaFactor(body: {
+  name: string;
+  expr: string;
+  project_id?: string;
+}): Promise<Factor> {
+  const { data } = await api.post<Factor>("/factors/formula", body);
+  return data;
+}
+
+// ---- billing / membership ----
+export async function getPlans(): Promise<Plan[]> {
+  const { data } = await api.get<Plan[]>("/billing/plans");
+  return data;
+}
+
+export async function getSubscription(): Promise<SubscriptionStatus> {
+  const { data } = await api.get<SubscriptionStatus>("/billing/me");
+  return data;
+}
+
+export async function getEntitlements(): Promise<Entitlements> {
+  const { data } = await api.get<Entitlements>("/billing/entitlements");
+  return data;
+}
+
+export async function redeemCode(code: string): Promise<{
+  ok: boolean;
+  tier: number;
+  tier_name: string;
+  expires_at: string | null;
+  message: string;
+}> {
+  const { data } = await api.post("/billing/redeem", { code });
+  return data;
+}
+
+export async function checkout(plan_code: string): Promise<{
+  configured: boolean;
+  plan_code: string;
+  plan_name: string;
+  price_cny: number;
+  message: string;
+}> {
+  const { data } = await api.post("/billing/checkout", { plan_code });
+  return data;
+}
+
 // ---- backtest / validation ----
 export async function createBacktest(body: {
   factor_id: string;
@@ -130,11 +236,84 @@ export async function createBacktest(body: {
   return data;
 }
 
+export async function runCrossSectionBacktest(body: {
+  factor_id: string;
+  symbols?: string[];
+  top_n?: number;
+  long_short?: boolean;
+  fee_rate?: number;
+  slippage_bps?: number;
+}): Promise<CrossSectionBacktest> {
+  const { data } = await api.post<CrossSectionBacktest>(
+    "/backtests/cross-section",
+    body,
+  );
+  return data;
+}
+
+export async function runCostSensitivity(body: {
+  factor_id: string;
+  symbol: string;
+  fee_rates?: number[];
+  slippage_bps_values?: number[];
+}): Promise<CostSensitivity> {
+  const { data } = await api.post<CostSensitivity>(
+    "/backtests/cost-sensitivity",
+    body,
+  );
+  return data;
+}
+
 export async function createValidation(body: {
   factor_id: string;
   symbol: string;
 }): Promise<Validation> {
   const { data } = await api.post<Validation>("/validations", body);
+  return data;
+}
+
+export async function runOrthogonalize(body: {
+  target_factor_id: string;
+  control_factor_ids: string[];
+  symbol: string;
+}): Promise<OrthogonalizeResult> {
+  const { data } = await api.post<OrthogonalizeResult>(
+    "/validations/orthogonalize",
+    body,
+  );
+  return data;
+}
+
+export async function runRobustnessTest(body: {
+  factor_id: string;
+  symbol: string;
+}): Promise<RobustnessTest> {
+  const { data } = await api.post<RobustnessTest>("/validations/robustness", body);
+  return data;
+}
+
+export async function runOverfitCheck(body: {
+  factor_id: string;
+  symbol: string;
+}): Promise<OverfitCheck> {
+  const { data } = await api.post<OverfitCheck>("/validations/overfit-check", body);
+  return data;
+}
+
+export async function optimizePortfolio(body: {
+  symbols?: string[];
+  method?: string;
+}): Promise<PortfolioOptimize> {
+  const { data } = await api.post<PortfolioOptimize>("/portfolio/optimize", body);
+  return data;
+}
+
+export async function paperSimulate(body: {
+  symbols?: string[];
+  weights: Record<string, number>;
+  rebalance?: string;
+}): Promise<PaperSimulate> {
+  const { data } = await api.post<PaperSimulate>("/portfolio/paper-simulate", body);
   return data;
 }
 

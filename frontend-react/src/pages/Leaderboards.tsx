@@ -3,20 +3,21 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getLeaderboard } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
+import { useLocale } from "../store/locale";
 import { ErrorBox, PageTitle, Spinner } from "../components/ui";
 import type { LeaderboardKind } from "../api/types";
-
-const tabs: { kind: LeaderboardKind; label: string }[] = [
-  { kind: "researcher", label: "研究之星" },
-  { kind: "contributor", label: "贡献之星" },
-  { kind: "newcomer", label: "新秀榜" },
-  { kind: "improved", label: "进步榜" },
-];
 
 const medals = ["🥇", "🥈", "🥉"];
 
 export default function Leaderboards() {
+  const l = useLocale((s) => s.dict.leaderboards);
   const [kind, setKind] = useState<LeaderboardKind>("researcher");
+  const tabs: { kind: LeaderboardKind; label: string }[] = [
+    { kind: "researcher", label: l.researcher },
+    { kind: "contributor", label: l.contributor },
+    { kind: "newcomer", label: l.newcomer },
+    { kind: "improved", label: l.improved },
+  ];
   const q = useQuery({
     queryKey: ["leaderboard", kind],
     queryFn: () => getLeaderboard(kind),
@@ -24,7 +25,7 @@ export default function Leaderboards() {
 
   return (
     <div>
-      <PageTitle title="研究员榜单" subtitle="多维度衡量研究贡献与成长" />
+      <PageTitle title={l.title} subtitle={l.subtitle} />
 
       <div className="mb-4 flex flex-wrap gap-2">
         {tabs.map((t) => (
@@ -51,11 +52,11 @@ export default function Leaderboards() {
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-left text-xs uppercase text-slate-400">
               <tr>
-                <th className="px-4 py-3">名次</th>
-                <th className="px-4 py-3">研究员</th>
-                <th className="px-4 py-3">等级</th>
+                <th className="px-4 py-3">{l.rank}</th>
+                <th className="px-4 py-3">{l.user}</th>
+                <th className="px-4 py-3">Lv</th>
                 <th className="px-4 py-3 text-right">
-                  {q.data?.[0]?.metric_label ?? "分数"}
+                  {q.data?.[0]?.metric_label ?? l.score}
                 </th>
               </tr>
             </thead>
@@ -84,7 +85,7 @@ export default function Leaderboards() {
               {q.data && q.data.length === 0 && (
                 <tr>
                   <td colSpan={4} className="px-4 py-8 text-center text-slate-400">
-                    暂无数据
+                    {l.empty}
                   </td>
                 </tr>
               )}

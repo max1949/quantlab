@@ -7,10 +7,13 @@ import {
   listChallenges,
 } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
+import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
 import { ErrorBox, PageTitle, Spinner } from "../components/ui";
 
 export default function Challenges() {
+  const { dict } = useLocale();
+  const t = dict.challengesPage;
   const notify = useUi((s) => s.notify);
   const qc = useQueryClient();
   const [code, setCode] = useState<string | null>(null);
@@ -37,24 +40,20 @@ export default function Challenges() {
     mutationFn: () => enrollChallenge(code!),
     onSuccess: (data) => {
       qc.setQueryData(["challenge-progress", code], data);
-      notify("报名成功! 完成里程碑即可领取证书", "success");
+      notify(t.enrollSuccess, "success");
     },
-    onError: (e) => notify(apiErrorMessage(e, "报名失败"), "error"),
+    onError: (e) => notify(apiErrorMessage(e, t.enrollFail), "error"),
   });
 
   const cert = useMutation({
     mutationFn: () => getCertificate(code!),
-    onSuccess: (c) =>
-      notify(`证书已颁发: ${c.certificate_code}`, "success"),
-    onError: (e) => notify(apiErrorMessage(e, "尚未全部完成"), "error"),
+    onSuccess: (c) => notify(t.certIssued(c.certificate_code), "success"),
+    onError: (e) => notify(apiErrorMessage(e, t.certNotReady), "error"),
   });
 
   return (
     <div>
-      <PageTitle
-        title="30 天研究挑战"
-        subtitle="按里程碑完成研究动作, 拿奖励积分和完成证书。"
-      />
+      <PageTitle title={t.title} subtitle={t.subtitle} />
 
       {challenges.isLoading ? (
         <Spinner />
@@ -88,19 +87,19 @@ export default function Challenges() {
             />
           ) : (
             <div className="card text-center">
-              <p className="text-slate-600">报名后开始你的 30 天研究挑战</p>
+              <p className="text-slate-600">{t.enrollHint}</p>
               <button
                 className="btn-primary mt-3"
                 disabled={enroll.isPending}
                 onClick={() => enroll.mutate()}
               >
-                {enroll.isPending ? "报名中…" : "立即报名"}
+                {enroll.isPending ? t.enrolling : t.enroll}
               </button>
             </div>
           )}
         </>
       ) : (
-        <ErrorBox message="暂无可参加的挑战 (运行 scripts/seed-challenge.ps1 初始化)" />
+        <ErrorBox message={t.empty} />
       )}
     </div>
   );
@@ -115,6 +114,8 @@ function ProgressView({
   onClaim: () => void;
   claiming: boolean;
 }) {
+  const { dict } = useLocale();
+  const t = dict.challengesPage;
   const allDone = data.completed_count >= data.total;
   return (
     <div>
@@ -123,13 +124,12 @@ function ProgressView({
           <div>
             <p className="font-semibold text-slate-800">{data.title}</p>
             <p className="text-sm text-slate-400">
-              已完成 {data.completed_count}/{data.total} · 奖励积分{" "}
-              {data.reward_points}
+              {t.completed(data.completed_count, data.total, data.reward_points)}
             </p>
           </div>
           {data.certificate_code ? (
             <span className="badge bg-emerald-100 text-emerald-700">
-              证书 {data.certificate_code}
+              {t.certLabel(data.certificate_code)}
             </span>
           ) : (
             <button
@@ -137,7 +137,7 @@ function ProgressView({
               disabled={!allDone || claiming}
               onClick={onClaim}
             >
-              {allDone ? "领取证书" : "完成全部解锁证书"}
+              {allDone ? t.claimCert : t.claimCertLocked}
             </button>
           )}
         </div>
@@ -162,7 +162,7 @@ function ProgressView({
                 {m.completed ? "✅ " : "⬜ "}
                 {m.title}
               </p>
-              <p className="text-xs text-slate-400">第 {m.day} 天</p>
+              <p className="text-xs text-slate-400">{t.day(m.day)}</p>
             </div>
             <span className="badge">+{m.reward_points}</span>
           </div>

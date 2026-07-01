@@ -32,6 +32,7 @@ from backend.app.core.database import Base
 class FactorKind(str, enum.Enum):
     TEMPLATE = "template"
     STACK = "stack"
+    FORMULA = "formula"  # L2: 用户自定义表达式因子
 
 
 class Factor(Base):

@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import type { ReportSummary } from "../api/types";
+import { useLocale } from "../store/locale";
 import { GradeBadge } from "./ui";
 
 export default function ReportCard({ report }: { report: ReportSummary }) {
+  const { dict } = useLocale();
   return (
     <Link to={`/reports/${report.id}`} className="card block hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
@@ -16,7 +18,7 @@ export default function ReportCard({ report }: { report: ReportSummary }) {
           className="text-brand-600 hover:underline"
           onClick={(e) => e.stopPropagation()}
         >
-          查看研究员
+          {dict.reportCard.viewResearcher}
         </Link>
         <span>{new Date(report.created_at).toLocaleDateString()}</span>
       </div>

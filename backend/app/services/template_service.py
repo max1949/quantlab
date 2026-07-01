@@ -11,11 +11,24 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from backend.app.core.locale import Locale
+from backend.app.i18n import content as i18n
 from backend.app.models.growth import ResearchTemplate
 from backend.app.models.user import User
 from backend.app.services import factor_service, project_service
 
 # 平台预置研究模板。factor_template 必须是 engine 合法因子模板 code。
+# 模板权限: min_level / min_tier (与 membership_service 一致)
+TEMPLATE_GATES: dict[str, dict[str, int]] = {
+    "gold-trend": {"min_level": 0, "min_tier": 0},
+    "commodity-momentum": {"min_level": 0, "min_tier": 0},
+    "vol-regime": {"min_level": 0, "min_tier": 0},
+    "mean-reversion": {"min_level": 0, "min_tier": 0},
+    "rsi-study": {"min_level": 0, "min_tier": 0},
+    "sma-cross": {"min_level": 1, "min_tier": 0},
+    "multi-momentum": {"min_level": 2, "min_tier": 1},
+}
+
 DEFAULT_TEMPLATES = [
     {
         "code": "gold-trend", "title": "黄金趋势研究", "symbol": "AU",
@@ -45,11 +58,38 @@ DEFAULT_TEMPLATES = [
         "description": "用均值回归因子检验价格的回归特性。",
         "tags": ["均值回归"],
     },
+    {
+        "code": "rsi-study", "title": "RSI 强弱研究", "symbol": "RB",
+        "factor_template": "rsi", "default_params": {"window": 14},
+        "hypothesis": "RSI 超买超卖区域是否蕴含反转信号?",
+        "description": "用 RSI 因子研究螺纹钢短期强弱切换。",
+        "tags": ["RSI", "商品"],
+    },
+    {
+        "code": "sma-cross", "title": "均线偏离研究", "symbol": "IF",
+        "factor_template": "sma_ratio", "default_params": {"window": 20},
+        "hypothesis": "价格偏离均线后是否存在可交易信号?",
+        "description": "用均线偏离因子研究股指定价偏离。",
+        "tags": ["均线", "股指"],
+    },
+    {
+        "code": "multi-momentum", "title": "进阶动量组合", "symbol": "AU",
+        "factor_template": "momentum", "default_params": {"window": 60},
+        "hypothesis": "长周期动量在黄金上是否更稳健?",
+        "description": "研究员会员专属 — 长窗口动量研究模板。",
+        "tags": ["动量", "进阶"],
+    },
 ]
 
 
 class TemplateNotFoundError(Exception):
     pass
+
+
+class TemplateLockedError(Exception):
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(message)
 
 
 def seed_default_templates(db: Session) -> dict:
@@ -72,6 +112,41 @@ def list_templates(db: Session) -> list[ResearchTemplate]:
     )
 
 
+def access_for(user: User, code: str, tier: int, locale: Locale = "en") -> dict:
+    gate = TEMPLATE_GATES.get(code, {"min_level": 0, "min_tier": 0})
+    min_level = gate["min_level"]
+    min_tier = gate["min_tier"]
+    level_ok = user.level >= min_level
+    tier_ok = tier >= min_tier
+    allowed = level_ok and tier_ok
+    lock_hint = i18n.format_lock_hint(locale, min_level, min_tier, level_ok, tier_ok)
+    return {
+        "min_level": min_level,
+        "min_tier": min_tier,
+        "allowed": allowed,
+        "lock_hint": lock_hint,
+    }
+
+
+def list_templates_for_user(db: Session, user: User, tier: int, locale: Locale = "en") -> list[dict]:
+    rows = list_templates(db)
+    out = []
+    for t in rows:
+        acc = access_for(user, t.code, tier, locale)
+        loc = i18n.localize_research_template(
+            t.code,
+            locale,
+            {
+                "title": t.title,
+                "hypothesis": t.hypothesis,
+                "description": t.description,
+                "tags": list(t.tags or []),
+            },
+        )
+        out.append({**acc, "template": t, "localized": loc})
+    return out
+
+
 def get_by_code(db: Session, code: str) -> ResearchTemplate:
     t = db.execute(select(ResearchTemplate).where(ResearchTemplate.code == code)).scalar_one_or_none()
     if t is None:
@@ -79,12 +154,25 @@ def get_by_code(db: Session, code: str) -> ResearchTemplate:
     return t
 
 
-def start(db: Session, user: User, code: str, with_factor: bool = True) -> dict:
+def start(db: Session, user: User, code: str, with_factor: bool = True, tier: int = 0, locale: Locale = "en") -> dict:
     """从模板一键开局: 建项目 (+可选首个因子)。返回 project 与 factor_id。"""
+    acc = access_for(user, code, tier, locale)
+    if not acc["allowed"]:
+        raise TemplateLockedError(i18n.t(locale, i18n.TEMPLATE_LOCKED))
     tpl = get_by_code(db, code)
+    loc = i18n.localize_research_template(
+        code,
+        locale,
+        {
+            "title": tpl.title,
+            "hypothesis": tpl.hypothesis,
+            "description": tpl.description,
+            "tags": list(tpl.tags or []),
+        },
+    )
     project = project_service.create_project(
-        db, user, title=tpl.title, symbol=tpl.symbol, question=tpl.hypothesis,
-        description=tpl.description, tags=list(tpl.tags or []),
+        db, user, title=loc["title"], symbol=tpl.symbol, question=loc["hypothesis"],
+        description=loc["description"], tags=list(loc["tags"]),
     )
     factor_id = None
     if with_factor:

@@ -11,14 +11,19 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from backend.app.auth.deps import CurrentUser
+from backend.app.auth.deps import CurrentUser, require_feature
 from backend.app.core.database import get_db
 from backend.app.schemas.backtest import (
     BacktestCreate,
     BacktestDetail,
     BacktestSummary,
+    CostSensitivityCreate,
+    CostSensitivityOut,
+    CrossSectionBacktestCreate,
+    CrossSectionBacktestOut,
     DatasetOut,
 )
+from backend.app.models.user import User
 from backend.app.services import backtest_service, factor_service, market_data
 
 router = APIRouter()
@@ -67,6 +72,77 @@ def create_backtest(
             detail="行情数据集不存在 (先生成样本数据: scripts/seed-market-data.ps1)",
         )
     return BacktestDetail.model_validate(bt)
+
+
+@router.post(
+    "/backtests/cross-section",
+    response_model=CrossSectionBacktestOut,
+    status_code=status.HTTP_200_OK,
+    tags=["backtest"],
+    summary="L2 截面多标的回测 (需 L2 + 研究员会员)",
+)
+def cross_section_backtest(
+    payload: CrossSectionBacktestCreate,
+    current_user: Annotated[User, Depends(require_feature("backtest_cross_section"))],
+    db: Annotated[Session, Depends(get_db)],
+) -> CrossSectionBacktestOut:
+    try:
+        result = backtest_service.run_cross_section_analysis(
+            db,
+            current_user,
+            payload.factor_id,
+            payload.symbols,
+            {"fee_rate": payload.fee_rate, "slippage_bps": payload.slippage_bps},
+            top_n=payload.top_n,
+            long_short=payload.long_short,
+        )
+    except factor_service.FactorNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="因子不存在"
+        )
+    except backtest_service.DatasetNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"行情数据集不存在: {exc}",
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+        )
+    return CrossSectionBacktestOut(**result)
+
+
+@router.post(
+    "/backtests/cost-sensitivity",
+    response_model=CostSensitivityOut,
+    status_code=status.HTTP_200_OK,
+    tags=["backtest"],
+    summary="L2 成本敏感性分析 (需 L2 + 研究员会员)",
+)
+def cost_sensitivity(
+    payload: CostSensitivityCreate,
+    current_user: Annotated[User, Depends(require_feature("cost_sensitivity"))],
+    db: Annotated[Session, Depends(get_db)],
+) -> CostSensitivityOut:
+    try:
+        result = backtest_service.run_cost_sensitivity(
+            db,
+            current_user,
+            payload.factor_id,
+            payload.symbol,
+            payload.fee_rates,
+            payload.slippage_bps_values,
+        )
+    except factor_service.FactorNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="因子不存在"
+        )
+    except backtest_service.DatasetNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"行情数据集不存在: {exc}",
+        )
+    return CostSensitivityOut(**result)
 
 
 @router.get(

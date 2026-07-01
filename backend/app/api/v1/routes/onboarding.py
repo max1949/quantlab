@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from backend.app.auth.deps import CurrentUser
 from backend.app.core.database import get_db
+from backend.app.core.locale import RequestLocale
 from backend.app.schemas.growth import ChooseTypeRequest, NextStepOut
 from backend.app.schemas.user import UserOut
 from backend.app.services import growth_service, onboarding_service
@@ -34,5 +35,6 @@ def choose_type(
 def next_step(
     current_user: CurrentUser,
     db: Annotated[Session, Depends(get_db)],
+    locale: RequestLocale,
 ) -> NextStepOut:
-    return NextStepOut(**onboarding_service.next_step(db, current_user))
+    return NextStepOut(**onboarding_service.next_step(db, current_user, locale))

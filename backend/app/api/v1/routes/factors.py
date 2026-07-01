@@ -11,17 +11,21 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from backend.app.auth.deps import CurrentUser, require_level
+from backend.app.auth.deps import CurrentUser, require_feature, require_level
 from backend.app.core.database import get_db
+from backend.app.core.locale import RequestLocale
 from backend.app.models.user import User, UserLevel
 from backend.app.schemas.factor import (
     FactorOut,
     FactorPreview,
     FactorTemplateOut,
+    FormulaFactorCreate,
+    FormulaHelpOut,
     StackFactorCreate,
     TemplateFactorCreate,
 )
 from backend.app.services import factor_service
+from engine import formula as ff
 
 router = APIRouter()
 
@@ -31,8 +35,18 @@ router = APIRouter()
     response_model=list[FactorTemplateOut],
     summary="模板因子目录 (L0 即可查看/使用)",
 )
-def list_templates() -> list[FactorTemplateOut]:
-    return [FactorTemplateOut(**t) for t in factor_service.list_templates()]
+def list_templates(
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+    locale: RequestLocale,
+) -> list[FactorTemplateOut]:
+    from backend.app.services import membership_service as ms
+
+    tier = ms.current_tier(db, current_user)
+    return [
+        FactorTemplateOut(**t)
+        for t in factor_service.list_templates(tier=tier, level=current_user.level, locale=locale)
+    ]
 
 
 @router.get("", response_model=list[FactorOut], summary="我的因子列表")
@@ -96,6 +110,52 @@ def create_stack_factor(
     except factor_service.StackPermissionError:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="组合器需要 L1 及以上"
+        )
+    except factor_service.FactorValidationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+        )
+    except factor_service.FactorNameTakenError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="同名因子已存在"
+        )
+    return FactorOut.model_validate(factor)
+
+
+@router.get(
+    "/formula/help",
+    response_model=FormulaHelpOut,
+    summary="公式因子: 可用变量/函数/示例",
+)
+def formula_help() -> FormulaHelpOut:
+    return FormulaHelpOut(
+        variables=list(ff.ALLOWED_VARS),
+        functions=[{"name": d["name"], "desc": d["desc"]} for d in ff.FUNC_DOCS],
+        examples=[
+            "(close - sma(close, 20)) / std(close, 20)",
+            "rsi(close, 14) - 50",
+            "mom(close, 20) * -1",
+            "zscore(volume, 20)",
+            "ema(close, 5) / ema(close, 20) - 1",
+        ],
+    )
+
+
+@router.post(
+    "/formula",
+    response_model=FactorOut,
+    status_code=status.HTTP_201_CREATED,
+    summary="创建公式因子 (需 L2 + 研究员会员)",
+)
+def create_formula_factor(
+    payload: FormulaFactorCreate,
+    # require_feature: 同时校验能力等级(L2)与付费档位(研究员卡)
+    current_user: Annotated[User, Depends(require_feature("factor_formula"))],
+    db: Annotated[Session, Depends(get_db)],
+) -> FactorOut:
+    try:
+        factor = factor_service.create_formula_factor(
+            db, current_user, payload.name, payload.expr, project_id=payload.project_id,
         )
     except factor_service.FactorValidationError as exc:
         raise HTTPException(

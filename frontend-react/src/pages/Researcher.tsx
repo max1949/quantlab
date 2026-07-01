@@ -2,11 +2,13 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getResearcher } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
+import { useLocale } from "../store/locale";
 import { useAuth } from "../store/auth";
 import { ErrorBox, Spinner } from "../components/ui";
 import ProfileView from "../components/ProfileView";
 
 export default function Researcher() {
+  const { dict } = useLocale();
   const { userId = "" } = useParams();
   const me = useAuth((s) => s.user);
   const q = useQuery({
@@ -16,7 +18,7 @@ export default function Researcher() {
 
   if (q.isLoading) return <Spinner />;
   if (q.isError)
-    return <ErrorBox message={apiErrorMessage(q.error, "研究员不存在")} />;
+    return <ErrorBox message={apiErrorMessage(q.error, dict.profile.notFound)} />;
 
   const isSelf = me?.id === userId;
   return (

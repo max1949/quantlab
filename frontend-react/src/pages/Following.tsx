@@ -2,15 +2,18 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getFollowingFeed } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
+import { useLocale } from "../store/locale";
 import { EmptyState, ErrorBox, PageTitle, Spinner } from "../components/ui";
 import ReportCard from "../components/ReportCard";
 
 export default function Following() {
+  const { dict } = useLocale();
+  const t = dict.following;
   const q = useQuery({ queryKey: ["following-feed"], queryFn: getFollowingFeed });
 
   return (
     <div>
-      <PageTitle title="关注动态" subtitle="你关注的研究员的最新研究" />
+      <PageTitle title={t.title} subtitle={t.subtitle} />
       {q.isLoading ? (
         <Spinner />
       ) : q.isError ? (
@@ -23,11 +26,11 @@ export default function Following() {
         </div>
       ) : (
         <EmptyState
-          title="还没有关注动态"
-          hint="去研究广场关注一些研究员吧"
+          title={t.emptyTitle}
+          hint={t.emptyHint}
           action={
             <Link to="/feed" className="btn-primary mt-2">
-              去研究广场
+              {t.goFeed}
             </Link>
           }
         />

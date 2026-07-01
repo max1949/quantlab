@@ -16,6 +16,7 @@ LEVEL_THRESHOLDS: dict[UserLevel, int] = {
     UserLevel.L1: 100,
     UserLevel.L2: 300,
     UserLevel.L3: 700,
+    UserLevel.L4: 1500,
 }
 
 

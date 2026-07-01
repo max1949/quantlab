@@ -39,3 +39,51 @@ class ValidationDetail(ValidationSummary):
     walk_forward: dict | None
     sensitivity: dict | None
     error: str | None
+
+
+class OrthogonalizeCreate(BaseModel):
+    target_factor_id: uuid.UUID
+    control_factor_ids: list[uuid.UUID] = Field(min_length=1, max_length=10)
+    symbol: str
+
+
+class OrthogonalizeOut(BaseModel):
+    target_factor_id: uuid.UUID
+    target_factor_name: str
+    control_factors: list[dict]
+    symbol: str
+    result: dict
+
+
+class RobustnessTestCreate(BaseModel):
+    factor_id: uuid.UUID
+    symbol: str
+    fee_rate: float = Field(default=0.0005, ge=0, le=0.1)
+    slippage_bps: float = Field(default=1.0, ge=0, le=1000)
+
+
+class RobustnessTestOut(BaseModel):
+    factor_id: uuid.UUID
+    factor_name: str
+    symbol: str
+    sensitivity: dict
+    verdict: dict
+
+
+class OverfitCheckCreate(BaseModel):
+    factor_id: uuid.UUID
+    symbol: str
+    fee_rate: float = Field(default=0.0005, ge=0, le=0.1)
+    slippage_bps: float = Field(default=1.0, ge=0, le=1000)
+    oos_ratio: float = Field(default=0.3, gt=0.05, lt=0.9)
+    n_splits: int = Field(default=4, ge=2, le=12)
+
+
+class OverfitCheckOut(BaseModel):
+    factor_id: uuid.UUID
+    factor_name: str
+    symbol: str
+    oos: dict
+    walk_forward: dict
+    sensitivity: dict
+    overfit: dict

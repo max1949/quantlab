@@ -2,12 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { getFeed } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
 import { useAuth } from "../store/auth";
+import { useLocale } from "../store/locale";
 import { EmptyState, ErrorBox, PageTitle, Spinner } from "../components/ui";
 import ReportCard from "../components/ReportCard";
 import { Link } from "react-router-dom";
 
 export default function Feed() {
   const user = useAuth((s) => s.user);
+  const f = useLocale((s) => s.dict.feed);
   const feed = useQuery({
     queryKey: ["feed"],
     queryFn: getFeed,
@@ -17,11 +19,11 @@ export default function Feed() {
   if (!user) {
     return (
       <EmptyState
-        title="登录后查看研究广场"
-        hint="看看大家都在研究什么"
+        title={f.loginTitle}
+        hint={f.loginHint}
         action={
           <Link to="/login" className="btn-primary mt-2">
-            去登录
+            {f.login}
           </Link>
         }
       />
@@ -30,7 +32,7 @@ export default function Feed() {
 
   return (
     <div>
-      <PageTitle title="研究广场" subtitle="社区里最新的公开研究成果" />
+      <PageTitle title={f.title} subtitle={f.subtitle} />
       {feed.isLoading ? (
         <Spinner />
       ) : feed.isError ? (
@@ -42,7 +44,7 @@ export default function Feed() {
           ))}
         </div>
       ) : (
-        <EmptyState title="还没有公开研究" hint="成为第一个发布研究的人!" />
+        <EmptyState title={f.emptyTitle} hint={f.emptyHint} />
       )}
     </div>
   );

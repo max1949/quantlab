@@ -38,6 +38,10 @@ class TemplateOut(BaseModel):
     hypothesis: str
     description: str
     tags: list
+    min_level: int = 0
+    min_tier: int = 0
+    allowed: bool = True
+    lock_hint: str | None = None
 
 
 class StartTemplateRequest(BaseModel):

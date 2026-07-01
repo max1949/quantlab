@@ -9,6 +9,8 @@ from __future__ import annotations
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from backend.app.core.locale import Locale
+from backend.app.i18n import content as i18n
 from backend.app.models.backtest import Backtest, BacktestStatus
 from backend.app.models.factor import Factor
 from backend.app.models.project import ProjectStatus, ResearchProject
@@ -16,17 +18,10 @@ from backend.app.models.research import ResearchReport
 from backend.app.models.user import User, UserType
 from backend.app.models.validation import Validation, ValidationStatus
 
-# 不同身份推荐的开局研究模板 (code 见 template_service.DEFAULT_TEMPLATES)。
 TYPE_DEFAULT_TEMPLATE = {
     UserType.NEWBIE.value: "gold-trend",
     UserType.PYTHON.value: "commodity-momentum",
     UserType.TRADER.value: "vol-regime",
-}
-
-TYPE_INTRO = {
-    UserType.NEWBIE.value: "完全不用写代码, 我们带你用模板一步步做出第一个研究。",
-    UserType.PYTHON.value: "你有 Python 基础, 可以更快上手因子与组合, 我们直接给你硬核路线。",
-    UserType.TRADER.value: "你懂交易, 我们帮你把盘感变成可被验证的因子与研究结论。",
 }
 
 
@@ -82,58 +77,28 @@ def _stage(db: Session, user: User) -> str:
     return "keep_going"
 
 
-_STEP_DETAIL = {
-    "create_project": {
-        "title": "创建你的第一个研究项目",
-        "action": "用研究模板一键开局, 定一个研究主题",
-        "cta": "/research/create",
-    },
-    "create_factor": {
-        "title": "造你的第一个因子",
-        "action": "在项目下选一个模板因子 (如动量), 填个窗口参数即可",
-        "cta": "/factor-lab",
-    },
-    "run_backtest": {
-        "title": "跑第一次回测",
-        "action": "看看这个因子在历史行情上的表现",
-        "cta": "/factor-lab",
-    },
-    "run_validation": {
-        "title": "做一次科学验证 (OOS)",
-        "action": "用样本外 + Walk-Forward 检验因子是不是过拟合",
-        "cta": "/factor-lab",
-    },
-    "generate_report": {
-        "title": "生成研究报告",
-        "action": "把因子+回测+验证聚合成一篇人话研究报告",
-        "cta": "/dashboard",
-    },
-    "publish_share": {
-        "title": "发布并分享你的研究",
-        "action": "公开项目、生成分享卡片, 让更多人看到你的研究",
-        "cta": "/dashboard",
-    },
-    "keep_going": {
-        "title": "继续深化研究",
-        "action": "试试组合因子、跨品种验证, 或开一个新主题冲榜",
-        "cta": "/leaderboard",
-    },
-}
-
-
-def next_step(db: Session, user: User) -> dict:
+def next_step(db: Session, user: User, locale: Locale = "en") -> dict:
     """返回个性化下一步 (身份 + 进度)。"""
     stage = _stage(db, user)
-    detail = _STEP_DETAIL[stage]
+    detail = i18n.STEP_DETAIL[stage][locale]
+    user_type = user.user_type
     out = {
-        "user_type": user.user_type,
-        "user_type_label": UserType(user.user_type).label,
-        "intro": TYPE_INTRO.get(user.user_type, ""),
+        "user_type": user_type,
+        "user_type_label": i18n.USER_TYPE_LABEL.get(user_type, {}).get(locale, user_type),
+        "intro": i18n.TYPE_INTRO.get(user_type, {}).get(locale, ""),
         "stage": stage,
         "title": detail["title"],
         "action": detail["action"],
-        "cta_path": detail["cta"],
+        "cta_path": {
+            "create_project": "/research/create",
+            "create_factor": "/factor-lab",
+            "run_backtest": "/factor-lab",
+            "run_validation": "/factor-lab",
+            "generate_report": "/dashboard",
+            "publish_share": "/dashboard",
+            "keep_going": "/leaderboard",
+        }[stage],
     }
     if stage == "create_project":
-        out["recommended_template"] = TYPE_DEFAULT_TEMPLATE.get(user.user_type, "momentum")
+        out["recommended_template"] = TYPE_DEFAULT_TEMPLATE.get(user_type, "gold-trend")
     return out

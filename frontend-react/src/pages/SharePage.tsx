@@ -3,9 +3,12 @@ import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getShareCard, trackEvent } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
+import { useLocale } from "../store/locale";
 import { GradeBadge, Spinner } from "../components/ui";
 
 export default function SharePage() {
+  const { dict } = useLocale();
+  const t = dict.share;
   const { token = "" } = useParams();
   const q = useQuery({
     queryKey: ["share", token],
@@ -23,28 +26,24 @@ export default function SharePage() {
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand-600 text-sm font-bold text-white">
             Q
           </span>
-          <span className="text-lg font-semibold">QuantLab AI</span>
+          <span className="text-lg font-semibold">{dict.brand}</span>
         </Link>
 
         {q.isLoading ? (
           <Spinner />
         ) : q.isError ? (
           <div className="card text-center text-slate-500">
-            {apiErrorMessage(q.error, "分享不存在或已失效")}
+            {apiErrorMessage(q.error, t.invalid)}
           </div>
         ) : (
           <ShareCardView card={q.data!.card} views={q.data!.views} />
         )}
 
         <div className="mt-6 rounded-2xl bg-white p-5 text-center shadow-sm">
-          <p className="font-medium text-slate-700">
-            想做出你自己的量化研究?
-          </p>
-          <p className="mt-1 text-sm text-slate-400">
-            完全不懂代码也能 5 分钟完成第一次研究
-          </p>
+          <p className="font-medium text-slate-700">{t.pitch}</p>
+          <p className="mt-1 text-sm text-slate-400">{t.pitchDesc}</p>
           <Link to="/register" className="btn-primary mt-3 inline-flex px-6">
-            免费开始 →
+            {t.cta}
           </Link>
         </div>
       </div>
@@ -59,37 +58,33 @@ function ShareCardView({
   card: import("../api/types").ShareCard;
   views: number;
 }) {
+  const { dict } = useLocale();
+  const t = dict.share;
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-md">
       <div className="bg-gradient-to-r from-brand-600 to-brand-500 px-6 py-5 text-white">
-        <p className="text-xs uppercase tracking-wide text-brand-100">
-          研究成果
-        </p>
-        <h1 className="mt-1 text-xl font-bold">{card.title ?? "量化研究报告"}</h1>
+        <p className="text-xs uppercase tracking-wide text-brand-100">{t.badge}</p>
+        <h1 className="mt-1 text-xl font-bold">{card.title ?? t.defaultTitle}</h1>
         <p className="mt-2 text-sm text-brand-50">
-          by {card.researcher ?? "匿名研究员"}
+          {t.by} {card.researcher ?? "—"}
           {card.symbol ? ` · ${card.symbol}` : ""}
         </p>
       </div>
       <div className="space-y-4 px-6 py-5">
         <div className="flex items-center gap-2">
           <GradeBadge grade={card.grade} />
-          <span className="text-xs text-slate-400">👀 {views} 次浏览</span>
+          <span className="text-xs text-slate-400">{t.views(views)}</span>
         </div>
         {card.summary && (
           <div>
-            <p className="text-xs font-medium text-slate-400">结论摘要</p>
-            <p className="mt-1 text-sm leading-relaxed text-slate-700">
-              {card.summary}
-            </p>
+            <p className="text-xs font-medium text-slate-400">{t.summary}</p>
+            <p className="mt-1 text-sm leading-relaxed text-slate-700">{card.summary}</p>
           </div>
         )}
         {card.hypothesis && (
           <div>
-            <p className="text-xs font-medium text-slate-400">研究假设</p>
-            <p className="mt-1 text-sm leading-relaxed text-slate-600">
-              {card.hypothesis}
-            </p>
+            <p className="text-xs font-medium text-slate-400">{t.hypothesis}</p>
+            <p className="mt-1 text-sm leading-relaxed text-slate-600">{card.hypothesis}</p>
           </div>
         )}
       </div>

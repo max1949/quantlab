@@ -7,6 +7,7 @@ V1: PostgreSQL 存索引 (MarketDataset) + Parquet 存 K 线。
 
 from __future__ import annotations
 
+import datetime as _dt
 import hashlib
 from pathlib import Path
 
@@ -21,6 +22,9 @@ from backend.app.models.market import DataSnapshot, MarketDataset
 settings = get_settings()
 
 DEFAULT_SYMBOLS = ["RB", "AU", "IF"]
+
+# 业务品种 -> 新浪连续主力合约代码 (akshare futures_main_sina)
+FUTURES_MAIN_CODE = {"RB": "RB0", "AU": "AU0", "IF": "IF0"}
 
 
 def market_dir() -> Path:
@@ -53,6 +57,40 @@ def generate_sample_ohlcv(symbol: str, n: int = 504, start: float = 100.0) -> pd
         {"open": open_, "high": high, "low": low, "close": close, "volume": volume},
         index=index,
     )
+
+
+def fetch_real_ohlcv(
+    symbol: str, start: str = "20180101", end: str | None = None
+) -> pd.DataFrame:
+    """从 akshare 拉取真实日线行情 (连续主力合约)。
+
+    返回与样本数据同构的 DataFrame: index=DatetimeIndex,
+    列 = [open, high, low, close, volume]。按列位置取值, 规避中文列名编码问题。
+    """
+    import akshare as ak  # 延迟导入: 没装/离线时不影响其它功能
+
+    code = FUTURES_MAIN_CODE.get(symbol, f"{symbol}0")
+    end = end or _dt.date.today().strftime("%Y%m%d")
+    raw = ak.futures_main_sina(symbol=code, start_date=start, end_date=end)
+    if raw is None or len(raw) == 0:
+        raise ValueError(f"真实行情为空: {symbol} ({code})")
+
+    cols = list(raw.columns)  # 顺序: 日期,开盘,最高,最低,收盘,成交量,持仓量,结算价
+    df = pd.DataFrame(
+        {
+            "open": pd.to_numeric(raw[cols[1]], errors="coerce"),
+            "high": pd.to_numeric(raw[cols[2]], errors="coerce"),
+            "low": pd.to_numeric(raw[cols[3]], errors="coerce"),
+            "close": pd.to_numeric(raw[cols[4]], errors="coerce"),
+            "volume": pd.to_numeric(raw[cols[5]], errors="coerce"),
+        }
+    )
+    df.index = pd.to_datetime(raw[cols[0]])
+    df = df.dropna(subset=["close"]).sort_index()
+    df = df[~df.index.duplicated(keep="last")]
+    if df.empty:
+        raise ValueError(f"真实行情清洗后无有效行: {symbol}")
+    return df
 
 
 def load_ohlcv(symbol: str, timeframe: str = "1d") -> pd.DataFrame:
@@ -120,6 +158,39 @@ def seed_sample_market_data(db: Session, symbols: list[str] | None = None) -> di
         df.to_parquet(dataset_path(sym))
         ds = register_dataset(db, sym, df)
         out.append({"symbol": sym, "rows": ds.rows})
+    return {"datasets": out, "dir": str(market_dir())}
+
+
+def seed_real_market_data(
+    db: Session, symbols: list[str] | None = None, fallback: bool = True
+) -> dict:
+    """拉取真实行情并登记 (幂等: 覆盖写 Parquet + upsert 索引)。
+
+    每个品种优先用真实数据; 拉取失败时, 若 fallback=True 则退回确定性样本数据,
+    保证系统永远有可用行情 (离线也能跑)。
+    """
+    symbols = symbols or DEFAULT_SYMBOLS
+    out = []
+    for sym in symbols:
+        source = "real"
+        try:
+            df = fetch_real_ohlcv(sym)
+        except Exception as exc:  # 网络/数据源异常 -> 样本兜底
+            if not fallback:
+                raise
+            source = f"sample(fallback:{type(exc).__name__})"
+            df = generate_sample_ohlcv(sym)
+        df.to_parquet(dataset_path(sym))
+        ds = register_dataset(db, sym, df)
+        out.append(
+            {
+                "symbol": sym,
+                "rows": ds.rows,
+                "source": source,
+                "start": str(ds.start_date),
+                "end": str(ds.end_date),
+            }
+        )
     return {"datasets": out, "dir": str(market_dir())}
 
 

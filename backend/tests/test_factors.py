@@ -65,7 +65,7 @@ def test_create_template_bad_param_422(client):
 
 def test_duplicate_name_409(client):
     h = _auth_headers(client)
-    body = {"name": "dup", "template_type": "rsi", "params": {}}
+    body = {"name": "dup", "template_type": "momentum", "params": {}}
     assert client.post(f"{BASE}/factors/template", headers=h, json=body).status_code == 201
     assert client.post(f"{BASE}/factors/template", headers=h, json=body).status_code == 409
 
@@ -130,7 +130,7 @@ def test_preview_template_factor(client):
     fid = client.post(
         f"{BASE}/factors/template",
         headers=h,
-        json={"name": "rsi-pv", "template_type": "rsi", "params": {}},
+        json={"name": "mom-pv", "template_type": "momentum", "params": {}},
     ).json()["id"]
     pv = client.post(f"{BASE}/factors/{fid}/preview", headers=h)
     assert pv.status_code == 200
@@ -142,7 +142,7 @@ def test_list_and_delete_factor(client):
     fid = client.post(
         f"{BASE}/factors/template",
         headers=h,
-        json={"name": "to-delete", "template_type": "sma_ratio", "params": {}},
+        json={"name": "to-delete", "template_type": "volatility", "params": {}},
     ).json()["id"]
     assert len(client.get(f"{BASE}/factors", headers=h).json()) == 1
     assert client.delete(f"{BASE}/factors/{fid}", headers=h).status_code == 204

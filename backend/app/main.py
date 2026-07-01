@@ -6,7 +6,7 @@
 
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -21,6 +21,19 @@ app = FastAPI(
     description="QuantLab AI —— AI 量化研究员孵化与因子研究平台",
 )
 
+
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    if request.url.path.startswith("/api/"):
+        response.headers["Cache-Control"] = "no-store"
+    return response
+
+
 app.include_router(api_router, prefix="/api/v1")
 
 
@@ -33,6 +46,36 @@ def health() -> dict:
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _REACT_DIST = _REPO_ROOT / "frontend-react" / "dist"
 _LEGACY_FRONTEND_DIR = _REPO_ROOT / "frontend"
+
+_SPA_SHORTCUTS = frozenset({
+    "/login",
+    "/register",
+    "/feed",
+    "/pricing",
+    "/leaderboards",
+    "/templates",
+    "/projects",
+    "/onboarding",
+    "/challenges",
+    "/me",
+})
+
+
+@app.middleware("http")
+async def spa_path_shortcuts(request: Request, call_next):
+    """Redirect /login etc. to /app/login (SPA base path)."""
+    if request.method == "GET":
+        path = request.url.path
+        skip = (
+            path.startswith(("/api/", "/app", "/app-legacy", "/docs", "/openapi.json"))
+            or path == "/health"
+        )
+        if not skip:
+            if path == "/":
+                return RedirectResponse(url="/app/")
+            if path in _SPA_SHORTCUTS or path.startswith("/share/"):
+                return RedirectResponse(url=f"/app{path}")
+    return await call_next(request)
 
 
 @app.get("/", include_in_schema=False)

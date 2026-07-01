@@ -13,6 +13,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from engine import factor_engine as fe
+from engine import formula as ff
+from backend.app.core.locale import Locale
 from backend.app.models.factor import Factor, FactorKind
 from backend.app.models.project import ResearchProject
 from backend.app.models.user import User, UserLevel
@@ -49,23 +51,42 @@ class StackPermissionError(Exception):
 STACK_MIN_LEVEL = UserLevel.L1
 
 
-def list_templates() -> list[dict]:
-    """平台模板因子目录 (来自 engine 注册表)。"""
+FACTOR_TEMPLATE_GATES: dict[str, dict[str, int]] = {
+    "momentum": {"min_level": 0, "min_tier": 0},
+    "volatility": {"min_level": 0, "min_tier": 0},
+    "mean_reversion": {"min_level": 0, "min_tier": 0},
+    "rsi": {"min_level": 0, "min_tier": 1},
+    "sma_ratio": {"min_level": 1, "min_tier": 0},
+}
+
+
+def list_templates(tier: int = 0, level: int = 0, locale: Locale = "en") -> list[dict]:
+    """平台模板因子目录 (来自 engine 注册表), 含锁定状态。"""
+    from backend.app.i18n import content as i18n
+
     out = []
     for tpl in fe.TEMPLATES.values():
+        gate = FACTOR_TEMPLATE_GATES.get(tpl.code, {"min_level": 0, "min_tier": 0})
+        min_level = gate["min_level"]
+        min_tier = gate["min_tier"]
+        allowed = level >= min_level and tier >= min_tier
+        overlay = i18n.FACTOR_TEMPLATES.get(tpl.code, {}).get(locale) or {}
         out.append(
             {
                 "code": tpl.code,
-                "label": tpl.label,
-                "description": tpl.description,
+                "label": overlay.get("label", tpl.label),
+                "description": overlay.get("description", tpl.description),
                 "requires": list(tpl.requires),
+                "min_level": min_level,
+                "min_tier": min_tier,
+                "allowed": allowed,
                 "params": [
                     {
                         "name": p.name,
                         "default": p.default,
                         "min": p.min,
                         "max": p.max,
-                        "label": p.label,
+                        "label": overlay.get("params", {}).get(p.name, p.label),
                     }
                     for p in tpl.params
                 ],
@@ -109,6 +130,16 @@ def create_template_factor(
         clean = fe.validate_template_params(template_type, params)
     except fe.FactorError as exc:
         raise FactorValidationError(str(exc))
+
+    from backend.app.services import membership_service as ms
+
+    tier = ms.current_tier(db, owner)
+    meta = next(
+        (t for t in list_templates(tier=tier, level=owner.level) if t["code"] == template_type),
+        None,
+    )
+    if meta and not meta["allowed"]:
+        raise FactorValidationError("该因子模板尚未解锁")
 
     pid = _validated_project_id(db, owner.id, project_id)
     _ensure_name_free(db, owner.id, name)
@@ -169,6 +200,34 @@ def create_stack_factor(
     return factor
 
 
+def create_formula_factor(
+    db: Session, owner: User, name: str, expr: str,
+    project_id: uuid.UUID | None = None,
+) -> Factor:
+    """创建公式因子 (L2 + 研究员会员)。权益闸门在路由层 require_feature 把关。"""
+    try:
+        ff.validate(expr)
+        # 在样本行情上试算一次, 提前暴露错误。
+        ff.compute(fe.sample_price_frame(n=120), expr)
+    except ff.FormulaError as exc:
+        raise FactorValidationError(str(exc))
+
+    pid = _validated_project_id(db, owner.id, project_id)
+    _ensure_name_free(db, owner.id, name)
+    factor = Factor(
+        owner_id=owner.id,
+        project_id=pid,
+        name=name,
+        kind=FactorKind.FORMULA.value,
+        template_type=None,
+        spec={"expr": expr.strip()},
+    )
+    db.add(factor)
+    db.commit()
+    db.refresh(factor)
+    return factor
+
+
 def delete_factor(db: Session, owner_id: uuid.UUID, factor_id: uuid.UUID) -> None:
     factor = get_factor(db, owner_id, factor_id)
     db.delete(factor)
@@ -184,6 +243,11 @@ def _compute_series(db: Session, owner_id: uuid.UUID, factor: Factor, market):
         return fe.compute_template_factor(
             market, factor.template_type, factor.spec.get("params", {})
         )
+    if factor.kind == FactorKind.FORMULA.value:
+        try:
+            return ff.compute(market, factor.spec.get("expr", ""))
+        except ff.FormulaError as exc:
+            raise FactorValidationError(str(exc))
     # stack: 取出各组件因子, 递归计算后加权组合
     items = []
     for comp in factor.spec.get("components", []):

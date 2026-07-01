@@ -11,11 +11,12 @@ import uuid
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from engine.research_report import TEMPLATE_LABELS
+from backend.app.core.locale import Locale
+from backend.app.i18n.content import factor_template_label, level_label
 from backend.app.models.factor import Factor
 from backend.app.models.project import ResearchProject
 from backend.app.models.research import ResearchReport
-from backend.app.models.user import User, UserLevel
+from backend.app.models.user import User
 from backend.app.models.validation import Validation, ValidationStatus
 
 
@@ -23,7 +24,9 @@ def _count(db: Session, stmt) -> int:
     return int(db.execute(stmt).scalar_one() or 0)
 
 
-def build_profile(db: Session, user: User, viewer: User | None = None) -> dict:
+def build_profile(
+    db: Session, user: User, viewer: User | None = None, locale: Locale = "en"
+) -> dict:
     uid = user.id
 
     project_count = _count(
@@ -55,9 +58,8 @@ def build_profile(db: Session, user: User, viewer: User | None = None) -> dict:
         .group_by(Factor.template_type)
         .order_by(func.count(Factor.id).desc())
     ).all()
-    tags = [TEMPLATE_LABELS.get(tt, tt) for tt, _ in tt_rows if tt]
+    tags = [factor_template_label(tt, locale) for tt, _ in tt_rows if tt]
 
-    level = UserLevel(user.level)
     from backend.app.services import social_service
 
     follow_counts = social_service.counts(db, uid)
@@ -65,7 +67,7 @@ def build_profile(db: Session, user: User, viewer: User | None = None) -> dict:
         "user_id": str(uid),
         "username": user.username,
         "level": user.level,
-        "level_label": level.label,
+        "level_label": level_label(locale, user.level),
         "research_score": round(user.research_score or 0.0, 2),
         "reward_points": user.reward_points or 0,
         "research_contribution_score": round(user.research_contribution_score or 0.0, 2),

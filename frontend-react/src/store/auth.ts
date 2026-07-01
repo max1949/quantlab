@@ -7,26 +7,33 @@ interface AuthState {
   token: string | null;
   user: User | null;
   ready: boolean; // 启动时是否已尝试恢复会话
-  login: (identifier: string, password: string) => Promise<User>;
+  login: (identifier: string, password: string, captchaToken?: string, captchaAnswer?: string) => Promise<User>;
   register: (body: {
     email: string;
     username: string;
     password: string;
     user_type?: UserType;
     ref?: string | null;
+    captcha_token?: string;
+    captcha_answer?: string;
   }) => Promise<User>;
   logout: () => void;
   refreshMe: () => Promise<User | null>;
   setUser: (user: User) => void;
 }
 
-export const useAuth = create<AuthState>((set, get) => ({
+export const useAuth = create<AuthState>((set) => ({
   token: getToken(),
   user: null,
   ready: false,
 
-  async login(identifier, password) {
-    const tok = await ep.login({ identifier, password });
+  async login(identifier, password, captchaToken?, captchaAnswer?) {
+    const tok = await ep.login({
+      identifier,
+      password,
+      captcha_token: captchaToken,
+      captcha_answer: captchaAnswer,
+    });
     setToken(tok.access_token);
     set({ token: tok.access_token });
     const user = await ep.getMe();
@@ -35,9 +42,10 @@ export const useAuth = create<AuthState>((set, get) => ({
   },
 
   async register(body) {
-    await ep.register(body);
-    // 注册后自动登录
-    return get().login(body.email, body.password);
+    const res = await ep.register(body);
+    setToken(res.access_token);
+    set({ token: res.access_token, user: res.user, ready: true });
+    return res.user;
   },
 
   logout() {

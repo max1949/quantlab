@@ -11,8 +11,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from backend.app.auth.deps import CurrentUser
+from backend.app.auth.deps import CurrentUser, OptionalUser
 from backend.app.core.database import get_db
+from backend.app.core.locale import RequestLocale
 from backend.app.schemas.profile import ResearcherProfile
 from backend.app.services import profile_service, social_service
 
@@ -22,15 +23,17 @@ router = APIRouter()
 @router.get("/me", response_model=ResearcherProfile, summary="我的研究主页")
 def my_profile(
     current_user: CurrentUser,
+    locale: RequestLocale,
     db: Annotated[Session, Depends(get_db)],
 ) -> ResearcherProfile:
-    return ResearcherProfile(**profile_service.build_profile(db, current_user))
+    return ResearcherProfile(**profile_service.build_profile(db, current_user, locale=locale))
 
 
-@router.get("/{user_id}", response_model=ResearcherProfile, summary="研究员主页 (统计 + 方向标签 + 关注状态)")
+@router.get("/{user_id}", response_model=ResearcherProfile, summary="研究员主页 (公开可读)")
 def researcher_profile(
     user_id: str,
-    current_user: CurrentUser,
+    viewer: OptionalUser,
+    locale: RequestLocale,
     db: Annotated[Session, Depends(get_db)],
 ) -> ResearcherProfile:
     try:
@@ -39,7 +42,7 @@ def researcher_profile(
         user = None
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="用户不存在")
-    return ResearcherProfile(**profile_service.build_profile(db, user, viewer=current_user))
+    return ResearcherProfile(**profile_service.build_profile(db, user, viewer=viewer, locale=locale))
 
 
 @router.post("/{user_id}/follow", status_code=status.HTTP_204_NO_CONTENT, summary="关注研究员")

@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from backend.app.auth.deps import CurrentUser
 from backend.app.core.database import get_db
+from backend.app.core.locale import RequestLocale
 from backend.app.schemas.growth import (
     ShareOut,
     StartTemplateRequest,
@@ -25,7 +26,8 @@ from backend.app.schemas.research import (
     ReportDetail,
     ReportSummary,
 )
-from backend.app.services import research_service, share_service, template_service
+from backend.app.services import membership_service as ms, research_service, share_service, template_service
+from backend.app.i18n import content as i18n
 
 router = APIRouter()
 
@@ -35,8 +37,31 @@ router = APIRouter()
 def list_research_templates(
     current_user: CurrentUser,
     db: Annotated[Session, Depends(get_db)],
+    locale: RequestLocale,
 ) -> list[TemplateOut]:
-    return [TemplateOut.model_validate(t) for t in template_service.list_templates(db)]
+    tier = ms.current_tier(db, current_user)
+    items = template_service.list_templates_for_user(db, current_user, tier, locale)
+    out = []
+    for item in items:
+        t = item["template"]
+        loc = item["localized"]
+        out.append(
+            TemplateOut(
+                code=t.code,
+                title=loc["title"],
+                symbol=t.symbol,
+                factor_template=t.factor_template,
+                default_params=t.default_params or {},
+                hypothesis=loc["hypothesis"],
+                description=loc["description"],
+                tags=list(loc["tags"]),
+                min_level=item["min_level"],
+                min_tier=item["min_tier"],
+                allowed=item["allowed"],
+                lock_hint=item["lock_hint"],
+            )
+        )
+    return out
 
 
 @router.post(
@@ -50,11 +75,20 @@ def start_from_template(
     payload: StartTemplateRequest,
     current_user: CurrentUser,
     db: Annotated[Session, Depends(get_db)],
+    locale: RequestLocale,
 ) -> StartTemplateResult:
     try:
-        res = template_service.start(db, current_user, code, with_factor=payload.with_factor)
+        tier = ms.current_tier(db, current_user)
+        res = template_service.start(
+            db, current_user, code, with_factor=payload.with_factor, tier=tier, locale=locale
+        )
     except template_service.TemplateNotFoundError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="模板不存在")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=i18n.t(locale, i18n.TEMPLATE_NOT_FOUND),
+        )
+    except template_service.TemplateLockedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
     return StartTemplateResult(
         project_id=res["project"].id, factor_id=res["factor_id"], template_code=res["template_code"]
     )

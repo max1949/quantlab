@@ -39,8 +39,9 @@ class UserLevel(enum.IntEnum):
 
     L0 = 0  # 观察员: 只读 + 模板因子
     L1 = 1  # 研究学徒: 因子组合器
-    L2 = 2  # 研究员: 自定义 Python 因子 (沙箱执行)
-    L3 = 3  # 高级研究员: vn.py 模拟/实盘接口
+    L2 = 2  # 研究员: 自定义公式因子 + 截面回测 + 成本敏感性
+    L3 = 3  # 进阶研究员: 多因子正交化 + 稳健性 + 过拟合检查
+    L4 = 4  # 量化研究员(准职业): 组合优化 + 模拟实盘
 
     @property
     def label(self) -> str:
@@ -48,7 +49,8 @@ class UserLevel(enum.IntEnum):
             UserLevel.L0: "观察员",
             UserLevel.L1: "研究学徒",
             UserLevel.L2: "研究员",
-            UserLevel.L3: "高级研究员",
+            UserLevel.L3: "进阶研究员",
+            UserLevel.L4: "量化研究员",
         }[self]
 
 

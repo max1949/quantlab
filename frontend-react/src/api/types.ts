@@ -55,6 +55,10 @@ export interface Template {
   hypothesis: string;
   description: string;
   tags: string[];
+  min_level?: number;
+  min_tier?: number;
+  allowed?: boolean;
+  lock_hint?: string | null;
 }
 
 export interface StartTemplateResult {
@@ -98,6 +102,77 @@ export interface Graph {
   edges: GraphEdge[];
 }
 
+export interface ParamSpec {
+  name: string;
+  default: number;
+  min: number;
+  max: number;
+  label: string;
+}
+
+export interface FactorTemplateMeta {
+  code: string;
+  label: string;
+  description: string;
+  params: ParamSpec[];
+  requires: string[];
+  min_level?: number;
+  min_tier?: number;
+  allowed?: boolean;
+}
+
+export interface Plan {
+  code: string;
+  name: string;
+  tier: number;
+  price_cny: number;
+  period_days: number;
+  tagline: string;
+  features: string[];
+}
+
+export interface SubscriptionStatus {
+  tier: number;
+  tier_name: string;
+  plan_code: string;
+  expires_at: string | null;
+  is_paid: boolean;
+}
+
+export interface FeatureState {
+  key: string;
+  label: string;
+  allowed: boolean;
+  level_ok: boolean;
+  tier_ok: boolean;
+  min_level: number;
+  min_level_name: string;
+  min_tier: number;
+  min_tier_name: string;
+}
+
+export interface Entitlements {
+  level: number;
+  level_name: string;
+  tier: number;
+  tier_name: string;
+  features: FeatureState[];
+}
+
+export interface FormulaHelp {
+  variables: string[];
+  functions: { name: string; desc: string }[];
+  examples: string[];
+}
+
+export interface FactorPreview {
+  factor_id: string;
+  name: string;
+  kind: string;
+  sample_rows: number;
+  stats: Record<string, number | null>;
+}
+
 export interface Factor {
   id: string;
   owner_id: string;
@@ -118,6 +193,78 @@ export interface Backtest {
   metrics: Record<string, number> | null;
   created_at: string;
   finished_at: string | null;
+}
+
+export interface CrossSectionBacktest {
+  factor_id: string;
+  factor_name: string;
+  symbols: string[];
+  top_n: number;
+  long_short: boolean;
+  metrics: Record<string, number | null>;
+  equity_curve: { date: string; equity: number | null }[];
+  latest_weights: Record<string, number | null>;
+}
+
+export interface CostSensitivityPoint {
+  fee_rate: number;
+  slippage_bps: number;
+  metrics: Record<string, number | null>;
+}
+
+export interface CostSensitivity {
+  factor_id: string;
+  factor_name: string;
+  symbol: string;
+  results: CostSensitivityPoint[];
+}
+
+export interface OrthogonalizeResult {
+  target_factor_id: string;
+  target_factor_name: string;
+  control_factors: { id: string; name: string }[];
+  symbol: string;
+  result: Record<string, unknown>;
+}
+
+export interface RobustnessTest {
+  factor_id: string;
+  factor_name: string;
+  symbol: string;
+  sensitivity: Record<string, unknown>;
+  verdict: Record<string, unknown>;
+}
+
+export interface OverfitCheck {
+  factor_id: string;
+  factor_name: string;
+  symbol: string;
+  oos: Record<string, unknown>;
+  walk_forward: Record<string, unknown>;
+  sensitivity: Record<string, unknown>;
+  overfit: {
+    risk_score?: number;
+    grade?: string;
+    flags?: { level: string; message: string }[];
+    inputs?: Record<string, number | null>;
+    [key: string]: unknown;
+  };
+}
+
+export interface PortfolioOptimize {
+  symbols: string[];
+  method: string;
+  weights: Record<string, number | null>;
+  expected: Record<string, number | null>;
+  asset_stats: Record<string, Record<string, number | null>>;
+}
+
+export interface PaperSimulate {
+  symbols: string[];
+  weights: Record<string, number>;
+  rebalance: string;
+  metrics: Record<string, number | null>;
+  equity_curve: { date: string; equity: number | null }[];
 }
 
 export interface Validation {

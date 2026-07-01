@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 
 from backend.app.auth.deps import CurrentUser
 from backend.app.core.database import get_db
+from backend.app.core.locale import RequestLocale
 from backend.app.schemas.ai import AiStatusOut, InsightOut
 from backend.app.schemas.growth import MentorOut
 from backend.app.services import ai_service
@@ -31,8 +32,9 @@ class ResearchPlanRequest(BaseModel):
 def mentor_next(
     current_user: CurrentUser,
     db: Annotated[Session, Depends(get_db)],
+    locale: RequestLocale,
 ) -> MentorOut:
-    return MentorOut(**ai_service.mentor_next(db, current_user))
+    return MentorOut(**ai_service.mentor_next(db, current_user, locale))
 
 
 @router.get("/status", response_model=AiStatusOut, summary="AI 助手状态 (是否接入 LLM)")

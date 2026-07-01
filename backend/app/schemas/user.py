@@ -25,6 +25,8 @@ class UserCreate(BaseModel):
         description="字母 / 数字 / 下划线, 3-50 位",
     )
     password: str = Field(min_length=8, max_length=128)
+    captcha_token: str | None = None
+    captcha_answer: str | None = None
     # Sprint 9: 注册即可分流身份 (也可注册后再选); ref = 邀请人 username。
     user_type: UserType | None = None
     ref: str | None = Field(default=None, max_length=50)
@@ -35,6 +37,8 @@ class UserLogin(BaseModel):
 
     identifier: str = Field(description="邮箱或用户名")
     password: str
+    captcha_token: str | None = None
+    captcha_answer: str | None = None
 
 
 class UserOut(BaseModel):
@@ -79,3 +83,11 @@ class Token(BaseModel):
 
     access_token: str
     token_type: str = "bearer"
+
+
+class RegisterOut(BaseModel):
+    """注册成功: 直接返回令牌 + 用户信息 (免二次验证码登录)。"""
+
+    access_token: str
+    token_type: str = "bearer"
+    user: UserOut

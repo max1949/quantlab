@@ -2,18 +2,24 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../store/auth";
 import { useUi } from "../store/ui";
+import { useLocale } from "../store/locale";
 import { apiErrorMessage } from "../api/client";
 import AuthShell from "../components/AuthShell";
+import CaptchaField from "../components/CaptchaField";
 
 export default function Login() {
   const login = useAuth((s) => s.login);
   const notify = useUi((s) => s.notify);
+  const auth = useLocale((s) => s.dict.auth);
+  const nav = useLocale((s) => s.dict.nav);
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as { from?: string } | null)?.from ?? "/app";
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [captchaAnswer, setCaptchaAnswer] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -22,21 +28,21 @@ export default function Login() {
     setLoading(true);
     setError("");
     try {
-      const user = await login(identifier, password);
-      notify(`欢迎回来, ${user.username}`, "success");
+      const user = await login(identifier, password, captchaToken, captchaAnswer);
+      notify(auth.welcomeBack(user.username), "success");
       navigate(user.onboarding_done ? from : "/onboarding", { replace: true });
     } catch (err) {
-      setError(apiErrorMessage(err, "登录失败"));
+      setError(apiErrorMessage(err, auth.loginFailed));
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <AuthShell title="登录 QuantLab AI" subtitle="继续你的量化研究之旅">
+    <AuthShell title={auth.loginTitle} subtitle={auth.loginSubtitle}>
       <form onSubmit={submit} className="space-y-4">
         <div>
-          <label className="label">邮箱或用户名</label>
+          <label className="label">{auth.identifier}</label>
           <input
             className="input"
             value={identifier}
@@ -46,7 +52,7 @@ export default function Login() {
           />
         </div>
         <div>
-          <label className="label">密码</label>
+          <label className="label">{auth.password}</label>
           <input
             type="password"
             className="input"
@@ -55,15 +61,21 @@ export default function Login() {
             required
           />
         </div>
+        <CaptchaField
+          answer={captchaAnswer}
+          onAnswer={setCaptchaAnswer}
+          token={captchaToken}
+          onToken={setCaptchaToken}
+        />
         {error && <p className="text-sm text-rose-600">{error}</p>}
         <button className="btn-primary w-full" disabled={loading}>
-          {loading ? "登录中…" : "登录"}
+          {loading ? auth.signingIn : auth.signIn}
         </button>
       </form>
       <p className="mt-4 text-center text-sm text-slate-500">
-        还没有账号?{" "}
+        {auth.noAccount}{" "}
         <Link to="/register" className="font-medium text-brand-600">
-          免费注册
+          {nav.register}
         </Link>
       </p>
     </AuthShell>

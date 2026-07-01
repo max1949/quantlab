@@ -11,7 +11,7 @@ export default function AuthShell({
   children: ReactNode;
 }) {
   return (
-    <div className="flex min-h-full items-center justify-center bg-gradient-to-b from-white to-brand-50 px-4 py-10">
+    <div className="flex min-h-full items-center justify-center bg-gradient-to-b from-white to-brand-50 px-4 py-10 dark:from-slate-950 dark:to-slate-900">
       <div className="w-full max-w-md">
         <Link to="/" className="mb-6 flex items-center justify-center gap-2">
           <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand-600 text-base font-bold text-white">
@@ -20,7 +20,7 @@ export default function AuthShell({
           <span className="text-xl font-semibold">QuantLab AI</span>
         </Link>
         <div className="card">
-          <h1 className="text-xl font-bold text-slate-900">{title}</h1>
+          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">{title}</h1>
           {subtitle && <p className="mt-1 text-sm text-slate-500">{subtitle}</p>}
           <div className="mt-5">{children}</div>
         </div>

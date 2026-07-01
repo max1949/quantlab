@@ -15,6 +15,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from engine import factor_engine as fe
+from engine import advanced_research as ar
 from engine import walk_forward as wf
 from engine.cost_model import CostConfig
 from backend.app.core.config import get_settings
@@ -179,3 +180,87 @@ def get_validation(db: Session, owner_id: uuid.UUID, validation_id: uuid.UUID) -
     if v is None or v.owner_id != owner_id:
         raise FileNotFoundError(str(validation_id))
     return v
+
+
+def run_orthogonalize(
+    db: Session,
+    owner,
+    target_factor_id: uuid.UUID,
+    control_factor_ids: list[uuid.UUID],
+    symbol: str,
+) -> dict:
+    """L3: 目标因子相对控制因子的正交化分析。"""
+    target = factor_service.get_factor(db, owner.id, target_factor_id)
+    controls = [factor_service.get_factor(db, owner.id, fid) for fid in control_factor_ids]
+    if market_data.get_dataset(db, symbol) is None:
+        raise DatasetNotFoundError(symbol)
+    ohlcv = market_data.load_ohlcv(symbol)
+    target_signal = factor_service._compute_series(db, owner.id, target, ohlcv)
+    control_signals = {
+        f.name: factor_service._compute_series(db, owner.id, f, ohlcv)
+        for f in controls
+    }
+    result = ar.orthogonalize(target_signal, control_signals)
+    return {
+        "target_factor_id": target.id,
+        "target_factor_name": target.name,
+        "control_factors": [{"id": f.id, "name": f.name} for f in controls],
+        "symbol": symbol,
+        "result": result,
+    }
+
+
+def run_robustness_test(
+    db: Session,
+    owner,
+    factor_id: uuid.UUID,
+    symbol: str,
+    cost_config: dict | None = None,
+) -> dict:
+    """L3: 参数稳健性测试。"""
+    factor = factor_service.get_factor(db, owner.id, factor_id)
+    if market_data.get_dataset(db, symbol) is None:
+        raise DatasetNotFoundError(symbol)
+    ohlcv = market_data.load_ohlcv(symbol)
+    cfg = CostConfig(**(cost_config or {}))
+    variants = _sensitivity_variants(factor, db, owner.id)
+    sens = wf.sensitivity(variants, ohlcv, cfg)
+    verdict = ar.robustness_verdict(sens["points"], sens["summary"])
+    return {
+        "factor_id": factor.id,
+        "factor_name": factor.name,
+        "symbol": symbol,
+        "sensitivity": sens,
+        "verdict": verdict,
+    }
+
+
+def run_overfit_check(
+    db: Session,
+    owner,
+    factor_id: uuid.UUID,
+    symbol: str,
+    cost_config: dict | None = None,
+    oos_ratio: float = 0.3,
+    n_splits: int = 4,
+) -> dict:
+    """L3: 过拟合红旗检查。"""
+    factor = factor_service.get_factor(db, owner.id, factor_id)
+    if market_data.get_dataset(db, symbol) is None:
+        raise DatasetNotFoundError(symbol)
+    ohlcv = market_data.load_ohlcv(symbol)
+    cfg = CostConfig(**(cost_config or {}))
+    signal_fn = _signal_fn(db, owner.id, factor)
+    oos = wf.evaluate_oos(signal_fn, ohlcv, cfg, oos_ratio)
+    walk = wf.walk_forward(signal_fn, ohlcv, cfg, n_splits)
+    sens = wf.sensitivity(_sensitivity_variants(factor, db, owner.id), ohlcv, cfg)
+    overfit = ar.overfit_check(oos, walk, sens)
+    return {
+        "factor_id": factor.id,
+        "factor_name": factor.name,
+        "symbol": symbol,
+        "oos": oos,
+        "walk_forward": walk,
+        "sensitivity": sens,
+        "overfit": overfit,
+    }

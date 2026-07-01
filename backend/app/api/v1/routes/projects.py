@@ -13,6 +13,8 @@ from sqlalchemy.orm import Session
 
 from backend.app.auth.deps import CurrentUser
 from backend.app.core.database import get_db
+from backend.app.core.locale import RequestLocale
+from backend.app.i18n.content import overlay_project_fields
 from backend.app.models.project import ProjectStatus
 from backend.app.schemas.project import GraphOut, ProjectCreate, ProjectOut
 from backend.app.services import project_service
@@ -20,25 +22,37 @@ from backend.app.services import project_service
 router = APIRouter()
 
 
+def _project_out(project, locale: RequestLocale) -> ProjectOut:
+    base = ProjectOut.model_validate(project)
+    overlay = overlay_project_fields(
+        base.title, base.question, base.description, list(base.tags or []), locale
+    )
+    if overlay:
+        return base.model_copy(update=overlay)
+    return base
+
+
 @router.post("", response_model=ProjectOut, status_code=status.HTTP_201_CREATED, summary="创建研究项目")
 def create_project(
     payload: ProjectCreate,
     current_user: CurrentUser,
+    locale: RequestLocale,
     db: Annotated[Session, Depends(get_db)],
 ) -> ProjectOut:
     project = project_service.create_project(
         db, current_user, payload.title, payload.symbol, payload.question,
         payload.description, payload.tags,
     )
-    return ProjectOut.model_validate(project)
+    return _project_out(project, locale)
 
 
 @router.get("", response_model=list[ProjectOut], summary="我的研究项目")
 def list_my_projects(
     current_user: CurrentUser,
+    locale: RequestLocale,
     db: Annotated[Session, Depends(get_db)],
 ) -> list[ProjectOut]:
-    return [ProjectOut.model_validate(p) for p in project_service.list_my_projects(db, current_user.id)]
+    return [_project_out(p, locale) for p in project_service.list_my_projects(db, current_user.id)]
 
 
 def _load_visible(db, current_user, project_id: str):
@@ -55,15 +69,17 @@ def _load_visible(db, current_user, project_id: str):
 def get_project(
     project_id: str,
     current_user: CurrentUser,
+    locale: RequestLocale,
     db: Annotated[Session, Depends(get_db)],
 ) -> ProjectOut:
-    return ProjectOut.model_validate(_load_visible(db, current_user, project_id))
+    return _project_out(_load_visible(db, current_user, project_id), locale)
 
 
 @router.post("/{project_id}/publish", response_model=ProjectOut, summary="发布项目到研究 Feed")
 def publish_project(
     project_id: str,
     current_user: CurrentUser,
+    locale: RequestLocale,
     db: Annotated[Session, Depends(get_db)],
 ) -> ProjectOut:
     try:
@@ -75,7 +91,7 @@ def publish_project(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="项目还没有任何研究产物 (先在项目下造因子), 不能发布",
         )
-    return ProjectOut.model_validate(p)
+    return _project_out(p, locale)
 
 
 @router.get("/{project_id}/graph", response_model=GraphOut, summary="研究路径图谱 (假设→实验→验证→结果)")

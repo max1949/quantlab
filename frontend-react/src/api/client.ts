@@ -23,6 +23,22 @@ api.interceptors.request.use((config) => {
     config.headers = config.headers ?? {};
     config.headers.Authorization = `Bearer ${token}`;
   }
+  try {
+    const raw = localStorage.getItem("ql-locale");
+    if (raw) {
+      const loc = JSON.parse(raw)?.state?.locale;
+      if (loc === "en" || loc === "zh") {
+        config.headers = config.headers ?? {};
+        config.headers["Accept-Language"] = loc;
+      }
+    } else {
+      config.headers = config.headers ?? {};
+      config.headers["Accept-Language"] = "en";
+    }
+  } catch {
+    config.headers = config.headers ?? {};
+    config.headers["Accept-Language"] = "en";
+  }
   return config;
 });
 

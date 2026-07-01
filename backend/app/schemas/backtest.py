@@ -46,3 +46,47 @@ class BacktestDetail(BacktestSummary):
     equity_curve: list | None
     report: dict | None
     error: str | None
+
+
+class CrossSectionBacktestCreate(BaseModel):
+    """L2: 截面多标的回测入参。"""
+
+    factor_id: uuid.UUID
+    symbols: list[str] = Field(default_factory=lambda: ["RB", "AU", "IF"], min_length=2)
+    top_n: int = Field(default=1, ge=1, le=10)
+    long_short: bool = True
+    fee_rate: float = Field(default=0.0005, ge=0, le=0.1)
+    slippage_bps: float = Field(default=1.0, ge=0, le=1000)
+
+
+class CrossSectionBacktestOut(BaseModel):
+    factor_id: uuid.UUID
+    factor_name: str
+    symbols: list[str]
+    top_n: int
+    long_short: bool
+    metrics: dict
+    equity_curve: list
+    latest_weights: dict[str, float | None]
+
+
+class CostSensitivityCreate(BaseModel):
+    """L2: 成本敏感性分析入参。"""
+
+    factor_id: uuid.UUID
+    symbol: str
+    fee_rates: list[float] = Field(default_factory=lambda: [0.0, 0.0002, 0.0005, 0.001])
+    slippage_bps_values: list[float] = Field(default_factory=lambda: [0.0, 1.0, 3.0, 5.0])
+
+
+class CostSensitivityPoint(BaseModel):
+    fee_rate: float
+    slippage_bps: float
+    metrics: dict
+
+
+class CostSensitivityOut(BaseModel):
+    factor_id: uuid.UUID
+    factor_name: str
+    symbol: str
+    results: list[CostSensitivityPoint]

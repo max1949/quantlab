@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from engine.backtest import run_backtest
 from engine.cost_model import CostConfig
+from engine.cross_section import run_cross_section_backtest
 from engine.report import build_research_report
 from backend.app.core.config import get_settings
 from backend.app.models.backtest import Backtest, BacktestStatus
@@ -136,6 +137,74 @@ def create_and_run(
 
         run_backtest_task.delay(str(bt.id))
     return bt
+
+
+def run_cross_section_analysis(
+    db: Session,
+    owner,
+    factor_id: uuid.UUID,
+    symbols: list[str],
+    cost_config: dict | None,
+    top_n: int = 1,
+    long_short: bool = True,
+) -> dict:
+    """即时运行 L2 截面多标的回测 (不落库)。"""
+    factor = factor_service.get_factor(db, owner.id, factor_id)
+    signals = {}
+    closes = {}
+    for sym in symbols:
+        if market_data.get_dataset(db, sym) is None:
+            raise DatasetNotFoundError(sym)
+        ohlcv = market_data.load_ohlcv(sym)
+        signals[sym] = factor_service._compute_series(db, owner.id, factor, ohlcv)
+        closes[sym] = ohlcv["close"]
+    cfg = CostConfig(**(cost_config or {}))
+    result = run_cross_section_backtest(
+        signals=signals,
+        closes=closes,
+        cost_config=cfg,
+        top_n=top_n,
+        long_short=long_short,
+    )
+    return {
+        "factor_id": factor.id,
+        "factor_name": factor.name,
+        **result,
+    }
+
+
+def run_cost_sensitivity(
+    db: Session,
+    owner,
+    factor_id: uuid.UUID,
+    symbol: str,
+    fee_rates: list[float],
+    slippage_bps_values: list[float],
+) -> dict:
+    """即时运行 L2 成本敏感性分析 (不落库)。"""
+    factor = factor_service.get_factor(db, owner.id, factor_id)
+    if market_data.get_dataset(db, symbol) is None:
+        raise DatasetNotFoundError(symbol)
+    ohlcv = market_data.load_ohlcv(symbol)
+    signal = factor_service._compute_series(db, owner.id, factor, ohlcv)
+    results = []
+    for fee in fee_rates:
+        for slip in slippage_bps_values:
+            cfg = CostConfig(fee_rate=float(fee), slippage_bps=float(slip))
+            bt = run_backtest(signal, ohlcv, cfg)
+            results.append(
+                {
+                    "fee_rate": float(fee),
+                    "slippage_bps": float(slip),
+                    "metrics": bt["metrics"],
+                }
+            )
+    return {
+        "factor_id": factor.id,
+        "factor_name": factor.name,
+        "symbol": symbol,
+        "results": results,
+    }
 
 
 def list_backtests(db: Session, owner_id: uuid.UUID) -> list[Backtest]:

@@ -7,7 +7,6 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from backend.app.auth.deps import CurrentUser
 from backend.app.core.database import get_db
 from backend.app.schemas.growth import LeaderRow
 from backend.app.services import leaderboard_service
@@ -15,10 +14,9 @@ from backend.app.services import leaderboard_service
 router = APIRouter()
 
 
-@router.get("/{kind}", response_model=list[LeaderRow], summary="多维榜单 (researcher/contributor/newcomer/improved)")
+@router.get("/{kind}", response_model=list[LeaderRow], summary="多维榜单 (公开可读)")
 def leaderboard(
     kind: str,
-    current_user: CurrentUser,
     db: Annotated[Session, Depends(get_db)],
     limit: int = 50,
 ) -> list[LeaderRow]:
