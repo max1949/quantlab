@@ -93,12 +93,16 @@ def fetch_real_ohlcv(
     return df
 
 
-def load_ohlcv(symbol: str, timeframe: str = "1d") -> pd.DataFrame:
+def load_ohlcv(
+    symbol: str, timeframe: str = "1d", *, max_rows: int | None = None
+) -> pd.DataFrame:
     path = dataset_path(symbol, timeframe)
     if not path.exists():
         raise FileNotFoundError(f"行情数据不存在: {symbol} ({path})")
     df = pd.read_parquet(path)
     df.index = pd.to_datetime(df.index)
+    if max_rows is not None and len(df) > max_rows:
+        df = df.iloc[-int(max_rows) :].copy()
     return df
 
 

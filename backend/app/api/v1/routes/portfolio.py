@@ -47,6 +47,8 @@ def optimize_portfolio(
         result = pf.optimize_weights(returns, payload.method)
     except FileNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"行情不存在: {exc}")
+    except mdp.MarketDataAccessError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
     return PortfolioOptimizeOut(symbols=payload.symbols, **result)
@@ -67,6 +69,8 @@ def paper_simulate(
         result = pf.simulate_portfolio(returns, payload.weights, payload.rebalance)
     except FileNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"行情不存在: {exc}")
+    except mdp.MarketDataAccessError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
     return PaperSimulateOut(

@@ -6,7 +6,7 @@ import uuid
 from datetime import date, datetime, timezone
 
 import pandas as pd
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from backend.app.models.factor import Factor
@@ -34,6 +34,39 @@ def _latest_success_validation(db: Session, factor_id: uuid.UUID) -> Validation 
         )
         .order_by(Validation.created_at.desc())
     ).scalars().first()
+
+
+def _latest_validations_map(db: Session) -> dict[uuid.UUID, Validation]:
+    """每个因子最近一次成功验证 (批量查询, 供 cron 使用)。"""
+    subq = (
+        select(
+            Validation.factor_id,
+            func.max(Validation.created_at).label("max_created"),
+        )
+        .where(Validation.status == ValidationStatus.SUCCESS.value)
+        .group_by(Validation.factor_id)
+        .subquery()
+    )
+    rows = db.execute(
+        select(Validation).join(
+            subq,
+            (Validation.factor_id == subq.c.factor_id)
+            & (Validation.created_at == subq.c.max_created),
+        )
+    ).scalars().all()
+    return {v.factor_id: v for v in rows}
+
+
+def _snapshot_to_preview(row: PaperSnapshot) -> dict:
+    return {
+        "factor_id": str(row.factor_id),
+        "symbol": row.symbol,
+        "timeframe": row.timeframe,
+        "bars": row.bars,
+        "as_of_date": row.as_of_date.isoformat(),
+        "metrics": row.metrics,
+        "nav_end": row.nav_end,
+    }
 
 
 def compute_paper_nav(
@@ -177,7 +210,7 @@ def assess_factor_decay(
     if preview is None:
         try:
             preview = compute_paper_nav(db, factor_id, owner_id)
-        except PaperTrackingError:
+        except (PaperTrackingError, mdp.MarketDataAccessError):
             preview = None
 
     rows = list_snapshots(db, factor_id, owner_id, limit=30)
@@ -196,11 +229,7 @@ def assess_factor_decay(
 
 def snapshot_history_payload(db: Session, factor_id: uuid.UUID, owner_id: uuid.UUID) -> dict:
     rows = list_snapshots(db, factor_id, owner_id)
-    preview = None
-    try:
-        preview = compute_paper_nav(db, factor_id, owner_id)
-    except PaperTrackingError:
-        preview = None
+    preview = _snapshot_to_preview(rows[0]) if rows else None
     decay = assess_factor_decay(db, factor_id, owner_id, preview=preview)
     return {
         "factor_id": str(factor_id),
@@ -236,15 +265,17 @@ def run_daily_paper_batch(db: Session, *, bars: int = 120) -> dict:
     started = datetime.now(timezone.utc)
     ok, skipped, failed = 0, 0, 0
     errors: list[str] = []
+    latest_vals = _latest_validations_map(db)
     for factor_id, owner_id in factors_eligible_for_daily_snapshot(db):
         try:
-            val = _latest_success_validation(db, factor_id)
-            if val is None:
+            if latest_vals.get(factor_id) is None:
                 skipped += 1
                 continue
             record_snapshot(db, factor_id, owner_id, bars=bars)
             ok += 1
         except PaperTrackingError:
+            skipped += 1
+        except mdp.MarketDataAccessError:
             skipped += 1
         except Exception as exc:  # noqa: BLE001
             failed += 1

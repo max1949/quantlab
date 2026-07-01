@@ -19,18 +19,21 @@ TIER_MARKET_POLICY: dict[int, dict] = {
         "max_bars": {"1d": 252},
         "summary_zh": "免费: 日线 · 近1年",
         "summary_en": "Free: daily · last 1 year",
+        "limit_labels": {"1d": "近1年 (252根)"},
     },
     1: {
         "timeframes": frozenset({"1d", "1m"}),
         "max_bars": {"1d": 504, "1m": 50_000},
         "summary_zh": "研究员: 日线2年 / 分钟线1年",
         "summary_en": "Researcher: 2y daily / 1y 1-minute",
+        "limit_labels": {"1d": "近2年 (504根)", "1m": "近1年 (5万根)"},
     },
     2: {
         "timeframes": frozenset({"1d", "1m"}),
         "max_bars": {"1d": None, "1m": None},
         "summary_zh": "专业: 全历史行情",
         "summary_en": "Pro: full history",
+        "limit_labels": {"1d": "全历史", "1m": "全历史"},
     },
 }
 
@@ -73,8 +76,7 @@ def load_for_user(db: Session, user: User, symbol: str, timeframe: str = "1d"):
     assert_timeframe_allowed(db, user, timeframe)
     tier = ms.current_tier(db, user)
     cap = max_bars_for(tier, timeframe)
-    df = market_data.load_ohlcv(symbol, timeframe)
-    return trim_ohlcv(df, cap)
+    return market_data.load_ohlcv(symbol, timeframe, max_rows=cap)
 
 
 def load_for_snapshot(
@@ -118,11 +120,12 @@ def entitlement_payload(db: Session, user: User) -> dict:
     tier = ms.current_tier(db, user)
     policy = policy_for_tier(tier)
     limits = {}
+    labels = policy.get("limit_labels", {})
     for tf in sorted(policy["timeframes"]):
         cap = policy["max_bars"].get(tf)
         limits[tf] = {
             "max_bars": cap,
-            "label": f"近{cap}根" if cap else "全历史",
+            "label": labels.get(tf) or ("全历史" if cap is None else f"近{cap}根"),
         }
     return {
         "allowed_timeframes": sorted(policy["timeframes"]),

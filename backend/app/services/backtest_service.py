@@ -165,10 +165,13 @@ def run_cross_section_analysis(
     factor = factor_service.get_factor(db, owner.id, factor_id)
     signals = {}
     closes = {}
+    ohlcv_cache: dict[str, pd.DataFrame] = {}
     for sym in symbols:
         if market_data.get_dataset(db, sym) is None:
             raise DatasetNotFoundError(sym)
-        ohlcv = mdp.load_for_user(db, owner, sym, "1d")
+        if sym not in ohlcv_cache:
+            ohlcv_cache[sym] = mdp.load_for_user(db, owner, sym, "1d")
+        ohlcv = ohlcv_cache[sym]
         signals[sym] = factor_service._compute_series(db, owner.id, factor, ohlcv)
         closes[sym] = ohlcv["close"]
     cfg = CostConfig(**(cost_config or {}))

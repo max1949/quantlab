@@ -79,6 +79,7 @@ const en = {
     redeemFailed: "Redeem failed",
     loginFirst: "Please sign in to redeem membership.",
     loadFailed: "Failed to load plans",
+    dataPlan: "Market data",
   },
   projects: {
     title: "My research projects",
@@ -301,6 +302,8 @@ const en = {
     dataBarsCapped: (eff: number, total: number) =>
       `${eff.toLocaleString()} bars (plan cap · ${total.toLocaleString()} in library)`,
     dataPlanHint: "Minute data & longer history → Researcher plan",
+    dataPlanLabel: "Your data plan",
+    dataPlanUpgrade: "Upgrade",
     qualityPass: "Ready for feed — passes research quality gate",
     qualityFail: "Not ready to publish — fix these first",
   },
@@ -557,6 +560,7 @@ const zh = {
     redeemFailed: "兑换失败",
     loginFirst: "请先登录。",
     loadFailed: "套餐加载失败",
+    dataPlan: "行情权限",
   },
   projects: {
     title: "我的研究项目",
@@ -778,6 +782,8 @@ const zh = {
     dataBarsCapped: (eff: number, total: number) =>
       `${eff.toLocaleString()} 根 (套餐上限 · 库内共 ${total.toLocaleString()} 根)`,
     dataPlanHint: "分钟线 / 更长历史 → 研究员月卡",
+    dataPlanLabel: "当前行情套餐",
+    dataPlanUpgrade: "升级",
     qualityPass: "已达广场发布标准",
     qualityFail: "尚未达发布门槛 — 请先完成以下项",
   },

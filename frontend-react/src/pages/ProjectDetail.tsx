@@ -5,6 +5,7 @@ import {
   createBacktest,
   createValidation,
   generateReport,
+  getEntitlements,
   getGraph,
   getProject,
   getProjectQuality,
@@ -43,6 +44,10 @@ export default function ProjectDetail() {
     enabled: Boolean(id),
   });
   const datasets = useQuery({ queryKey: ["datasets"], queryFn: listDatasets });
+  const entitlements = useQuery({
+    queryKey: ["entitlements"],
+    queryFn: getEntitlements,
+  });
 
   const projectFactors = useMemo(
     () => (factors.data ?? []).filter((f) => f.project_id === id),
@@ -57,10 +62,13 @@ export default function ProjectDetail() {
   const symbol = project.data?.symbol || "";
 
   const timeframeOptions = useMemo(() => {
-    if (!symbol || !datasets.data) return ["1d"];
+    const allowed = entitlements.data?.market_data?.allowed_timeframes;
+    if (!symbol || !datasets.data) return allowed?.length ? [...allowed] : ["1d"];
     const tfs = datasets.data.filter((d) => d.symbol === symbol).map((d) => d.timeframe);
-    return tfs.length ? Array.from(new Set(tfs)).sort() : ["1d"];
-  }, [datasets.data, symbol]);
+    const unique = tfs.length ? Array.from(new Set(tfs)).sort() : ["1d"];
+    if (!allowed?.length) return unique;
+    return unique.filter((tf) => allowed.includes(tf));
+  }, [datasets.data, symbol, entitlements.data]);
 
   const [timeframe, setTimeframe] = useState("1d");
   const activeTimeframe = timeframeOptions.includes(timeframe) ? timeframe : timeframeOptions[0];
@@ -237,6 +245,17 @@ export default function ProjectDetail() {
               </option>
             ))}
           </select>
+        </div>
+      )}
+
+      {entitlements.data?.market_data?.summary && (
+        <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300">
+          {p.dataPlanLabel}: {entitlements.data.market_data.summary}
+          {entitlements.data.tier < 2 && (
+            <Link to="/pricing" className="ml-2 text-brand-600 hover:underline dark:text-brand-400">
+              {p.dataPlanUpgrade}
+            </Link>
+          )}
         </div>
       )}
 

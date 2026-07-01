@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   checkout,
+  getEntitlements,
   getPlans,
   getSubscription,
   redeemCode,
@@ -22,6 +23,11 @@ export default function Pricing() {
   const sub = useQuery({
     queryKey: ["subscription"],
     queryFn: getSubscription,
+    enabled: !!user,
+  });
+  const ent = useQuery({
+    queryKey: ["entitlements"],
+    queryFn: getEntitlements,
     enabled: !!user,
   });
 
@@ -65,6 +71,11 @@ export default function Pricing() {
               ({p.expires}{" "}
               {new Date(sub.data.expires_at).toLocaleDateString()})
             </span>
+          )}
+          {ent.data?.market_data?.summary && (
+            <div className="mt-1 text-slate-600 dark:text-slate-400">
+              {p.dataPlan}: {ent.data.market_data.summary}
+            </div>
           )}
         </div>
       )}

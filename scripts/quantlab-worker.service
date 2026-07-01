@@ -1,0 +1,19 @@
+[Unit]
+Description=QuantLab Celery worker (backtest / validation / paper batch)
+After=network.target redis.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=quantlab
+WorkingDirectory=/opt/quantlab
+Environment=PYTHONPATH=/opt/quantlab
+EnvironmentFile=/opt/quantlab/.env
+ExecStart=/opt/quantlab/.venv/bin/celery -A backend.app.tasks.celery_app worker --loglevel=info --concurrency=2
+Restart=on-failure
+RestartSec=10
+MemoryMax=2G
+CPUQuota=200%
+
+[Install]
+WantedBy=multi-user.target

@@ -92,3 +92,66 @@ def test_trim_and_effective_rows():
     assert len(trimmed) == 252
     assert mdp.effective_rows(1000, 0, "1d") == 252
     assert mdp.effective_rows(1000, 2, "1m") == 1000
+
+
+def test_load_ohlcv_tail_reads_only_recent_rows(db_session, tmp_path):
+    from backend.app.core.config import get_settings
+
+    settings = get_settings()
+    prev = settings.market_data_dir
+    settings.market_data_dir = str(tmp_path)
+    try:
+        n = 60_000
+        cap = 50_000
+        idx = pd.date_range("2023-01-02", periods=n, freq="min")
+        df = pd.DataFrame(
+            {
+                "open": range(n),
+                "high": range(n),
+                "low": range(n),
+                "close": range(n),
+                "volume": 1000,
+            },
+            index=idx,
+        )
+        path = market_data.dataset_path("RB", "1m")
+        df.to_parquet(path)
+        loaded = market_data.load_ohlcv("RB", "1m", max_rows=cap)
+        assert len(loaded) == cap
+        assert int(loaded["close"].iloc[0]) == n - cap
+    finally:
+        settings.market_data_dir = prev
+
+
+def test_expired_tier_blocks_paper_preview(client, db_session):
+    h = _auth(client)
+    market_data.seed_sample_market_data(db_session)
+    n = 500
+    idx = pd.date_range("2023-01-02", periods=n, freq="min")
+    df_1m = pd.DataFrame(
+        {"open": 1.0, "high": 1.0, "low": 1.0, "close": 1.0, "volume": 1000},
+        index=idx,
+    )
+    df_1m.to_parquet(market_data.dataset_path("RB", "1m"))
+    market_data.register_dataset(db_session, "RB", df_1m, "1m")
+    user = _user(db_session)
+    ms.grant(db_session, user, tier=1, period_days=30, plan_code="plus_monthly", source="test")
+    fid = client.post(
+        f"{BASE}/factors/template",
+        headers=h,
+        json={"name": "m", "template_type": "momentum", "params": {"window": 5}},
+    ).json()["id"]
+    resp = client.post(
+        f"{BASE}/validations",
+        headers=h,
+        json={"factor_id": fid, "symbol": "RB", "timeframe": "1m"},
+    )
+    assert resp.status_code == 201
+    # 模拟会员过期: 删除订阅
+    from backend.app.models.membership import Subscription
+
+    for sub in db_session.execute(__import__("sqlalchemy").select(Subscription)).scalars():
+        db_session.delete(sub)
+    db_session.commit()
+    prev = client.get(f"{BASE}/factors/{fid}/paper-preview", headers=h)
+    assert prev.status_code == 403

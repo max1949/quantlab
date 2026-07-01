@@ -28,6 +28,7 @@ from backend.app.schemas.factor import (
     TemplateFactorCreate,
 )
 from backend.app.services import factor_service
+from backend.app.services import market_data_policy as mdp
 from engine import formula as ff
 
 router = APIRouter()
@@ -251,6 +252,8 @@ def paper_preview(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="因子不存在")
     except ResearchQualityError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=exc.reasons)
+    except mdp.MarketDataAccessError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
 
 
 @router.get("/{factor_id}/paper-decay", summary="纸面衰减评估")
@@ -265,6 +268,8 @@ def paper_decay(
         return pts.assess_factor_decay(db, uuid.UUID(factor_id), current_user.id)
     except (factor_service.FactorNotFoundError, ValueError):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="因子不存在")
+    except mdp.MarketDataAccessError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
 
 
 @router.get("/{factor_id}/paper-history", response_model=PaperHistoryOut, summary="纸面跟踪历史")
@@ -279,6 +284,8 @@ def paper_history(
         payload = pts.snapshot_history_payload(db, uuid.UUID(factor_id), current_user.id)
     except (factor_service.FactorNotFoundError, ValueError):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="因子不存在")
+    except mdp.MarketDataAccessError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
     return PaperHistoryOut(**payload)
 
 
@@ -297,6 +304,8 @@ def paper_refresh(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="因子不存在")
     except PaperTrackingError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=exc.message)
+    except mdp.MarketDataAccessError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
     if row is None:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="无法记录快照")
     return {

@@ -22,6 +22,21 @@ source "$INSTALL_DIR/.venv/bin/activate"
 set -a && source "$INSTALL_DIR/.env" && set +a
 cd "$INSTALL_DIR/backend" && alembic upgrade head && cd "$INSTALL_DIR"
 
+# 异步任务: 启用 Celery worker (回测/验证不阻塞 API)
+if grep -q '^CELERY_TASK_ALWAYS_EAGER=true' "$INSTALL_DIR/.env" 2>/dev/null; then
+  sed -i 's/^CELERY_TASK_ALWAYS_EAGER=true/CELERY_TASK_ALWAYS_EAGER=false/' "$INSTALL_DIR/.env"
+  echo "==> CELERY_TASK_ALWAYS_EAGER=false"
+fi
+if [[ -f "$INSTALL_DIR/scripts/quantlab-worker.service" ]]; then
+  APP_USER=$(stat -c '%U' "$INSTALL_DIR" 2>/dev/null || echo quantlab)
+  sed "s/User=quantlab/User=${APP_USER}/" "$INSTALL_DIR/scripts/quantlab-worker.service" \
+    > /etc/systemd/system/quantlab-worker.service
+  systemctl daemon-reload
+  systemctl enable quantlab-worker
+  systemctl restart quantlab-worker
+  echo "==> quantlab-worker restarted"
+fi
+
 systemctl restart quantlab
 sleep 2
 
