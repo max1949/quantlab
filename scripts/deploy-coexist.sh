@@ -43,23 +43,79 @@ if port_busy "$QUANTLAB_PORT"; then
   exit 1
 fi
 
-echo "==> 安装系统依赖（不启动/不重载其他网站）..."
-export DEBIAN_FRONTEND=noninteractive
-apt-get update -qq
-PKGS=(git curl python3 python3-venv python3-pip build-essential libpq-dev)
-if [[ "$SKIP_INSTALL_PG" != "1" ]] && ! command -v psql >/dev/null 2>&1; then
-  PKGS+=(postgresql postgresql-contrib)
-fi
-if [[ "$SKIP_INSTALL_REDIS" != "1" ]] && ! command -v redis-cli >/dev/null 2>&1; then
-  PKGS+=(redis-server)
-fi
-apt-get install -y -qq "${PKGS[@]}"
+PYTHON_BIN="${PYTHON_BIN:-python3}"
+PG_SERVICE="postgresql"
+REDIS_SERVICE="redis-server"
 
-if [[ "$SKIP_INSTALL_PG" != "1" ]] && systemctl is-enabled postgresql >/dev/null 2>&1; then
-  systemctl start postgresql || true
+install_deps_apt() {
+  export DEBIAN_FRONTEND=noninteractive
+  apt-get update -qq
+  local pkgs=(git curl python3 python3-venv python3-pip build-essential libpq-dev)
+  if [[ "$SKIP_INSTALL_PG" != "1" ]] && ! command -v psql >/dev/null 2>&1; then
+    pkgs+=(postgresql postgresql-contrib)
+  fi
+  if [[ "$SKIP_INSTALL_REDIS" != "1" ]] && ! command -v redis-cli >/dev/null 2>&1; then
+    pkgs+=(redis-server)
+  fi
+  apt-get install -y -qq "${pkgs[@]}"
+  PG_SERVICE=postgresql
+  REDIS_SERVICE=redis-server
+}
+
+install_deps_dnf() {
+  local mgr=$1
+  $mgr install -y git curl gcc make openssl-devel
+  if $mgr install -y python3.11 python3.11-pip python3.11-devel 2>/dev/null; then
+    PYTHON_BIN=python3.11
+  else
+    $mgr install -y python3 python3-pip python3-devel
+    PYTHON_BIN=python3
+  fi
+  if [[ "$SKIP_INSTALL_PG" != "1" ]] && ! command -v psql >/dev/null 2>&1; then
+    $mgr install -y postgresql-server postgresql postgresql-contrib
+    if command -v postgresql-setup >/dev/null 2>&1; then
+      postgresql-setup --initdb 2>/dev/null || true
+    fi
+    PG_SERVICE=postgresql
+  fi
+  if [[ "$SKIP_INSTALL_REDIS" != "1" ]] && ! command -v redis-cli >/dev/null 2>&1; then
+    $mgr install -y redis
+    REDIS_SERVICE=redis
+  fi
+  $mgr install -y postgresql-devel 2>/dev/null || $mgr install -y libpq-devel 2>/dev/null || true
+}
+
+ensure_pg_local_auth() {
+  local pg_hba=""
+  for f in /var/lib/pgsql/data/pg_hba.conf /var/lib/pgsql/*/data/pg_hba.conf; do
+    [[ -f "$f" ]] && pg_hba="$f" && break
+  done
+  if [[ -n "$pg_hba" ]] && ! grep -q 'quantlab.*127.0.0.1' "$pg_hba"; then
+    echo "host    quantlab    quantlab    127.0.0.1/32    scram-sha-256" >>"$pg_hba"
+    systemctl reload "$PG_SERVICE" 2>/dev/null || systemctl restart "$PG_SERVICE" 2>/dev/null || true
+  fi
+}
+
+echo "==> 安装系统依赖（不启动/不重载其他网站）..."
+if command -v apt-get >/dev/null 2>&1; then
+  install_deps_apt
+elif command -v dnf >/dev/null 2>&1; then
+  install_deps_dnf dnf
+elif command -v yum >/dev/null 2>&1; then
+  install_deps_dnf yum
+else
+  echo "未找到 apt-get / dnf / yum，请手动安装 git python3 postgresql redis 后重试"
+  exit 1
 fi
-if [[ "$SKIP_INSTALL_REDIS" != "1" ]] && systemctl is-enabled redis-server >/dev/null 2>&1; then
-  systemctl start redis-server || true
+
+if [[ "$SKIP_INSTALL_PG" != "1" ]] && systemctl list-unit-files 2>/dev/null | grep -q "^${PG_SERVICE}.service"; then
+  systemctl enable "$PG_SERVICE" 2>/dev/null || true
+  systemctl start "$PG_SERVICE" || true
+  ensure_pg_local_auth
+fi
+if [[ "$SKIP_INSTALL_REDIS" != "1" ]] && systemctl list-unit-files 2>/dev/null | grep -q "^${REDIS_SERVICE}.service"; then
+  systemctl enable "$REDIS_SERVICE" 2>/dev/null || true
+  systemctl start "$REDIS_SERVICE" || true
 fi
 
 echo "==> PostgreSQL: 仅新建 quantlab 库/用户..."
