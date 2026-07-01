@@ -94,26 +94,9 @@ def require_project_publishable(db: Session, project_id: uuid.UUID) -> QualityVe
 
 def paper_nav_preview(db: Session, factor_id: uuid.UUID, owner_id: uuid.UUID, bars: int = 120) -> dict:
     """模拟跟踪预览: 用验证时封印段之后的逻辑, 在最近 bars 上滚动净值。"""
-    from backend.app.services import factor_service, market_data
-    from engine.backtest import run_backtest
-    from engine.cost_model import CostConfig
+    from backend.app.services.paper_tracking_service import PaperTrackingError, compute_paper_nav
 
-    factor = factor_service.get_factor(db, owner_id, factor_id)
-    val = _latest_success_validation(db, factor_id)
-    if val is None:
-        raise ResearchQualityError(["需要先完成科学验证"])
-    symbol = val.symbol
-    ohlcv = market_data.load_ohlcv(symbol)
-    tail = ohlcv.iloc[-bars:] if ohlcv.shape[0] > bars else ohlcv
-    signal = factor_service._compute_series(db, owner_id, factor, tail)
-    cfg = CostConfig(**(val.cost_config or {}))
-    result = run_backtest(signal, tail, cfg)
-    return {
-        "factor_id": str(factor_id),
-        "symbol": symbol,
-        "bars": int(tail.shape[0]),
-        "metrics": result.get("metrics") or {},
-        "equity_curve": result.get("equity_curve") or [],
-        "validation_grade": (val.robustness or {}).get("grade"),
-        "note": "此为最近行情上的模拟跟踪预览, 非实盘承诺",
-    }
+    try:
+        return compute_paper_nav(db, factor_id, owner_id, bars=bars)
+    except PaperTrackingError as exc:
+        raise ResearchQualityError([exc.message])

@@ -200,6 +200,65 @@ export async function createFormulaFactor(body: {
   return data;
 }
 
+export type PythonFactorHelp = {
+  template: string;
+  variables: string[];
+  notes: string[];
+};
+
+export async function getPythonFactorHelp(): Promise<PythonFactorHelp> {
+  const { data } = await api.get<PythonFactorHelp>("/factors/python/help");
+  return data;
+}
+
+export async function createPythonFactor(body: {
+  name: string;
+  source: string;
+  project_id?: string;
+}): Promise<Factor> {
+  const { data } = await api.post<Factor>("/factors/python", body);
+  return data;
+}
+
+export type PaperSnapshot = {
+  as_of_date: string;
+  symbol: string;
+  timeframe: string;
+  bars: number;
+  nav_end: number;
+  metrics: Record<string, number>;
+  equity_tail: { date?: string; nav: number }[];
+};
+
+export type PaperHistory = {
+  factor_id: string;
+  snapshots: PaperSnapshot[];
+  latest_preview: {
+    nav_end: number;
+    symbol: string;
+    metrics: Record<string, number>;
+  } | null;
+};
+
+export async function getPaperHistory(factorId: string): Promise<PaperHistory> {
+  const { data } = await api.get<PaperHistory>(`/factors/${factorId}/paper-history`);
+  return data;
+}
+
+export async function refreshPaperSnapshot(factorId: string): Promise<{
+  as_of_date: string;
+  nav_end: number;
+  metrics: Record<string, number>;
+}> {
+  const { data } = await api.post(`/factors/${factorId}/paper-track/refresh`);
+  return data;
+}
+
+export async function getPaperPreview(factorId: string): Promise<Record<string, unknown>> {
+  const { data } = await api.get(`/factors/${factorId}/paper-preview`);
+  return data;
+}
+
 // ---- billing / membership ----
 export async function getPlans(): Promise<Plan[]> {
   const { data } = await api.get<Plan[]>("/billing/plans");

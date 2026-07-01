@@ -59,6 +59,36 @@ class FormulaFactorCreate(BaseModel):
     project_id: uuid.UUID | None = None
 
 
+class PythonFactorCreate(BaseModel):
+    """创建 Python 因子 (L3 + 研究员会员)。"""
+
+    name: str = Field(min_length=1, max_length=120)
+    source: str = Field(min_length=1, max_length=8000)
+    project_id: uuid.UUID | None = None
+
+
+class PythonFactorHelpOut(BaseModel):
+    template: str
+    variables: list[str]
+    notes: list[str]
+
+
+class PaperSnapshotOut(BaseModel):
+    as_of_date: str
+    symbol: str
+    timeframe: str
+    bars: int
+    nav_end: float
+    metrics: dict
+    equity_tail: list
+
+
+class PaperHistoryOut(BaseModel):
+    factor_id: str
+    snapshots: list[PaperSnapshotOut]
+    latest_preview: dict | None = None
+
+
 class FormulaFnDoc(BaseModel):
     name: str
     desc: str

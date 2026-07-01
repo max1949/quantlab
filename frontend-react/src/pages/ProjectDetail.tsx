@@ -20,6 +20,7 @@ import { ErrorBox, PageTitle, Spinner } from "../components/ui";
 import FactorLab from "../components/FactorLab";
 import AdvancedAnalysis from "../components/AdvancedAnalysis";
 import L3ResearchTools from "../components/L3ResearchTools";
+import PaperTrackingPanel from "../components/PaperTrackingPanel";
 import L4PortfolioTools from "../components/L4PortfolioTools";
 import type { Graph } from "../api/types";
 
@@ -355,6 +356,13 @@ export default function ProjectDetail() {
           factors={projectFactors}
           selectedFactorId={projectFactor?.id ?? null}
           symbol={symbol}
+        />
+      </div>
+
+      <div className="mt-4">
+        <PaperTrackingPanel
+          factorId={projectFactor?.id ?? null}
+          enabled={done.validation}
         />
       </div>
 

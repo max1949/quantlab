@@ -21,6 +21,9 @@ from backend.app.schemas.factor import (
     FactorTemplateOut,
     FormulaFactorCreate,
     FormulaHelpOut,
+    PaperHistoryOut,
+    PythonFactorCreate,
+    PythonFactorHelpOut,
     StackFactorCreate,
     TemplateFactorCreate,
 )
@@ -168,6 +171,53 @@ def create_formula_factor(
     return FactorOut.model_validate(factor)
 
 
+@router.get(
+    "/python/help",
+    response_model=PythonFactorHelpOut,
+    summary="Python 因子: 模板与约束",
+)
+def python_help() -> PythonFactorHelpOut:
+    return PythonFactorHelpOut(
+        template=(
+            "def compute(ohlcv):\n"
+            "    close = ohlcv[\"close\"]\n"
+            "    return (close - close.rolling(20).mean()) / close.rolling(20).std()"
+        ),
+        variables=["open", "high", "low", "close", "volume", "open_interest"],
+        notes=[
+            "必须定义 compute(ohlcv) 并返回 pandas Series",
+            "可使用 pd / np, 禁止 import 与文件/网络操作",
+            "在沙箱内执行, 有超时与复杂度限制",
+        ],
+    )
+
+
+@router.post(
+    "/python",
+    response_model=FactorOut,
+    status_code=status.HTTP_201_CREATED,
+    summary="创建 Python 因子 (需 L3 + 研究员会员)",
+)
+def create_python_factor(
+    payload: PythonFactorCreate,
+    current_user: Annotated[User, Depends(require_feature("factor_python"))],
+    db: Annotated[Session, Depends(get_db)],
+) -> FactorOut:
+    try:
+        factor = factor_service.create_python_factor(
+            db, current_user, payload.name, payload.source, project_id=payload.project_id,
+        )
+    except factor_service.FactorValidationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+        )
+    except factor_service.FactorNameTakenError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="同名因子已存在"
+        )
+    return FactorOut.model_validate(factor)
+
+
 @router.get("/{factor_id}", response_model=FactorOut, summary="因子详情")
 def get_factor(
     factor_id: str,
@@ -199,6 +249,45 @@ def paper_preview(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="因子不存在")
     except ResearchQualityError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=exc.reasons)
+
+
+@router.get("/{factor_id}/paper-history", response_model=PaperHistoryOut, summary="纸面跟踪历史")
+def paper_history(
+    factor_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> PaperHistoryOut:
+    from backend.app.services import paper_tracking_service as pts
+
+    try:
+        payload = pts.snapshot_history_payload(db, uuid.UUID(factor_id), current_user.id)
+    except (factor_service.FactorNotFoundError, ValueError):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="因子不存在")
+    return PaperHistoryOut(**payload)
+
+
+@router.post("/{factor_id}/paper-track/refresh", summary="立即刷新纸面快照")
+def paper_refresh(
+    factor_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> dict:
+    from backend.app.services import paper_tracking_service as pts
+    from backend.app.services.paper_tracking_service import PaperTrackingError
+
+    try:
+        row = pts.record_snapshot(db, uuid.UUID(factor_id), current_user.id)
+    except (factor_service.FactorNotFoundError, ValueError):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="因子不存在")
+    except PaperTrackingError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=exc.message)
+    if row is None:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="无法记录快照")
+    return {
+        "as_of_date": row.as_of_date.isoformat(),
+        "nav_end": row.nav_end,
+        "metrics": row.metrics,
+    }
 
 
 @router.post(

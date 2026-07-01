@@ -57,6 +57,7 @@ PLANS: list[dict] = [
         "features": [
             "免费版全部功能",
             "公式因子 (自己写表达式)",
+            "Python 因子 (沙箱隔离)",
             "截面多标的回测",
             "成本敏感性分析",
             "多因子正交化",
@@ -87,6 +88,7 @@ FEATURES: dict[str, dict] = {
     "factor_template": {"label": "模板因子", "min_level": 0, "min_tier": 0},
     "factor_stack": {"label": "因子组合", "min_level": 1, "min_tier": 0},
     "factor_formula": {"label": "公式因子", "min_level": 2, "min_tier": 1},
+    "factor_python": {"label": "Python 因子", "min_level": 3, "min_tier": 1},
     "backtest_cross_section": {"label": "截面多标的回测", "min_level": 2, "min_tier": 1},
     "cost_sensitivity": {"label": "成本敏感性分析", "min_level": 2, "min_tier": 1},
     "factor_orthogonalize": {"label": "多因子正交化", "min_level": 3, "min_tier": 1},
@@ -105,6 +107,14 @@ def _now() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def _normalize_utc(dt: datetime | None) -> datetime | None:
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
 def _active_subscriptions(db: Session, user_id: uuid.UUID) -> list[Subscription]:
     now = _now()
     stmt = select(Subscription).where(
@@ -112,7 +122,11 @@ def _active_subscriptions(db: Session, user_id: uuid.UUID) -> list[Subscription]
         Subscription.status == SubscriptionStatus.ACTIVE.value,
     )
     subs = list(db.execute(stmt).scalars().all())
-    return [s for s in subs if s.expires_at is None or s.expires_at > now]
+    return [
+        s
+        for s in subs
+        if s.expires_at is None or _normalize_utc(s.expires_at) > now
+    ]
 
 
 def current_tier(db: Session, user: User) -> int:

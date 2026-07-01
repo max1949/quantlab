@@ -33,6 +33,7 @@ class FactorKind(str, enum.Enum):
     TEMPLATE = "template"
     STACK = "stack"
     FORMULA = "formula"  # L2: 用户自定义表达式因子
+    PYTHON = "python"  # L3: 用户 Python 因子 (沙箱)
 
 
 class Factor(Base):

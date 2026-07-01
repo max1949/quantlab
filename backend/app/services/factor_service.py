@@ -228,6 +228,39 @@ def create_formula_factor(
     return factor
 
 
+def create_python_factor(
+    db: Session, owner: User, name: str, source: str,
+    project_id: uuid.UUID | None = None,
+) -> Factor:
+    """创建 Python 因子 (L3 + 研究员会员, 沙箱执行)。"""
+    from sandbox.ast_guard import validate_source
+    from sandbox.runner import SandboxError, run_user_factor
+
+    src = (source or "").strip()
+    ok, errors = validate_source(src)
+    if not ok:
+        raise FactorValidationError("; ".join(errors))
+    try:
+        run_user_factor(src, fe.sample_price_frame(n=120))
+    except SandboxError as exc:
+        raise FactorValidationError(str(exc))
+
+    pid = _validated_project_id(db, owner.id, project_id)
+    _ensure_name_free(db, owner.id, name)
+    factor = Factor(
+        owner_id=owner.id,
+        project_id=pid,
+        name=name,
+        kind=FactorKind.PYTHON.value,
+        template_type=None,
+        spec={"source": src},
+    )
+    db.add(factor)
+    db.commit()
+    db.refresh(factor)
+    return factor
+
+
 def delete_factor(db: Session, owner_id: uuid.UUID, factor_id: uuid.UUID) -> None:
     factor = get_factor(db, owner_id, factor_id)
     db.delete(factor)
@@ -247,6 +280,13 @@ def _compute_series(db: Session, owner_id: uuid.UUID, factor: Factor, market):
         try:
             return ff.compute(market, factor.spec.get("expr", ""))
         except ff.FormulaError as exc:
+            raise FactorValidationError(str(exc))
+    if factor.kind == FactorKind.PYTHON.value:
+        from sandbox.runner import SandboxError, run_user_factor
+
+        try:
+            return run_user_factor(factor.spec.get("source", ""), market)
+        except SandboxError as exc:
             raise FactorValidationError(str(exc))
     # stack: 取出各组件因子, 递归计算后加权组合
     items = []

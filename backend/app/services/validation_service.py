@@ -152,6 +152,12 @@ def execute(db: Session, validation_id) -> Validation | None:
         owner = db.get(User, v.owner_id)
         if owner is not None:
             growth_service.recompute_contribution_score(db, owner)
+        try:
+            from backend.app.services import paper_tracking_service as pts
+
+            pts.record_snapshot(db, v.factor_id, v.owner_id)
+        except Exception:
+            pass  # 纸面跟踪失败不影响验证结果
     return v
 
 

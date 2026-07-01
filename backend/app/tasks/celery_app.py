@@ -17,6 +17,7 @@ celery_app = Celery(
     include=[
         "backend.app.tasks.backtest_tasks",
         "backend.app.tasks.validation_tasks",
+        "backend.app.tasks.paper_tracking_tasks",
     ],
 )
 

@@ -10,12 +10,23 @@ export GIT_SSH_COMMAND="${GIT_SSH_COMMAND:-ssh -i /root/.ssh/quantlab_deploy -o 
 git fetch origin
 git reset --hard origin/master
 
+echo "==> alembic upgrade"
+cd backend && alembic upgrade head && cd ..
+
 systemctl restart quantlab
 sleep 2
 
 echo "==> health"
 curl -sf "http://127.0.0.1:${QUANTLAB_PORT:-8010}/health"
 echo ""
+
+# 每日纸面跟踪 cron (工作日 18:30 UTC+8 约 10:30 UTC — 可按需改)
+CRON_LINE="30 10 * * 1-5 bash ${INSTALL_DIR}/scripts/run-daily-paper.sh >> /var/log/quantlab-paper.log 2>&1"
+if ! crontab -l 2>/dev/null | grep -qF run-daily-paper; then
+  (crontab -l 2>/dev/null; echo "$CRON_LINE") | crontab -
+  echo "==> installed daily paper cron"
+fi
+
 echo "==> public feed (first 120 chars)"
 curl -sf "http://127.0.0.1:${QUANTLAB_PORT:-8010}/api/v1/public/feed" | head -c 120
 echo ""

@@ -3,11 +3,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import {
   createFormulaFactor,
+  createPythonFactor,
   createStackFactor,
   createTemplateFactor,
   getEntitlements,
   getFactorTemplates,
   getFormulaHelp,
+  getPythonFactorHelp,
   listFactors,
   previewFactor,
   trackEvent,
@@ -38,12 +40,15 @@ export default function FactorLab({ projectId }: { projectId: string }) {
   const formulaFeat = entitlements.data?.features.find(
     (f) => f.key === "factor_formula",
   );
+  const pythonFeat = entitlements.data?.features.find(
+    (f) => f.key === "factor_python",
+  );
   const projectFactors = useMemo(
     () => (factors.data ?? []).filter((f) => f.project_id === projectId),
     [factors.data, projectId],
   );
 
-  const [mode, setMode] = useState<"template" | "stack" | "formula">("template");
+  const [mode, setMode] = useState<"template" | "stack" | "formula" | "python">("template");
   const [preview, setPreview] = useState<Record<string, FactorPreview>>({});
 
   function refresh() {
@@ -80,6 +85,12 @@ export default function FactorLab({ projectId }: { projectId: string }) {
           >
             {fl.formula}{!formulaFeat?.allowed && " 🔒"}
           </button>
+          <button
+            onClick={() => setMode("python")}
+            className={`rounded-lg px-3 py-1 text-sm ${mode === "python" ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-600"}`}
+          >
+            {fl.python}{!pythonFeat?.allowed && " 🔒"}
+          </button>
         </div>
       </div>
 
@@ -95,7 +106,13 @@ export default function FactorLab({ projectId }: { projectId: string }) {
                   <span className="text-sm font-medium text-slate-700">
                     {f.name}{" "}
                     <span className="badge ml-1">
-                      {f.kind === "stack" ? fl.stackKind : f.template_type}
+                      {f.kind === "stack"
+                        ? fl.stackKind
+                        : f.kind === "formula"
+                          ? fl.formula
+                          : f.kind === "python"
+                            ? fl.python
+                            : f.template_type}
                     </span>
                   </span>
                   <button
@@ -134,18 +151,24 @@ export default function FactorLab({ projectId }: { projectId: string }) {
         (formulaFeat?.allowed ? (
           <FormulaForm projectId={projectId} onCreated={refresh} />
         ) : (
-          <FeatureLock feat={formulaFeat} />
+          <FeatureLock feat={formulaFeat} lockedText={fl.formulaLocked} />
+        ))}
+      {mode === "python" &&
+        (pythonFeat?.allowed ? (
+          <PythonForm projectId={projectId} onCreated={refresh} />
+        ) : (
+          <FeatureLock feat={pythonFeat} lockedText={fl.pythonLocked} />
         ))}
     </div>
   );
 }
 
-function FeatureLock({ feat }: { feat?: FeatureState }) {
+function FeatureLock({ feat, lockedText }: { feat?: FeatureState; lockedText: string }) {
   const f = useLocale((s) => s.dict.factorLab);
   const c = useLocale((s) => s.dict.common);
   return (
     <div className="rounded-lg bg-amber-50 p-4 text-sm text-amber-800">
-      <p className="mb-2 font-medium">🔒 {f.formulaLocked}</p>
+      <p className="mb-2 font-medium">🔒 {lockedText}</p>
       {feat && (
         <ul className="mb-3 space-y-1 text-amber-700">
           <li>
@@ -260,6 +283,76 @@ function FormulaForm({
         onClick={() => create.mutate()}
       >
         {create.isPending ? "创建中…" : "创建公式因子"}
+      </button>
+    </div>
+  );
+}
+
+function PythonForm({
+  projectId,
+  onCreated,
+}: {
+  projectId: string;
+  onCreated: () => void;
+}) {
+  const notify = useUi((s) => s.notify);
+  const fl = useLocale((s) => s.dict.factorLab);
+  const help = useQuery({ queryKey: ["python-help"], queryFn: getPythonFactorHelp });
+  const [name, setName] = useState("");
+  const [source, setSource] = useState("");
+
+  useEffect(() => {
+    if (help.data?.template && !source) {
+      setSource(help.data.template);
+    }
+  }, [help.data, source]);
+
+  const create = useMutation({
+    mutationFn: () =>
+      createPythonFactor({
+        name: name.trim() || "Python factor",
+        source: source.trim(),
+        project_id: projectId,
+      }),
+    onSuccess: () => {
+      void trackEvent("factor_created", { project: projectId, type: "python" });
+      notify(fl.factorCreated, "success");
+      onCreated();
+    },
+    onError: (e) => notify(apiErrorMessage(e, fl.createFailed), "error"),
+  });
+
+  return (
+    <div className="space-y-3 rounded-lg bg-slate-50 p-3">
+      <div>
+        <label className="label">Python {fl.python}</label>
+        <textarea
+          className="input font-mono text-sm"
+          rows={8}
+          value={source}
+          onChange={(e) => setSource(e.target.value)}
+        />
+      </div>
+      {help.data && (
+        <details className="text-xs text-slate-500">
+          <summary className="cursor-pointer text-brand-600">{fl.pythonTemplate}</summary>
+          <ul className="mt-2 list-inside list-disc">
+            {help.data.notes.map((n) => (
+              <li key={n}>{n}</li>
+            ))}
+          </ul>
+        </details>
+      )}
+      <div>
+        <label className="label">{fl.factorName}</label>
+        <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
+      </div>
+      <button
+        className="btn-primary w-full"
+        disabled={create.isPending || !source.trim()}
+        onClick={() => create.mutate()}
+      >
+        {create.isPending ? "…" : fl.createPython}
       </button>
     </div>
   );
