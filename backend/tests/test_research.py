@@ -87,7 +87,7 @@ def test_report_unknown_factor_404(client):
     assert client.post(f"{BASE}/research/factors/{fake}/report", headers=h).status_code == 404
 
 
-def test_public_report_visible_to_others(client, db_session):
+def test_report_private_until_shared(client, db_session):
     seed_sample_market_data(db_session)
     h1 = _register(client, "owner1")
     fid = _factor(client, h1)
@@ -96,7 +96,11 @@ def test_public_report_visible_to_others(client, db_session):
 
     h2 = _register(client, "viewer1")
     resp = client.get(f"{BASE}/research/reports/{rid}", headers=h2)
-    assert resp.status_code == 200  # 默认公开
+    assert resp.status_code == 403
+    share = client.post(f"{BASE}/research/reports/{rid}/share", headers=h1)
+    assert share.status_code == 201, share.text
+    resp = client.get(f"{BASE}/research/reports/{rid}", headers=h2)
+    assert resp.status_code == 200
     assert resp.json()["id"] == rid
 
 

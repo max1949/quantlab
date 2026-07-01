@@ -96,6 +96,7 @@ def test_feed_lists_public_reports(client, db_session):
     fid = _factor_in_project(client, h, proj["id"])
     client.post(f"{BASE}/backtests", headers=h, json={"factor_id": fid, "symbol": "RB"})
     client.post(f"{BASE}/research/reports/generate", headers=h, json={"project_id": proj["id"]})
+    client.post(f"{BASE}/projects/{proj['id']}/publish", headers=h)
     feed = client.get(f"{BASE}/research/feed", headers=h).json()
     assert len(feed) >= 1
     feed_top = client.get(f"{BASE}/research/feed?sort=top", headers=h).json()

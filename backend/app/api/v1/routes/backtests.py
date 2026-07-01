@@ -26,6 +26,7 @@ from backend.app.schemas.backtest import (
 from backend.app.models.user import User
 from backend.app.services import backtest_service, factor_service, market_data
 from backend.app.services import market_data_policy as mdp
+from backend.app.services import rate_limit
 
 router = APIRouter()
 
@@ -55,6 +56,10 @@ def create_backtest(
     current_user: CurrentUser,
     db: Annotated[Session, Depends(get_db)],
 ) -> BacktestDetail:
+    try:
+        rate_limit.check_backtest(str(current_user.id))
+    except rate_limit.RateLimitExceeded as exc:
+        raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=str(exc))
     try:
         bt = backtest_service.create_and_run(
             db,

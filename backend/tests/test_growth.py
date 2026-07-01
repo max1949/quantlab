@@ -104,7 +104,8 @@ def test_share_html_preview_has_og(client, db_session):
 def test_public_feed_no_auth(client, db_session):
     seed_sample_market_data(db_session)
     h = _register(client, "jade")
-    _, rep = _full_research(client, h, db_session)
+    proj, rep = _full_research(client, h, db_session)
+    client.post(f"{BASE}/projects/{proj['id']}/publish", headers=h)
     client.post(f"{BASE}/research/reports/{rep['id']}/share", headers=h)
     feed = client.get(f"{BASE}/public/feed").json()
     assert isinstance(feed, list)

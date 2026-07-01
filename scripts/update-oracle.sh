@@ -22,7 +22,7 @@ source "$INSTALL_DIR/.venv/bin/activate"
 set -a && source "$INSTALL_DIR/.env" && set +a
 cd "$INSTALL_DIR/backend" && alembic upgrade head && cd "$INSTALL_DIR"
 
-# 异步任务: 仅当 Redis 可用时启用 Celery worker + 关闭 eager
+# 异步任务: 生产环境 Redis 不可用时直接失败, 避免重计算压回 API 进程
 _redis_ok=false
 if redis-cli ping 2>/dev/null | grep -q PONG; then
   _redis_ok=true
@@ -31,6 +31,7 @@ elif systemctl restart redis 2>/dev/null && sleep 2 && redis-cli ping 2>/dev/nul
 fi
 
 if [[ "$_redis_ok" == true ]]; then
+  cp "$INSTALL_DIR/.env" "$INSTALL_DIR/.env.bak.$(date +%Y%m%d%H%M%S)"
   if grep -q '^CELERY_TASK_ALWAYS_EAGER=true' "$INSTALL_DIR/.env" 2>/dev/null; then
     sed -i 's/^CELERY_TASK_ALWAYS_EAGER=true/CELERY_TASK_ALWAYS_EAGER=false/' "$INSTALL_DIR/.env"
     echo "==> CELERY_TASK_ALWAYS_EAGER=false (Redis OK)"
@@ -45,10 +46,11 @@ if [[ "$_redis_ok" == true ]]; then
     echo "==> quantlab-worker restarted"
   fi
 else
-  if grep -q '^CELERY_TASK_ALWAYS_EAGER=false' "$INSTALL_DIR/.env" 2>/dev/null; then
-    sed -i 's/^CELERY_TASK_ALWAYS_EAGER=false/CELERY_TASK_ALWAYS_EAGER=true/' "$INSTALL_DIR/.env"
-    echo "==> Redis unavailable — CELERY_TASK_ALWAYS_EAGER=true (sync fallback)"
+  if [[ "${APP_ENV:-production}" == "production" ]]; then
+    echo "ERROR: Redis unavailable in production; aborting deploy to keep API workers isolated." >&2
+    exit 1
   fi
+  echo "==> Redis unavailable — development sync fallback only"
   systemctl stop quantlab-worker 2>/dev/null || true
   systemctl disable quantlab-worker 2>/dev/null || true
 fi

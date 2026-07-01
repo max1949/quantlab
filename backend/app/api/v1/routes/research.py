@@ -9,7 +9,7 @@ from __future__ import annotations
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from backend.app.auth.deps import CurrentUser
@@ -152,10 +152,10 @@ def generate_report_for_factor(
 def research_feed(
     current_user: CurrentUser,
     db: Annotated[Session, Depends(get_db)],
-    sort: str = "latest",
-    limit: int = 30,
+    sort: str = Query(default="latest", pattern="^(latest|top)$"),
+    limit: int = Query(default=30, ge=1, le=50),
 ) -> list[ReportSummary]:
-    return [ReportSummary.model_validate(r) for r in research_service.feed(db, sort, limit)]
+    return [ReportSummary(**r) for r in research_service.feed(db, sort, limit)]
 
 
 @router.get("/reports", response_model=list[ReportSummary], summary="我的研究报告列表")

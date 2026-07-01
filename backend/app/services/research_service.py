@@ -16,6 +16,7 @@ from backend.app.schemas.research import ReportSummary
 from backend.app.models.backtest import Backtest, BacktestStatus
 from backend.app.models.factor import Factor
 from backend.app.models.market import DataSnapshot
+from backend.app.models.project import ProjectStatus, ResearchProject
 from backend.app.models.research import ResearchReport
 from backend.app.models.user import User
 from backend.app.models.validation import Validation, ValidationStatus
@@ -138,6 +139,7 @@ def _build_report_row(
             "backtest_id": str(bt.id) if bt else None,
             "validation_id": str(val.id) if val else None,
         },
+        is_public=False,
     )
     db.add(report)
     db.commit()
@@ -207,14 +209,7 @@ def list_my_reports(db: Session, owner_id: uuid.UUID, limit: int = 50) -> list[R
 _GRADE_RANK = {"稳健": 3, "中等": 2, "偏弱": 1, "脆弱": 0}
 
 
-def _feed_metrics(db: Session, report: ResearchReport) -> tuple[float | None, float | None]:
-    vid = (report.based_on or {}).get("validation_id")
-    if not vid:
-        return None, None
-    try:
-        val = db.get(Validation, uuid.UUID(str(vid)))
-    except (ValueError, TypeError):
-        return None, None
+def _validation_metrics(val: Validation | None) -> tuple[float | None, float | None]:
     if val is None:
         return None, None
     oos_sharpe = None
@@ -227,8 +222,23 @@ def _feed_metrics(db: Session, report: ResearchReport) -> tuple[float | None, fl
     return oos_sharpe, rob_score
 
 
-def feed_summary(db: Session, report: ResearchReport) -> dict:
-    oos_sharpe, robustness_score = _feed_metrics(db, report)
+def _feed_metrics(db: Session, report: ResearchReport) -> tuple[float | None, float | None]:
+    vid = (report.based_on or {}).get("validation_id")
+    if not vid:
+        return None, None
+    try:
+        val = db.get(Validation, uuid.UUID(str(vid)))
+    except (ValueError, TypeError):
+        return None, None
+    return _validation_metrics(val)
+
+
+def feed_summary(
+    db: Session,
+    report: ResearchReport,
+    metric: tuple[float | None, float | None] | None = None,
+) -> dict:
+    oos_sharpe, robustness_score = metric or _feed_metrics(db, report)
     return {
         **ReportSummary.model_validate(report).model_dump(),
         "oos_sharpe": oos_sharpe,
@@ -238,22 +248,48 @@ def feed_summary(db: Session, report: ResearchReport) -> dict:
 
 def feed(db: Session, sort: str = "latest", limit: int = 30) -> list[dict]:
     """研究 Feed: 公开报告。sort=latest(最新) | top(高评分优先)。"""
+    limit = max(1, min(int(limit), 50))
     rows = list(
         db.execute(
             select(ResearchReport)
-            .where(ResearchReport.is_public.is_(True))
+            .join(ResearchProject, ResearchProject.id == ResearchReport.project_id)
+            .where(
+                ResearchReport.is_public.is_(True),
+                ResearchProject.status == ProjectStatus.PUBLISHED.value,
+            )
             .order_by(ResearchReport.created_at.desc())
             .limit(200)
         ).scalars().all()
     )
+    validation_ids: list[uuid.UUID] = []
+    for row in rows:
+        raw = (row.based_on or {}).get("validation_id")
+        if not raw:
+            continue
+        try:
+            validation_ids.append(uuid.UUID(str(raw)))
+        except (TypeError, ValueError):
+            continue
+    validations = {
+        v.id: v
+        for v in db.execute(select(Validation).where(Validation.id.in_(validation_ids))).scalars().all()
+    } if validation_ids else {}
+    metrics_by_report: dict[uuid.UUID, tuple[float | None, float | None]] = {}
+    for row in rows:
+        raw = (row.based_on or {}).get("validation_id")
+        try:
+            val_id = uuid.UUID(str(raw)) if raw else None
+        except (TypeError, ValueError):
+            val_id = None
+        metrics_by_report[row.id] = _validation_metrics(validations.get(val_id)) if val_id else (None, None)
     if sort == "top":
         rows.sort(
             key=lambda r: (
                 _GRADE_RANK.get(r.grade or "", -1),
-                _feed_metrics(db, r)[1] or 0,
-                _feed_metrics(db, r)[0] or 0,
+                metrics_by_report.get(r.id, (None, None))[1] or 0,
+                metrics_by_report.get(r.id, (None, None))[0] or 0,
                 r.created_at,
             ),
             reverse=True,
         )
-    return [feed_summary(db, r) for r in rows[:limit]]
+    return [feed_summary(db, r, metrics_by_report.get(r.id)) for r in rows[:limit]]

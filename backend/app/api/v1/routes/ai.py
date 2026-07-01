@@ -19,9 +19,16 @@ from backend.app.core.database import get_db
 from backend.app.core.locale import RequestLocale
 from backend.app.schemas.ai import AiStatusOut, InsightOut
 from backend.app.schemas.growth import MentorOut
-from backend.app.services import ai_service
+from backend.app.services import ai_service, rate_limit
 
 router = APIRouter()
+
+
+def _check_ai_quota(user_id) -> None:
+    try:
+        rate_limit.check_ai(str(user_id))
+    except rate_limit.RateLimitExceeded as exc:
+        raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=str(exc))
 
 
 class ResearchPlanRequest(BaseModel):
@@ -64,6 +71,7 @@ def research_plan(
     current_user: CurrentUser,
     db: Annotated[Session, Depends(get_db)],
 ) -> InsightOut:
+    _check_ai_quota(current_user.id)
     insight = ai_service.research_plan(db, current_user, payload.theme)
     return InsightOut.model_validate(insight)
 
@@ -79,6 +87,7 @@ def review_validation(
     current_user: CurrentUser,
     db: Annotated[Session, Depends(get_db)],
 ) -> InsightOut:
+    _check_ai_quota(current_user.id)
     try:
         insight = ai_service.review_validation(db, current_user, uuid.UUID(validation_id))
     except ValueError:
@@ -102,6 +111,7 @@ def summarize_backtest(
     current_user: CurrentUser,
     db: Annotated[Session, Depends(get_db)],
 ) -> InsightOut:
+    _check_ai_quota(current_user.id)
     try:
         insight = ai_service.summarize_backtest(db, current_user, uuid.UUID(backtest_id))
     except ValueError:

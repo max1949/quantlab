@@ -15,11 +15,16 @@ from backend.app.core.config import get_settings
 from backend.app.web import share_preview
 
 settings = get_settings()
+if settings.app_env == "production" and settings.secret_key == "change-me-in-production":
+    raise RuntimeError("SECRET_KEY must be set in production")
 
 app = FastAPI(
     title=settings.app_name,
     version="0.1.0",
     description="QuantLab AI —— AI 量化研究员孵化与因子研究平台",
+    docs_url=None if settings.app_env == "production" else "/docs",
+    redoc_url=None if settings.app_env == "production" else "/redoc",
+    openapi_url=None if settings.app_env == "production" else "/openapi.json",
 )
 
 
@@ -59,6 +64,8 @@ def robots_txt() -> str:
 @app.get("/health", tags=["system"])
 def health() -> dict:
     """存活探针。"""
+    if settings.app_env == "production":
+        return {"status": "ok"}
     return {"status": "ok", "env": settings.app_env}
 
 

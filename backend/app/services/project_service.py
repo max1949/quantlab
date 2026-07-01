@@ -105,6 +105,18 @@ def publish_project(db: Session, owner_id: uuid.UUID, project_id: uuid.UUID) -> 
     if not verdict.passed:
         raise ProjectQualityRejectedError(verdict.reasons)
     p.status = ProjectStatus.PUBLISHED.value
+    reports = list(
+        db.execute(
+            select(ResearchReport).where(
+                ResearchReport.project_id == project_id,
+                ResearchReport.owner_id == owner_id,
+            )
+        )
+        .scalars()
+        .all()
+    )
+    for report in reports:
+        report.is_public = True
     db.commit()
     db.refresh(p)
     return p

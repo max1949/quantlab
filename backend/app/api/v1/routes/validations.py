@@ -24,6 +24,7 @@ from backend.app.schemas.validation import (
 )
 from backend.app.services import backtest_service, factor_service, validation_service
 from backend.app.services import market_data_policy as mdp
+from backend.app.services import rate_limit
 
 router = APIRouter()
 
@@ -124,6 +125,10 @@ def create_validation(
     current_user: CurrentUser,
     db: Annotated[Session, Depends(get_db)],
 ) -> ValidationDetail:
+    try:
+        rate_limit.check_validation(str(current_user.id))
+    except rate_limit.RateLimitExceeded as exc:
+        raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=str(exc))
     try:
         v = validation_service.create_and_run(
             db,

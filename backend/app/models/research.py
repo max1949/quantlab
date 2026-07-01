@@ -65,7 +65,7 @@ class ResearchReport(Base):
     based_on: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
 
     is_public: Mapped[bool] = mapped_column(
-        Boolean, default=True, server_default="true", nullable=False
+        Boolean, default=False, server_default="false", nullable=False
     )
 
     created_at: Mapped[datetime] = mapped_column(

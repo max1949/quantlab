@@ -10,6 +10,10 @@ SIGNUP_LIMITS = (5, 3600), (20, 86_400)  # hourly, daily per IP
 LOGIN_LIMITS = (30, 3600)
 CAPTCHA_LIMITS = (60, 3600)
 REDEEM_LIMITS = (12, 3600), (30, 86_400)  # hourly/daily per user + 24/h IP
+EVENT_LIMITS = (120, 60), (2_000, 86_400)  # per IP
+BACKTEST_LIMITS = (12, 3600), (60, 86_400)  # per user
+VALIDATION_LIMITS = (6, 3600), (30, 86_400)  # per user
+AI_LIMITS = (10, 3600), (50, 86_400)  # per user
 
 
 class RateLimitExceeded(Exception):
@@ -30,7 +34,8 @@ def consume(bucket: str, max_calls: int, window_seconds: int) -> bool:
             r.expire(key, window_seconds)
         return count <= max_calls
     except redis.RedisError:
-        return True
+        # 本地/测试环境允许无 Redis 运行；生产环境限流后端失效时保守拒绝。
+        return get_settings().app_env != "production"
 
 
 def require_rate_limit(bucket: str, max_calls: int, window_seconds: int) -> None:
@@ -59,3 +64,29 @@ def check_redeem(ip: str, user_id: str) -> None:
     require_rate_limit(
         f"redeem:user:{user_id}:day", REDEEM_LIMITS[1][0], REDEEM_LIMITS[1][1]
     )
+
+
+def check_event(ip: str) -> None:
+    require_rate_limit(f"event:ip:{ip}", EVENT_LIMITS[0][0], EVENT_LIMITS[0][1])
+    require_rate_limit(f"event:ip:{ip}:day", EVENT_LIMITS[1][0], EVENT_LIMITS[1][1])
+
+
+def check_backtest(user_id: str) -> None:
+    require_rate_limit(f"backtest:user:{user_id}", BACKTEST_LIMITS[0][0], BACKTEST_LIMITS[0][1])
+    require_rate_limit(
+        f"backtest:user:{user_id}:day", BACKTEST_LIMITS[1][0], BACKTEST_LIMITS[1][1]
+    )
+
+
+def check_validation(user_id: str) -> None:
+    require_rate_limit(
+        f"validation:user:{user_id}", VALIDATION_LIMITS[0][0], VALIDATION_LIMITS[0][1]
+    )
+    require_rate_limit(
+        f"validation:user:{user_id}:day", VALIDATION_LIMITS[1][0], VALIDATION_LIMITS[1][1]
+    )
+
+
+def check_ai(user_id: str) -> None:
+    require_rate_limit(f"ai:user:{user_id}", AI_LIMITS[0][0], AI_LIMITS[0][1])
+    require_rate_limit(f"ai:user:{user_id}:day", AI_LIMITS[1][0], AI_LIMITS[1][1])
