@@ -238,6 +238,12 @@ export type PaperHistory = {
     symbol: string;
     metrics: Record<string, number>;
   } | null;
+  decay?: {
+    status: "ok" | "watch" | "alert";
+    reasons: string[];
+    baseline_sharpe?: number | null;
+    paper_sharpe?: number | null;
+  };
 };
 
 export async function getPaperHistory(factorId: string): Promise<PaperHistory> {

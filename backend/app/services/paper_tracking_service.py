@@ -15,6 +15,7 @@ from backend.app.models.validation import Validation, ValidationStatus
 from backend.app.services import factor_service, market_data
 from engine.backtest import run_backtest
 from engine.cost_model import CostConfig
+from engine.paper_decay import assess_paper_decay
 
 
 class PaperTrackingError(Exception):
@@ -151,6 +152,32 @@ def list_snapshots(
     )
 
 
+def assess_factor_decay(db: Session, factor_id: uuid.UUID, owner_id: uuid.UUID) -> dict:
+    """纸面衰减评估 (对比验证 OOS 与最新纸面指标)。"""
+    val = _latest_success_validation(db, factor_id)
+    if val is None:
+        return assess_paper_decay(validation_oos=None, paper_metrics=None).to_dict()
+
+    preview = None
+    try:
+        preview = compute_paper_nav(db, factor_id, owner_id)
+    except PaperTrackingError:
+        preview = None
+
+    rows = list_snapshots(db, factor_id, owner_id, limit=30)
+    nav_series = [r.nav_end for r in reversed(rows)]
+    if preview and preview.get("nav_end") is not None:
+        if not nav_series or nav_series[-1] != preview["nav_end"]:
+            nav_series = nav_series + [preview["nav_end"]]
+
+    verdict = assess_paper_decay(
+        validation_oos=val.oos,
+        paper_metrics=(preview or {}).get("metrics"),
+        nav_series=nav_series or None,
+    )
+    return verdict.to_dict()
+
+
 def snapshot_history_payload(db: Session, factor_id: uuid.UUID, owner_id: uuid.UUID) -> dict:
     rows = list_snapshots(db, factor_id, owner_id)
     preview = None
@@ -158,6 +185,7 @@ def snapshot_history_payload(db: Session, factor_id: uuid.UUID, owner_id: uuid.U
         preview = compute_paper_nav(db, factor_id, owner_id)
     except PaperTrackingError:
         preview = None
+    decay = assess_factor_decay(db, factor_id, owner_id)
     return {
         "factor_id": str(factor_id),
         "snapshots": [
@@ -173,6 +201,7 @@ def snapshot_history_payload(db: Session, factor_id: uuid.UUID, owner_id: uuid.U
             for r in reversed(rows)
         ],
         "latest_preview": preview,
+        "decay": decay,
     }
 
 

@@ -35,6 +35,14 @@ class TaskAlreadyCompletedError(Exception):
     pass
 
 
+def try_auto_complete(db: Session, user: User, code: str) -> dict | None:
+    """事件驱动自动完成任务 (已做过/等级不足则静默跳过)。"""
+    try:
+        return complete_task(db, user, code)
+    except (TaskNotFoundError, TaskLockedError, TaskAlreadyCompletedError):
+        return None
+
+
 def list_active_tasks(db: Session) -> list[Task]:
     stmt = (
         select(Task)
@@ -152,7 +160,7 @@ DEFAULT_TASKS: list[dict] = [
     {
         "code": "write-python-factor",
         "title": "编写 Python 因子",
-        "description": "在沙箱中提交一个自定义 Python 因子 (L3 解锁 vn.py 的前置)。",
+        "description": "在沙箱中提交一个自定义 Python 因子 (L3 进阶能力)。",
         "category": "factor",
         "min_level": UserLevel.L3.value,
         "xp_reward": 300,

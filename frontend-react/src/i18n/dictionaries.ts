@@ -231,6 +231,9 @@ const en = {
     symbol: "Symbol",
     historyHint: "More daily snapshots will build a trend line over time.",
     lastSnapshot: "Last snapshot",
+    decayOk: "Paper performance aligned with validation",
+    decayWatch: "Paper performance weakening — review factor",
+    decayAlert: "Paper decay alert — consider re-validation",
   },
   locked: {
     needLevel: (label: string) => `Requires level: ${label}`,
@@ -683,6 +686,9 @@ const zh = {
     symbol: "品种",
     historyHint: "每日快照会逐步画出净值曲线。",
     lastSnapshot: "最近快照",
+    decayOk: "纸面表现与验证期一致",
+    decayWatch: "纸面表现走弱 — 建议复查因子",
+    decayAlert: "纸面衰减告警 — 建议重新验证",
   },
   locked: {
     needLevel: (label: string) => `需要等级：${label}`,

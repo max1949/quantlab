@@ -244,11 +244,27 @@ def paper_preview(
     from backend.app.services.research_quality_service import ResearchQualityError, paper_nav_preview
 
     try:
-        return paper_nav_preview(db, uuid.UUID(factor_id), current_user.id)
+        from backend.app.services.research_quality_service import ResearchQualityError, paper_preview_with_decay
+
+        return paper_preview_with_decay(db, uuid.UUID(factor_id), current_user.id)
     except (factor_service.FactorNotFoundError, ValueError):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="因子不存在")
     except ResearchQualityError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=exc.reasons)
+
+
+@router.get("/{factor_id}/paper-decay", summary="纸面衰减评估")
+def paper_decay(
+    factor_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> dict:
+    from backend.app.services import paper_tracking_service as pts
+
+    try:
+        return pts.assess_factor_decay(db, uuid.UUID(factor_id), current_user.id)
+    except (factor_service.FactorNotFoundError, ValueError):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="因子不存在")
 
 
 @router.get("/{factor_id}/paper-history", response_model=PaperHistoryOut, summary="纸面跟踪历史")

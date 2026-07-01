@@ -52,4 +52,4 @@ def test_require_level_allows_and_blocks():
 
 def test_user_level_label():
     assert UserLevel.L0.label == "观察员"
-    assert UserLevel.L3.label == "高级研究员"
+    assert UserLevel.L3.label == "进阶研究员"

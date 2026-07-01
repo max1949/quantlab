@@ -45,6 +45,17 @@ def test_paper_preview_endpoint(client, db_session):
     assert prev.json()["nav_end"] > 0
 
 
+def test_paper_decay_endpoint(client, db_session):
+    seed_sample_market_data(db_session)
+    h = _register(client, "paper4")
+    fid = _template(client, h)
+    client.post(f"{BASE}/validations", headers=h, json={"factor_id": fid, "symbol": "RB"})
+    decay = client.get(f"{BASE}/factors/{fid}/paper-decay", headers=h)
+    assert decay.status_code == 200
+    body = decay.json()
+    assert body["status"] in {"ok", "watch", "alert"}
+
+
 def test_daily_batch(client, db_session):
     seed_sample_market_data(db_session)
     h = _register(client, "paper3")

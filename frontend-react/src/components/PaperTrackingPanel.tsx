@@ -48,6 +48,7 @@ export default function PaperTrackingPanel({
 
   const snapshots = history.data?.snapshots ?? [];
   const preview = history.data?.latest_preview;
+  const decay = history.data?.decay;
   const navSeries = snapshots.map((s) => s.nav_end);
   const latestNav = navSeries.length ? navSeries[navSeries.length - 1] : preview?.nav_end;
 
@@ -67,12 +68,33 @@ export default function PaperTrackingPanel({
         </button>
       </div>
 
+      {decay && decay.status !== "ok" && (
+        <div
+          className={`mb-4 rounded-lg border px-3 py-2 text-sm ${
+            decay.status === "alert"
+              ? "border-rose-200 bg-rose-50 text-rose-800"
+              : "border-amber-200 bg-amber-50 text-amber-800"
+          }`}
+        >
+          <p className="font-medium">
+            {decay.status === "alert" ? pt.decayAlert : pt.decayWatch}
+          </p>
+          {decay.reasons?.length > 0 && (
+            <ul className="mt-1 list-inside list-disc text-xs opacity-90">
+              {decay.reasons.map((r) => (
+                <li key={r}>{r}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
       {preview && (
         <div className="mb-4 grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
           <Metric label={pt.nav} value={latestNav?.toFixed(4) ?? "—"} />
           <Metric
             label={pt.sharpe}
-            value={formatMetric(preview.metrics?.sharpe_ratio)}
+            value={formatMetric(preview.metrics?.sharpe ?? preview.metrics?.sharpe_ratio)}
           />
           <Metric
             label={pt.maxDd}

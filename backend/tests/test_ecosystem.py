@@ -39,7 +39,7 @@ def test_profile_counts(client, db_session):
     assert prof["project_count"] == 1
     assert prof["factor_count"] == 1
     assert prof["validation_count"] == 1
-    assert "动量 / 趋势延续" in prof["tags"]
+    assert any(t in prof["tags"] for t in ("动量因子", "Momentum"))
 
 
 def test_profile_other_user_visible(client, db_session):

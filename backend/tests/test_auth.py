@@ -27,15 +27,16 @@ def test_register_success_defaults_to_l0(client):
     resp = _register(client)
     assert resp.status_code == 201, resp.text
     body = resp.json()
-    assert body["email"] == VALID_USER["email"]
-    assert body["username"] == VALID_USER["username"]
-    assert body["level"] == 0
-    assert body["level_label"] == "观察员"
-    assert body["research_score"] == 0
-    assert body["is_active"] is True
-    # 绝不回传敏感字段
-    assert "hashed_password" not in body
-    assert "password" not in body
+    user = body["user"]
+    assert user["email"] == VALID_USER["email"]
+    assert user["username"] == VALID_USER["username"]
+    assert user["level"] == 0
+    assert user["level_label"] == "观察员"
+    assert user["research_score"] == 0
+    assert user["is_active"] is True
+    assert "access_token" in body
+    assert "hashed_password" not in user
+    assert "password" not in user
 
 
 def test_register_duplicate_email_conflicts(client):

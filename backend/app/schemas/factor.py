@@ -87,6 +87,7 @@ class PaperHistoryOut(BaseModel):
     factor_id: str
     snapshots: list[PaperSnapshotOut]
     latest_preview: dict | None = None
+    decay: dict | None = None
 
 
 class FormulaFnDoc(BaseModel):

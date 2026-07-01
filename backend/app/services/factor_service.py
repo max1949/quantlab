@@ -154,6 +154,9 @@ def create_template_factor(
     db.add(factor)
     db.commit()
     db.refresh(factor)
+    from backend.app.services import task_service
+
+    task_service.try_auto_complete(db, owner, "use-template-factor")
     return factor
 
 
@@ -197,6 +200,9 @@ def create_stack_factor(
     db.add(factor)
     db.commit()
     db.refresh(factor)
+    from backend.app.services import task_service
+
+    task_service.try_auto_complete(db, owner, "combine-factors")
     return factor
 
 
@@ -258,6 +264,9 @@ def create_python_factor(
     db.add(factor)
     db.commit()
     db.refresh(factor)
+    from backend.app.services import task_service
+
+    task_service.try_auto_complete(db, owner, "write-python-factor")
     return factor
 
 
