@@ -51,11 +51,9 @@ def list_tasks(
 ) -> list[TaskWithProgress]:
     tasks = task_service.list_active_tasks(db)
     completed_ids = task_service.completed_task_ids(db, current_user.id)
-    user_task_map = {
-        ut.task_id: ut
-        for t in tasks
-        if (ut := task_service.get_user_task(db, current_user.id, t.id))
-    }
+    user_task_map = task_service.user_task_map(
+        db, current_user.id, [t.id for t in tasks]
+    )
     return [
         _with_progress(t, completed_ids, user_task_map, current_user.level)
         for t in tasks

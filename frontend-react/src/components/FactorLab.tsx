@@ -196,6 +196,7 @@ function FormulaForm({
   onCreated: () => void;
 }) {
   const notify = useUi((s) => s.notify);
+  const fl = useLocale((s) => s.dict.factorLab);
   const help = useQuery({ queryKey: ["formula-help"], queryFn: getFormulaHelp });
   const [name, setName] = useState("");
   const [expr, setExpr] = useState("");
@@ -203,23 +204,23 @@ function FormulaForm({
   const create = useMutation({
     mutationFn: () =>
       createFormulaFactor({
-        name: name.trim() || "公式因子",
+        name: name.trim() || fl.formulaNamePh,
         expr: expr.trim(),
         project_id: projectId,
       }),
     onSuccess: () => {
       void trackEvent("factor_created", { project: projectId, type: "formula" });
-      notify("公式因子已创建", "success");
+      notify(fl.formulaCreated, "success");
       setExpr("");
       onCreated();
     },
-    onError: (e) => notify(apiErrorMessage(e, "创建失败"), "error"),
+    onError: (e) => notify(apiErrorMessage(e, fl.createFailed), "error"),
   });
 
   return (
     <div className="space-y-3 rounded-lg bg-slate-50 p-3">
       <div>
-        <label className="label">因子公式</label>
+        <label className="label">{fl.formulaExpr}</label>
         <textarea
           className="input font-mono text-sm"
           rows={2}
@@ -232,14 +233,14 @@ function FormulaForm({
       {help.data && (
         <details className="text-xs text-slate-500">
           <summary className="cursor-pointer text-brand-600">
-            可用变量 / 函数 / 示例
+            {fl.formulaHelpTitle}
           </summary>
           <div className="mt-2 space-y-2">
             <div>
-              <b>变量:</b> {help.data.variables.join(", ")}
+              <b>{fl.formulaVars}:</b> {help.data.variables.join(", ")}
             </div>
             <div>
-              <b>函数:</b>
+              <b>{fl.formulaFns}:</b>
               <ul className="mt-1 grid grid-cols-1 gap-0.5 sm:grid-cols-2">
                 {help.data.functions.map((f) => (
                   <li key={f.name}>
@@ -249,7 +250,7 @@ function FormulaForm({
               </ul>
             </div>
             <div>
-              <b>示例 (点击填入):</b>
+              <b>{fl.formulaExamples}:</b>
               <ul className="mt-1 space-y-0.5">
                 {help.data.examples.map((ex) => (
                   <li key={ex}>
@@ -268,10 +269,10 @@ function FormulaForm({
       )}
 
       <div>
-        <label className="label">因子名称</label>
+        <label className="label">{fl.factorNameLabel}</label>
         <input
           className="input"
-          placeholder="我的公式因子"
+          placeholder={fl.formulaNamePh}
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
@@ -282,7 +283,7 @@ function FormulaForm({
         disabled={create.isPending || !expr.trim()}
         onClick={() => create.mutate()}
       >
-        {create.isPending ? "创建中…" : "创建公式因子"}
+        {create.isPending ? fl.creating : fl.formulaCreate}
       </button>
     </div>
   );
@@ -480,7 +481,7 @@ function TemplateForm({
       ))}
 
       <div>
-        <label className="label">因子名称</label>
+        <label className="label">{fl.factorNameLabel}</label>
         <input
           className="input"
           value={name}
@@ -493,7 +494,7 @@ function TemplateForm({
         disabled={create.isPending}
         onClick={() => create.mutate()}
       >
-        {create.isPending ? "Creating…" : "Create factor"}
+        {create.isPending ? fl.creating : fl.createFactor}
       </button>
         </>
       )}
@@ -513,7 +514,8 @@ function StackForm({
   onCreated: () => void;
 }) {
   const notify = useUi((s) => s.notify);
-  const [name, setName] = useState("组合因子");
+  const fl = useLocale((s) => s.dict.factorLab);
+  const [name, setName] = useState<string>(fl.stackDefaultName);
   const [weights, setWeights] = useState<Record<string, number>>({});
 
   const create = useMutation({
@@ -521,27 +523,27 @@ function StackForm({
       const components = Object.entries(weights)
         .filter(([, w]) => w !== 0)
         .map(([factor_id, weight]) => ({ factor_id, weight }));
-      return createStackFactor({ name: name.trim() || "组合因子", components, project_id: projectId });
+      return createStackFactor({ name: name.trim() || fl.stackDefaultName, components, project_id: projectId });
     },
     onSuccess: () => {
       void trackEvent("factor_created", { project: projectId, type: "stack" });
-      notify("组合因子已创建", "success");
+      notify(fl.stackCreated, "success");
       onCreated();
     },
-    onError: (e) => notify(apiErrorMessage(e, "创建失败"), "error"),
+    onError: (e) => notify(apiErrorMessage(e, fl.createFailed), "error"),
   });
 
   if (level < 1) {
     return (
       <div className="rounded-lg bg-amber-50 p-3 text-sm text-amber-700">
-        组合因子需要 L1（研究学徒）等级。先多做几次研究升级后即可解锁。
+        {fl.stackNeedL1Msg}
       </div>
     );
   }
   if (factors.length < 2) {
     return (
       <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-500">
-        至少要有 2 个模板因子才能组合。先在「模板因子」里多建几个。
+        {fl.stackNeedTwoMsg}
       </p>
     );
   }
@@ -550,7 +552,7 @@ function StackForm({
 
   return (
     <div className="space-y-3 rounded-lg bg-slate-50 p-3">
-      <p className="text-xs text-slate-400">给因子设权重 (0 表示不参与), 至少选 1 个。</p>
+      <p className="text-xs text-slate-400">{fl.stackWeightHint}</p>
       {factors.map((f) => (
         <div key={f.id} className="flex items-center gap-2">
           <span className="flex-1 truncate text-sm text-slate-700">{f.name}</span>
@@ -566,7 +568,7 @@ function StackForm({
         </div>
       ))}
       <div>
-        <label className="label">组合名称</label>
+        <label className="label">{fl.stackName}</label>
         <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
       </div>
       <button
@@ -574,7 +576,7 @@ function StackForm({
         disabled={create.isPending || chosen < 1}
         onClick={() => create.mutate()}
       >
-        {create.isPending ? "创建中…" : "创建组合因子"}
+        {create.isPending ? fl.creating : fl.stackCreate}
       </button>
     </div>
   );

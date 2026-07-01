@@ -63,6 +63,12 @@ class Settings(BaseSettings):
     publish_require_sealed_holdout: bool = True
     publish_min_sealed_holdout_sharpe: float = 0.0
 
+    # 纸面跟踪
+    paper_tracking_bars: int = 120
+
+    # Python 因子沙箱
+    sandbox_timeout_sec: float = 15.0
+
 
 @lru_cache
 def get_settings() -> Settings:

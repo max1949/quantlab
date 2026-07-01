@@ -67,6 +67,20 @@ def completed_task_ids(db: Session, user_id: uuid.UUID) -> set[uuid.UUID]:
     return {tid for tid, status in rows if status == TaskStatus.COMPLETED.value}
 
 
+def user_task_map(
+    db: Session, user_id: uuid.UUID, task_ids: list[uuid.UUID]
+) -> dict[uuid.UUID, UserTask]:
+    if not task_ids:
+        return {}
+    rows = db.execute(
+        select(UserTask).where(
+            UserTask.user_id == user_id,
+            UserTask.task_id.in_(task_ids),
+        )
+    ).scalars().all()
+    return {ut.task_id: ut for ut in rows}
+
+
 def get_user_task(
     db: Session, user_id: uuid.UUID, task_id: uuid.UUID
 ) -> UserTask | None:

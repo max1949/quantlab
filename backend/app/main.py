@@ -23,6 +23,15 @@ app = FastAPI(
 )
 
 
+_CACHEABLE_API_PREFIXES = (
+    "/api/v1/public/",
+    "/api/v1/factors/templates",
+    "/api/v1/factors/formula/help",
+    "/api/v1/factors/python/help",
+    "/api/v1/billing/plans",
+)
+
+
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
     response = await call_next(request)
@@ -31,7 +40,10 @@ async def security_headers(request: Request, call_next):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
     if request.url.path.startswith("/api/"):
-        response.headers["Cache-Control"] = "no-store"
+        if any(request.url.path.startswith(p) for p in _CACHEABLE_API_PREFIXES):
+            response.headers["Cache-Control"] = "public, max-age=300"
+        else:
+            response.headers["Cache-Control"] = "no-store"
     return response
 
 

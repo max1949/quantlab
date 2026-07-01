@@ -40,9 +40,13 @@ def compute_paper_nav(
     factor_id: uuid.UUID,
     owner_id: uuid.UUID,
     *,
-    bars: int = 120,
+    bars: int | None = None,
 ) -> dict:
     """计算因子在最近 bars 上的纸面净值 (不持久化)。"""
+    from backend.app.core.config import get_settings
+
+    if bars is None:
+        bars = get_settings().paper_tracking_bars
     factor = factor_service.get_factor(db, owner_id, factor_id)
     val = _latest_success_validation(db, factor_id)
     if val is None:
@@ -152,17 +156,23 @@ def list_snapshots(
     )
 
 
-def assess_factor_decay(db: Session, factor_id: uuid.UUID, owner_id: uuid.UUID) -> dict:
+def assess_factor_decay(
+    db: Session,
+    factor_id: uuid.UUID,
+    owner_id: uuid.UUID,
+    *,
+    preview: dict | None = None,
+) -> dict:
     """纸面衰减评估 (对比验证 OOS 与最新纸面指标)。"""
     val = _latest_success_validation(db, factor_id)
     if val is None:
         return assess_paper_decay(validation_oos=None, paper_metrics=None).to_dict()
 
-    preview = None
-    try:
-        preview = compute_paper_nav(db, factor_id, owner_id)
-    except PaperTrackingError:
-        preview = None
+    if preview is None:
+        try:
+            preview = compute_paper_nav(db, factor_id, owner_id)
+        except PaperTrackingError:
+            preview = None
 
     rows = list_snapshots(db, factor_id, owner_id, limit=30)
     nav_series = [r.nav_end for r in reversed(rows)]
@@ -185,7 +195,7 @@ def snapshot_history_payload(db: Session, factor_id: uuid.UUID, owner_id: uuid.U
         preview = compute_paper_nav(db, factor_id, owner_id)
     except PaperTrackingError:
         preview = None
-    decay = assess_factor_decay(db, factor_id, owner_id)
+    decay = assess_factor_decay(db, factor_id, owner_id, preview=preview)
     return {
         "factor_id": str(factor_id),
         "snapshots": [

@@ -67,9 +67,13 @@ def run_user_factor(
     source: str,
     ohlcv: pd.DataFrame,
     *,
-    timeout_sec: float = DEFAULT_TIMEOUT_SEC,
+    timeout_sec: float | None = None,
 ) -> pd.Series:
     """执行用户代码中的 compute(ohlcv), 返回因子 Series。"""
+    from backend.app.core.config import get_settings
+
+    if timeout_sec is None:
+        timeout_sec = get_settings().sandbox_timeout_sec
     ok, errors = validate_source(source)
     if not ok:
         raise SandboxError("; ".join(errors))

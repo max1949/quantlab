@@ -102,9 +102,12 @@ def paper_nav_preview(db: Session, factor_id: uuid.UUID, owner_id: uuid.UUID, ba
         raise ResearchQualityError([exc.message])
 
 
-def paper_preview_with_decay(db: Session, factor_id: uuid.UUID, owner_id: uuid.UUID, bars: int = 120) -> dict:
+def paper_preview_with_decay(db: Session, factor_id: uuid.UUID, owner_id: uuid.UUID, bars: int | None = None) -> dict:
     from backend.app.services import paper_tracking_service as pts
 
-    preview = paper_nav_preview(db, factor_id, owner_id, bars=bars)
-    preview["decay"] = pts.assess_factor_decay(db, factor_id, owner_id)
+    try:
+        preview = pts.compute_paper_nav(db, factor_id, owner_id, bars=bars)
+    except pts.PaperTrackingError as exc:
+        raise ResearchQualityError([exc.message])
+    preview["decay"] = pts.assess_factor_decay(db, factor_id, owner_id, preview=preview)
     return preview
