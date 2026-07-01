@@ -72,6 +72,7 @@ install_deps_dnf() {
     PYTHON_BIN=python3
   fi
   if [[ "$SKIP_INSTALL_PG" != "1" ]] && ! command -v psql >/dev/null 2>&1; then
+    $mgr module enable -y postgresql:13 2>/dev/null || $mgr module enable -y postgresql:15 2>/dev/null || true
     $mgr install -y postgresql-server postgresql postgresql-contrib
     if command -v postgresql-setup >/dev/null 2>&1; then
       postgresql-setup --initdb 2>/dev/null || true
@@ -111,6 +112,20 @@ fi
 if [[ "$SKIP_INSTALL_PG" != "1" ]] && systemctl list-unit-files 2>/dev/null | grep -q "^${PG_SERVICE}.service"; then
   systemctl enable "$PG_SERVICE" 2>/dev/null || true
   systemctl start "$PG_SERVICE" || true
+  sleep 2
+  if ! sudo -u postgres psql -tAc "SELECT 1" >/dev/null 2>&1; then
+    echo "PostgreSQL 未就绪，尝试初始化..."
+    postgresql-setup --initdb 2>/dev/null || true
+    systemctl restart "$PG_SERVICE" || true
+    sleep 2
+  fi
+  if ! sudo -u postgres psql -tAc "SELECT 1" >/dev/null 2>&1; then
+    echo "错误: PostgreSQL 仍无法连接。请先手动执行:"
+    echo "  dnf install -y postgresql-server postgresql"
+    echo "  postgresql-setup --initdb"
+    echo "  systemctl enable --now postgresql"
+    exit 1
+  fi
   ensure_pg_local_auth
 fi
 if [[ "$SKIP_INSTALL_REDIS" != "1" ]] && systemctl list-unit-files 2>/dev/null | grep -q "^${REDIS_SERVICE}.service"; then
