@@ -347,7 +347,41 @@ export async function getShareCard(token: string): Promise<ShareCardPublic> {
 }
 
 export async function getFeed(): Promise<ReportSummary[]> {
-  const { data } = await api.get<ReportSummary[]>("/research/feed");
+  const { data } = await api.get<ReportSummary[]>("/public/feed");
+  return data;
+}
+
+export async function getPublicFeed(): Promise<ReportSummary[]> {
+  return getFeed();
+}
+
+// ---- academy tasks ----
+export interface AcademyTask {
+  id: string;
+  code: string;
+  title: string;
+  description: string;
+  category: string;
+  min_level: number;
+  min_level_label: string;
+  xp_reward: number;
+  order_index: number;
+  completed: boolean;
+  locked: boolean;
+  completed_at: string | null;
+}
+
+export async function listTasks(): Promise<AcademyTask[]> {
+  const { data } = await api.get<AcademyTask[]>("/tasks");
+  return data;
+}
+
+export async function completeTask(code: string): Promise<{
+  awarded_xp: number;
+  leveled_up: boolean;
+  user: User;
+}> {
+  const { data } = await api.post(`/tasks/${code}/complete`);
   return data;
 }
 

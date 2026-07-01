@@ -11,6 +11,7 @@ import {
 } from "../api/endpoints";
 import { stageToCtaLabel, stageToRoute } from "../lib/nav";
 import { GradeBadge, PageTitle, Spinner, Stat } from "../components/ui";
+import AcademyTasks from "../components/AcademyTasks";
 
 export default function Dashboard() {
   const user = useAuth((s) => s.user)!;
@@ -80,7 +81,11 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-2">
+      <div className="mt-6">
+        <AcademyTasks />
+      </div>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <div className="card">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="font-semibold">{d.myProjects}</h3>

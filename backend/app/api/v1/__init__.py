@@ -8,6 +8,7 @@ Sprint 1: 暴露 ping + 用户系统 (auth / users)。
 from fastapi import APIRouter
 
 from backend.app.api.v1.routes import (
+    admin_billing,
     ai,
     auth,
     backtests,
@@ -22,6 +23,7 @@ from backend.app.api.v1.routes import (
     portfolio,
     projects,
     public,
+    public_feed,
     research,
     researchers,
     tasks,
@@ -56,9 +58,11 @@ api_router.include_router(me.router, prefix="/me", tags=["me"])
 api_router.include_router(leaderboards.router, prefix="/leaderboards", tags=["leaderboard"])
 api_router.include_router(events.router, prefix="/events", tags=["growth"])
 api_router.include_router(public.router, prefix="/share", tags=["public"])
+api_router.include_router(public_feed.router, prefix="/public", tags=["public"])
 
 # 商业化 (Sprint 10)
 api_router.include_router(billing.router, prefix="/billing", tags=["billing"])
+api_router.include_router(admin_billing.router, prefix="/admin/billing", tags=["admin"])
 api_router.include_router(portfolio.router, prefix="/portfolio", tags=["portfolio"])
 
 # 后续 Sprint 继续在此挂载: execution-adapter (vn.py/QMT, Phase 3) / ...

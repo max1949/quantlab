@@ -51,6 +51,9 @@ class Settings(BaseSettings):
     # Optional: direct Postgres URI for one-time Supabase DDL (card pool migration)
     card_pool_database_url: str = ""
 
+    # 运营批量发卡 (留空则禁用 /admin/billing 接口)
+    admin_api_key: str = ""
+
 
 @lru_cache
 def get_settings() -> Settings:

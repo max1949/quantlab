@@ -117,6 +117,10 @@ export default function ProjectDetail() {
 
   const proj = project.data!;
 
+  const stepOrder: StepKey[] = ["factor", "backtest", "validation", "report", "publish"];
+  const finishedCount = stepOrder.filter((k) => done[k]).length;
+  const nextKey = stepOrder.find((k) => !done[k]) ?? null;
+
   const steps: {
     key: StepKey;
     title: string;
@@ -208,18 +212,37 @@ export default function ProjectDetail() {
         </div>
       )}
 
+      <div className="mb-6 card">
+        <div className="mb-2 flex items-center justify-between text-sm">
+          <span className="font-medium text-slate-700 dark:text-slate-200">{p.progressLabel}</span>
+          <span className="text-slate-500">{p.progressSteps(finishedCount, stepOrder.length)}</span>
+        </div>
+        <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+          <div
+            className="h-full rounded-full bg-brand-500 transition-all"
+            style={{ width: `${(finishedCount / stepOrder.length) * 100}%` }}
+          />
+        </div>
+      </div>
+
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-3">
           {steps.map((s) => {
             const finished = done[s.key as keyof typeof done];
+            const isNext = s.key === nextKey;
             return (
               <div
                 key={s.key}
-                className={`card flex items-center justify-between ${
+                className={`card flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${
                   finished ? "border-emerald-200 bg-emerald-50/40" : ""
-                }`}
+                } ${isNext ? "ring-2 ring-brand-400 ring-offset-2 dark:ring-offset-slate-950" : ""}`}
               >
-                <div>
+                <div className="min-w-0">
+                  {isNext && (
+                    <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-brand-600">
+                      {p.nextUp}
+                    </p>
+                  )}
                   <p className="font-semibold text-slate-800">
                     {finished && "✅ "}
                     {s.title}
@@ -228,7 +251,7 @@ export default function ProjectDetail() {
                 </div>
                 {s.run && (
                   <button
-                    className="btn-primary whitespace-nowrap"
+                    className="btn-primary w-full shrink-0 whitespace-nowrap sm:w-auto"
                     disabled={s.disabled || s.pending}
                     onClick={s.run}
                   >
