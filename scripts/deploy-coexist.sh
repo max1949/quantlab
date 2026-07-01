@@ -23,6 +23,17 @@ else
   APP_USER="${APP_USER:-root}"
 fi
 export GIT_SSH_COMMAND="${GIT_SSH_COMMAND:-}"
+if [[ -z "$GIT_SSH_COMMAND" && -f /root/.ssh/quantlab_deploy ]]; then
+  export GIT_SSH_COMMAND='ssh -i /root/.ssh/quantlab_deploy -o IdentitiesOnly=yes'
+fi
+
+git_as_app() {
+  if [[ "$(id -u)" -eq 0 ]] && [[ "$APP_USER" == "root" ]]; then
+    env GIT_SSH_COMMAND="$GIT_SSH_COMMAND" git "$@"
+  else
+    sudo -u "$APP_USER" env GIT_SSH_COMMAND="$GIT_SSH_COMMAND" git "$@"
+  fi
+}
 QUANTLAB_PORT="${QUANTLAB_PORT:-8010}"
 # 已有 Postgres/Redis 时设为 1，跳过 apt 安装
 SKIP_INSTALL_PG="${SKIP_INSTALL_PG:-0}"
@@ -176,9 +187,9 @@ fi
 echo "==> 拉取代码到 ${INSTALL_DIR}..."
 mkdir -p "$(dirname "$INSTALL_DIR")"
 if [[ -d "$INSTALL_DIR/.git" ]]; then
-  sudo -u "$APP_USER" env GIT_SSH_COMMAND="$GIT_SSH_COMMAND" git -C "$INSTALL_DIR" pull --ff-only
+  git_as_app -C "$INSTALL_DIR" pull --ff-only
 else
-  sudo -u "$APP_USER" env GIT_SSH_COMMAND="$GIT_SSH_COMMAND" git clone "$REPO_URL" "$INSTALL_DIR"
+  git_as_app clone "$REPO_URL" "$INSTALL_DIR"
 fi
 chown -R "$APP_USER:$APP_USER" "$INSTALL_DIR"
 
