@@ -172,6 +172,20 @@ def seed_real_market_data(
     symbols = symbols or DEFAULT_SYMBOLS
     out = []
     for sym in symbols:
+        path = dataset_path(sym, "1d")
+        if path.exists():
+            df = load_ohlcv(sym, "1d")
+            ds = register_dataset(db, sym, df, "1d")
+            out.append(
+                {
+                    "symbol": sym,
+                    "rows": ds.rows,
+                    "source": "local_parquet",
+                    "start": str(ds.start_date),
+                    "end": str(ds.end_date),
+                }
+            )
+            continue
         source = "real"
         try:
             df = fetch_real_ohlcv(sym)

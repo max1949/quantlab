@@ -126,6 +126,7 @@ def create_validation(
             {"fee_rate": payload.fee_rate, "slippage_bps": payload.slippage_bps},
             payload.oos_ratio,
             payload.n_splits,
+            payload.timeframe,
         )
     except factor_service.FactorNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="因子不存在")

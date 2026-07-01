@@ -8,6 +8,7 @@ import {
   getGraph,
   getProject,
   getProjectQuality,
+  listDatasets,
   listFactors,
   publishProject,
   trackEvent,
@@ -40,6 +41,7 @@ export default function ProjectDetail() {
     queryFn: () => getProjectQuality(id),
     enabled: Boolean(id),
   });
+  const datasets = useQuery({ queryKey: ["datasets"], queryFn: listDatasets });
 
   const projectFactors = useMemo(
     () => (factors.data ?? []).filter((f) => f.project_id === id),
@@ -52,6 +54,15 @@ export default function ProjectDetail() {
     null;
 
   const symbol = project.data?.symbol || "";
+
+  const timeframeOptions = useMemo(() => {
+    if (!symbol || !datasets.data) return ["1d"];
+    const tfs = datasets.data.filter((d) => d.symbol === symbol).map((d) => d.timeframe);
+    return tfs.length ? Array.from(new Set(tfs)).sort() : ["1d"];
+  }, [datasets.data, symbol]);
+
+  const [timeframe, setTimeframe] = useState("1d");
+  const activeTimeframe = timeframeOptions.includes(timeframe) ? timeframe : timeframeOptions[0];
 
   const done = useMemo(() => computeDone(graph.data, project.data?.status), [
     graph.data,
@@ -69,7 +80,7 @@ export default function ProjectDetail() {
 
   const runBacktest = useMutation({
     mutationFn: () =>
-      createBacktest({ factor_id: projectFactor!.id, symbol }),
+      createBacktest({ factor_id: projectFactor!.id, symbol, timeframe: activeTimeframe }),
     onMutate: () => setBusy("backtest"),
     onSuccess: (bt) => {
       void trackEvent("backtest_run", { project: id, status: bt.status });
@@ -82,7 +93,7 @@ export default function ProjectDetail() {
 
   const runValidation = useMutation({
     mutationFn: () =>
-      createValidation({ factor_id: projectFactor!.id, symbol }),
+      createValidation({ factor_id: projectFactor!.id, symbol, timeframe: activeTimeframe }),
     onMutate: () => setBusy("validation"),
     onSuccess: (v) => {
       void trackEvent("validation_run", { project: id, status: v.status });
@@ -216,6 +227,29 @@ export default function ProjectDetail() {
               </option>
             ))}
           </select>
+        </div>
+      )}
+
+      {symbol && timeframeOptions.length > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
+          <span className="text-slate-500">{p.dataTimeframe}</span>
+          <select
+            className="input max-w-xs"
+            value={activeTimeframe}
+            onChange={(e) => setTimeframe(e.target.value)}
+          >
+            {timeframeOptions.map((tf) => (
+              <option key={tf} value={tf}>
+                {tf}
+              </option>
+            ))}
+          </select>
+          {datasets.data && (
+            <span className="text-xs text-slate-400">
+              {datasets.data.find((d) => d.symbol === symbol && d.timeframe === activeTimeframe)?.rows?.toLocaleString() ?? ""}{" "}
+              bars
+            </span>
+          )}
         </div>
       )}
 

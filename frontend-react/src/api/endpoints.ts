@@ -239,9 +239,23 @@ export async function checkout(plan_code: string): Promise<{
 }
 
 // ---- backtest / validation ----
+export interface MarketDataset {
+  symbol: string;
+  timeframe: string;
+  start_date: string;
+  end_date: string;
+  rows: number;
+}
+
+export async function listDatasets(): Promise<MarketDataset[]> {
+  const { data } = await api.get<MarketDataset[]>("/datasets");
+  return data;
+}
+
 export async function createBacktest(body: {
   factor_id: string;
   symbol: string;
+  timeframe?: string;
 }): Promise<Backtest> {
   const { data } = await api.post<Backtest>("/backtests", body);
   return data;
@@ -278,6 +292,7 @@ export async function runCostSensitivity(body: {
 export async function createValidation(body: {
   factor_id: string;
   symbol: string;
+  timeframe?: string;
 }): Promise<Validation> {
   const { data } = await api.post<Validation>("/validations", body);
   return data;

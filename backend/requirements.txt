@@ -27,6 +27,7 @@ pandas==2.2.3
 numpy==2.2.1
 pyarrow==18.1.0  # Parquet 读写 (行情数据 V1)
 akshare==1.18.64  # 真实行情数据源 (连续主力合约日线)
+pymongo==4.10.1  # vn.py MongoDB 行情导入 (本机 scripts/import-vnpy-mongo.py)
 
 # 测试 (开发期)
 pytest==8.3.4

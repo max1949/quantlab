@@ -21,6 +21,7 @@ from engine.cost_model import CostConfig
 from backend.app.core.config import get_settings
 from backend.app.models.factor import Factor, FactorKind
 from backend.app.models.validation import Validation, ValidationStatus
+from backend.app.models.market import DataSnapshot
 from backend.app.services import factor_service, market_data
 from backend.app.services.backtest_service import DatasetNotFoundError
 
@@ -71,12 +72,13 @@ def create_validation(
     cost_config: dict | None,
     oos_ratio: float,
     n_splits: int,
+    timeframe: str = "1d",
 ) -> Validation:
     factor = factor_service.get_factor(db, owner.id, factor_id)  # 可能抛 FactorNotFound
-    if market_data.get_dataset(db, symbol) is None:
+    if market_data.get_dataset(db, symbol, timeframe) is None:
         raise DatasetNotFoundError(symbol)
-    df = market_data.load_ohlcv(symbol)
-    snapshot = market_data.create_snapshot(db, symbol, df)
+    df = market_data.load_ohlcv(symbol, timeframe)
+    snapshot = market_data.create_snapshot(db, symbol, df, timeframe)
 
     v = Validation(
         owner_id=owner.id,
@@ -107,7 +109,9 @@ def execute(db: Session, validation_id) -> Validation | None:
         if factor is None:
             raise factor_service.FactorNotFoundError(str(v.factor_id))
 
-        ohlcv = market_data.load_ohlcv(v.symbol)
+        snap = db.get(DataSnapshot, v.snapshot_id) if v.snapshot_id else None
+        tf = snap.timeframe if snap else "1d"
+        ohlcv = market_data.load_ohlcv(v.symbol, tf)
         cfg = CostConfig(**(v.cost_config or {}))
         signal_fn = _signal_fn(db, v.owner_id, factor)
 
@@ -159,9 +163,10 @@ def create_and_run(
     cost_config: dict | None,
     oos_ratio: float,
     n_splits: int,
+    timeframe: str = "1d",
 ) -> Validation:
     v = create_validation(
-        db, owner, factor_id, symbol, cost_config, oos_ratio, n_splits
+        db, owner, factor_id, symbol, cost_config, oos_ratio, n_splits, timeframe
     )
     if get_settings().celery_task_always_eager:
         execute(db, v.id)
