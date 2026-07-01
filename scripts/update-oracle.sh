@@ -17,7 +17,10 @@ if [[ "${QUANTLAB_UPDATE_PHASE:-}" != "post-pull" ]]; then
 fi
 
 echo "==> alembic upgrade"
-cd backend && alembic upgrade head && cd ..
+export PYTHONPATH="$INSTALL_DIR"
+source "$INSTALL_DIR/.venv/bin/activate"
+set -a && source "$INSTALL_DIR/.env" && set +a
+cd "$INSTALL_DIR/backend" && alembic upgrade head && cd "$INSTALL_DIR"
 
 systemctl restart quantlab
 sleep 2
