@@ -36,4 +36,4 @@ Write-Host "==> 3/3 Oracle 登记行情索引 ..."
 
 Write-Host "提示: 代码更新请 git push 后 ssh 执行 update-oracle.sh"
 
-Write-Host "完成。RB/AU 等日线已来自 vn.py 米筐数据。"
+Write-Host "Done. Daily bars now sourced from vn.py Mongo data."
