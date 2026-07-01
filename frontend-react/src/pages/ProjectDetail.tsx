@@ -23,6 +23,7 @@ import AdvancedAnalysis from "../components/AdvancedAnalysis";
 import L3ResearchTools from "../components/L3ResearchTools";
 import PaperTrackingPanel from "../components/PaperTrackingPanel";
 import L4PortfolioTools from "../components/L4PortfolioTools";
+import ValidationResultsPanel from "../components/ValidationResultsPanel";
 import type { Graph } from "../api/types";
 
 type StepKey = "factor" | "backtest" | "validation" | "report" | "publish";
@@ -107,6 +108,7 @@ export default function ProjectDetail() {
     onSuccess: (v) => {
       void trackEvent("validation_run", { project: id, status: v.status });
       notify(p.validationDone(v.status), "success");
+      void qc.invalidateQueries({ queryKey: ["validations"] });
       refreshAll();
     },
     onError: (e) => notify(apiErrorMessage(e, p.validationFail), "error"),
@@ -190,7 +192,7 @@ export default function ProjectDetail() {
       cta: p.genReport,
       run: () => genReport.mutate(),
       pending: busy === "report",
-      disabled: !done.backtest,
+      disabled: !done.backtest || !done.validation || done.report,
     },
     {
       key: "publish",
@@ -199,7 +201,10 @@ export default function ProjectDetail() {
       cta: proj.status === "published" ? p.published : p.publishProject,
       run: () => publish.mutate(),
       pending: busy === "publish",
-      disabled: !done.report || proj.status === "published",
+      disabled:
+        !done.report ||
+        proj.status === "published" ||
+        (quality.data != null && !quality.data.passed),
     },
   ];
 
@@ -301,6 +306,12 @@ export default function ProjectDetail() {
         </div>
       </div>
 
+      {done.backtest && !done.validation && (
+        <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
+          {p.warnBacktestOnly}
+        </div>
+      )}
+
       {quality.data && (
         <div
           className={`mb-6 card border ${
@@ -312,13 +323,44 @@ export default function ProjectDetail() {
           <p className="font-semibold text-slate-800 dark:text-slate-100">
             {quality.data.passed ? p.qualityPass : p.qualityFail}
           </p>
+          {quality.data.scorecard && Object.keys(quality.data.scorecard).length > 0 && (
+            <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+              <ScoreRow
+                label={p.scoreOos}
+                value={quality.data.scorecard.oos_sharpe}
+                need={quality.data.thresholds?.min_oos_sharpe}
+              />
+              <ScoreRow
+                label={p.scoreRobust}
+                value={quality.data.scorecard.robustness_score}
+                extra={quality.data.scorecard.robustness_grade as string | null}
+                need={quality.data.thresholds?.min_robustness_score}
+              />
+              <ScoreRow
+                label={p.scoreBacktest}
+                value={quality.data.scorecard.backtest_sharpe}
+                need={quality.data.thresholds?.min_backtest_sharpe}
+              />
+              <ScoreRow
+                label={p.scoreSealed}
+                value={quality.data.scorecard.sealed_holdout_sharpe}
+                need={quality.data.thresholds?.min_sealed_holdout_sharpe}
+              />
+            </div>
+          )}
           {!quality.data.passed && quality.data.reasons.length > 0 && (
-            <ul className="mt-2 list-inside list-disc text-sm text-slate-600 dark:text-slate-300">
+            <ul className="mt-3 list-inside list-disc text-sm text-slate-600 dark:text-slate-300">
               {quality.data.reasons.map((r) => (
                 <li key={r}>{r}</li>
               ))}
             </ul>
           )}
+        </div>
+      )}
+
+      {done.validation && (
+        <div className="mb-6">
+          <ValidationResultsPanel factorId={projectFactor?.id ?? null} enabled={done.validation} />
         </div>
       )}
 
@@ -452,4 +494,37 @@ function computeDone(graph: Graph | undefined, status: string | undefined) {
     report: refTypes.has("report"),
     publish: status === "published",
   };
+}
+
+function ScoreRow({
+  label,
+  value,
+  need,
+  extra,
+}: {
+  label: string;
+  value: number | string | null | undefined;
+  need?: number;
+  extra?: string | null;
+}) {
+  const num = typeof value === "number" ? value : value != null ? Number(value) : null;
+  const ok = need == null || need < -100 || (num != null && num >= need);
+  const display =
+    num != null && !Number.isNaN(num)
+      ? num.toFixed(2)
+      : value == null
+        ? "—"
+        : String(value);
+  return (
+    <div className={`rounded-md px-2 py-1 ${ok ? "" : "text-amber-800 dark:text-amber-200"}`}>
+      <span className="text-slate-500">{label}: </span>
+      <span className="font-medium">
+        {display}
+        {extra ? ` (${extra})` : ""}
+      </span>
+      {need != null && need > -100 && (
+        <span className="text-xs text-slate-400"> / ≥{need}</span>
+      )}
+    </div>
+  );
 }

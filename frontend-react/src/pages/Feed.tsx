@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { getPublicFeed } from "../api/endpoints";
@@ -11,15 +12,33 @@ import ReportCard from "../components/ReportCard";
 export default function Feed() {
   const user = useAuth((s) => s.user);
   const f = useLocale((s) => s.dict.feed);
+  const [sort, setSort] = useState<"top" | "latest">("top");
   useDocumentTitle(`${f.title} · QuantLab AI`);
   const feed = useQuery({
-    queryKey: ["public-feed"],
-    queryFn: getPublicFeed,
+    queryKey: ["public-feed", sort],
+    queryFn: () => getPublicFeed(sort),
   });
 
   return (
     <div>
       <PageTitle title={f.title} subtitle={f.subtitle} />
+
+      <div className="mb-4 flex gap-2">
+        <button
+          type="button"
+          className={sort === "top" ? "btn-primary" : "btn-ghost"}
+          onClick={() => setSort("top")}
+        >
+          {f.sortTop}
+        </button>
+        <button
+          type="button"
+          className={sort === "latest" ? "btn-primary" : "btn-ghost"}
+          onClick={() => setSort("latest")}
+        >
+          {f.sortLatest}
+        </button>
+      </div>
 
       {!user && (
         <div className="mb-4 flex flex-col gap-3 rounded-xl border border-brand-200 bg-brand-50/60 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-brand-900 dark:bg-brand-950/40">

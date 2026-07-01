@@ -284,6 +284,15 @@ export interface Validation {
   finished_at: string | null;
 }
 
+export interface ValidationDetail extends Validation {
+  oos: Record<string, unknown> | null;
+  walk_forward: Record<string, unknown> | null;
+  sensitivity: Record<string, unknown> | null;
+  oos_ratio: number;
+  n_splits: number;
+  error: string | null;
+}
+
 export interface ReportSummary {
   id: string;
   owner_id: string;
@@ -295,6 +304,8 @@ export interface ReportSummary {
   stages: Record<string, unknown>;
   is_public: boolean;
   created_at: string;
+  oos_sharpe?: number | null;
+  robustness_score?: number | null;
 }
 
 export interface ReportDetail extends ReportSummary {

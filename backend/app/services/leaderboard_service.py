@@ -19,6 +19,7 @@ from sqlalchemy.orm import Session
 from backend.app.models.research import ResearchReport
 from backend.app.models.user import User
 from backend.app.models.validation import Validation, ValidationStatus
+from backend.app.services.growth_service import EFFECTIVE_GRADES
 
 KINDS = {"researcher", "contributor", "newcomer", "improved"}
 
@@ -63,18 +64,20 @@ def leaderboard(db: Session, kind: str, limit: int = 50) -> list[dict]:
         ).scalars().all()
         return [_row(i + 1, u, "新人研究信用", round(u.research_contribution_score, 2)) for i, u in enumerate(users)]
 
-    # improved: 近 IMPROVED_DAYS 天的产出量 (有效验证 + 报告)
+    # improved: 近 IMPROVED_DAYS 天有效验证 (稳健/中等) + 报告
     since = datetime.now(timezone.utc) - timedelta(days=IMPROVED_DAYS)
-    val_counts = dict(
-        db.execute(
-            select(Validation.owner_id, func.count(Validation.id))
-            .where(
-                Validation.status == ValidationStatus.SUCCESS.value,
-                Validation.created_at >= since,
-            )
-            .group_by(Validation.owner_id)
-        ).all()
-    )
+    val_rows = db.execute(
+        select(Validation.owner_id, Validation.robustness)
+        .where(
+            Validation.status == ValidationStatus.SUCCESS.value,
+            Validation.created_at >= since,
+        )
+    ).all()
+    val_counts: dict = {}
+    for owner_id, robustness in val_rows:
+        if (robustness or {}).get("grade") not in EFFECTIVE_GRADES:
+            continue
+        val_counts[owner_id] = val_counts.get(owner_id, 0) + 1
     rep_counts = dict(
         db.execute(
             select(ResearchReport.owner_id, func.count(ResearchReport.id))

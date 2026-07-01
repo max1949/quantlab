@@ -11,11 +11,12 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class QualityThresholds:
-    min_oos_sharpe: float = 0.0
-    min_robustness_score: float = 35.0
+    min_oos_sharpe: float = 0.15
+    min_robustness_score: float = 50.0
     min_backtest_sharpe: float = 0.0
     require_sealed_holdout_positive: bool = True
     min_sealed_holdout_sharpe: float = 0.0
+    allowed_robustness_grades: frozenset[str] = frozenset({"稳健", "中等"})
 
 
 @dataclass
@@ -68,6 +69,9 @@ def assess_publish_readiness(
             f"稳健性评分 {float(rob_score):.1f} ({rob_grade or '?'}) "
             f"低于发布门槛 {th.min_robustness_score:.1f}"
         )
+    elif rob_grade and rob_grade not in th.allowed_robustness_grades:
+        allowed = "、".join(sorted(th.allowed_robustness_grades))
+        reasons.append(f"稳健性评级「{rob_grade}」未达发布标准 (需 {allowed})")
 
     bt_sharpe = (backtest_metrics or {}).get("sharpe")
     if bt_sharpe is None:

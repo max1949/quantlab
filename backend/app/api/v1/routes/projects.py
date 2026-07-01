@@ -85,7 +85,12 @@ def project_quality(
 
     project_service.get_owned_project(db, current_user.id, uuid.UUID(project_id))
     verdict = rq.assess_project(db, uuid.UUID(project_id))
-    return {"passed": verdict.passed, "reasons": verdict.reasons, "scorecard": verdict.scorecard}
+    return {
+        "passed": verdict.passed,
+        "reasons": verdict.reasons,
+        "scorecard": verdict.scorecard,
+        "thresholds": rq.thresholds_payload(),
+    }
 
 
 @router.post("/{project_id}/publish", response_model=ProjectOut, summary="发布项目到研究 Feed")

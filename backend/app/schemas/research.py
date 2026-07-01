@@ -23,6 +23,8 @@ class ReportSummary(BaseModel):
     stages: dict
     is_public: bool
     created_at: datetime
+    oos_sharpe: float | None = None
+    robustness_score: float | None = None
 
 
 class ReportDetail(BaseModel):

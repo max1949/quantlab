@@ -35,6 +35,7 @@ import type {
   User,
   UserType,
   Validation,
+  ValidationDetail,
 } from "./types";
 
 // ---- auth ----
@@ -139,6 +140,13 @@ export interface ProjectQuality {
   passed: boolean;
   reasons: string[];
   scorecard: Record<string, number | string | null>;
+  thresholds?: {
+    min_oos_sharpe: number;
+    min_robustness_score: number;
+    min_backtest_sharpe: number;
+    min_sealed_holdout_sharpe: number;
+    allowed_robustness_grades: string[];
+  };
 }
 
 export async function getProjectQuality(id: string): Promise<ProjectQuality> {
@@ -365,6 +373,16 @@ export async function createValidation(body: {
   return data;
 }
 
+export async function listValidations(): Promise<Validation[]> {
+  const { data } = await api.get<Validation[]>("/validations");
+  return data;
+}
+
+export async function getValidation(id: string): Promise<ValidationDetail> {
+  const { data } = await api.get<ValidationDetail>(`/validations/${id}`);
+  return data;
+}
+
 export async function runOrthogonalize(body: {
   target_factor_id: string;
   control_factor_ids: string[];
@@ -444,8 +462,9 @@ export async function getFeed(): Promise<ReportSummary[]> {
   return data;
 }
 
-export async function getPublicFeed(): Promise<ReportSummary[]> {
-  return getFeed();
+export async function getPublicFeed(sort: "latest" | "top" = "top"): Promise<ReportSummary[]> {
+  const { data } = await api.get<ReportSummary[]>("/public/feed", { params: { sort } });
+  return data;
 }
 
 // ---- academy tasks ----

@@ -29,14 +29,47 @@ def _thresholds() -> QualityThresholds:
             min_backtest_sharpe=-999.0,
             require_sealed_holdout_positive=False,
             min_sealed_holdout_sharpe=-999.0,
+            allowed_robustness_grades=frozenset({"稳健", "中等", "偏弱", "脆弱"}),
         )
+    grades = frozenset(
+        g.strip() for g in s.publish_min_robustness_grades.split(",") if g.strip()
+    ) or frozenset({"稳健", "中等"})
     return QualityThresholds(
         min_oos_sharpe=s.publish_min_oos_sharpe,
         min_robustness_score=s.publish_min_robustness_score,
         min_backtest_sharpe=s.publish_min_backtest_sharpe,
         require_sealed_holdout_positive=s.publish_require_sealed_holdout,
         min_sealed_holdout_sharpe=s.publish_min_sealed_holdout_sharpe,
+        allowed_robustness_grades=grades,
     )
+
+
+def _representative_factor_id(db: Session, project_id: uuid.UUID) -> uuid.UUID | None:
+    from backend.app.models.factor import Factor
+
+    factors = list(
+        db.execute(select(Factor).where(Factor.project_id == project_id)).scalars().all()
+    )
+    if not factors:
+        return None
+    for f in factors:
+        if _latest_success_validation(db, f.id):
+            return f.id
+    for f in factors:
+        if _latest_success_backtest(db, f.id):
+            return f.id
+    return factors[0].id
+
+
+def thresholds_payload() -> dict:
+    th = _thresholds()
+    return {
+        "min_oos_sharpe": th.min_oos_sharpe,
+        "min_robustness_score": th.min_robustness_score,
+        "min_backtest_sharpe": th.min_backtest_sharpe,
+        "min_sealed_holdout_sharpe": th.min_sealed_holdout_sharpe,
+        "allowed_robustness_grades": sorted(th.allowed_robustness_grades),
+    }
 
 
 def _latest_success_backtest(db: Session, factor_id: uuid.UUID) -> Backtest | None:
@@ -80,8 +113,9 @@ def assess_project(db: Session, project_id: uuid.UUID) -> QualityVerdict:
             reasons=["项目下还没有因子"],
             scorecard={},
         )
-    # 以项目主因子 (最早创建的) 为准
-    factor_id = factors[0]
+    factor_id = _representative_factor_id(db, project_id)
+    if factor_id is None:
+        return QualityVerdict(passed=False, reasons=["项目下还没有因子"], scorecard={})
     return assess_factor(db, factor_id)
 
 

@@ -20,4 +20,4 @@ def public_research_feed(
     sort: str = "latest",
     limit: int = 30,
 ) -> list[ReportSummary]:
-    return [ReportSummary.model_validate(r) for r in research_service.feed(db, sort, limit)]
+    return [ReportSummary(**r) for r in research_service.feed(db, sort, limit)]

@@ -11,8 +11,18 @@ export default function ReportCard({ report }: { report: ReportSummary }) {
         <h3 className="font-semibold text-slate-800">{report.title}</h3>
         <GradeBadge grade={report.grade} />
       </div>
-      <div className="mt-2 flex items-center gap-2 text-xs text-slate-400">
+      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-400">
         <span className="badge">{report.symbol}</span>
+        {report.oos_sharpe != null && (
+          <span>
+            {dict.reportCard.oosSharpe}: {report.oos_sharpe.toFixed(2)}
+          </span>
+        )}
+        {report.robustness_score != null && (
+          <span>
+            {dict.reportCard.robustness}: {report.robustness_score.toFixed(0)}
+          </span>
+        )}
         <Link
           to={`/u/${report.owner_id}`}
           className="text-brand-600 hover:underline"

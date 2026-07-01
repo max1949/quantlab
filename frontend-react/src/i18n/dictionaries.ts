@@ -156,6 +156,20 @@ const en = {
     guestBanner: "Browsing as guest — sign in to publish and follow researchers",
     guestLogin: "Sign in",
     guestRegister: "Register free",
+    sortTop: "Top quality",
+    sortLatest: "Latest",
+  },
+  validationPanel: {
+    title: "Scientific validation results",
+    subtitle: "In-sample returns mean little — focus on out-of-sample and cross-period stability.",
+    empty: "Run validation to see if this factor holds up out of sample.",
+    isSharpe: "In-sample Sharpe",
+    oosSharpe: "Out-of-sample Sharpe",
+    degradation: "Sharpe decay (IS−OOS)",
+    robustness: "Robustness",
+    wfSummary: (folds: number, pct: number) =>
+      `Walk-forward: ${folds} folds, ${pct}% periods with positive Sharpe`,
+    sealedHoldout: (s: string) => `Sealed holdout Sharpe ${s} (never used in tuning)`,
   },
   leaderboards: {
     title: "Leaderboards",
@@ -306,6 +320,12 @@ const en = {
     dataPlanUpgrade: "Upgrade",
     qualityPass: "Ready for feed — passes research quality gate",
     qualityFail: "Not ready to publish — fix these first",
+    warnBacktestOnly:
+      "Backtest looks good? Not enough — run scientific validation (OOS + walk-forward) before trusting this factor.",
+    scoreOos: "OOS Sharpe",
+    scoreRobust: "Robustness",
+    scoreBacktest: "Backtest Sharpe",
+    scoreSealed: "Sealed holdout Sharpe",
   },
   l2Analysis: {
     title: "L2 Advanced analysis",
@@ -457,6 +477,8 @@ const en = {
   },
   reportCard: {
     viewResearcher: "View researcher",
+    oosSharpe: "OOS Sharpe",
+    robustness: "Robustness",
   },
   l4Tools: {
     title: "L4 Pro portfolio tools",
@@ -637,6 +659,20 @@ const zh = {
     guestBanner: "当前为访客浏览 — 登录后可发布研究、关注其他研究员",
     guestLogin: "登录",
     guestRegister: "免费注册",
+    sortTop: "质量优先",
+    sortLatest: "最新发布",
+  },
+  validationPanel: {
+    title: "科学验证结果",
+    subtitle: "全样本回测好看不算数 — 重点看样本外和跨期是否还能赚钱。",
+    empty: "先运行科学验证，才能判断因子是否真有效。",
+    isSharpe: "样本内夏普",
+    oosSharpe: "样本外夏普",
+    degradation: "夏普衰减 (样本内−外)",
+    robustness: "稳健性评分",
+    wfSummary: (folds: number, pct: number) =>
+      `Walk-Forward: ${folds} 段, ${pct}% 时段夏普为正`,
+    sealedHoldout: (s: string) => `封印 holdout 夏普 ${s}（该段未参与调参）`,
   },
   leaderboards: {
     title: "排行榜",
@@ -786,6 +822,12 @@ const zh = {
     dataPlanUpgrade: "升级",
     qualityPass: "已达广场发布标准",
     qualityFail: "尚未达发布门槛 — 请先完成以下项",
+    warnBacktestOnly:
+      "回测好看还不够 — 必须做科学验证（样本外 + Walk-Forward），才能判断因子是否真能用。",
+    scoreOos: "样本外夏普",
+    scoreRobust: "稳健性",
+    scoreBacktest: "回测夏普",
+    scoreSealed: "封印段夏普",
   },
   l2Analysis: {
     title: "L2 进阶分析",
@@ -936,6 +978,8 @@ const zh = {
   },
   reportCard: {
     viewResearcher: "查看研究员",
+    oosSharpe: "样本外夏普",
+    robustness: "稳健性",
   },
   l4Tools: {
     title: "L4 准职业组合工具",

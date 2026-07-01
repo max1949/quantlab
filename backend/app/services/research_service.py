@@ -12,6 +12,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from engine import ai_advisor, research_report
+from backend.app.schemas.research import ReportSummary
 from backend.app.models.backtest import Backtest, BacktestStatus
 from backend.app.models.factor import Factor
 from backend.app.models.market import DataSnapshot
@@ -206,7 +207,36 @@ def list_my_reports(db: Session, owner_id: uuid.UUID, limit: int = 50) -> list[R
 _GRADE_RANK = {"稳健": 3, "中等": 2, "偏弱": 1, "脆弱": 0}
 
 
-def feed(db: Session, sort: str = "latest", limit: int = 30) -> list[ResearchReport]:
+def _feed_metrics(db: Session, report: ResearchReport) -> tuple[float | None, float | None]:
+    vid = (report.based_on or {}).get("validation_id")
+    if not vid:
+        return None, None
+    try:
+        val = db.get(Validation, uuid.UUID(str(vid)))
+    except (ValueError, TypeError):
+        return None, None
+    if val is None:
+        return None, None
+    oos_sharpe = None
+    if val.oos:
+        s = (val.oos.get("out_of_sample") or {}).get("sharpe")
+        oos_sharpe = float(s) if s is not None else None
+    rob_score = None
+    if val.robustness and val.robustness.get("score") is not None:
+        rob_score = float(val.robustness["score"])
+    return oos_sharpe, rob_score
+
+
+def feed_summary(db: Session, report: ResearchReport) -> dict:
+    oos_sharpe, robustness_score = _feed_metrics(db, report)
+    return {
+        **ReportSummary.model_validate(report).model_dump(),
+        "oos_sharpe": oos_sharpe,
+        "robustness_score": robustness_score,
+    }
+
+
+def feed(db: Session, sort: str = "latest", limit: int = 30) -> list[dict]:
     """研究 Feed: 公开报告。sort=latest(最新) | top(高评分优先)。"""
     rows = list(
         db.execute(
@@ -218,7 +248,12 @@ def feed(db: Session, sort: str = "latest", limit: int = 30) -> list[ResearchRep
     )
     if sort == "top":
         rows.sort(
-            key=lambda r: (_GRADE_RANK.get(r.grade or "", -1), r.created_at),
+            key=lambda r: (
+                _GRADE_RANK.get(r.grade or "", -1),
+                _feed_metrics(db, r)[1] or 0,
+                _feed_metrics(db, r)[0] or 0,
+                r.created_at,
+            ),
             reverse=True,
         )
-    return rows[:limit]
+    return [feed_summary(db, r) for r in rows[:limit]]
