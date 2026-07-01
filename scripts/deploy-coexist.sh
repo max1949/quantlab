@@ -65,11 +65,19 @@ install_deps_apt() {
 install_deps_dnf() {
   local mgr=$1
   $mgr install -y git curl gcc make openssl-devel
-  if $mgr install -y python3.11 python3.11-pip python3.11-devel 2>/dev/null; then
+  # OL8 默认 python3 常为 3.6，QuantLab 需要 3.9+
+  if $mgr install -y python39 python39-pip python39-devel 2>/dev/null; then
+    PYTHON_BIN=python3.9
+  elif $mgr install -y python3.11 python3.11-pip python3.11-devel 2>/dev/null; then
     PYTHON_BIN=python3.11
   else
     $mgr install -y python3 python3-pip python3-devel
     PYTHON_BIN=python3
+  fi
+  if ! "$PYTHON_BIN" -c 'import sys; exit(0 if sys.version_info >= (3, 9) else 1)' 2>/dev/null; then
+    echo "错误: 需要 Python 3.9+，当前: $($PYTHON_BIN --version 2>&1)"
+    echo "请执行: dnf install -y python39 python39-pip python39-devel"
+    exit 1
   fi
   if [[ "$SKIP_INSTALL_PG" != "1" ]] && ! command -v psql >/dev/null 2>&1; then
     $mgr module enable -y postgresql:13 2>/dev/null || $mgr module enable -y postgresql:15 2>/dev/null || true
@@ -92,7 +100,7 @@ ensure_pg_local_auth() {
     [[ -f "$f" ]] && pg_hba="$f" && break
   done
   if [[ -n "$pg_hba" ]] && ! grep -q 'quantlab.*127.0.0.1' "$pg_hba"; then
-    echo "host    quantlab    quantlab    127.0.0.1/32    scram-sha-256" >>"$pg_hba"
+    echo "host    quantlab    quantlab    127.0.0.1/32    md5" >>"$pg_hba"
     systemctl reload "$PG_SERVICE" 2>/dev/null || systemctl restart "$PG_SERVICE" 2>/dev/null || true
   fi
 }
