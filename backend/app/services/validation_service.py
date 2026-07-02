@@ -19,6 +19,7 @@ from engine import advanced_research as ar
 from engine import walk_forward as wf
 from engine.cost_model import CostConfig
 from engine.factor_metrics import IC_HORIZON_BY_TF, factor_ic
+from engine.segment_robustness import evaluate_session_segments, turnover_capacity_hint
 from backend.app.core.config import get_settings
 from backend.app.models.factor import Factor, FactorKind
 from backend.app.models.validation import Validation, ValidationStatus
@@ -136,6 +137,14 @@ def execute(db: Session, validation_id) -> Validation | None:
         sealed = wf.evaluate_sealed_holdout(signal_fn, ohlcv, cfg, holdout_ratio)
         robustness = wf.robustness_score(oos, walk, sens)
         robustness["sealed_holdout"] = sealed
+        session_seg = evaluate_session_segments(signal_fn, dev_ohlcv, cfg, tf)
+        robustness["session_segments"] = session_seg
+        if session_seg.get("notes"):
+            robustness["notes"] = list(robustness.get("notes") or []) + session_seg["notes"]
+        oos_turnover = (oos.get("out_of_sample") or {}).get("turnover")
+        cap_hint = turnover_capacity_hint(oos_turnover, tf)
+        if cap_hint:
+            robustness["capacity_hint"] = cap_hint
         try:
             signal = signal_fn(dev_ohlcv)
             ic_horizon = IC_HORIZON_BY_TF.get(tf, 1)

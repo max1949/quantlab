@@ -72,8 +72,10 @@ export default function BacktestResultsPanel({ factorId, enabled }: Props) {
   if (!detail.data?.metrics) return null;
 
   const m = detail.data.metrics;
-  const sharpe = m.sharpe;
+  const sharpe = m.sharpe as number | null | undefined;
+  const turnover = m.turnover as number | null | undefined;
   const lowSharpe = sharpe != null && sharpe < MIN_SHARPE_HINT;
+  const capHint = turnoverCapacityMessage(v, turnover);
 
   return (
     <div className="card">
@@ -96,12 +98,20 @@ export default function BacktestResultsPanel({ factorId, enabled }: Props) {
         </p>
       )}
 
-      <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <Metric label={v.sharpe} value={fmtNum(sharpe)} highlight={lowSharpe} />
-        <Metric label={v.annualReturn} value={fmtPct(m.annual_return)} />
-        <Metric label={v.maxDrawdown} value={fmtPct(m.max_drawdown)} />
-        <Metric label={v.winRate} value={fmtPct(m.win_rate)} />
+        <Metric label={v.annualReturn} value={fmtPct(m.annual_return as number)} />
+        <Metric label={v.maxDrawdown} value={fmtPct(m.max_drawdown as number)} />
+        <Metric label={v.winRate} value={fmtPct(m.win_rate as number)} />
+        <Metric label={v.turnover} value={turnover != null ? turnover.toFixed(1) : "—"} />
       </div>
+
+      {capHint && (
+        <p className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
+          <span className="font-medium">{v.capacityHintTitle}: </span>
+          {capHint}
+        </p>
+      )}
 
       {insight && (
         <div className="mt-4 rounded-lg border border-brand-200 bg-brand-50/50 p-4 text-sm text-slate-700 dark:border-brand-900 dark:bg-brand-950/30 dark:text-slate-200">
@@ -144,4 +154,20 @@ function fmtNum(v: number | null | undefined): string {
 function fmtPct(v: number | null | undefined): string {
   if (v == null) return "—";
   return `${(v * 100).toFixed(1)}%`;
+}
+
+function turnoverCapacityMessage(
+  v: {
+    capacityHigh: string;
+    capacityMid: (t: number) => string;
+    capacityIntraday: (t: number) => string;
+  },
+  turnover: number | null | undefined,
+): string | null {
+  if (turnover == null) return null;
+  const t = Math.abs(turnover);
+  if (t > 80) return v.capacityHigh;
+  if (t > 40) return v.capacityMid(t);
+  if (t > 25) return v.capacityIntraday(t);
+  return null;
 }

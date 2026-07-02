@@ -65,6 +65,16 @@ export default function ValidationResultsPanel({ factorId, enabled }: Props) {
     score?: number;
     grade?: string;
     notes?: string[];
+    capacity_hint?: string;
+    session_segments?: {
+      skipped?: boolean;
+      segments?: {
+        label: string;
+        bars: number;
+        skipped?: boolean;
+        sharpe?: number | null;
+      }[];
+    };
     factor_ic?: { ic_mean?: number; rank_ic_mean?: number };
     sealed_holdout?: { metrics?: { sharpe?: number }; skipped?: boolean };
   } | null;
@@ -85,6 +95,9 @@ export default function ValidationResultsPanel({ factorId, enabled }: Props) {
   const costCfg = d.cost_config;
   const feeRate = costCfg?.fee_rate;
   const slipBps = costCfg?.slippage_bps;
+  const oosTurnover = (oos?.out_of_sample as { turnover?: number } | undefined)?.turnover;
+  const sessionSeg = rob?.session_segments;
+  const capacityHint = rob?.capacity_hint;
 
   const oosOk = oosSharpe != null && oosSharpe >= 0.15;
   const robOk = rob?.score != null && rob.score >= 50;
@@ -124,7 +137,7 @@ export default function ValidationResultsPanel({ factorId, enabled }: Props) {
         </p>
       )}
 
-      <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <Metric label={v.isSharpe} value={fmtSharpe(isSharpe)} />
         <Metric label={v.oosSharpe} value={fmtSharpe(oosSharpe)} highlight={oosSharpe != null && oosSharpe <= 0} />
         <Metric label={v.degradation} value={degradation != null ? degradation.toFixed(2) : "—"} />
@@ -132,7 +145,17 @@ export default function ValidationResultsPanel({ factorId, enabled }: Props) {
           label={v.robustness}
           value={rob?.score != null ? `${rob.score}/100` : "—"}
         />
+        <Metric
+          label={v.oosTurnover}
+          value={oosTurnover != null ? oosTurnover.toFixed(1) : "—"}
+        />
       </div>
+
+      {capacityHint && (
+        <p className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
+          {capacityHint}
+        </p>
+      )}
 
       {(icMean != null || rankIc != null || icIr != null) && (
         <div className="mb-4 grid gap-3 sm:grid-cols-3">
@@ -156,6 +179,29 @@ export default function ValidationResultsPanel({ factorId, enabled }: Props) {
             Math.round((wf.summary.positive_ratio ?? 0) * 100),
           )}
         </p>
+      )}
+
+      {sessionSeg && !sessionSeg.skipped && sessionSeg.segments && (
+        <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50/60 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/40">
+          <p className="mb-2 font-medium text-slate-700 dark:text-slate-200">{v.sessionTitle}</p>
+          <ul className="space-y-1 text-slate-600 dark:text-slate-300">
+            {sessionSeg.segments.map((seg) =>
+              seg.skipped ? null : (
+                <li key={seg.label}>
+                  {v.sessionRow(
+                    seg.label,
+                    seg.sharpe != null ? seg.sharpe.toFixed(2) : "—",
+                    seg.bars,
+                  )}
+                </li>
+              ),
+            )}
+          </ul>
+        </div>
+      )}
+
+      {sessionSeg?.skipped && (
+        <p className="mb-3 text-xs text-slate-500">{v.sessionSkipped}</p>
       )}
 
       {sealedSharpe != null && (

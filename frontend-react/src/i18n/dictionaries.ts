@@ -206,6 +206,11 @@ const en = {
     icSeriesTitle: "IC over time (daily buckets)",
     costNote: (fee: string, slip: string) =>
       `Metrics include costs: fee ${fee}, slippage ${slip} bps`,
+    sessionTitle: "Day vs night session (intraday)",
+    sessionRow: (label: string, sharpe: string, bars: number) =>
+      `${label}: Sharpe ${sharpe} · ${bars} bars`,
+    sessionSkipped: "Day/night split needs intraday data (5m/15m/1m).",
+    oosTurnover: "OOS turnover",
   },
   backtestPanel: {
     title: "Backtest results",
@@ -215,6 +220,13 @@ const en = {
     annualReturn: "Annual return",
     maxDrawdown: "Max drawdown",
     winRate: "Win rate",
+    turnover: "Turnover",
+    capacityHintTitle: "Capacity / cost note",
+    capacityHigh: "Turnover is very high — live trading may differ sharply from backtest after costs.",
+    capacityMid: (t: number) =>
+      `Turnover ${t.toFixed(0)} is elevated — run cost sensitivity before scaling capital.`,
+    capacityIntraday: (t: number) =>
+      `Intraday turnover ${t.toFixed(0)} — estimate capacity before live deployment.`,
     lowSharpeWarning:
       "Sharpe looks weak on full history — tweak the factor in Factor Lab before spending time on validation.",
   },
@@ -913,6 +925,11 @@ const zh = {
     icSeriesTitle: "IC 时序（按日分桶）",
     costNote: (fee: string, slip: string) =>
       `以下指标已含交易成本：手续费 ${fee}，滑点 ${slip} bps`,
+    sessionTitle: "日盘 vs 夜盘（中频）",
+    sessionRow: (label: string, sharpe: string, bars: number) =>
+      `${label}：夏普 ${sharpe} · ${bars} 根`,
+    sessionSkipped: "日夜分段需分钟/小时线数据（如 5m/15m）。",
+    oosTurnover: "样本外换手",
   },
   backtestPanel: {
     title: "回测结果",
@@ -922,6 +939,13 @@ const zh = {
     annualReturn: "年化收益",
     maxDrawdown: "最大回撤",
     winRate: "胜率",
+    turnover: "换手率",
+    capacityHintTitle: "容量 / 成本提示",
+    capacityHigh: "换手率极高 — 实盘收益可能被成本大幅侵蚀。",
+    capacityMid: (t: number) =>
+      `换手率 ${t.toFixed(0)} 偏高 — 放大资金前请先做成本敏感性分析。`,
+    capacityIntraday: (t: number) =>
+      `中频换手 ${t.toFixed(0)} — 上实盘前请估算可承载规模。`,
     lowSharpeWarning:
       "全样本夏普偏弱 — 建议先在因子实验室调整公式/参数，再花时间做验证。",
   },
