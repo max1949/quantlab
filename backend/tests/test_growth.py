@@ -83,6 +83,31 @@ def test_public_report_detail(client, db_session):
     assert anon.status_code == 200
 
 
+def test_report_seo_preview_and_sitemap(client, db_session):
+    seed_sample_market_data(db_session)
+    h = _register(client, "seorep")
+    proj, rep = _full_research(client, h, db_session)
+    rid = rep["id"]
+    # 未公开 -> SEO 预览 404
+    assert client.get(f"/reports/{rid}").status_code == 404
+    client.post(f"{BASE}/projects/{proj['id']}/publish", headers=h)
+    client.post(f"{BASE}/research/reports/{rid}/share", headers=h)
+    # 公开后 -> 可索引 HTML, 含 OG 标题与 canonical
+    page = client.get(f"/reports/{rid}")
+    assert page.status_code == 200
+    assert 'property="og:title"' in page.text
+    assert f"/app/reports/{rid}" in page.text
+    assert 'application/ld+json' in page.text
+    # sitemap 含该报告
+    sm = client.get("/sitemap.xml")
+    assert sm.status_code == 200
+    assert f"/reports/{rid}" in sm.text
+    # robots 指向 sitemap
+    robots = client.get("/robots.txt")
+    assert robots.status_code == 200
+    assert "Sitemap:" in robots.text
+
+
 def test_choose_type_updates_user(client, db_session):
     h = _register(client, "oscar")
     out = client.post(f"{BASE}/onboarding/choose-type", headers=h, json={"user_type": "python"}).json()

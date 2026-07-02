@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -194,6 +195,21 @@ def generate_for_project(db: Session, owner: User, project_id: uuid.UUID) -> Res
 
 def get_report(db: Session, report_id: uuid.UUID) -> ResearchReport | None:
     return db.get(ResearchReport, report_id)
+
+
+def public_report_ids(db: Session, limit: int = 500) -> list[tuple[uuid.UUID, datetime]]:
+    """公开且已发布的报告 (id, 更新/创建时间), 供 sitemap 使用。"""
+    rows = db.execute(
+        select(ResearchReport.id, ResearchReport.created_at)
+        .join(ResearchProject, ResearchProject.id == ResearchReport.project_id)
+        .where(
+            ResearchReport.is_public.is_(True),
+            ResearchProject.status == ProjectStatus.PUBLISHED.value,
+        )
+        .order_by(ResearchReport.created_at.desc())
+        .limit(max(1, min(int(limit), 2000)))
+    ).all()
+    return [(r[0], r[1]) for r in rows]
 
 
 def list_my_reports(db: Session, owner_id: uuid.UUID, limit: int = 50) -> list[ResearchReport]:

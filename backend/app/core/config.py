@@ -14,6 +14,8 @@ class Settings(BaseSettings):
 
     app_env: str = "development"
     app_name: str = "QuantLab AI"
+    # 站点对外地址 (用于 SEO canonical / sitemap 绝对 URL)。留空则按请求推断。
+    public_base_url: str = ""
 
     # 数据库
     database_url: str = "postgresql+psycopg://quantlab:quantlab@localhost:5432/quantlab"

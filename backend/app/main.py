@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 
 from backend.app.api.v1 import api_router
 from backend.app.core.config import get_settings
-from backend.app.web import share_preview
+from backend.app.web import report_preview, share_preview
 
 settings = get_settings()
 if settings.app_env == "production" and settings.secret_key == "change-me-in-production":
@@ -54,11 +54,19 @@ async def security_headers(request: Request, call_next):
 
 app.include_router(api_router, prefix="/api/v1")
 app.include_router(share_preview.router)
+app.include_router(report_preview.router)
 
 
 @app.get("/robots.txt", include_in_schema=False, response_class=PlainTextResponse)
-def robots_txt() -> str:
-    return "User-agent: *\nAllow: /app/\nAllow: /share/\n"
+def robots_txt(request: Request) -> str:
+    origin = (settings.public_base_url or str(request.base_url)).rstrip("/")
+    return (
+        "User-agent: *\n"
+        "Allow: /app/\n"
+        "Allow: /share/\n"
+        "Allow: /reports/\n"
+        f"Sitemap: {origin}/sitemap.xml\n"
+    )
 
 
 @app.get("/health", tags=["system"])
