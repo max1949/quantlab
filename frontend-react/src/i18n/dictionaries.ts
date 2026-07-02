@@ -176,6 +176,7 @@ const en = {
     guestRegister: "Register free",
     sortTop: "Top quality",
     sortLatest: "Latest",
+    highlightBanner: "Your study is live here — highlighted below.",
   },
   validationPanel: {
     title: "Scientific validation results",
@@ -496,8 +497,14 @@ const en = {
     publishNow: "Publish to feed",
     backToFix: "Back to project — fix quality gate",
     publishedTitle: "Published to the research feed",
-    publishedDesc: "Your study is live. Browse the feed or share your report card below.",
+    publishedDesc: "Your study is live. Create a share card below, then see it on the feed.",
+    publishedShareNext: "Create share card →",
     viewFeed: "View research feed",
+    shareSuccessTitle: "Shared — your study is on the feed!",
+    shareSuccessDesc:
+      "Copy the link for friends, or open the research feed to see your report alongside the community.",
+    shareViewOnFeed: "See it on the feed →",
+    shareLinkLabel: "Share link",
   },
   reportDiscover: {
     authorTitle: "About the researcher",
@@ -796,6 +803,7 @@ const zh = {
     guestRegister: "免费注册",
     sortTop: "质量优先",
     sortLatest: "最新发布",
+    highlightBanner: "你的研究已出现在这里 — 下方高亮卡片就是。",
   },
   validationPanel: {
     title: "科学验证结果",
@@ -1111,8 +1119,13 @@ const zh = {
     publishNow: "发布到广场",
     backToFix: "回项目页 — 先过质量门槛",
     publishedTitle: "已发布到研究广场",
-    publishedDesc: "研究已公开。可以去广场逛逛，或用下方分享卡片发给朋友。",
+    publishedDesc: "研究已公开。在下方生成分享卡片，然后去广场看看效果。",
+    publishedShareNext: "去生成分享卡片 →",
     viewFeed: "去看研究广场",
+    shareSuccessTitle: "分享成功 — 你的研究已在广场上！",
+    shareSuccessDesc: "把链接发给朋友，或打开研究广场，看看你的报告在社区里的位置。",
+    shareViewOnFeed: "去广场看看 →",
+    shareLinkLabel: "分享链接",
   },
   reportDiscover: {
     authorTitle: "关于作者",

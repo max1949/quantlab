@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { getPublicFeed } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
@@ -12,12 +12,23 @@ import ReportCard from "../components/ReportCard";
 export default function Feed() {
   const user = useAuth((s) => s.user);
   const f = useLocale((s) => s.dict.feed);
-  const [sort, setSort] = useState<"top" | "latest">("top");
+  const [params] = useSearchParams();
+  const highlightId = params.get("highlight");
+  const highlightRef = useRef<HTMLDivElement>(null);
+  const [sort, setSort] = useState<"top" | "latest">(highlightId ? "latest" : "top");
   useDocumentTitle(`${f.title} · QuantLab AI`);
   const feed = useQuery({
     queryKey: ["public-feed", sort],
     queryFn: () => getPublicFeed(sort),
   });
+
+  useEffect(() => {
+    if (!highlightId || !feed.data?.some((r) => r.id === highlightId)) return;
+    const t = window.setTimeout(() => {
+      highlightRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 120);
+    return () => window.clearTimeout(t);
+  }, [highlightId, feed.data]);
 
   return (
     <div>
@@ -60,8 +71,23 @@ export default function Feed() {
         <ErrorBox message={apiErrorMessage(feed.error)} />
       ) : feed.data && feed.data.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {highlightId && feed.data.some((r) => r.id === highlightId) && (
+            <div className="col-span-full rounded-lg border border-emerald-200 bg-emerald-50/60 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200">
+              {f.highlightBanner}
+            </div>
+          )}
           {feed.data.map((r) => (
-            <ReportCard key={r.id} report={r} />
+            <div
+              key={r.id}
+              ref={r.id === highlightId ? highlightRef : undefined}
+              className={
+                r.id === highlightId
+                  ? "rounded-xl ring-2 ring-emerald-400 ring-offset-2 dark:ring-emerald-600"
+                  : undefined
+              }
+            >
+              <ReportCard report={r} />
+            </div>
           ))}
         </div>
       ) : (

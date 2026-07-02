@@ -53,9 +53,14 @@ export default function ReportPublishCoach({ projectId }: Props) {
       <div className="mb-6 card border border-emerald-200 bg-emerald-50/50 dark:border-emerald-900 dark:bg-emerald-950/30">
         <p className="font-semibold text-emerald-800 dark:text-emerald-200">{t.publishedTitle}</p>
         <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-300">{t.publishedDesc}</p>
-        <Link to="/feed" className="btn-primary mt-3 inline-block">
-          {t.viewFeed}
-        </Link>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <a href="#report-share" className="btn-primary">
+            {t.publishedShareNext}
+          </a>
+          <Link to="/feed" className="btn-ghost">
+            {t.viewFeed}
+          </Link>
+        </div>
       </div>
     );
   }
