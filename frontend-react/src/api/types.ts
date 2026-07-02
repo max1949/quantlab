@@ -226,6 +226,19 @@ export interface FormulaEvaluate {
   coach_summary: string;
 }
 
+export interface PythonEvaluate {
+  source: string;
+  score: number | null;
+  sharpe: number | null;
+  oos_sharpe: number | null;
+  ic_mean: number | null;
+  turnover: number | null;
+  max_drawdown: number | null;
+  publish_promising: boolean;
+  publish_hints: string[];
+  coach_summary: string;
+}
+
 export interface FactorPreview {
   factor_id: string;
   name: string;

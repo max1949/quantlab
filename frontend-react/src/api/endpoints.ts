@@ -16,6 +16,7 @@ import type {
   FactorTemplateMeta,
   FormulaHelp,
   FormulaEvaluate,
+  PythonEvaluate,
   Graph,
   LeaderRow,
   Plan,
@@ -303,6 +304,15 @@ export async function evaluateFormulaExpr(body: {
     "/factors/formula/evaluate",
     body,
   );
+  return data;
+}
+
+export async function evaluatePythonSource(body: {
+  source: string;
+  symbol: string;
+  timeframe?: string;
+}): Promise<PythonEvaluate> {
+  const { data } = await api.post<PythonEvaluate>("/factors/python/evaluate", body);
   return data;
 }
 

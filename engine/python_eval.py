@@ -1,4 +1,4 @@
-"""公式因子快速评估 — 在真实行情上跑回测 + OOS + IC (无需先创建因子)。"""
+"""Python 因子快速评估 — 沙箱执行 compute(ohlcv) 后跑回测 + OOS + IC。"""
 
 from __future__ import annotations
 
@@ -6,33 +6,33 @@ from typing import Any
 
 import pandas as pd
 
-from engine import formula as ff
 from engine.signal_eval import evaluate_signal
+from sandbox.runner import SandboxError, run_user_factor
 
 
-def evaluate_formula(
+def evaluate_python_source(
     ohlcv: pd.DataFrame,
-    expr: str,
+    source: str,
     *,
     oos_ratio: float = 0.3,
     ic_horizon: int | None = None,
     timeframe: str = "1d",
 ) -> dict[str, Any]:
-    """对公式表达式做快速因子评估, 返回可展示指标与发布预览提示。"""
-    ff.validate(expr)
-    clean = expr.strip()
+    src = source.strip()
+    if not src:
+        raise SandboxError("源码为空")
 
     def signal_fn(df: pd.DataFrame) -> pd.Series:
-        return ff.compute(df, clean)
+        return run_user_factor(src, df)
 
     result = evaluate_signal(
         ohlcv,
         signal_fn,
-        label=clean,
-        kind="formula",
+        label="compute(ohlcv)",
+        kind="python",
         oos_ratio=oos_ratio,
         ic_horizon=ic_horizon,
         timeframe=timeframe,
     )
-    result["expr"] = clean
+    result["source"] = src
     return result
