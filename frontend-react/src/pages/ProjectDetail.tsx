@@ -135,9 +135,14 @@ export default function ProjectDetail() {
   const genReport = useMutation({
     mutationFn: () => generateReport({ project_id: id }),
     onMutate: () => setBusy("report"),
-    onSuccess: (r) => {
+    onSuccess: async (r) => {
       void trackEvent("report_generated", { project: id });
       notify(p.reportDone, "success");
+      const msg = academyRewardMessage(r.academy_rewards, d.academyXpEarned);
+      if (msg) notify(msg, "success");
+      void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
+      const me = await useAuth.getState().refreshMe();
+      if (me) setUser(me);
       refreshAll();
       navigate(`/reports/${r.id}`);
     },

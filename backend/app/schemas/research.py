@@ -5,7 +5,9 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+
+from backend.app.schemas.task import AcademyRewardOut
 
 
 class ReportSummary(BaseModel):
@@ -49,6 +51,7 @@ class ReportDetail(BaseModel):
     based_on: dict
     is_public: bool
     created_at: datetime
+    academy_rewards: list[AcademyRewardOut] = Field(default_factory=list)
 
 
 class GenerateReportRequest(BaseModel):

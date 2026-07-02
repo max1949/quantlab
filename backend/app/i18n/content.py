@@ -11,12 +11,14 @@ RESEARCH_TEMPLATES: dict[str, dict[Locale, dict]] = {
             "hypothesis": "Does gold exhibit trend persistence?",
             "description": "Test whether gold (AU) trends can be captured with a momentum factor.",
             "tags": ["trend", "precious metals"],
+            "suitable_for": "Complete beginners · trend-first study",
         },
         "zh": {
             "title": "黄金趋势研究",
             "hypothesis": "黄金价格是否存在趋势延续性?",
             "description": "用动量因子检验黄金 (AU) 的趋势是否可被捕捉。",
             "tags": ["趋势", "贵金属"],
+            "suitable_for": "完全新手 · 从趋势思路入门",
         },
     },
     "commodity-momentum": {
@@ -25,12 +27,14 @@ RESEARCH_TEMPLATES: dict[str, dict[Locale, dict]] = {
             "hypothesis": "Is momentum effective on rebar (RB)?",
             "description": "Study trend inertia in commodity futures with a momentum factor.",
             "tags": ["momentum", "commodity"],
+            "suitable_for": "Python users · commodity futures",
         },
         "zh": {
             "title": "商品动量研究",
             "hypothesis": "螺纹钢 (RB) 的动量效应是否有效?",
             "description": "用动量因子研究商品期货的趋势惯性。",
             "tags": ["动量", "商品"],
+            "suitable_for": "有 Python 基础 · 商品期货",
         },
     },
     "vol-regime": {
@@ -39,12 +43,14 @@ RESEARCH_TEMPLATES: dict[str, dict[Locale, dict]] = {
             "hypothesis": "Do volatility states predict return distribution?",
             "description": "Study risk regime shifts on index futures (IF) with a volatility factor.",
             "tags": ["volatility", "index"],
+            "suitable_for": "Traders · risk / regime angle",
         },
         "zh": {
             "title": "波动率研究",
             "hypothesis": "波动率状态能否预示后续收益分布?",
             "description": "用波动率因子研究股指 (IF) 的风险状态切换。",
             "tags": ["波动率", "股指"],
+            "suitable_for": "有交易经验 · 风险/状态切换",
         },
     },
     "mean-reversion": {
@@ -53,12 +59,14 @@ RESEARCH_TEMPLATES: dict[str, dict[Locale, dict]] = {
             "hypothesis": "Do prices tend to revert after deviating from the mean?",
             "description": "Test mean-reversion behavior with a dedicated factor.",
             "tags": ["mean reversion"],
+            "suitable_for": "Beginners · contrarian / reversion logic",
         },
         "zh": {
             "title": "均值回归研究",
             "hypothesis": "价格偏离均值后是否倾向回归?",
             "description": "用均值回归因子检验价格的回归特性。",
             "tags": ["均值回归"],
+            "suitable_for": "新手 · 逆势/回归思路",
         },
     },
     "rsi-study": {
@@ -67,12 +75,14 @@ RESEARCH_TEMPLATES: dict[str, dict[Locale, dict]] = {
             "hypothesis": "Do RSI extremes contain reversal signals?",
             "description": "Study short-term strength swings on rebar with RSI.",
             "tags": ["RSI", "commodity"],
+            "suitable_for": "Beginners · oscillator / overbought-oversold",
         },
         "zh": {
             "title": "RSI 强弱研究",
             "hypothesis": "RSI 超买超卖区域是否蕴含反转信号?",
             "description": "用 RSI 因子研究螺纹钢短期强弱切换。",
             "tags": ["RSI", "商品"],
+            "suitable_for": "新手 · 强弱/超买超卖",
         },
     },
     "sma-cross": {
@@ -81,12 +91,14 @@ RESEARCH_TEMPLATES: dict[str, dict[Locale, dict]] = {
             "hypothesis": "Is there a tradable signal when price deviates from its moving average?",
             "description": "Study index pricing deviation with an SMA ratio factor.",
             "tags": ["moving average", "index"],
+            "suitable_for": "L1+ · moving-average deviation",
         },
         "zh": {
             "title": "均线偏离研究",
             "hypothesis": "价格偏离均线后是否存在可交易信号?",
             "description": "用均线偏离因子研究股指定价偏离。",
             "tags": ["均线", "股指"],
+            "suitable_for": "L1+ · 均线偏离",
         },
     },
     "multi-momentum": {
@@ -95,14 +107,31 @@ RESEARCH_TEMPLATES: dict[str, dict[Locale, dict]] = {
             "hypothesis": "Is long-window momentum more robust on gold?",
             "description": "Researcher Plus — long-window momentum template.",
             "tags": ["momentum", "advanced"],
+            "suitable_for": "L2 + membership · longer lookback",
         },
         "zh": {
             "title": "进阶动量组合",
             "hypothesis": "长周期动量在黄金上是否更稳健?",
             "description": "研究员会员专属 — 长窗口动量研究模板。",
             "tags": ["动量", "进阶"],
+            "suitable_for": "L2 + 会员 · 长周期动量",
         },
     },
+}
+
+LEARNING_STEPS_DEFAULT: dict[Locale, list[str]] = {
+    "en": [
+        "One-click start — auto project + starter factor",
+        "Backtest — read Sharpe and max drawdown",
+        "Scientific validation — OOS + walk-forward",
+        "Generate report — publish when quality gate passes",
+    ],
+    "zh": [
+        "一键开局 → 自动建好项目与起步因子",
+        "运行回测 → 看夏普与最大回撤",
+        "科学验证 → 样本外 + Walk-Forward",
+        "生成报告 → 达标后发布到研究广场",
+    ],
 }
 
 FACTOR_TEMPLATES: dict[str, dict[Locale, dict]] = {
@@ -380,15 +409,49 @@ def t(locale: Locale, table: dict[Locale, str]) -> str:
 def localize_research_template(code: str, locale: Locale, fallback: dict | None = None) -> dict:
     pack = RESEARCH_TEMPLATES.get(code, {}).get(locale) or RESEARCH_TEMPLATES.get(code, {}).get("en")
     if pack:
-        return dict(pack)
-    if fallback:
-        return {
+        out = dict(pack)
+    elif fallback:
+        out = {
             "title": fallback.get("title", code),
             "hypothesis": fallback.get("hypothesis", ""),
             "description": fallback.get("description", ""),
             "tags": list(fallback.get("tags") or []),
         }
-    return {"title": code, "hypothesis": "", "description": "", "tags": []}
+    else:
+        out = {"title": code, "hypothesis": "", "description": "", "tags": []}
+    out.setdefault("suitable_for", "")
+    out.setdefault("learning_steps", LEARNING_STEPS_DEFAULT.get(locale) or LEARNING_STEPS_DEFAULT["en"])
+    return out
+
+
+def template_teaching_bundle(
+    code: str,
+    factor_template: str,
+    default_params: dict | None,
+    locale: Locale,
+) -> dict:
+    """研究模板卡片教学信息 (因子说明 + 学习路径)。"""
+    loc = localize_research_template(code, locale)
+    ft = FACTOR_TEMPLATES.get(factor_template, {}).get(locale) or FACTOR_TEMPLATES.get(factor_template, {}).get("en") or {}
+    params = default_params or {}
+    param_bits: list[str] = []
+    for key, val in params.items():
+        ph = (ft.get("param_help") or {}).get(key) or {}
+        hint = ph.get("suggested") or ph.get("tip") or key
+        param_bits.append(f"{key}={val}")
+    params_line = ", ".join(param_bits)
+    label = ft.get("label", factor_template)
+    if locale == "zh":
+        factor_note = f"内置「{label}」因子，默认 {params_line}"
+    else:
+        factor_note = f"Starter factor: {label} ({params_line})"
+    return {
+        "suitable_for": loc.get("suitable_for", ""),
+        "learning_steps": loc.get("learning_steps") or LEARNING_STEPS_DEFAULT.get(locale) or LEARNING_STEPS_DEFAULT["en"],
+        "factor_template_label": label,
+        "factor_note": factor_note,
+        "how_it_works": ft.get("how_it_works", ""),
+    }
 
 
 def format_lock_hint(locale: Locale, min_level: int, min_tier: int, level_ok: bool, tier_ok: bool) -> str | None:

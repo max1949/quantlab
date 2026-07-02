@@ -60,6 +60,11 @@ export interface Template {
   min_tier?: number;
   allowed?: boolean;
   lock_hint?: string | null;
+  suitable_for?: string;
+  factor_template_label?: string;
+  factor_note?: string;
+  how_it_works?: string;
+  learning_steps?: string[];
 }
 
 export interface StartTemplateResult {
@@ -356,6 +361,7 @@ export interface ReportDetail extends ReportSummary {
   improvement_suggestion: string;
   narrative: Record<string, unknown>;
   based_on: Record<string, unknown>;
+  academy_rewards?: AcademyReward[];
 }
 
 export interface ShareOut {

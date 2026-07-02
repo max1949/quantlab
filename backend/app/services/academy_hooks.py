@@ -40,3 +40,7 @@ def on_validation_success(db: Session, user: User) -> list[dict]:
 
 def on_welcome(db: Session, user: User) -> list[dict]:
     return _collect(db, user, ["welcome"])
+
+
+def on_report_generated(db: Session, user: User) -> list[dict]:
+    return _collect(db, user, ["first-report"])

@@ -70,6 +70,9 @@ def test_template_one_click_start(client, db_session):
     assert nxt["stage"] == "run_backtest"
     assert nxt["active_project_id"] == str(body["project_id"])
     assert nxt["cta_path"] == f"/projects/{body['project_id']}"
+    gold = next(t for t in tpls if t["code"] == "gold-trend")
+    assert gold.get("learning_steps")
+    assert gold.get("factor_note")
     # 因子确实归属新建项目
     f = client.get(f"{BASE}/factors/{body['factor_id']}", headers=h).json()
     assert f["project_id"] == str(body["project_id"])

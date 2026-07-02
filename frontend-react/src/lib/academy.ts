@@ -18,6 +18,7 @@ export const AUTO_ACADEMY_TASK_CODES = new Set([
   "first-observation",
   "first-backtest",
   "first-validation",
+  "first-report",
   "use-template-factor",
   "combine-factors",
   "write-formula-factor",

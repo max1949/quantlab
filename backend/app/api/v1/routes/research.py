@@ -45,6 +45,7 @@ def list_research_templates(
     for item in items:
         t = item["template"]
         loc = item["localized"]
+        teach = i18n.template_teaching_bundle(t.code, t.factor_template, t.default_params or {}, locale)
         out.append(
             TemplateOut(
                 code=t.code,
@@ -59,6 +60,7 @@ def list_research_templates(
                 min_tier=item["min_tier"],
                 allowed=item["allowed"],
                 lock_hint=item["lock_hint"],
+                **teach,
             )
         )
     return out
@@ -122,7 +124,8 @@ def generate_report(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="还没有成功的回测或验证, 先去回测/验证再生成报告",
         )
-    return ReportDetail.model_validate(report)
+    detail = ReportDetail.model_validate(report)
+    return detail.model_copy(update={"academy_rewards": getattr(report, "academy_rewards", [])})
 
 
 @router.post(
@@ -145,7 +148,8 @@ def generate_report_for_factor(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="该因子还没有成功的回测或验证, 先去回测/验证再生成报告",
         )
-    return ReportDetail.model_validate(report)
+    detail = ReportDetail.model_validate(report)
+    return detail.model_copy(update={"academy_rewards": getattr(report, "academy_rewards", [])})
 
 
 @router.get("/feed", response_model=list[ReportSummary], summary="研究 Feed (最新/高分 公开研究)")

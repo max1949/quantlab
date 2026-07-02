@@ -151,6 +151,9 @@ def _build_report_row(
     growth_service.recompute_contribution_score(db, owner)
     referral_service.activate_if_referred(db, owner)
     growth_service.log_event(db, "generate_report", owner.id, {"report_id": str(report.id)})
+    from backend.app.services import academy_hooks
+
+    report.academy_rewards = academy_hooks.on_report_generated(db, owner)
     return report
 
 

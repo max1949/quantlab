@@ -84,3 +84,17 @@ def test_template_start_auto_welcome(client, db_session):
     assert out["project_id"]
     tasks = {t["code"]: t for t in client.get(f"{BASE}/tasks", headers=h).json()}
     assert tasks["welcome"]["completed"] is True
+
+
+def test_first_report_auto_completes(client, db_session):
+    from backend.tests.test_growth import _full_research
+
+    seed_default_tasks(db_session)
+    seed_sample_market_data(db_session)
+    h = _register(client, "acad_rep")
+    proj, rep = _full_research(client, h, db_session)
+    assert rep.status_code == 201, rep.text
+    body = rep.json()
+    assert any(r["code"] == "first-report" for r in body.get("academy_rewards", []))
+    tasks = {t["code"]: t for t in client.get(f"{BASE}/tasks", headers=h).json()}
+    assert tasks["first-report"]["completed"] is True

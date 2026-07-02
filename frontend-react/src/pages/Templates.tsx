@@ -38,6 +38,16 @@ export default function Templates() {
   return (
     <div>
       <PageTitle title={t.title} subtitle={t.subtitle} />
+
+      <div className="mb-6 rounded-xl border border-brand-100 bg-brand-50/50 p-4 dark:border-brand-900 dark:bg-brand-950/30">
+        <p className="font-medium text-brand-800 dark:text-brand-200">{t.pathTitle}</p>
+        <ol className="mt-2 list-inside list-decimal space-y-1 text-sm text-slate-600 dark:text-slate-300">
+          {t.pathSteps.map((step) => (
+            <li key={step}>{step}</li>
+          ))}
+        </ol>
+      </div>
+
       {templates.isLoading ? (
         <Spinner />
       ) : templates.isError ? (
@@ -64,10 +74,37 @@ export default function Templates() {
                   </h3>
                   <span className="badge shrink-0">{tpl.symbol}</span>
                 </div>
+                {tpl.suitable_for && (
+                  <p className="mt-2 text-xs font-medium text-brand-600 dark:text-brand-400">
+                    {t.suitableFor}: {tpl.suitable_for}
+                  </p>
+                )}
                 <p className="mt-2 flex-1 text-sm text-slate-500">{tpl.description}</p>
                 <p className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500 dark:bg-slate-800">
                   💡 {c.hypothesis}: {tpl.hypothesis}
                 </p>
+                {tpl.factor_note && (
+                  <p className="mt-2 rounded-lg border border-slate-200 bg-white/70 px-3 py-2 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300">
+                    <span className="font-medium">{t.factorSetup}: </span>
+                    {tpl.factor_note}
+                  </p>
+                )}
+                {tpl.how_it_works && (
+                  <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                    <span className="font-medium text-slate-600 dark:text-slate-300">{t.howWorks} </span>
+                    {tpl.how_it_works}
+                  </p>
+                )}
+                {tpl.learning_steps && tpl.learning_steps.length > 0 && (
+                  <div className="mt-2 rounded-lg border border-brand-100 bg-brand-50/40 px-3 py-2 dark:border-brand-900 dark:bg-brand-950/20">
+                    <p className="text-xs font-medium text-brand-700 dark:text-brand-300">{t.youWill}</p>
+                    <ol className="mt-1 list-inside list-decimal space-y-0.5 text-xs text-slate-600 dark:text-slate-300">
+                      {tpl.learning_steps.map((step) => (
+                        <li key={step}>{step}</li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
                 <div className="mt-2 flex flex-wrap gap-1">
                   {tpl.tags.map((tag) => (
                     <span key={tag} className="badge">

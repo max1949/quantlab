@@ -181,6 +181,15 @@ DEFAULT_TASKS: list[dict] = [
         "order_index": 32,
     },
     {
+        "code": "first-report",
+        "title": "第一份研究报告",
+        "description": "首次生成研究报告后自动完成 — 把因子、回测与验证写成结论。",
+        "category": "research",
+        "min_level": UserLevel.L0.value,
+        "xp_reward": 125,
+        "order_index": 33,
+    },
+    {
         "code": "write-formula-factor",
         "title": "编写公式因子",
         "description": "在因子实验室创建公式因子后自动完成 (L2 + 研究员会员)。",
