@@ -17,6 +17,7 @@ import type {
   FormulaHelp,
   FormulaEvaluate,
   PythonEvaluate,
+  TemplateEvaluate,
   Graph,
   LeaderRow,
   Plan,
@@ -200,6 +201,16 @@ export async function createTemplateFactor(body: {
   project_id?: string;
 }): Promise<Factor> {
   const { data } = await api.post<Factor>("/factors/template", body);
+  return data;
+}
+
+export async function evaluateTemplateFactor(body: {
+  template_type: string;
+  params: Record<string, number>;
+  symbol: string;
+  timeframe?: string;
+}): Promise<TemplateEvaluate> {
+  const { data } = await api.post<TemplateEvaluate>("/factors/template/evaluate", body);
   return data;
 }
 

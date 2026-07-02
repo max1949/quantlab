@@ -47,6 +47,30 @@ class TemplateFactorCreate(BaseModel):
     project_id: uuid.UUID | None = None  # 可选: 归入某研究项目
 
 
+class TemplateEvaluateRequest(BaseModel):
+    """模板因子快评 (不创建因子)。"""
+
+    template_type: str = Field(min_length=1, max_length=64)
+    params: dict[str, int] = Field(default_factory=dict)
+    symbol: str = Field(min_length=1, max_length=32)
+    timeframe: str = Field(default="1d", max_length=16)
+
+
+class TemplateEvaluateOut(BaseModel):
+    template_type: str
+    params: dict
+    label: str
+    score: float | None = None
+    sharpe: float | None = None
+    oos_sharpe: float | None = None
+    ic_mean: float | None = None
+    turnover: float | None = None
+    max_drawdown: float | None = None
+    publish_promising: bool = False
+    publish_hints: list[str] = Field(default_factory=list)
+    coach_summary: str = ""
+
+
 class StackComponent(BaseModel):
     factor_id: uuid.UUID
     weight: float

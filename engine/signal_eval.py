@@ -77,14 +77,17 @@ def _coach_summary(
     short = label if len(label) <= 48 else f"{label[:45]}…"
     if kind == "python":
         lines = [f"Python 因子快评综合分 {score}。"]
+    elif kind == "template":
+        lines = [f"模板参数 {short} 快评综合分 {score}。"]
     else:
         lines = [f"公式「{short}」快评综合分 {score}。"]
     if oos_sharpe is not None and oos_sharpe < 0.3:
-        hint = (
-            "样本外偏弱，可简化代码或调整窗口后再试。"
-            if kind == "python"
-            else "样本外偏弱，可简化表达式或调整窗口后再试。"
-        )
+        if kind == "python":
+            hint = "样本外偏弱，可简化代码或调整窗口后再试。"
+        elif kind == "template":
+            hint = "样本外偏弱，可调整参数或换模板后再试。"
+        else:
+            hint = "样本外偏弱，可简化表达式或调整窗口后再试。"
         lines.append(hint)
     elif oos_sharpe is not None and oos_sharpe >= 0.5:
         lines.append("表现尚可，确认后可创建因子并跑完整科学验证。")

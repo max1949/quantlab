@@ -241,7 +241,7 @@ export default function Experiments() {
                     <td className="px-3 py-2 font-mono text-xs">
                       {row.results[0]?.label ?? "—"}
                     </td>
-                    <td className="px-3 py-2">{row.template_type}</td>
+                    <td className="px-3 py-2">{formatScanType(row.template_type)}</td>
                     <td className="px-3 py-2">{row.symbol}</td>
                     <td className="px-3 py-2">{row.timeframe}</td>
                     <td className="px-3 py-2 font-medium">{fmt(row.best_score)}</td>
@@ -344,7 +344,7 @@ function ScanDetail({
         <div>
           <h3 className="font-semibold text-slate-800 dark:text-slate-100">{e.detailTitle}</h3>
           <p className="text-xs text-slate-500">
-            {scan.template_type} · {scan.symbol} · {scan.timeframe}
+            {formatScanType(scan.template_type)} · {scan.symbol} · {scan.timeframe}
           </p>
         </div>
         <button type="button" className="btn text-sm" disabled={aiPending} onClick={onAiReview}>
@@ -436,4 +436,9 @@ function ScanDetail({
 function fmt(v: number | null | undefined): string {
   if (v == null) return "—";
   return v.toFixed(2);
+}
+
+function formatScanType(templateType: string): string {
+  if (templateType.startsWith("stack:")) return "stack";
+  return templateType;
 }

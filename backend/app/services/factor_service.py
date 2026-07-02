@@ -342,6 +342,43 @@ def preview(
     }
 
 
+def evaluate_template_params(
+    db: Session,
+    user: User,
+    template_type: str,
+    params: dict,
+    symbol: str,
+    timeframe: str = "1d",
+) -> dict:
+    """模板快评: 在用户可访问行情上评估单组参数。"""
+    from backend.app.services import market_data_policy as mdp
+    from engine.template_eval import evaluate_template
+
+    try:
+        fe.validate_template_params(template_type, params)
+    except fe.FactorError as exc:
+        raise FactorValidationError(str(exc))
+
+    from backend.app.services import membership_service as ms
+
+    tier = ms.current_tier(db, user)
+    meta = next(
+        (t for t in list_templates(tier=tier, level=user.level) if t["code"] == template_type),
+        None,
+    )
+    if meta and not meta["allowed"]:
+        raise FactorValidationError("该因子模板尚未解锁")
+
+    ohlcv = mdp.load_for_user(db, user, symbol.upper(), timeframe)
+    if ohlcv is None or ohlcv.empty:
+        raise FactorValidationError("行情数据为空")
+    return _evaluate_with_dq(
+        evaluate_template(ohlcv, template_type, params, timeframe=timeframe),
+        ohlcv,
+        timeframe,
+    )
+
+
 def evaluate_formula_expr(
     db: Session,
     user: User,

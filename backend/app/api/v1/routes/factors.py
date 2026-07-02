@@ -29,6 +29,8 @@ from backend.app.schemas.factor import (
     PythonFactorCreate,
     PythonFactorHelpOut,
     StackFactorCreate,
+    TemplateEvaluateOut,
+    TemplateEvaluateRequest,
     TemplateFactorCreate,
 )
 from backend.app.schemas.factor_scan import (
@@ -99,6 +101,36 @@ def create_template_factor(
             status_code=status.HTTP_409_CONFLICT, detail="同名因子已存在"
         )
     return FactorOut.model_validate(factor)
+
+
+@router.post(
+    "/template/evaluate",
+    response_model=TemplateEvaluateOut,
+    summary="模板因子快评 (不创建因子)",
+)
+def evaluate_template_factor(
+    payload: TemplateEvaluateRequest,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> TemplateEvaluateOut:
+    from backend.app.services.market_data_policy import MarketDataAccessError
+
+    try:
+        result = factor_service.evaluate_template_params(
+            db,
+            current_user,
+            payload.template_type,
+            payload.params,
+            payload.symbol,
+            timeframe=payload.timeframe,
+        )
+    except MarketDataAccessError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
+    except factor_service.FactorValidationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+        )
+    return TemplateEvaluateOut(**result)
 
 
 @router.post(

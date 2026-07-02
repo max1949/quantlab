@@ -6,6 +6,7 @@ import {
   createPythonFactor,
   createStackFactor,
   createTemplateFactor,
+  evaluateTemplateFactor,
   evaluateFormulaExpr,
   evaluatePythonSource,
   getEntitlements,
@@ -21,7 +22,14 @@ import { useAuth } from "../store/auth";
 import { useUi } from "../store/ui";
 import { useLocale } from "../store/locale";
 import { Spinner } from "./ui";
-import type { Factor, FactorPreview, FeatureState, FormulaEvaluate, PythonEvaluate } from "../api/types";
+import type {
+  Factor,
+  FactorPreview,
+  FeatureState,
+  FormulaEvaluate,
+  PythonEvaluate,
+  TemplateEvaluate,
+} from "../api/types";
 import FactorFormulaGuide from "./FactorFormulaGuide";
 import TemplateParamHelp from "./TemplateParamHelp";
 import { academyRewardMessage } from "../lib/academy";
@@ -160,6 +168,8 @@ export default function FactorLab({
       {mode === "template" && (
         <TemplateForm
           projectId={projectId}
+          symbol={symbol}
+          timeframe={timeframe}
           templatesLoading={templates.isLoading}
           templates={templates.data ?? []}
           onCreated={refresh}
@@ -512,11 +522,15 @@ function PreviewStats({ p }: { p: FactorPreview }) {
 
 function TemplateForm({
   projectId,
+  symbol,
+  timeframe,
   templates,
   templatesLoading,
   onCreated,
 }: {
   projectId: string;
+  symbol: string;
+  timeframe: string;
   templates: import("../api/types").FactorTemplateMeta[];
   templatesLoading: boolean;
   onCreated: () => void;
@@ -527,8 +541,24 @@ function TemplateForm({
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
   const [params, setParams] = useState<Record<string, number>>({});
+  const [evalResult, setEvalResult] = useState<TemplateEvaluate | null>(null);
 
   const selected = templates.find((t) => t.code === code) ?? templates[0];
+
+  const evaluate = useMutation({
+    mutationFn: () =>
+      evaluateTemplateFactor({
+        template_type: selected.code,
+        params,
+        symbol,
+        timeframe,
+      }),
+    onSuccess: (data) => {
+      setEvalResult(data);
+      notify(fl.templateEvalDone, "success");
+    },
+    onError: (e) => notify(apiErrorMessage(e, fl.templateEvalFail), "error"),
+  });
 
   // 模板加载后初始化默认选择 (用 effect, 避免 render 期 setState)。
   useEffect(() => {
@@ -621,6 +651,36 @@ function TemplateForm({
           <TemplateParamHelp param={p} value={params[p.name] ?? p.default} />
         </div>
       ))}
+
+      <button
+        type="button"
+        className="btn w-full"
+        disabled={evaluate.isPending || !symbol}
+        onClick={() => evaluate.mutate()}
+      >
+        {evaluate.isPending ? fl.templateEvaluating : fl.templateEvaluate}
+      </button>
+
+      {evalResult && (
+        <div className="space-y-2 rounded-lg border border-brand-200 bg-brand-50/50 p-3 text-sm dark:border-brand-900 dark:bg-brand-950/30">
+          <p className="text-slate-700 dark:text-slate-200">{evalResult.coach_summary}</p>
+          <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
+            <Metric label={fl.evalScore} value={evalResult.score} />
+            <Metric label={fl.evalSharpe} value={evalResult.sharpe} />
+            <Metric label={fl.evalOos} value={evalResult.oos_sharpe} />
+            <Metric label={fl.evalIc} value={evalResult.ic_mean} />
+            <Metric label={fl.evalTurnover} value={evalResult.turnover} />
+            <Metric label={fl.evalMdd} value={evalResult.max_drawdown} />
+          </div>
+          {evalResult.publish_hints.length > 0 && (
+            <ul className="list-inside list-disc text-xs text-slate-500">
+              {evalResult.publish_hints.map((hint) => (
+                <li key={hint}>{hint}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       <div>
         <label className="label">{fl.factorNameLabel}</label>
