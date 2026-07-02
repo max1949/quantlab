@@ -72,6 +72,8 @@ try:
     print('challenge:', seed_default_challenge(db))
     print('tasks:', seed_default_tasks(db))
     print('market:', seed_real_market_data(db))
+    from backend.app.services.example_studies_service import seed_public_example_studies
+    print('examples:', seed_public_example_studies(db))
 finally:
     db.close()
 "

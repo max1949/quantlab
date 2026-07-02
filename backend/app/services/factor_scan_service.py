@@ -18,6 +18,8 @@ from engine.param_scan import (
     scan_stack_weights,
     scan_template_grid,
     scan_template_multi_symbol,
+    scan_template_multi_refine,
+    scan_template_refine,
 )
 from engine.factor_metrics import IC_HORIZON_BY_TF
 from engine.research_quality import assess_scan_preview
@@ -227,44 +229,79 @@ def run_scan(
     sym_list = list(dict.fromkeys(sym_list))[:3]
     multi = len(sym_list) > 1
     mode = (search_mode or "grid").lower()
-    if mode == "random":
+    refine_meta = ""
+    if mode == "refine":
+        if multi:
+            ohlcv_map: dict = {}
+            for s in sym_list:
+                df = mdp.load_for_user(db, user, s, timeframe)
+                if df is None or df.empty:
+                    raise ScanError(f"{s} 行情数据为空")
+                ohlcv_map[s] = df
+            results, refine_meta = scan_template_multi_refine(
+                ohlcv_map,
+                template_type,
+                ic_horizon=_ic_horizon(timeframe),
+                steps=steps,
+            )
+            symbol_label = ",".join(sym_list)
+            dq_notes: list[str] = []
+            for s, df in ohlcv_map.items():
+                dq = assess_ohlcv_quality(df, timeframe)
+                dq_notes.extend([f"{s}:{w}" for w in dq.get("warnings", [])[:1]])
+        else:
+            s = sym_list[0]
+            ohlcv = mdp.load_for_user(db, user, s, timeframe)
+            if ohlcv is None or ohlcv.empty:
+                raise ScanError("行情数据为空")
+            results, refine_meta = scan_template_refine(
+                ohlcv,
+                template_type,
+                ic_horizon=_ic_horizon(timeframe),
+                steps=steps,
+            )
+            symbol_label = s
+            dq = assess_ohlcv_quality(ohlcv, timeframe)
+            dq_notes = dq.get("warnings") or []
+    elif mode == "random":
         param_grid = build_random_param_grid(template_type, n_trials=steps)
         scan_kwargs = {"param_grid": param_grid, "steps": steps}
     else:
         scan_kwargs = {"steps": steps}
 
-    if multi:
-        ohlcv_map: dict = {}
-        for s in sym_list:
-            df = mdp.load_for_user(db, user, s, timeframe)
-            if df is None or df.empty:
-                raise ScanError(f"{s} 行情数据为空")
-            ohlcv_map[s] = df
-        results = scan_template_multi_symbol(
-            ohlcv_map,
-            template_type,
-            ic_horizon=_ic_horizon(timeframe),
-            **scan_kwargs,
-        )
-        symbol_label = ",".join(sym_list)
-        dq_notes: list[str] = []
-        for s, df in ohlcv_map.items():
-            dq = assess_ohlcv_quality(df, timeframe)
-            dq_notes.extend([f"{s}:{w}" for w in dq.get("warnings", [])[:1]])
-    else:
-        s = sym_list[0]
-        ohlcv = mdp.load_for_user(db, user, s, timeframe)
-        if ohlcv is None or ohlcv.empty:
-            raise ScanError("行情数据为空")
-        results = scan_template_grid(
-            ohlcv,
-            template_type,
-            ic_horizon=_ic_horizon(timeframe),
-            **scan_kwargs,
-        )
-        symbol_label = s
-        dq = assess_ohlcv_quality(ohlcv, timeframe)
-        dq_notes = dq.get("warnings") or []
+    if mode != "refine":
+        if multi:
+            ohlcv_map = {}
+            for s in sym_list:
+                df = mdp.load_for_user(db, user, s, timeframe)
+                if df is None or df.empty:
+                    raise ScanError(f"{s} 行情数据为空")
+                ohlcv_map[s] = df
+            results = scan_template_multi_symbol(
+                ohlcv_map,
+                template_type,
+                ic_horizon=_ic_horizon(timeframe),
+                **scan_kwargs,
+            )
+            symbol_label = ",".join(sym_list)
+            dq_notes = []
+            for s, df in ohlcv_map.items():
+                dq = assess_ohlcv_quality(df, timeframe)
+                dq_notes.extend([f"{s}:{w}" for w in dq.get("warnings", [])[:1]])
+        else:
+            s = sym_list[0]
+            ohlcv = mdp.load_for_user(db, user, s, timeframe)
+            if ohlcv is None or ohlcv.empty:
+                raise ScanError("行情数据为空")
+            results = scan_template_grid(
+                ohlcv,
+                template_type,
+                ic_horizon=_ic_horizon(timeframe),
+                **scan_kwargs,
+            )
+            symbol_label = s
+            dq = assess_ohlcv_quality(ohlcv, timeframe)
+            dq_notes = dq.get("warnings") or []
 
     best = results[0] if results else None
     coach = _coach_summary(
@@ -274,6 +311,8 @@ def run_scan(
         coach = f"【数据质量】{'；'.join(dq_notes[:2])} {coach}"
     if mode == "random":
         coach = f"【随机搜索 {steps} 组】{coach}"
+    elif mode == "refine" and refine_meta:
+        coach = f"{refine_meta}{coach}"
     scan = FactorScan(
         owner_id=user.id,
         project_id=project_id,

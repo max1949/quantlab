@@ -80,6 +80,39 @@ def build_random_param_grid(
     return grid
 
 
+def build_local_refinement_grid(
+    template_type: str,
+    center: dict[str, int],
+    *,
+    radius: int = 3,
+) -> list[dict[str, int]]:
+    """围绕一组较优参数做局部邻域搜索 (智能精炼第二阶段)。"""
+    tpl = fe.TEMPLATES.get(template_type)
+    if tpl is None:
+        raise fe.FactorError(f"未知模板: {template_type}")
+    clean = fe.validate_template_params(template_type, center)
+    seen: set[tuple[tuple[str, int], ...]] = set()
+    grid: list[dict[str, int]] = []
+
+    def _add(row: dict[str, int]) -> None:
+        key = tuple(sorted(row.items()))
+        if key in seen or len(grid) >= MAX_VARIANTS:
+            return
+        seen.add(key)
+        grid.append(row)
+
+    _add(clean)
+    for spec in tpl.params:
+        c = clean[spec.name]
+        for delta in range(-radius, radius + 1):
+            if delta == 0:
+                continue
+            row = dict(clean)
+            row[spec.name] = max(spec.min, min(spec.max, c + delta))
+            _add(row)
+    return grid[:MAX_VARIANTS]
+
+
 def _signal_fn(template_type: str, params: dict) -> SignalFn:
     clean = fe.validate_template_params(template_type, params)
 
@@ -294,3 +327,103 @@ def scan_template_multi_symbol(
     for i, row in enumerate(results):
         row["rank"] = i + 1
     return results
+
+
+def _merge_param_grids(*grids: list[dict[str, int]]) -> list[dict[str, int]]:
+    combined: list[dict[str, int]] = []
+    seen: set[str] = set()
+    for grid in grids:
+        for row in grid:
+            key = _params_key(row)
+            if key in seen:
+                continue
+            seen.add(key)
+            combined.append(row)
+            if len(combined) >= MAX_VARIANTS:
+                return combined
+    return combined
+
+
+def scan_template_refine(
+    ohlcv: pd.DataFrame,
+    template_type: str,
+    *,
+    steps: int = 8,
+    cost_config: CostConfig | None = None,
+    oos_ratio: float = 0.3,
+    ic_horizon: int = 1,
+    radius: int = 3,
+) -> tuple[list[dict[str, Any]], str]:
+    """两阶段搜索: 随机探针 → 围绕最优做局部精炼。"""
+    probe_n = max(4, min(max(4, steps // 2), MAX_VARIANTS // 2))
+    random_grid = build_random_param_grid(template_type, n_trials=probe_n)
+    probe = scan_template_grid(
+        ohlcv,
+        template_type,
+        param_grid=random_grid,
+        cost_config=cost_config,
+        oos_ratio=oos_ratio,
+        ic_horizon=ic_horizon,
+        steps=steps,
+    )
+    if not probe:
+        return [], "【智能精炼】探针未产生有效结果"
+    center = probe[0].get("params") or {}
+    refine_grid = build_local_refinement_grid(template_type, center, radius=radius)
+    combined = _merge_param_grids(random_grid, refine_grid)
+    results = scan_template_grid(
+        ohlcv,
+        template_type,
+        param_grid=combined,
+        cost_config=cost_config,
+        oos_ratio=oos_ratio,
+        ic_horizon=ic_horizon,
+        steps=steps,
+    )
+    meta = (
+        f"【智能精炼】探针 {probe_n} 组 + 局部 {len(refine_grid)} 组，"
+        f"锚点 {probe[0].get('label')} "
+    )
+    return results, meta
+
+
+def scan_template_multi_refine(
+    ohlcv_map: dict[str, pd.DataFrame],
+    template_type: str,
+    *,
+    steps: int = 8,
+    cost_config: CostConfig | None = None,
+    oos_ratio: float = 0.3,
+    ic_horizon: int = 1,
+    radius: int = 3,
+) -> tuple[list[dict[str, Any]], str]:
+    probe_n = max(4, min(max(4, steps // 2), MAX_VARIANTS // 2))
+    random_grid = build_random_param_grid(template_type, n_trials=probe_n)
+    probe = scan_template_multi_symbol(
+        ohlcv_map,
+        template_type,
+        param_grid=random_grid,
+        cost_config=cost_config,
+        oos_ratio=oos_ratio,
+        ic_horizon=ic_horizon,
+        steps=steps,
+    )
+    if not probe:
+        return [], "【智能精炼】探针未产生有效结果"
+    center = probe[0].get("params") or {}
+    refine_grid = build_local_refinement_grid(template_type, center, radius=radius)
+    combined = _merge_param_grids(random_grid, refine_grid)
+    results = scan_template_multi_symbol(
+        ohlcv_map,
+        template_type,
+        param_grid=combined,
+        cost_config=cost_config,
+        oos_ratio=oos_ratio,
+        ic_horizon=ic_horizon,
+        steps=steps,
+    )
+    meta = (
+        f"【智能精炼】探针 {probe_n} 组 + 局部 {len(refine_grid)} 组，"
+        f"锚点 {probe[0].get('label')} "
+    )
+    return results, meta

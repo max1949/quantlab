@@ -14,6 +14,7 @@ import {
 } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
 import type { Factor, FactorScan, FactorScanCompare } from "../api/types";
+import { formatScanType } from "../lib/factorScan";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
 import { Spinner } from "./ui";
@@ -42,7 +43,7 @@ export default function FactorScanPanel({ projectId, symbol, timeframe, factors 
   const [templateType, setTemplateType] = useState("momentum");
   const [scanKind, setScanKind] = useState<"template" | "stack">("template");
   const [stackFactorIds, setStackFactorIds] = useState<string[]>([]);
-  const [searchMode, setSearchMode] = useState<"grid" | "random">("grid");
+  const [searchMode, setSearchMode] = useState<"grid" | "random" | "refine">("grid");
   const [extraSymbols, setExtraSymbols] = useState<string[]>([]);
   const crossSymbolOptions = useMemo(
     () => ["RB", "AU", "IF", "CU", "I", "MA"].filter((s) => s !== symbol.toUpperCase()),
@@ -270,11 +271,12 @@ export default function FactorScanPanel({ projectId, symbol, timeframe, factors 
             <select
               className="input"
               value={searchMode}
-              onChange={(e) => setSearchMode(e.target.value as "grid" | "random")}
-            >
-              <option value="grid">{s.searchGrid}</option>
-              <option value="random">{s.searchRandom}</option>
-            </select>
+            onChange={(e) => setSearchMode(e.target.value as "grid" | "random" | "refine")}
+          >
+            <option value="grid">{s.searchGrid}</option>
+            <option value="random">{s.searchRandom}</option>
+            <option value="refine">{s.searchRefine}</option>
+          </select>
           </div>
         )}
         {scanKind === "template" && crossSymbolOptions.length > 0 && (
@@ -346,7 +348,7 @@ export default function FactorScanPanel({ projectId, symbol, timeframe, factors 
                   className="text-left text-brand-700 hover:underline dark:text-brand-300"
                   onClick={() => loadHistory(row)}
                 >
-                  {row.template_type} · {row.timeframe} · {row.best_score?.toFixed(2) ?? "—"}
+                  {formatScanType(row.template_type)} · {row.timeframe} · {row.best_score?.toFixed(2) ?? "—"}
                 </button>
                 <span className="text-xs text-slate-400">
                   {new Date(row.created_at).toLocaleString()}

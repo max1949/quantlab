@@ -51,6 +51,25 @@ def test_stack_weight_grid_scan():
     assert results[0]["params"]["weights"][0]["weight"] is not None
 
 
+def test_local_refinement_grid():
+    from engine.param_scan import build_local_refinement_grid, build_random_param_grid
+
+    center = {"window": 20}
+    grid = build_local_refinement_grid("momentum", center, radius=2)
+    assert any(g.get("window") == 20 for g in grid)
+    assert len(grid) >= 3
+
+
+def test_refine_scan_ranks():
+    from engine.param_scan import scan_template_refine
+
+    df = sample_price_frame(400)
+    results, meta = scan_template_refine(df, "momentum", steps=8)
+    assert "智能精炼" in meta
+    assert results
+    assert results[0]["rank"] == 1
+
+
 def test_param_grid_scan_ranks():
     df = sample_price_frame(400)
     grid = build_param_grid("momentum", steps=6)

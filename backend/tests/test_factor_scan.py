@@ -222,6 +222,32 @@ def test_stack_weight_scan(client, db_session):
     assert applied.json()["kind"] == "stack"
 
 
+def test_refine_search_mode(client, db_session):
+    seed_sample_market_data(db_session)
+    h = _register(client, "ref1")
+    from backend.app.models.user import User, UserLevel
+    from sqlalchemy import select
+
+    user = db_session.execute(select(User).where(User.username == "ref1")).scalar_one()
+    user.level = UserLevel.L1
+    user.experience = 100
+    db_session.commit()
+
+    res = client.post(
+        f"{BASE}/factors/scan",
+        headers=h,
+        json={
+            "symbol": "RB",
+            "template_type": "momentum",
+            "timeframe": "1d",
+            "steps": 8,
+            "search_mode": "refine",
+        },
+    )
+    assert res.status_code == 201, res.text
+    assert "智能精炼" in res.json()["coach_summary"]
+
+
 def test_random_search_mode(client, db_session):
     seed_sample_market_data(db_session)
     h = _register(client, "rnd1")

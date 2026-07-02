@@ -13,6 +13,7 @@ import {
   reviewFactorScansBatch,
 } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
+import { formatScanType } from "../lib/factorScan";
 import type { FactorScan, FactorScanCompare } from "../api/types";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
@@ -436,9 +437,4 @@ function ScanDetail({
 function fmt(v: number | null | undefined): string {
   if (v == null) return "—";
   return v.toFixed(2);
-}
-
-function formatScanType(templateType: string): string {
-  if (templateType.startsWith("stack:")) return "stack";
-  return templateType;
 }
