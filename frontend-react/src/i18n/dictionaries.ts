@@ -499,6 +499,23 @@ const en = {
     publishedDesc: "Your study is live. Browse the feed or share your report card below.",
     viewFeed: "View research feed",
   },
+  reportDiscover: {
+    authorTitle: "About the researcher",
+    viewProfile: "View profile",
+    followLogin: "Sign in to follow",
+    tryTemplate: "Try a similar study",
+    tryTemplateDesc: (symbol: string) =>
+      `Start your own quant study on ${symbol} — pick a template and finish in about 5 minutes.`,
+    genericTemplateTitle: (symbol: string) => `Research template for ${symbol}`,
+    startTemplate: "Start from template →",
+    registerCta: "Sign up free →",
+    loginCta: "Already have an account",
+    templateNames: {
+      "gold-trend": "Gold Trend Study",
+      "commodity-momentum": "Commodity Momentum",
+      "vol-regime": "Volatility Regime",
+    },
+  },
   challengesPage: {
     title: "30-Day Research Challenge",
     subtitle: "Hit milestones, earn points, and get a certificate.",
@@ -1096,6 +1113,23 @@ const zh = {
     publishedTitle: "已发布到研究广场",
     publishedDesc: "研究已公开。可以去广场逛逛，或用下方分享卡片发给朋友。",
     viewFeed: "去看研究广场",
+  },
+  reportDiscover: {
+    authorTitle: "关于作者",
+    viewProfile: "查看主页",
+    followLogin: "登录后关注",
+    tryTemplate: "做类似研究",
+    tryTemplateDesc: (symbol: string) =>
+      `在 ${symbol} 上开始你自己的量化研究 — 选模板，约 5 分钟能跑通全流程。`,
+    genericTemplateTitle: (symbol: string) => `${symbol} 研究模板`,
+    startTemplate: "从模板开始 →",
+    registerCta: "免费注册 →",
+    loginCta: "已有账号",
+    templateNames: {
+      "gold-trend": "黄金趋势研究",
+      "commodity-momentum": "商品动量研究",
+      "vol-regime": "波动率研究",
+    },
   },
   challengesPage: {
     title: "30 天研究挑战",

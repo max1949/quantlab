@@ -9,6 +9,7 @@ import { useUi } from "../store/ui";
 import { academyRewardMessage } from "../lib/academy";
 import { ErrorBox, GradeBadge, PageTitle, Spinner } from "../components/ui";
 import ReportPublishCoach from "../components/ReportPublishCoach";
+import ReportDiscoverPanel from "../components/ReportDiscoverPanel";
 
 export default function ReportDetail() {
   const { dict } = useLocale();
@@ -84,6 +85,8 @@ export default function ReportDetail() {
           </Link>
         )}
       </div>
+
+      {!isOwner && <ReportDiscoverPanel report={r} />}
 
       {isOwner && r.project_id && <ReportPublishCoach projectId={r.project_id} />}
 

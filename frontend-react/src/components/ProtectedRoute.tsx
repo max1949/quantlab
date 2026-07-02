@@ -7,7 +7,13 @@ export default function ProtectedRoute() {
   const location = useLocation();
 
   if (!user) {
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{ from: location.pathname + location.search }}
+      />
+    );
   }
 
   // 未完成分流的用户, 强制去 onboarding (onboarding 页本身放行)。
