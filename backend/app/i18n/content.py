@@ -110,60 +110,150 @@ FACTOR_TEMPLATES: dict[str, dict[Locale, dict]] = {
         "en": {
             "label": "Momentum",
             "description": "Past N-period return; captures trend continuation.",
+            "how_it_works": "Scores higher when price rose over the lookback — bets trends continue.",
             "params": {"window": "Lookback window"},
+            "param_help": {
+                "window": {
+                    "tip": "How many bars of close price to measure past return.",
+                    "low_hint": "Short window (e.g. 5–10): reacts fast, more noise.",
+                    "high_hint": "Long window (60+): smoother signal, slower to turn.",
+                    "suggested": "Daily research often uses 10–30 bars.",
+                }
+            },
         },
         "zh": {
             "label": "动量因子",
             "description": "过去 N 期收益率, 捕捉趋势延续。",
+            "how_it_works": "最近涨得多 → 打分偏高，押趋势延续；跌得多 → 打分偏低。",
             "params": {"window": "回看窗口"},
+            "param_help": {
+                "window": {
+                    "tip": "用最近多少根 K 线的收盘价，计算涨跌幅（动量）。",
+                    "low_hint": "窗口偏小（如 5–10）：反应快，但容易被单日噪声干扰。",
+                    "high_hint": "窗口偏大（60+）：信号更平滑，但转向更慢。",
+                    "suggested": "日线研究常用 10–30；小白可先用默认 20。",
+                }
+            },
         },
     },
     "sma_ratio": {
         "en": {
             "label": "SMA deviation",
             "description": "Price deviation from N-period moving average.",
+            "how_it_works": "Positive when price is above its moving average — relative strength vs recent average.",
             "params": {"window": "MA window"},
+            "param_help": {
+                "window": {
+                    "tip": "Length of the simple moving average (SMA) baseline.",
+                    "low_hint": "Short MA: tracks price closely, more whipsaws.",
+                    "high_hint": "Long MA: stable baseline, slower mean-reversion signals.",
+                    "suggested": "Try 20 on daily bars as a starting point.",
+                }
+            },
         },
         "zh": {
             "label": "均线偏离",
             "description": "价格相对 N 期均线的偏离度。",
+            "how_it_works": "价格在均线上方 → 偏离为正；下方 → 为负。可配合趋势或回归思路使用。",
             "params": {"window": "均线窗口"},
+            "param_help": {
+                "window": {
+                    "tip": "均线用多少根 K 线计算（简单移动平均 SMA）。",
+                    "low_hint": "窗口短：均线跟价格跟得紧，信号切换更频繁。",
+                    "high_hint": "窗口长：基准更稳，偏离信号更慢。",
+                    "suggested": "日线可先试 20，再回测对比 10 / 60。",
+                }
+            },
         },
     },
     "rsi": {
         "en": {
             "label": "RSI strength",
             "description": "Relative strength index (0–100) for overbought/oversold.",
+            "how_it_works": "RSI near 70+ may mean overheated; near 30− may mean oversold. Factor shifts around 50.",
             "params": {"window": "RSI window"},
+            "param_help": {
+                "window": {
+                    "tip": "Bars used to average gains vs losses in RSI.",
+                    "low_hint": "Short RSI (e.g. 7): jumps quickly, good for fast markets.",
+                    "high_hint": "Long RSI (21+): smoother, fewer extreme readings.",
+                    "suggested": "Classic default is 14 — a solid first try.",
+                }
+            },
         },
         "zh": {
             "label": "RSI 强弱",
             "description": "相对强弱指标 (0-100), 衡量超买超卖。",
+            "how_it_works": "RSI 接近 70 可能偏热，接近 30 可能偏冷；因子以 50 为中轴偏移。",
             "params": {"window": "RSI 窗口"},
+            "param_help": {
+                "window": {
+                    "tip": "计算 RSI 时，涨跌分别平均用多少根 K 线。",
+                    "low_hint": "窗口短（如 7）：RSI 跳动快，适合短线实验。",
+                    "high_hint": "窗口长（21+）：更平滑，极端值更少。",
+                    "suggested": "经典默认 14，小白可直接用。",
+                }
+            },
         },
     },
     "volatility": {
         "en": {
             "label": "Volatility",
             "description": "Rolling std of returns; measures risk level.",
+            "how_it_works": "High recent volatility → higher score. Often used as risk/regime filter, not pure alpha.",
             "params": {"window": "Vol window"},
+            "param_help": {
+                "window": {
+                    "tip": "How many daily returns go into the rolling standard deviation.",
+                    "low_hint": "Short window: captures recent spikes, unstable rank.",
+                    "high_hint": "Long window: stable vol estimate, slow regime shifts.",
+                    "suggested": "Start with 20 on daily data; validate before publishing.",
+                }
+            },
         },
         "zh": {
             "label": "波动率",
             "description": "收益率的滚动标准差, 衡量风险水平。",
+            "how_it_works": "最近波动越大 → 打分越高。常作风险/状态过滤，单独当 alpha 要谨慎验证。",
             "params": {"window": "波动窗口"},
+            "param_help": {
+                "window": {
+                    "tip": "用最近多少根 K 线的日收益率，算滚动标准差。",
+                    "low_hint": "窗口短：对近期暴涨暴跌敏感，排名波动大。",
+                    "high_hint": "窗口长：波动估计更稳，状态切换慢。",
+                    "suggested": "日线可先试 20，务必做样本外验证再发布。",
+                }
+            },
         },
     },
     "mean_reversion": {
         "en": {
             "label": "Mean reversion",
             "description": "Negative z-score vs mean; expects reversion.",
+            "how_it_works": "Price far below average → positive score (expect bounce); far above → negative.",
             "params": {"window": "Lookback window"},
+            "param_help": {
+                "window": {
+                    "tip": "Bars for rolling mean and std when computing z-score.",
+                    "low_hint": "Short window: quick mean, more false extremes.",
+                    "high_hint": "Long window: slow mean, fewer reversion bets.",
+                    "suggested": "20 bars on daily is a common starting point.",
+                }
+            },
         },
         "zh": {
             "label": "均值回归",
             "description": "价格相对均值的负向 z-score, 预期向均值回归。",
+            "how_it_works": "价格远低于均线 → 打分偏高（期待反弹）；远高于均线 → 打分偏低。",
             "params": {"window": "回看窗口"},
+            "param_help": {
+                "window": {
+                    "tip": "计算 z-score 时，均值和标准差各用多少根 K 线。",
+                    "low_hint": "窗口短：均值跟得紧，极端值出现更频繁。",
+                    "high_hint": "窗口长：均值更慢，回归信号更少。",
+                    "suggested": "日线常用 20，调参后一定要重新验证。",
+                }
+            },
         },
     },
 }

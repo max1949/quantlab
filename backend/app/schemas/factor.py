@@ -9,18 +9,27 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 # ---- 模板目录 ----
+class ParamHelpOut(BaseModel):
+    tip: str
+    low_hint: str = ""
+    high_hint: str = ""
+    suggested: str = ""
+
+
 class ParamSpecOut(BaseModel):
     name: str
     default: int
     min: int
     max: int
     label: str
+    help: ParamHelpOut | None = None
 
 
 class FactorTemplateOut(BaseModel):
     code: str
     label: str
     description: str
+    how_it_works: str = ""
     params: list[ParamSpecOut]
     requires: list[str]
     min_level: int = 0

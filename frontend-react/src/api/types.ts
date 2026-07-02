@@ -103,18 +103,27 @@ export interface Graph {
   edges: GraphEdge[];
 }
 
+export interface ParamHelp {
+  tip: string;
+  low_hint: string;
+  high_hint: string;
+  suggested: string;
+}
+
 export interface ParamSpec {
   name: string;
   default: number;
   min: number;
   max: number;
   label: string;
+  help?: ParamHelp | null;
 }
 
 export interface FactorTemplateMeta {
   code: string;
   label: string;
   description: string;
+  how_it_works?: string;
   params: ParamSpec[];
   requires: string[];
   min_level?: number;

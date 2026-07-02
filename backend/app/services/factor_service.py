@@ -71,11 +71,13 @@ def list_templates(tier: int = 0, level: int = 0, locale: Locale = "en") -> list
         min_tier = gate["min_tier"]
         allowed = level >= min_level and tier >= min_tier
         overlay = i18n.FACTOR_TEMPLATES.get(tpl.code, {}).get(locale) or {}
+        param_help_map = overlay.get("param_help") or {}
         out.append(
             {
                 "code": tpl.code,
                 "label": overlay.get("label", tpl.label),
                 "description": overlay.get("description", tpl.description),
+                "how_it_works": overlay.get("how_it_works", ""),
                 "requires": list(tpl.requires),
                 "min_level": min_level,
                 "min_tier": min_tier,
@@ -87,6 +89,7 @@ def list_templates(tier: int = 0, level: int = 0, locale: Locale = "en") -> list
                         "min": p.min,
                         "max": p.max,
                         "label": overlay.get("params", {}).get(p.name, p.label),
+                        "help": param_help_map.get(p.name),
                     }
                     for p in tpl.params
                 ],

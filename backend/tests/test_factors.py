@@ -38,6 +38,10 @@ def test_list_templates(client):
     assert resp.status_code == 200
     codes = {t["code"] for t in resp.json()}
     assert {"momentum", "rsi", "volatility", "mean_reversion", "sma_ratio"} <= codes
+    mom = next(t for t in resp.json() if t["code"] == "momentum")
+    assert mom.get("how_it_works")
+    win = next(p for p in mom["params"] if p["name"] == "window")
+    assert win.get("help") and win["help"].get("tip")
 
 
 def test_create_template_factor_l0(client):

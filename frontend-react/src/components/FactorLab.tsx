@@ -21,6 +21,7 @@ import { useLocale } from "../store/locale";
 import { Spinner } from "./ui";
 import type { Factor, FactorPreview, FeatureState } from "../api/types";
 import FactorFormulaGuide from "./FactorFormulaGuide";
+import TemplateParamHelp from "./TemplateParamHelp";
 import { academyRewardMessage } from "../lib/academy";
 
 export default function FactorLab({ projectId }: { projectId: string }) {
@@ -477,6 +478,12 @@ function TemplateForm({
         </div>
       ) : (
         <>
+      {selected.how_it_works && (
+        <div className="rounded-lg border border-brand-100 bg-brand-50/60 px-3 py-2 text-sm text-slate-700 dark:border-brand-900 dark:bg-brand-950/40 dark:text-slate-200">
+          <span className="font-medium text-brand-700 dark:text-brand-300">{fl.templateHow} </span>
+          {selected.how_it_works}
+        </div>
+      )}
       {selected.params.map((p) => (
         <div key={p.name}>
           <label className="label">
@@ -492,6 +499,7 @@ function TemplateForm({
               setParams((m) => ({ ...m, [p.name]: Number(e.target.value) }))
             }
           />
+          <TemplateParamHelp param={p} value={params[p.name] ?? p.default} />
         </div>
       ))}
 
