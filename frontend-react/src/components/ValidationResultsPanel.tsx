@@ -82,6 +82,9 @@ export default function ValidationResultsPanel({ factorId, enabled }: Props) {
   const rankIc = icBlock?.rank_ic_mean;
   const icIr = icBlock?.ic_ir;
   const icSeries = icBlock?.ic_series ?? [];
+  const costCfg = d.cost_config;
+  const feeRate = costCfg?.fee_rate;
+  const slipBps = costCfg?.slippage_bps;
 
   const oosOk = oosSharpe != null && oosSharpe >= 0.15;
   const robOk = rob?.score != null && rob.score >= 50;
@@ -103,6 +106,12 @@ export default function ValidationResultsPanel({ factorId, enabled }: Props) {
         </div>
       </div>
       <p className="mb-4 text-sm text-slate-500">{v.subtitle}</p>
+
+      {feeRate != null && slipBps != null && (
+        <p className="mb-3 text-xs text-slate-500">
+          {v.costNote(feeRate.toFixed(4), slipBps.toFixed(1))}
+        </p>
+      )}
 
       {!oosOk && oosSharpe != null && (
         <p className="mb-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">

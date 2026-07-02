@@ -29,6 +29,7 @@ import L4PortfolioTools from "../components/L4PortfolioTools";
 import ValidationResultsPanel from "../components/ValidationResultsPanel";
 import BacktestResultsPanel from "../components/BacktestResultsPanel";
 import QualityCoach from "../components/QualityCoach";
+import DataQualityBanner from "../components/DataQualityBanner";
 import type { Graph } from "../api/types";
 
 type StepKey = "factor" | "backtest" | "validation" | "report" | "publish";
@@ -327,6 +328,10 @@ export default function ProjectDetail() {
             </Link>
           )}
         </div>
+      )}
+
+      {symbol && activeTimeframe && (
+        <DataQualityBanner symbol={symbol} timeframe={activeTimeframe} />
       )}
 
       <div className="mb-6 card">

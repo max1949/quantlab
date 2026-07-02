@@ -14,6 +14,7 @@ from engine import factor_engine as fe
 from engine.param_scan import scan_template_grid
 from engine.factor_metrics import IC_HORIZON_BY_TF
 from engine.research_quality import assess_scan_preview
+from engine.data_quality import assess_ohlcv_quality
 
 
 class ScanError(Exception):
@@ -95,6 +96,9 @@ def run_scan(
     )
     best = results[0] if results else None
     coach = _coach_summary(template_type, results, symbol, timeframe)
+    dq = assess_ohlcv_quality(ohlcv, timeframe)
+    if dq.get("warnings"):
+        coach = f"【数据质量】{'；'.join(dq['warnings'][:2])} {coach}"
     scan = FactorScan(
         owner_id=user.id,
         project_id=project_id,

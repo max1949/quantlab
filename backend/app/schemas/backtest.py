@@ -20,6 +20,15 @@ class DatasetOut(BaseModel):
     tier_cap: int | None = None
 
 
+class DataQualityOut(BaseModel):
+    symbol: str
+    timeframe: str
+    passed: bool
+    grade: str
+    warnings: list[str]
+    stats: dict
+
+
 class BacktestCreate(BaseModel):
     """创建回测入参。"""
 

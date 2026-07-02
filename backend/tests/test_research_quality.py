@@ -72,3 +72,15 @@ def test_publish_blocked_when_gate_enabled(client, db_session):
         assert r.status_code == 422
     finally:
         settings.research_gate_enabled = False
+
+
+def test_dataset_quality_endpoint(client, db_session):
+    seed_sample_market_data(db_session)
+    h = _register(client, "dq1")
+    r = client.get(f"{BASE}/datasets/quality", headers=h, params={"symbol": "RB", "timeframe": "1d"})
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["symbol"] == "RB"
+    assert "passed" in body
+    assert "grade" in body
+    assert body["stats"]["rows"] >= 20

@@ -7,6 +7,7 @@ import type {
   ChallengeProgress,
   CostSensitivity,
   CrossSectionBacktest,
+  DataQuality,
   Entitlements,
   Factor,
   FactorPreview,
@@ -391,6 +392,16 @@ export interface MarketDataset {
 
 export async function listDatasets(): Promise<MarketDataset[]> {
   const { data } = await api.get<MarketDataset[]>("/datasets");
+  return data;
+}
+
+export async function getDataQuality(
+  symbol: string,
+  timeframe: string,
+): Promise<DataQuality> {
+  const { data } = await api.get<DataQuality>("/datasets/quality", {
+    params: { symbol, timeframe },
+  });
   return data;
 }
 

@@ -204,6 +204,8 @@ const en = {
     rankIc: "Rank IC",
     icIr: "IC IR",
     icSeriesTitle: "IC over time (daily buckets)",
+    costNote: (fee: string, slip: string) =>
+      `Metrics include costs: fee ${fee}, slippage ${slip} bps`,
   },
   backtestPanel: {
     title: "Backtest results",
@@ -488,6 +490,9 @@ const en = {
     scoreRobust: "Robustness",
     scoreBacktest: "Backtest Sharpe",
     scoreSealed: "Sealed holdout Sharpe",
+    dataQualityChecking: "Checking data quality…",
+    dataQualityPass: (grade: string) => `Data quality: ${grade} — no major gaps or halt bars detected`,
+    dataQualityWarn: (grade: string) => `Data quality: ${grade} — review before trusting backtests`,
   },
   l2Analysis: {
     title: "L2 Advanced analysis",
@@ -906,6 +911,8 @@ const zh = {
     rankIc: "Rank IC",
     icIr: "IC IR",
     icSeriesTitle: "IC 时序（按日分桶）",
+    costNote: (fee: string, slip: string) =>
+      `以下指标已含交易成本：手续费 ${fee}，滑点 ${slip} bps`,
   },
   backtestPanel: {
     title: "回测结果",
@@ -1185,6 +1192,9 @@ const zh = {
     scoreRobust: "稳健性",
     scoreBacktest: "回测夏普",
     scoreSealed: "封印段夏普",
+    dataQualityChecking: "正在检查数据质量…",
+    dataQualityPass: (grade: string) => `数据质量：${grade} — 未发现明显缺口或停牌棒`,
+    dataQualityWarn: (grade: string) => `数据质量：${grade} — 回测前请先留意以下问题`,
   },
   l2Analysis: {
     title: "L2 进阶分析",

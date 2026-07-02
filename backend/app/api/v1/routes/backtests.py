@@ -21,6 +21,7 @@ from backend.app.schemas.backtest import (
     CostSensitivityOut,
     CrossSectionBacktestCreate,
     CrossSectionBacktestOut,
+    DataQualityOut,
     DatasetOut,
 )
 from backend.app.models.user import User
@@ -42,6 +43,33 @@ def list_datasets(
     db: Annotated[Session, Depends(get_db)],
 ) -> list[DatasetOut]:
     return [DatasetOut(**d) for d in mdp.list_datasets_for_user(db, current_user)]
+
+
+@router.get(
+    "/datasets/quality",
+    response_model=DataQualityOut,
+    tags=["data"],
+    summary="行情数据质量评估",
+)
+def dataset_quality(
+    symbol: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+    timeframe: str = "1d",
+) -> DataQualityOut:
+    from engine.data_quality import assess_ohlcv_quality
+
+    if market_data.get_dataset(db, symbol, timeframe) is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="行情数据集不存在",
+        )
+    try:
+        df = mdp.load_for_user(db, current_user, symbol, timeframe)
+    except mdp.MarketDataAccessError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
+    report = assess_ohlcv_quality(df, timeframe)
+    return DataQualityOut(symbol=symbol.upper(), timeframe=timeframe, **report)
 
 
 @router.post(

@@ -395,9 +395,19 @@ export interface ValidationDetail extends Validation {
   oos: Record<string, unknown> | null;
   walk_forward: Record<string, unknown> | null;
   sensitivity: Record<string, unknown> | null;
+  cost_config?: { fee_rate?: number; slippage_bps?: number };
   oos_ratio: number;
   n_splits: number;
   error: string | null;
+}
+
+export interface DataQuality {
+  symbol: string;
+  timeframe: string;
+  passed: boolean;
+  grade: string;
+  warnings: string[];
+  stats: Record<string, number>;
 }
 
 export interface ReportSummary {
