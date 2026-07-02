@@ -27,6 +27,12 @@ from backend.app.schemas.factor import (
     StackFactorCreate,
     TemplateFactorCreate,
 )
+from backend.app.schemas.factor_scan import (
+    ApplyScanRequest,
+    FactorScanCompareOut,
+    FactorScanOut,
+    FactorScanRequest,
+)
 from backend.app.services import factor_service
 from backend.app.services import market_data_policy as mdp
 from engine import formula as ff
@@ -216,6 +222,123 @@ def create_python_factor(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="同名因子已存在"
         )
+    return FactorOut.model_validate(factor)
+
+
+@router.post(
+    "/scan",
+    response_model=FactorScanOut,
+    status_code=status.HTTP_201_CREATED,
+    summary="模板因子参数网格扫描",
+)
+def run_factor_scan(
+    payload: FactorScanRequest,
+    current_user: Annotated[User, Depends(require_feature("factor_param_scan"))],
+    db: Annotated[Session, Depends(get_db)],
+) -> FactorScanOut:
+    from backend.app.services import factor_scan_service as fss
+    from backend.app.services.market_data_policy import MarketDataAccessError
+
+    try:
+        scan = fss.run_scan(
+            db,
+            current_user,
+            symbol=payload.symbol,
+            template_type=payload.template_type,
+            timeframe=payload.timeframe,
+            project_id=payload.project_id,
+            steps=payload.steps,
+        )
+    except MarketDataAccessError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
+    except fss.ScanError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    payload = fss.scan_to_out(scan)
+    payload["academy_rewards"] = getattr(scan, "academy_rewards", []) or []
+    return FactorScanOut(**payload)
+
+
+@router.get("/scans", response_model=list[FactorScanOut], summary="我的因子扫描实验")
+def list_factor_scans(
+    current_user: Annotated[User, Depends(require_feature("factor_param_scan"))],
+    db: Annotated[Session, Depends(get_db)],
+    project_id: str | None = None,
+) -> list[FactorScanOut]:
+    from backend.app.services import factor_scan_service as fss
+
+    pid = None
+    if project_id:
+        try:
+            pid = uuid.UUID(project_id)
+        except ValueError:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="无效项目 ID")
+    return [FactorScanOut(**fss.scan_to_out(s)) for s in fss.list_scans(db, current_user.id, project_id=pid)]
+
+
+@router.get("/scans/compare", response_model=FactorScanCompareOut, summary="对比两次扫描实验")
+def compare_factor_scans(
+    scan_a: str,
+    scan_b: str,
+    current_user: Annotated[User, Depends(require_feature("factor_param_scan"))],
+    db: Annotated[Session, Depends(get_db)],
+) -> FactorScanCompareOut:
+    from backend.app.services import factor_scan_service as fss
+
+    try:
+        sid_a = uuid.UUID(scan_a)
+        sid_b = uuid.UUID(scan_b)
+        data = fss.compare_scans(db, current_user.id, sid_a, sid_b)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="扫描不存在")
+    except fss.ScanError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    return FactorScanCompareOut(**data)
+
+
+@router.get("/scans/{scan_id}", response_model=FactorScanOut, summary="扫描详情")
+def get_factor_scan(
+    scan_id: str,
+    current_user: Annotated[User, Depends(require_feature("factor_param_scan"))],
+    db: Annotated[Session, Depends(get_db)],
+) -> FactorScanOut:
+    from backend.app.services import factor_scan_service as fss
+
+    try:
+        sid = uuid.UUID(scan_id)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="扫描不存在")
+    scan = fss.get_scan(db, current_user.id, sid)
+    if scan is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="扫描不存在")
+    return FactorScanOut(**fss.scan_to_out(scan))
+
+
+@router.post(
+    "/scans/{scan_id}/apply",
+    response_model=FactorOut,
+    summary="将扫描结果载入为项目因子",
+)
+def apply_factor_scan(
+    scan_id: str,
+    payload: ApplyScanRequest,
+    current_user: Annotated[User, Depends(require_feature("factor_param_scan"))],
+    db: Annotated[Session, Depends(get_db)],
+) -> FactorOut:
+    from backend.app.services import factor_scan_service as fss
+
+    try:
+        sid = uuid.UUID(scan_id)
+        _, factor = fss.apply_scan(
+            db, current_user, sid, rank=payload.rank, name=payload.name
+        )
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="扫描不存在")
+    except fss.ScanError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    except factor_service.FactorValidationError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    except factor_service.FactorNameTakenError:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="同名因子已存在")
     return FactorOut.model_validate(factor)
 
 

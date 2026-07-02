@@ -65,11 +65,15 @@ export default function ValidationResultsPanel({ factorId, enabled }: Props) {
     score?: number;
     grade?: string;
     notes?: string[];
+    factor_ic?: { ic_mean?: number; rank_ic_mean?: number };
     sealed_holdout?: { metrics?: { sharpe?: number }; skipped?: boolean };
   } | null;
   const sealedSharpe = rob?.sealed_holdout?.skipped
     ? null
     : rob?.sealed_holdout?.metrics?.sharpe;
+  const icBlock = rob?.factor_ic as { ic_mean?: number; rank_ic_mean?: number } | undefined;
+  const icMean = icBlock?.ic_mean;
+  const rankIc = icBlock?.rank_ic_mean;
 
   const oosOk = oosSharpe != null && oosSharpe >= 0.15;
   const robOk = rob?.score != null && rob.score >= 50;
@@ -112,6 +116,13 @@ export default function ValidationResultsPanel({ factorId, enabled }: Props) {
           value={rob?.score != null ? `${rob.score}/100` : "—"}
         />
       </div>
+
+      {(icMean != null || rankIc != null) && (
+        <div className="mb-4 grid gap-3 sm:grid-cols-2">
+          <Metric label={v.icMean} value={icMean != null ? icMean.toFixed(3) : "—"} />
+          <Metric label={v.rankIc} value={rankIc != null ? rankIc.toFixed(3) : "—"} />
+        </div>
+      )}
 
       {wf?.summary && (
         <p className="mb-3 text-sm text-slate-600 dark:text-slate-300">

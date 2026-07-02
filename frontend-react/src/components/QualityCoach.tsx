@@ -9,7 +9,7 @@ type Props = {
   showDataPlanHint?: boolean;
 };
 
-type TipKey = "validation" | "oos" | "robustness" | "backtest" | "holdout" | "generic";
+type TipKey = "validation" | "oos" | "robustness" | "backtest" | "holdout" | "turnover" | "generic";
 
 function classifyReason(reason: string): TipKey {
   if (reason.includes("科学验证") || reason.includes("validation")) return "validation";
@@ -17,6 +17,7 @@ function classifyReason(reason: string): TipKey {
   if (reason.includes("稳健性")) return "robustness";
   if (reason.includes("回测")) return "backtest";
   if (reason.includes("holdout") || reason.includes("封印")) return "holdout";
+  if (reason.includes("换手") || reason.includes("turnover")) return "turnover";
   return "generic";
 }
 

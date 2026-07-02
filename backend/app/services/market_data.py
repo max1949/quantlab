@@ -41,6 +41,70 @@ def _symbol_seed(symbol: str) -> int:
     return int(hashlib.sha256(symbol.encode()).hexdigest(), 16) % (2**32)
 
 
+def generate_sample_ohlcv_intraday(
+    symbol: str, n: int = 12_000, start: float = 100.0, freq: str = "5min"
+) -> pd.DataFrame:
+    """确定性分钟级样本 (用于 1m/5m/15m 扫描与回测)。"""
+    rng = np.random.default_rng(_symbol_seed(symbol) + len(freq))
+    rets = rng.normal(loc=0.00002, scale=0.002, size=n)
+    close = start * np.cumprod(1.0 + rets)
+    index = pd.date_range("2024-01-02 09:00", periods=n, freq=freq)
+    daily_range = np.abs(rng.normal(0.0, 0.001, size=n)) * close
+    open_ = np.concatenate([[start], close[:-1]])
+    high = np.maximum(open_, close) + daily_range
+    low = np.minimum(open_, close) - daily_range
+    volume = rng.integers(100, 5_000, size=n)
+    return pd.DataFrame(
+        {"open": open_, "high": high, "low": low, "close": close, "volume": volume},
+        index=index,
+    )
+
+
+def resample_ohlcv(df: pd.DataFrame, rule: str) -> pd.DataFrame:
+    """OHLCV 重采样 (5m / 15m / 30m / 1h / 1d)。"""
+    agg = {
+        "open": "first",
+        "high": "max",
+        "low": "min",
+        "close": "last",
+        "volume": "sum",
+    }
+    cols = [c for c in agg if c in df.columns]
+    out = df[cols].resample(rule).agg({c: agg[c] for c in cols}).dropna()
+    return out
+
+
+DERIVED_TIMEFRAMES: tuple[tuple[str, str], ...] = (
+    ("5m", "5min"),
+    ("15m", "15min"),
+    ("30m", "30min"),
+    ("1h", "1h"),
+)
+
+
+def ensure_derived_timeframes(
+    db: Session, symbol: str, base_timeframe: str = "1m"
+) -> list[dict]:
+    """从已有分钟线 Parquet 重采样生成中频周期并登记索引 (幂等)。"""
+    if base_timeframe != "1m":
+        return []
+    path = dataset_path(symbol, "1m")
+    if not path.is_file():
+        return []
+    df = load_ohlcv(symbol, "1m")
+    if df.empty:
+        return []
+    out: list[dict] = []
+    for tf, rule in DERIVED_TIMEFRAMES:
+        rdf = resample_ohlcv(df, rule)
+        if rdf.empty:
+            continue
+        rdf.to_parquet(dataset_path(symbol, tf))
+        ds = register_dataset(db, symbol, rdf, tf)
+        out.append({"symbol": symbol, "timeframe": tf, "rows": ds.rows})
+    return out
+
+
 def generate_sample_ohlcv(symbol: str, n: int = 504, start: float = 100.0) -> pd.DataFrame:
     """确定性样本 OHLCV (按品种派生种子, 不同品种走势不同)。"""
     rng = np.random.default_rng(_symbol_seed(symbol))
@@ -176,10 +240,24 @@ def seed_sample_market_data(db: Session, symbols: list[str] | None = None) -> di
     symbols = symbols or DEFAULT_SYMBOLS
     out = []
     for sym in symbols:
-        df = generate_sample_ohlcv(sym)
-        df.to_parquet(dataset_path(sym))
-        ds = register_dataset(db, sym, df)
-        out.append({"symbol": sym, "rows": ds.rows})
+        df_1d = generate_sample_ohlcv(sym)
+        df_1d.to_parquet(dataset_path(sym, "1d"))
+        ds = register_dataset(db, sym, df_1d, "1d")
+        out.append({"symbol": sym, "timeframe": "1d", "rows": ds.rows})
+
+        df_1m = generate_sample_ohlcv_intraday(sym, n=12_000, freq="1min")
+        df_1m.to_parquet(dataset_path(sym, "1m"))
+        register_dataset(db, sym, df_1m, "1m")
+        out.append({"symbol": sym, "timeframe": "1m", "rows": len(df_1m)})
+
+        for tf, rule in (("5m", "5min"), ("15m", "15min"), ("30m", "30min"), ("1h", "1h")):
+            rdf = resample_ohlcv(df_1m, rule)
+            if rdf.empty:
+                continue
+            rdf.to_parquet(dataset_path(sym, tf))
+            register_dataset(db, sym, rdf, tf)
+            out.append({"symbol": sym, "timeframe": tf, "rows": len(rdf)})
+
     return {"datasets": out, "dir": str(market_dir())}
 
 
@@ -298,6 +376,9 @@ def import_vnpy_sqlite(
 
     df.to_parquet(dataset_path(out_symbol, out_tf))
     ds = register_dataset(db, out_symbol, df, out_tf)
+    derived: list[dict] = []
+    if out_tf == "1m":
+        derived = ensure_derived_timeframes(db, out_symbol, "1m")
     return {
         "symbol": out_symbol,
         "timeframe": out_tf,
@@ -305,6 +386,7 @@ def import_vnpy_sqlite(
         "start": str(ds.start_date),
         "end": str(ds.end_date),
         "path": str(dataset_path(out_symbol, out_tf)),
+        "derived": derived,
     }
 
 

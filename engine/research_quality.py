@@ -16,6 +16,8 @@ class QualityThresholds:
     min_backtest_sharpe: float = 0.0
     require_sealed_holdout_positive: bool = True
     min_sealed_holdout_sharpe: float = 0.0
+    max_turnover: float | None = 80.0
+    min_abs_ic: float | None = None
     allowed_robustness_grades: frozenset[str] = frozenset({"稳健", "中等"})
 
 
@@ -79,6 +81,26 @@ def assess_publish_readiness(
     elif float(bt_sharpe) < th.min_backtest_sharpe:
         reasons.append(f"全样本回测夏普 {float(bt_sharpe):.2f} 需 ≥ {th.min_backtest_sharpe:.2f}")
 
+    bt_turnover = (backtest_metrics or {}).get("turnover")
+    if th.max_turnover is not None and bt_turnover is not None:
+        if float(bt_turnover) > th.max_turnover:
+            reasons.append(
+                f"回测换手率 {float(bt_turnover):.1f} 超过发布门槛 {th.max_turnover:.1f} "
+                "（中频成本敏感，实盘易打折）"
+            )
+
+    ic_mean = None
+    if validation_robustness:
+        ic_block = validation_robustness.get("factor_ic") or {}
+        ic_mean = ic_block.get("ic_mean")
+    if th.min_abs_ic is not None:
+        if ic_mean is None:
+            reasons.append("缺少因子 IC 结果")
+        elif abs(float(ic_mean)) < th.min_abs_ic:
+            reasons.append(
+                f"因子 IC {float(ic_mean):.3f} 绝对值低于门槛 {th.min_abs_ic:.3f}（预测力偏弱）"
+            )
+
     sealed = (validation_robustness or {}).get("sealed_holdout")
     sealed_sharpe = evaluate_sealed_holdout_metrics(sealed)
     if th.require_sealed_holdout_positive:
@@ -92,9 +114,11 @@ def assess_publish_readiness(
 
     scorecard = {
         "backtest_sharpe": bt_sharpe,
+        "backtest_turnover": bt_turnover,
         "oos_sharpe": oos_sharpe,
         "robustness_score": rob_score,
         "robustness_grade": rob_grade,
         "sealed_holdout_sharpe": sealed_sharpe,
+        "ic_mean": ic_mean,
     }
     return QualityVerdict(passed=len(reasons) == 0, reasons=reasons, scorecard=scorecard)

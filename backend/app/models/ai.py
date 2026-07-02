@@ -20,6 +20,7 @@ from backend.app.core.database import Base
 class InsightKind(str, enum.Enum):
     VALIDATION_REVIEW = "validation_review"
     BACKTEST_SUMMARY = "backtest_summary"
+    SCAN_REVIEW = "scan_review"
 
 
 class InsightSource(str, enum.Enum):

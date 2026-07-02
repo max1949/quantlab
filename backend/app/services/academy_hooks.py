@@ -38,6 +38,10 @@ def on_validation_success(db: Session, user: User) -> list[dict]:
     return _collect(db, user, ["first-validation"])
 
 
+def on_factor_scan(db: Session, user: User) -> list[dict]:
+    return _collect(db, user, ["first-factor-scan"])
+
+
 def on_welcome(db: Session, user: User) -> list[dict]:
     return _collect(db, user, ["welcome"])
 

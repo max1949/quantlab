@@ -301,3 +301,92 @@ def build_research_plan_prompt(theme: str) -> dict:
         "要求: 只给研究方法与因子方向, 不要给具体买卖点位, 不要承诺收益。"
     )
     return {"system": MENTOR_SYSTEM, "user": user}
+
+
+# --------------------------------------------------------------------------- #
+# 因子参数扫描复盘 (Scan Review)
+# --------------------------------------------------------------------------- #
+
+def local_scan_review(context: dict) -> dict:
+    """由参数扫描结果生成确定性解读。"""
+    symbol = context.get("symbol", "?")
+    timeframe = context.get("timeframe", "?")
+    template = context.get("template_type", "?")
+    results = context.get("results") or []
+    coach = context.get("coach_summary", "")
+
+    strengths: list[str] = []
+    risks: list[str] = []
+    suggestions: list[str] = []
+
+    if not results:
+        headline = f"「{template}」在 {symbol}·{timeframe} 上扫描无有效结果。"
+        return {
+            "headline": headline,
+            "strengths": [],
+            "risks": ["参数网格未产生可排序结果"],
+            "suggestions": ["换更大周期或简化模板参数范围后重扫"],
+            "markdown": f"**结论**: {headline}\n\n请换标的/周期后重试。",
+        }
+
+    top = results[0]
+    score = top.get("score")
+    oos = top.get("oos_sharpe")
+    ic = top.get("ic_mean")
+    turnover = top.get("turnover")
+
+    if score is not None and score >= 0.55:
+        strengths.append(f"最优参数 {top.get('label')} 综合分 {score:.2f}，排名靠前。")
+    if oos is not None and oos >= 0.4:
+        strengths.append(f"样本外夏普 {_fmt_num(oos, 2)}，初步具备延续性。")
+    if ic is not None and abs(ic) >= 0.03:
+        strengths.append(f"IC {_fmt_num(ic, 3)}，因子与远期收益有一定相关性。")
+
+    if oos is not None and oos < 0.2:
+        risks.append(f"样本外夏普仅 {_fmt_num(oos, 2)}，疑似过拟合窗口。")
+        suggestions.append("缩小搜索范围或固定逻辑后做完整科学验证。")
+    if ic is not None and abs(ic) < 0.02:
+        risks.append("IC 偏低，预测力有限。")
+        suggestions.append("尝试组合因子或换模板类型。")
+    if turnover is not None and turnover > 40:
+        risks.append(f"换手率 {_fmt_num(turnover, 1)} 偏高，实盘成本敏感。")
+        suggestions.append("加长窗口或换 15m/30m 等更低频周期。")
+
+    if len(results) >= 3:
+        suggestions.append("可用「实验对比」比较两次扫描，确认最优区间是否稳定。")
+    suggestions.append("满意后一键载入因子 → 回测 → 科学验证，再考虑发布。")
+
+    headline = (
+        f"「{template}」在 {symbol}·{timeframe} 扫描完成，"
+        f"推荐参数 {top.get('label')}（综合分 {score if score is not None else '—'}）。"
+    )
+    markdown = _render_review_md(
+        headline,
+        coach or "参数扫描教练摘要见上。",
+        strengths,
+        risks,
+        suggestions,
+    )
+    return {
+        "headline": headline,
+        "strengths": strengths,
+        "risks": risks,
+        "suggestions": suggestions,
+        "markdown": markdown,
+    }
+
+
+def build_scan_review_prompt(context: dict) -> dict:
+    payload = {
+        "标的": context.get("symbol"),
+        "周期": context.get("timeframe"),
+        "模板": context.get("template_type"),
+        "前5组结果": (context.get("results") or [])[:5],
+        "教练摘要": context.get("coach_summary"),
+    }
+    user = (
+        "请基于以下因子参数扫描结果，给出研究解读:\n"
+        "1) 一句话结论; 2) 优点; 3) 风险 (过拟合/换手/IC); 4) 下一步建议。\n\n"
+        + json.dumps(payload, ensure_ascii=False, default=str, indent=2)
+    )
+    return {"system": MENTOR_SYSTEM, "user": user}

@@ -77,6 +77,30 @@ def research_plan(
 
 
 @router.post(
+    "/scans/{scan_id}/review",
+    response_model=InsightOut,
+    status_code=status.HTTP_201_CREATED,
+    summary="AI 解读因子参数扫描结果",
+)
+def review_factor_scan(
+    scan_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> InsightOut:
+    _check_ai_quota(current_user.id)
+    try:
+        insight = ai_service.review_scan(db, current_user, uuid.UUID(scan_id))
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="扫描不存在")
+    except ai_service.TargetNotReadyError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="扫描不存在 / 非本人, 无法解读",
+        )
+    return InsightOut.model_validate(insight)
+
+
+@router.post(
     "/validations/{validation_id}/review",
     response_model=InsightOut,
     status_code=status.HTTP_201_CREATED,

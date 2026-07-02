@@ -131,6 +131,31 @@ def summarize_backtest(db: Session, owner: User, backtest_id: uuid.UUID) -> AiIn
     )
 
 
+def review_scan(db: Session, owner: User, scan_id: uuid.UUID) -> AiInsight:
+    from backend.app.services import factor_scan_service as fss
+
+    scan = fss.get_scan(db, owner.id, scan_id)
+    if scan is None:
+        raise TargetNotReadyError(str(scan_id))
+
+    out = fss.scan_to_out(scan)
+    context = {
+        "symbol": scan.symbol,
+        "timeframe": scan.timeframe,
+        "template_type": scan.template_type,
+        "results": out.get("results") or [],
+        "coach_summary": scan.coach_summary,
+    }
+    local = ai_advisor.local_scan_review(context)
+    prompt = ai_advisor.build_scan_review_prompt(context)
+    content, source, model = _generate(prompt, local)
+
+    return _persist(
+        db, owner, InsightKind.SCAN_REVIEW.value, "factor_scan",
+        scan_id, content, source, model, local,
+    )
+
+
 def research_plan(db: Session, owner: User, theme: str) -> AiInsight:
     """AI 研究指导: 给方向 -> 研究假设 + 推荐因子 + 实验计划 (不给交易建议)。"""
     local = ai_advisor.local_research_plan(theme)

@@ -65,6 +65,8 @@ class Settings(BaseSettings):
     publish_require_sealed_holdout: bool = True
     publish_min_sealed_holdout_sharpe: float = 0.0
     publish_min_robustness_grades: str = "稳健,中等"
+    publish_max_turnover: float = 80.0
+    publish_min_abs_ic: float = 0.0
 
     # 纸面跟踪
     paper_tracking_bars: int = 120

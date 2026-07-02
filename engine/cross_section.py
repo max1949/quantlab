@@ -21,8 +21,22 @@ TRADING_DAYS = 252
 def _f(x) -> float | None:
     if x is None:
         return None
-    xf = float(x)
+    if isinstance(x, complex):
+        return None
+    try:
+        xf = float(x)
+    except (TypeError, ValueError):
+        return None
     return None if (np.isnan(xf) or np.isinf(xf)) else xf
+
+
+def _annual_return(final_equity: float, n: int, mean: float) -> float | None:
+    """CAGR; 净值 ≤ 0 时幂次年化无意义，退化为按日均收益复利年化。"""
+    if n <= 0:
+        return 0.0
+    if final_equity > 0:
+        return final_equity ** (TRADING_DAYS / n) - 1.0
+    return (1.0 + mean) ** TRADING_DAYS - 1.0
 
 
 def _metrics(net_ret: pd.Series, equity: pd.Series, weights: pd.DataFrame) -> dict:
@@ -33,7 +47,7 @@ def _metrics(net_ret: pd.Series, equity: pd.Series, weights: pd.DataFrame) -> di
     running_max = equity.cummax()
     drawdown = equity / running_max - 1.0
     max_dd = float(drawdown.min()) if n else 0.0
-    annual_return = final_equity ** (TRADING_DAYS / n) - 1.0 if n else 0.0
+    annual_return = _annual_return(final_equity, n, mean)
     annual_vol = std * np.sqrt(TRADING_DAYS)
     sharpe = (mean / std * np.sqrt(TRADING_DAYS)) if std > 0 else None
     turnover = weights.diff().abs()

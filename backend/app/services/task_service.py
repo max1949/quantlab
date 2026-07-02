@@ -181,6 +181,15 @@ DEFAULT_TASKS: list[dict] = [
         "order_index": 32,
     },
     {
+        "code": "first-factor-scan",
+        "title": "第一次参数扫描",
+        "description": "完成首次模板因子参数网格扫描后自动完成。",
+        "category": "factor",
+        "min_level": UserLevel.L1.value,
+        "xp_reward": 75,
+        "order_index": 31,
+    },
+    {
         "code": "first-report",
         "title": "第一份研究报告",
         "description": "首次生成研究报告后自动完成 — 把因子、回测与验证写成结论。",

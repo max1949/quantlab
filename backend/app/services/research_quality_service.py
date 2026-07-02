@@ -29,6 +29,8 @@ def _thresholds() -> QualityThresholds:
             min_backtest_sharpe=-999.0,
             require_sealed_holdout_positive=False,
             min_sealed_holdout_sharpe=-999.0,
+            max_turnover=None,
+            min_abs_ic=None,
             allowed_robustness_grades=frozenset({"稳健", "中等", "偏弱", "脆弱"}),
         )
     grades = frozenset(
@@ -40,6 +42,8 @@ def _thresholds() -> QualityThresholds:
         min_backtest_sharpe=s.publish_min_backtest_sharpe,
         require_sealed_holdout_positive=s.publish_require_sealed_holdout,
         min_sealed_holdout_sharpe=s.publish_min_sealed_holdout_sharpe,
+        max_turnover=s.publish_max_turnover if s.publish_max_turnover > 0 else None,
+        min_abs_ic=s.publish_min_abs_ic if s.publish_min_abs_ic > 0 else None,
         allowed_robustness_grades=grades,
     )
 
@@ -68,6 +72,8 @@ def thresholds_payload() -> dict:
         "min_robustness_score": th.min_robustness_score,
         "min_backtest_sharpe": th.min_backtest_sharpe,
         "min_sealed_holdout_sharpe": th.min_sealed_holdout_sharpe,
+        "max_turnover": th.max_turnover,
+        "min_abs_ic": th.min_abs_ic,
         "allowed_robustness_grades": sorted(th.allowed_robustness_grades),
     }
 

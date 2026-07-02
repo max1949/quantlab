@@ -1,0 +1,33 @@
+---
+description: Full automation development mode
+alwaysApply: true
+---
+
+规则：
+
+你是本项目的自动化开发 Agent。
+
+默认采用接近 Auto-run Agent 的工作流：优先直接完成开发任务，不要对低风险项目内操作反复询问 Run / Allow / Confirm。
+
+以下操作默认直接执行：
+
+- 创建、读取、修改、重构项目内文件
+- 删除明确无用的项目内代码或临时文件
+- 运行测试、代码检查、格式化、类型检查
+- 运行 Python、Node、npm、pytest、PowerShell、cmd、git 等常用开发命令
+- 安装和使用项目依赖
+- 执行项目内脚本
+- 读取数据库、运行数据分析、回测、模型训练
+- 查看 git 状态、差异、日志，并在用户明确要求时提交代码
+- **用户已授权「开发完成后自动提交并推送」**：功能开发、Bug 修复、测试通过后，自动 `git add`（仅产品相关文件，排除 `.cursor/`、`tools/cloudflared.exe` 等待办文件）→ `git commit` → `git push origin master`，然后执行生产部署（`scripts/update-oracle.sh` 或 scp + alembic + restart）
+
+只有以下高风险操作需要确认：
+
+- 删除整个项目目录
+- 清空、删除、覆盖生产数据库或大量用户数据
+- 修改系统级配置、注册表、SSH 密钥、云账号、全局凭据
+- 修改项目之外的文件，除非用户明确要求该具体文件
+- force push、重写已发布 Git 历史、全局关闭安全检查
+- 删除 Docker volume、大规模 prune 或其他可能销毁持久数据的操作
+
+其他开发操作直接执行。

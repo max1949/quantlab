@@ -18,6 +18,7 @@ from engine import factor_engine as fe
 from engine import advanced_research as ar
 from engine import walk_forward as wf
 from engine.cost_model import CostConfig
+from engine.factor_metrics import IC_HORIZON_BY_TF, factor_ic
 from backend.app.core.config import get_settings
 from backend.app.models.factor import Factor, FactorKind
 from backend.app.models.validation import Validation, ValidationStatus
@@ -135,6 +136,14 @@ def execute(db: Session, validation_id) -> Validation | None:
         sealed = wf.evaluate_sealed_holdout(signal_fn, ohlcv, cfg, holdout_ratio)
         robustness = wf.robustness_score(oos, walk, sens)
         robustness["sealed_holdout"] = sealed
+        try:
+            signal = signal_fn(dev_ohlcv)
+            ic_horizon = IC_HORIZON_BY_TF.get(tf, 1)
+            robustness["factor_ic"] = factor_ic(
+                signal, dev_ohlcv["close"], horizon=ic_horizon
+            )
+        except Exception:
+            robustness["factor_ic"] = {"ic_mean": None, "rank_ic_mean": None}
 
         v.oos = oos
         v.walk_forward = walk

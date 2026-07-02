@@ -17,6 +17,22 @@ def test_publish_gate_passes_strong_factor():
     assert verdict.passed is True
 
 
+def test_publish_gate_blocks_high_turnover():
+    verdict = assess_publish_readiness(
+        backtest_metrics={"sharpe": 1.2, "turnover": 95.0},
+        validation_status="success",
+        validation_oos={"out_of_sample": {"sharpe": 0.8}},
+        validation_robustness={
+            "score": 55,
+            "grade": "中等",
+            "sealed_holdout": {"metrics": {"sharpe": 0.3}},
+        },
+        thresholds=QualityThresholds(max_turnover=80.0),
+    )
+    assert verdict.passed is False
+    assert any("换手" in r for r in verdict.reasons)
+
+
 def test_publish_gate_blocks_weak_oos():
     verdict = assess_publish_readiness(
         backtest_metrics={"sharpe": 1.5},

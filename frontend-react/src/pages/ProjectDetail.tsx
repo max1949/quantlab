@@ -21,6 +21,7 @@ import { useUi } from "../store/ui";
 import { useLocale } from "../store/locale";
 import { ErrorBox, PageTitle, Spinner } from "../components/ui";
 import FactorLab from "../components/FactorLab";
+import FactorScanPanel from "../components/FactorScanPanel";
 import AdvancedAnalysis from "../components/AdvancedAnalysis";
 import L3ResearchTools from "../components/L3ResearchTools";
 import PaperTrackingPanel from "../components/PaperTrackingPanel";
@@ -472,6 +473,10 @@ export default function ProjectDetail() {
             <p className="py-6 text-center text-sm text-slate-400">{p.graphEmpty}</p>
           )}
         </div>
+      </div>
+
+      <div className="mt-4" id="factor-scan">
+        <FactorScanPanel projectId={id} symbol={symbol} timeframe={activeTimeframe} />
       </div>
 
       <div className="mt-4" id="factor-lab">

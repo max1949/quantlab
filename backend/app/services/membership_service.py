@@ -40,6 +40,7 @@ PLANS: list[dict] = [
         "tagline": "入门研究, 跑通第一次闭环",
         "features": [
             "模板因子 (5 种)",
+            "因子参数扫描 (L1+)",
             "因子组合器",
             "历史回测 (日线 · 近1年)",
             "样本外 + Walk-Forward 验证",
@@ -59,6 +60,7 @@ PLANS: list[dict] = [
             "公式因子 (自己写表达式)",
             "截面多标的回测",
             "分钟线回测 (近1年)",
+            "5分钟 / 15分钟中频周期",
             "日线回测 (近2年)",
             "成本敏感性分析",
             "多因子正交化",
@@ -96,6 +98,7 @@ FEATURES: dict[str, dict] = {
     "factor_orthogonalize": {"label": "多因子正交化", "min_level": 3, "min_tier": 1},
     "robustness_test": {"label": "参数稳健性测试", "min_level": 3, "min_tier": 1},
     "overfit_check": {"label": "过拟合检查", "min_level": 3, "min_tier": 1},
+    "factor_param_scan": {"label": "因子参数扫描", "min_level": 1, "min_tier": 0},
     "portfolio_optimize": {"label": "组合优化", "min_level": 4, "min_tier": 2},
     "paper_trading": {"label": "模拟实盘", "min_level": 4, "min_tier": 2},
 }

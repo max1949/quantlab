@@ -10,6 +10,8 @@ import type {
   Entitlements,
   Factor,
   FactorPreview,
+  FactorScan,
+  FactorScanCompare,
   FactorTemplateMeta,
   FormulaHelp,
   Graph,
@@ -186,6 +188,47 @@ export async function createTemplateFactor(body: {
   project_id?: string;
 }): Promise<Factor> {
   const { data } = await api.post<Factor>("/factors/template", body);
+  return data;
+}
+
+export async function runFactorScan(body: {
+  symbol: string;
+  template_type: string;
+  timeframe?: string;
+  project_id?: string;
+  steps?: number;
+}): Promise<FactorScan> {
+  const { data } = await api.post<FactorScan>("/factors/scan", body);
+  return data;
+}
+
+export async function listFactorScans(projectId?: string): Promise<FactorScan[]> {
+  const { data } = await api.get<FactorScan[]>("/factors/scans", {
+    params: projectId ? { project_id: projectId } : undefined,
+  });
+  return data;
+}
+
+export async function compareFactorScans(
+  scanA: string,
+  scanB: string,
+): Promise<FactorScanCompare> {
+  const { data } = await api.get<FactorScanCompare>("/factors/scans/compare", {
+    params: { scan_a: scanA, scan_b: scanB },
+  });
+  return data;
+}
+
+export async function reviewFactorScan(scanId: string): Promise<Insight> {
+  const { data } = await api.post<Insight>(`/ai/scans/${scanId}/review`);
+  return data;
+}
+
+export async function applyFactorScan(
+  scanId: string,
+  body: { rank?: number; name?: string },
+): Promise<Factor> {
+  const { data } = await api.post<Factor>(`/factors/scans/${scanId}/apply`, body);
   return data;
 }
 

@@ -234,6 +234,41 @@ export interface Factor {
   created_at: string;
 }
 
+export interface ScanResultRow {
+  rank: number;
+  params: Record<string, number>;
+  label: string;
+  score: number | null;
+  sharpe: number | null;
+  oos_sharpe: number | null;
+  ic_mean: number | null;
+  turnover: number | null;
+  max_drawdown: number | null;
+}
+
+export interface FactorScan {
+  id: string;
+  symbol: string;
+  timeframe: string;
+  template_type: string;
+  project_id: string | null;
+  results: ScanResultRow[];
+  best_params: Record<string, number> | null;
+  best_score: number | null;
+  coach_summary: string;
+  applied_factor_id: string | null;
+  created_at: string;
+  academy_rewards?: AcademyReward[];
+}
+
+export interface FactorScanCompare {
+  scan_a: FactorScan;
+  scan_b: FactorScan;
+  delta: Record<string, number | null>;
+  winner: "a" | "b" | "tie";
+  summary: string;
+}
+
 export interface AcademyReward {
   code: string;
   title: string;
