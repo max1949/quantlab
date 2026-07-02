@@ -41,6 +41,14 @@ export interface JourneyStep {
   key: string;
   label: string;
   done: boolean;
+  challenge_milestones: ChallengeMilestoneLink[];
+}
+
+export interface ChallengeMilestoneLink {
+  code: string;
+  day: number;
+  title: string;
+  completed: boolean;
 }
 
 export interface ResearchJourney {
@@ -48,6 +56,10 @@ export interface ResearchJourney {
   total: number;
   steps: JourneyStep[];
   active_project_id: string | null;
+  challenge_enrolled: boolean;
+  challenge_code: string | null;
+  challenge_completed_count: number;
+  challenge_total: number;
 }
 
 export interface Mentor {
@@ -448,6 +460,8 @@ export interface Milestone {
   title: string;
   completed: boolean;
   reward_points: number;
+  journey_key?: string | null;
+  journey_label?: string | null;
 }
 
 export interface ChallengeProgress {

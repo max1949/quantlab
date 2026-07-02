@@ -40,6 +40,7 @@ export default function Challenges() {
     mutationFn: () => enrollChallenge(code!),
     onSuccess: (data) => {
       qc.setQueryData(["challenge-progress", code], data);
+      void qc.invalidateQueries({ queryKey: ["research-journey"] });
       notify(t.enrollSuccess, "success");
     },
     onError: (e) => notify(apiErrorMessage(e, t.enrollFail), "error"),
@@ -162,6 +163,11 @@ function ProgressView({
                 {m.completed ? "✅ " : "⬜ "}
                 {m.title}
               </p>
+              {m.journey_label && (
+                <p className="text-xs text-brand-600 dark:text-brand-400">
+                  {t.journeyStep(m.journey_label)}
+                </p>
+              )}
               <p className="text-xs text-slate-400">{t.day(m.day)}</p>
             </div>
             <span className="badge">+{m.reward_points}</span>

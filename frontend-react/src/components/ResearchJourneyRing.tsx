@@ -11,7 +11,15 @@ export default function ResearchJourneyRing() {
   if (journey.isLoading) return <Spinner />;
   if (!journey.data) return null;
 
-  const { done_count, total, steps, active_project_id } = journey.data;
+  const {
+    done_count,
+    total,
+    steps,
+    active_project_id,
+    challenge_enrolled,
+    challenge_completed_count,
+    challenge_total,
+  } = journey.data;
   const pct = total > 0 ? Math.round((done_count / total) * 100) : 0;
   const next = steps.find((s) => !s.done);
 
@@ -26,6 +34,17 @@ export default function ResearchJourneyRing() {
           {d.journeyProgress(done_count, total)}
         </span>
       </div>
+
+      {challenge_enrolled && challenge_total > 0 && (
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50/60 px-3 py-2 text-sm dark:border-amber-900 dark:bg-amber-950/30">
+          <span className="text-amber-900 dark:text-amber-100">
+            {d.journeyChallengeSync(challenge_completed_count, challenge_total)}
+          </span>
+          <Link to="/challenges" className="text-xs font-medium text-brand-600 hover:underline">
+            {d.journeyViewChallenge}
+          </Link>
+        </div>
+      )}
 
       <div className="mb-4 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
         <div
@@ -44,8 +63,26 @@ export default function ResearchJourneyRing() {
                 : "border-slate-200 bg-slate-50/50 text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300"
             }`}
           >
-            {s.done ? "✓ " : "○ "}
-            {s.label}
+            <div>
+              {s.done ? "✓ " : "○ "}
+              {s.label}
+            </div>
+            {s.challenge_milestones.length > 0 && (
+              <div className="mt-1 flex flex-wrap gap-1">
+                {s.challenge_milestones.map((cm) => (
+                  <span
+                    key={cm.code}
+                    className={`rounded px-1 py-0.5 text-[10px] ${
+                      cm.completed
+                        ? "bg-emerald-200/80 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-100"
+                        : "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-100"
+                    }`}
+                  >
+                    {d.journeyChallengeDay(cm.day)}
+                  </span>
+                ))}
+              </div>
+            )}
           </li>
         ))}
       </ol>
@@ -62,6 +99,15 @@ export default function ResearchJourneyRing() {
               {d.fromTemplate}
             </Link>
           ) : null}
+        </p>
+      )}
+
+      {!challenge_enrolled && (
+        <p className="mt-3 text-sm text-slate-500">
+          {d.journeyChallengeHint}{" "}
+          <Link to="/challenges" className="text-brand-600 hover:underline">
+            {d.journeyEnrollChallenge}
+          </Link>
         </p>
       )}
     </div>

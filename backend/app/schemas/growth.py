@@ -31,6 +31,7 @@ class JourneyStepOut(BaseModel):
     key: str
     label: str
     done: bool
+    challenge_milestones: list[dict] = Field(default_factory=list)
 
 
 class ResearchJourneyOut(BaseModel):
@@ -38,6 +39,10 @@ class ResearchJourneyOut(BaseModel):
     total: int
     steps: list[JourneyStepOut]
     active_project_id: uuid.UUID | None = None
+    challenge_enrolled: bool = False
+    challenge_code: str | None = None
+    challenge_completed_count: int = 0
+    challenge_total: int = 0
 
 
 # ---- 研究模板 ----

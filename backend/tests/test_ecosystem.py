@@ -85,6 +85,9 @@ def test_challenge_progress_auto(client, db_session):
     done = {m["code"] for m in prog["milestones"] if m["completed"]}
     assert "first_factor" in done
     assert prog["completed_count"] >= 1
+    first_ms = next(m for m in prog["milestones"] if m["code"] == "first_factor")
+    assert first_ms.get("journey_key") == "factor"
+    assert first_ms.get("journey_label")
 
 
 def test_challenge_list_and_unknown(client, db_session):

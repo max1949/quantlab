@@ -25,6 +25,8 @@ class MilestoneStatus(BaseModel):
     title: str
     completed: bool
     reward_points: int = 0
+    journey_key: str | None = None
+    journey_label: str | None = None
 
 
 class ProgressOut(BaseModel):

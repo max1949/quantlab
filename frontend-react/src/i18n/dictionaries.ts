@@ -139,6 +139,12 @@ const en = {
     journeyProgress: (done: number, total: number) => `${done}/${total} complete`,
     journeyNext: (label: string) => `Next: ${label}`,
     journeyGoProject: "Open project →",
+    journeyChallengeSync: (done: number, total: number) =>
+      `30-day challenge synced: ${done}/${total} milestones`,
+    journeyViewChallenge: "View challenge →",
+    journeyChallengeDay: (day: number) => `Challenge D${day}`,
+    journeyChallengeHint: "Enroll in the 30-day challenge — milestones light up as you complete each step.",
+    journeyEnrollChallenge: "Join challenge →",
   },
   stages: {
     create_project: "Start from template →",
@@ -540,6 +546,7 @@ const en = {
     claimCert: "Claim certificate",
     claimCertLocked: "Complete all to unlock certificate",
     day: (d: number) => `Day ${d}`,
+    journeyStep: (label: string) => `Research path · ${label}`,
   },
   profile: {
     myTitle: "My research profile",
@@ -766,6 +773,12 @@ const zh = {
     journeyProgress: (done: number, total: number) => `已完成 ${done}/${total}`,
     journeyNext: (label: string) => `下一步：${label}`,
     journeyGoProject: "打开项目 →",
+    journeyChallengeSync: (done: number, total: number) =>
+      `30 天挑战已同步：${done}/${total} 个里程碑`,
+    journeyViewChallenge: "查看挑战 →",
+    journeyChallengeDay: (day: number) => `挑战 D${day}`,
+    journeyChallengeHint: "报名 30 天挑战 — 每完成研究闭环一步，对应里程碑会自动点亮。",
+    journeyEnrollChallenge: "去报名挑战 →",
   },
   stages: {
     create_project: "从模板开始 →",
@@ -1161,6 +1174,7 @@ const zh = {
     claimCert: "领取证书",
     claimCertLocked: "完成全部解锁证书",
     day: (d: number) => `第 ${d} 天`,
+    journeyStep: (label: string) => `研究闭环 · ${label}`,
   },
   profile: {
     myTitle: "我的研究主页",

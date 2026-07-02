@@ -504,6 +504,14 @@ CHALLENGE_CONTENT: dict[str, dict[Locale, dict[str, str]]] = {
     },
 }
 
+# 挑战里程碑 ↔ 七步研究闭环 (journey step key)
+MILESTONE_JOURNEY_KEYS: dict[str, str] = {
+    "first_factor": "factor",
+    "first_oos": "validation",
+    "stack_factor": "factor",
+    "first_report": "report",
+}
+
 MILESTONE_TITLES: dict[str, dict[Locale, str]] = {
     "first_factor": {
         "en": "Create your first factor",
@@ -599,6 +607,11 @@ def localize_progress(progress: dict, locale: Locale) -> dict:
         mc = m.get("code")
         if mc and mc in MILESTONE_TITLES:
             m2["title"] = MILESTONE_TITLES[mc][locale]
+        jk = m.get("journey_key") or (MILESTONE_JOURNEY_KEYS.get(mc or "") if mc else None)
+        if jk:
+            m2["journey_key"] = jk
+            labels = JOURNEY_STEPS.get(locale) or JOURNEY_STEPS["en"]
+            m2["journey_label"] = labels.get(jk, jk)
         loc_ms.append(m2)
     out["milestones"] = loc_ms
     return out

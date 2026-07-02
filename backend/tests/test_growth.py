@@ -50,16 +50,22 @@ def test_register_with_user_type_and_onboarding_next(client, db_session):
 
 def test_research_journey_endpoint(client, db_session):
     seed_sample_market_data(db_session)
+    seed_default_challenge(db_session)
     h = _register(client, "journey1")
     j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
     assert j["total"] == 7
     assert j["done_count"] == 0
     assert len(j["steps"]) == 7
     assert j["steps"][0]["key"] == "template"
+    assert j["challenge_enrolled"] is False
     proj, _ = _full_research(client, h, db_session)
+    client.post(f"{BASE}/challenges/30d-research/enroll", headers=h)
     j2 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
     assert j2["done_count"] >= 4
     assert j2["active_project_id"] == proj["id"]
+    assert j2["challenge_enrolled"] is True
+    factor_step = next(s for s in j2["steps"] if s["key"] == "factor")
+    assert any(cm["code"] == "first_factor" for cm in factor_step["challenge_milestones"])
 
 
 def test_public_report_detail(client, db_session):

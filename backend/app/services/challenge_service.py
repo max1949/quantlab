@@ -17,6 +17,7 @@ from backend.app.models.factor import Factor, FactorKind
 from backend.app.models.research import ResearchReport
 from backend.app.models.user import User
 from backend.app.models.validation import Validation, ValidationStatus
+from backend.app.i18n.content import MILESTONE_JOURNEY_KEYS
 from backend.app.services import growth_service
 
 DEFAULT_CODE = "30d-research"
@@ -97,6 +98,27 @@ def _user_stats(db: Session, uid: uuid.UUID) -> dict:
     }
 
 
+def is_enrolled(db: Session, user: User, code: str = DEFAULT_CODE) -> bool:
+    try:
+        ch = get_by_code(db, code)
+    except ChallengeNotFoundError:
+        return False
+    prog = db.execute(
+        select(ChallengeProgress).where(
+            ChallengeProgress.user_id == user.id,
+            ChallengeProgress.challenge_id == ch.id,
+        )
+    ).scalar_one_or_none()
+    return prog is not None
+
+
+def progress_if_enrolled(db: Session, user: User, code: str = DEFAULT_CODE) -> dict | None:
+    """已报名才返回进度 (不自动报名)。"""
+    if not is_enrolled(db, user, code):
+        return None
+    return evaluate(db, user, code)
+
+
 def enroll(db: Session, user: User, code: str) -> ChallengeProgress:
     ch = get_by_code(db, code)
     prog = db.execute(
@@ -135,8 +157,12 @@ def evaluate(db: Session, user: User, code: str) -> dict:
                 rewarded.add(m["code"])
         milestones_status.append(
             {
-                "day": m["day"], "code": m["code"], "title": m["title"],
-                "completed": done, "reward_points": int(m.get("reward_points", 0)),
+                "day": m["day"],
+                "code": m["code"],
+                "title": m["title"],
+                "completed": done,
+                "reward_points": int(m.get("reward_points", 0)),
+                "journey_key": MILESTONE_JOURNEY_KEYS.get(m["code"]),
             }
         )
 

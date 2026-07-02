@@ -171,11 +171,51 @@ def research_journey(db: Session, user: User, locale: Locale = "en") -> dict:
         "share": _count(db, select(func.count(ResearchShare.id)).where(ResearchShare.owner_id == uid)) > 0,
     }
     labels = i18n.JOURNEY_STEPS.get(locale) or i18n.JOURNEY_STEPS["en"]
-    steps = [{"key": k, "label": labels[k], "done": flags[k]} for k in JOURNEY_STEP_KEYS]
+
+    challenge_by_journey: dict[str, list[dict]] = {}
+    challenge_enrolled = False
+    challenge_code = None
+    challenge_completed_count = 0
+    challenge_total = 0
+    from backend.app.services import challenge_service
+
+    ch_prog = challenge_service.progress_if_enrolled(db, user)
+    if ch_prog:
+        challenge_enrolled = True
+        challenge_code = ch_prog["code"]
+        challenge_completed_count = ch_prog["completed_count"]
+        challenge_total = ch_prog["total"]
+        for m in ch_prog["milestones"]:
+            jk = m.get("journey_key")
+            if not jk:
+                continue
+            challenge_by_journey.setdefault(jk, []).append(
+                {
+                    "code": m["code"],
+                    "day": m["day"],
+                    "title": m["title"],
+                    "completed": m["completed"],
+                }
+            )
+
+    steps = []
+    for k in JOURNEY_STEP_KEYS:
+        steps.append(
+            {
+                "key": k,
+                "label": labels[k],
+                "done": flags[k],
+                "challenge_milestones": challenge_by_journey.get(k, []),
+            }
+        )
     done_count = sum(1 for s in steps if s["done"])
     return {
         "done_count": done_count,
         "total": len(steps),
         "steps": steps,
         "active_project_id": _active_project_id(db, user),
+        "challenge_enrolled": challenge_enrolled,
+        "challenge_code": challenge_code,
+        "challenge_completed_count": challenge_completed_count,
+        "challenge_total": challenge_total,
     }
