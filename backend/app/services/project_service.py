@@ -119,6 +119,12 @@ def publish_project(db: Session, owner_id: uuid.UUID, project_id: uuid.UUID) -> 
         report.is_public = True
     db.commit()
     db.refresh(p)
+    from backend.app.models.user import User
+    from backend.app.services import academy_hooks
+
+    owner = db.get(User, owner_id)
+    if owner is not None:
+        p.academy_rewards = academy_hooks.on_project_published(db, owner)
     return p
 
 

@@ -153,9 +153,14 @@ export default function ProjectDetail() {
   const publish = useMutation({
     mutationFn: () => publishProject(id),
     onMutate: () => setBusy("publish"),
-    onSuccess: () => {
+    onSuccess: async (res) => {
       void trackEvent("project_published", { project: id });
       notify(p.publishDone, "success");
+      const msg = academyRewardMessage(res.academy_rewards, d.academyXpEarned);
+      if (msg) notify(msg, "success");
+      void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
+      const me = await useAuth.getState().refreshMe();
+      if (me) setUser(me);
       refreshAll();
     },
     onError: (e) => notify(apiErrorMessage(e, p.publishFail), "error"),

@@ -84,6 +84,7 @@ export interface Project {
   tags: string[];
   created_at: string;
   updated_at: string;
+  academy_rewards?: AcademyReward[];
 }
 
 export interface GraphNode {

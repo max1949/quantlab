@@ -482,6 +482,14 @@ const en = {
     copyLink: "Copy link",
     copied: "Link copied — share it!",
     preview: "Preview",
+    publishNextTitle: "Next: publish to the research feed",
+    publishNextDesc:
+      "Your report is ready. Publish the project so others can discover it on the feed (quality gate required).",
+    publishNow: "Publish to feed",
+    backToFix: "Back to project — fix quality gate",
+    publishedTitle: "Published to the research feed",
+    publishedDesc: "Your study is live. Browse the feed or share your report card below.",
+    viewFeed: "View research feed",
   },
   challengesPage: {
     title: "30-Day Research Challenge",
@@ -1064,6 +1072,13 @@ const zh = {
     copyLink: "复制链接",
     copied: "链接已复制, 去分享吧!",
     preview: "预览",
+    publishNextTitle: "下一步：发布到研究广场",
+    publishNextDesc: "报告已生成。把项目发布出去，别人才能在广场上看到你的研究（需通过质量门槛）。",
+    publishNow: "发布到广场",
+    backToFix: "回项目页 — 先过质量门槛",
+    publishedTitle: "已发布到研究广场",
+    publishedDesc: "研究已公开。可以去广场逛逛，或用下方分享卡片发给朋友。",
+    viewFeed: "去看研究广场",
   },
   challengesPage: {
     title: "30 天研究挑战",

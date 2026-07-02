@@ -6,6 +6,7 @@ import { apiErrorMessage } from "../api/client";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
 import { ErrorBox, GradeBadge, PageTitle, Spinner } from "../components/ui";
+import ReportPublishCoach from "../components/ReportPublishCoach";
 
 export default function ReportDetail() {
   const { dict } = useLocale();
@@ -63,21 +64,23 @@ export default function ReportDetail() {
         )}
       </div>
 
+      {r.project_id && <ReportPublishCoach projectId={r.project_id} />}
+
       <div className="space-y-4">
         {sections
           .filter((s) => s.body)
           .map((s) => (
             <div key={s.title} className="card">
-              <h3 className="font-semibold text-slate-800">{s.title}</h3>
-              <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-600">
+              <h3 className="font-semibold text-slate-800 dark:text-slate-100">{s.title}</h3>
+              <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-600 dark:text-slate-300">
                 {s.body}
               </p>
             </div>
           ))}
       </div>
 
-      <div className="mt-6 card bg-brand-50/40">
-        <h3 className="font-semibold text-slate-800">📣 {t.shareTitle}</h3>
+      <div className="mt-6 card bg-brand-50/40 dark:bg-brand-950/20">
+        <h3 className="font-semibold text-slate-800 dark:text-slate-100">📣 {t.shareTitle}</h3>
         <p className="mt-1 text-sm text-slate-500">{t.shareDesc}</p>
         {shareUrl ? (
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">

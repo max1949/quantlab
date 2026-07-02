@@ -7,6 +7,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from backend.app.schemas.task import AcademyRewardOut
+
 
 class ProjectCreate(BaseModel):
     title: str = Field(min_length=1, max_length=200)
@@ -29,6 +31,10 @@ class ProjectOut(BaseModel):
     tags: list
     created_at: datetime
     updated_at: datetime
+
+
+class PublishProjectOut(ProjectOut):
+    academy_rewards: list[AcademyRewardOut] = Field(default_factory=list)
 
 
 class GraphNodeOut(BaseModel):

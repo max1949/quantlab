@@ -44,3 +44,7 @@ def on_welcome(db: Session, user: User) -> list[dict]:
 
 def on_report_generated(db: Session, user: User) -> list[dict]:
     return _collect(db, user, ["first-report"])
+
+
+def on_project_published(db: Session, user: User) -> list[dict]:
+    return _collect(db, user, ["first-publish"])

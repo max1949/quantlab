@@ -190,6 +190,15 @@ DEFAULT_TASKS: list[dict] = [
         "order_index": 33,
     },
     {
+        "code": "first-publish",
+        "title": "首次发布研究",
+        "description": "首次将项目发布到研究广场后自动完成。",
+        "category": "research",
+        "min_level": UserLevel.L0.value,
+        "xp_reward": 150,
+        "order_index": 34,
+    },
+    {
         "code": "write-formula-factor",
         "title": "编写公式因子",
         "description": "在因子实验室创建公式因子后自动完成 (L2 + 研究员会员)。",

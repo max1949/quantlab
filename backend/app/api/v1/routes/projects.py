@@ -16,7 +16,7 @@ from backend.app.core.database import get_db
 from backend.app.core.locale import RequestLocale
 from backend.app.i18n.content import overlay_project_fields
 from backend.app.models.project import ProjectStatus
-from backend.app.schemas.project import GraphOut, ProjectCreate, ProjectOut
+from backend.app.schemas.project import GraphOut, ProjectCreate, ProjectOut, PublishProjectOut
 from backend.app.services import project_service
 
 router = APIRouter()
@@ -93,13 +93,13 @@ def project_quality(
     }
 
 
-@router.post("/{project_id}/publish", response_model=ProjectOut, summary="发布项目到研究 Feed")
+@router.post("/{project_id}/publish", response_model=PublishProjectOut, summary="发布项目到研究 Feed")
 def publish_project(
     project_id: str,
     current_user: CurrentUser,
     locale: RequestLocale,
     db: Annotated[Session, Depends(get_db)],
-) -> ProjectOut:
+) -> PublishProjectOut:
     try:
         p = project_service.publish_project(db, current_user.id, uuid.UUID(project_id))
     except (project_service.ProjectNotFoundError, ValueError):
@@ -114,7 +114,11 @@ def publish_project(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail={"message": "研究质量未达发布门槛", "reasons": exc.reasons},
         )
-    return _project_out(p, locale)
+    base = _project_out(p, locale)
+    return PublishProjectOut(
+        **base.model_dump(),
+        academy_rewards=getattr(p, "academy_rewards", []),
+    )
 
 
 @router.get("/{project_id}/graph", response_model=GraphOut, summary="研究路径图谱 (假设→实验→验证→结果)")
