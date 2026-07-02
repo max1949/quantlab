@@ -254,6 +254,7 @@ export interface FactorScan {
   timeframe: string;
   template_type: string;
   project_id: string | null;
+  project_title?: string | null;
   results: ScanResultRow[];
   best_params: Record<string, number> | null;
   best_score: number | null;

@@ -108,6 +108,9 @@ export default function Layout() {
                     <MenuLink to="/projects" onClick={() => setMenuOpen(false)}>
                       {t.nav.myProjects}
                     </MenuLink>
+                    <MenuLink to="/experiments" onClick={() => setMenuOpen(false)}>
+                      {t.nav.myExperiments}
+                    </MenuLink>
                     <MenuLink to="/me/following" onClick={() => setMenuOpen(false)}>
                       {t.nav.following}
                     </MenuLink>

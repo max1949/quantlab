@@ -54,6 +54,15 @@ def test_factor_scan_run_and_apply(client, db_session):
     lst = client.get(f"{BASE}/factors/scans", headers=h)
     assert lst.status_code == 200
     assert any(s["id"] == sid for s in lst.json())
+    assert lst.json()[0].get("project_title") is not None
+
+    filtered = client.get(
+        f"{BASE}/factors/scans",
+        headers=h,
+        params={"symbol": "RB", "template_type": "momentum", "limit": 10},
+    )
+    assert filtered.status_code == 200
+    assert all(s["symbol"] == "RB" for s in filtered.json())
 
     scan2 = client.post(
         f"{BASE}/factors/scan",

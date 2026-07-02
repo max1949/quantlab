@@ -68,6 +68,12 @@ if ! crontab -l 2>/dev/null | grep -qF run-daily-paper; then
   echo "==> installed daily paper cron"
 fi
 
+DERIVED_CRON="45 10 * * 1-5 bash ${INSTALL_DIR}/scripts/materialize-derived-timeframes.sh >> /var/log/quantlab-derived.log 2>&1"
+if ! crontab -l 2>/dev/null | grep -qF materialize-derived-timeframes; then
+  (crontab -l 2>/dev/null; echo "$DERIVED_CRON") | crontab -
+  echo "==> installed derived timeframe cron"
+fi
+
 echo "==> public feed (first 120 chars)"
 curl -sf "http://127.0.0.1:${QUANTLAB_PORT:-8010}/api/v1/public/feed" | head -c 120
 echo ""

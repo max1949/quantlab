@@ -23,6 +23,7 @@ import Researcher from "./pages/Researcher";
 import MyProfile from "./pages/MyProfile";
 import Referral from "./pages/Referral";
 import Following from "./pages/Following";
+import Experiments from "./pages/Experiments";
 import Leaderboards from "./pages/Leaderboards";
 import Challenges from "./pages/Challenges";
 import Pricing from "./pages/Pricing";
@@ -71,6 +72,7 @@ export default function App() {
             <Route path="/templates" element={<Templates />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/projects/:id" element={<ProjectDetail />} />
+            <Route path="/experiments" element={<Experiments />} />
             <Route path="/challenges" element={<Challenges />} />
             <Route path="/me" element={<MyProfile />} />
             <Route path="/me/referral" element={<Referral />} />

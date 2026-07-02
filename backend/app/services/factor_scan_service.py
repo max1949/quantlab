@@ -120,14 +120,33 @@ def list_scans(
     owner_id: uuid.UUID,
     *,
     project_id: uuid.UUID | None = None,
-    limit: int = 20,
+    symbol: str | None = None,
+    template_type: str | None = None,
+    limit: int = 50,
 ) -> list[FactorScan]:
     q = select(FactorScan).where(FactorScan.owner_id == owner_id)
     if project_id is not None:
         q = q.where(FactorScan.project_id == project_id)
+    if symbol:
+        q = q.where(FactorScan.symbol == symbol.upper())
+    if template_type:
+        q = q.where(FactorScan.template_type == template_type)
+    cap = max(1, min(int(limit), 100))
     return list(
-        db.execute(q.order_by(FactorScan.created_at.desc()).limit(limit)).scalars().all()
+        db.execute(q.order_by(FactorScan.created_at.desc()).limit(cap)).scalars().all()
     )
+
+
+def project_titles_for(db: Session, scans: list[FactorScan]) -> dict[uuid.UUID, str]:
+    pids = {s.project_id for s in scans if s.project_id}
+    if not pids:
+        return {}
+    from backend.app.models.project import ResearchProject
+
+    rows = db.execute(
+        select(ResearchProject.id, ResearchProject.title).where(ResearchProject.id.in_(pids))
+    ).all()
+    return {row[0]: row[1] for row in rows}
 
 
 def get_scan(db: Session, owner_id: uuid.UUID, scan_id: uuid.UUID) -> FactorScan | None:
@@ -240,7 +259,7 @@ def compare_scans(
     }
 
 
-def scan_to_out(scan: FactorScan) -> dict:
+def scan_to_out(scan: FactorScan, *, project_title: str | None = None) -> dict:
     rows = [_serialize_row(r) for r in (scan.results or [])]
     return {
         "id": scan.id,
@@ -248,6 +267,7 @@ def scan_to_out(scan: FactorScan) -> dict:
         "timeframe": scan.timeframe,
         "template_type": scan.template_type,
         "project_id": scan.project_id,
+        "project_title": project_title,
         "results": rows,
         "best_params": scan.best_params,
         "best_score": scan.best_score,

@@ -202,10 +202,25 @@ export async function runFactorScan(body: {
   return data;
 }
 
-export async function listFactorScans(projectId?: string): Promise<FactorScan[]> {
+export async function listFactorScans(opts?: {
+  projectId?: string;
+  symbol?: string;
+  templateType?: string;
+  limit?: number;
+}): Promise<FactorScan[]> {
   const { data } = await api.get<FactorScan[]>("/factors/scans", {
-    params: projectId ? { project_id: projectId } : undefined,
+    params: {
+      project_id: opts?.projectId,
+      symbol: opts?.symbol,
+      template_type: opts?.templateType,
+      limit: opts?.limit,
+    },
   });
+  return data;
+}
+
+export async function getFactorScan(scanId: string): Promise<FactorScan> {
+  const { data } = await api.get<FactorScan>(`/factors/scans/${scanId}`);
   return data;
 }
 

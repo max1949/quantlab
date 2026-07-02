@@ -263,6 +263,9 @@ def list_factor_scans(
     current_user: Annotated[User, Depends(require_feature("factor_param_scan"))],
     db: Annotated[Session, Depends(get_db)],
     project_id: str | None = None,
+    symbol: str | None = None,
+    template_type: str | None = None,
+    limit: int = 50,
 ) -> list[FactorScanOut]:
     from backend.app.services import factor_scan_service as fss
 
@@ -272,7 +275,19 @@ def list_factor_scans(
             pid = uuid.UUID(project_id)
         except ValueError:
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="无效项目 ID")
-    return [FactorScanOut(**fss.scan_to_out(s)) for s in fss.list_scans(db, current_user.id, project_id=pid)]
+    scans = fss.list_scans(
+        db,
+        current_user.id,
+        project_id=pid,
+        symbol=symbol,
+        template_type=template_type,
+        limit=limit,
+    )
+    titles = fss.project_titles_for(db, scans)
+    return [
+        FactorScanOut(**fss.scan_to_out(s, project_title=titles.get(s.project_id)))
+        for s in scans
+    ]
 
 
 @router.get("/scans/compare", response_model=FactorScanCompareOut, summary="对比两次扫描实验")
@@ -310,7 +325,10 @@ def get_factor_scan(
     scan = fss.get_scan(db, current_user.id, sid)
     if scan is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="扫描不存在")
-    return FactorScanOut(**fss.scan_to_out(scan))
+    titles = fss.project_titles_for(db, [scan])
+    return FactorScanOut(
+        **fss.scan_to_out(scan, project_title=titles.get(scan.project_id))
+    )
 
 
 @router.post(

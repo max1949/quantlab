@@ -38,6 +38,7 @@ class FactorScanOut(BaseModel):
     timeframe: str
     template_type: str
     project_id: uuid.UUID | None
+    project_title: str | None = None
     results: list[ScanResultRow]
     best_params: dict | None
     best_score: float | None

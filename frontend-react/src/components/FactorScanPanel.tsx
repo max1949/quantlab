@@ -34,7 +34,7 @@ export default function FactorScanPanel({ projectId, symbol, timeframe }: Props)
   const templates = useQuery({ queryKey: ["factor-templates"], queryFn: getFactorTemplates });
   const history = useQuery({
     queryKey: ["factor-scans", projectId],
-    queryFn: () => listFactorScans(projectId),
+    queryFn: () => listFactorScans({ projectId }),
   });
   const scanFeat = ent.data?.features.find((f) => f.key === "factor_param_scan");
 
@@ -64,6 +64,7 @@ export default function FactorScanPanel({ projectId, symbol, timeframe }: Props)
         notify(s.academyXp(data.academy_rewards[0].awarded_xp), "success");
       }
       void qc.invalidateQueries({ queryKey: ["factor-scans", projectId] });
+      void qc.invalidateQueries({ queryKey: ["factor-scans", "all"] });
     },
     onError: (e) => notify(apiErrorMessage(e, s.fail), "error"),
   });
@@ -75,6 +76,7 @@ export default function FactorScanPanel({ projectId, symbol, timeframe }: Props)
       void qc.invalidateQueries({ queryKey: ["factors"] });
       void qc.invalidateQueries({ queryKey: ["graph", projectId] });
       void qc.invalidateQueries({ queryKey: ["factor-scans", projectId] });
+      void qc.invalidateQueries({ queryKey: ["factor-scans", "all"] });
     },
     onError: (e) => notify(apiErrorMessage(e, s.applyFail), "error"),
   });
@@ -93,6 +95,7 @@ export default function FactorScanPanel({ projectId, symbol, timeframe }: Props)
       void qc.invalidateQueries({ queryKey: ["validations"] });
       void qc.invalidateQueries({ queryKey: ["graph", projectId] });
       void qc.invalidateQueries({ queryKey: ["factor-scans", projectId] });
+      void qc.invalidateQueries({ queryKey: ["factor-scans", "all"] });
       void qc.invalidateQueries({ queryKey: ["research-journey"] });
       window.setTimeout(() => {
         document.getElementById("validation-results")?.scrollIntoView({
