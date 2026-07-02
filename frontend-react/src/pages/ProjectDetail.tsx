@@ -15,6 +15,8 @@ import {
   trackEvent,
 } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
+import { academyRewardMessage } from "../lib/academy";
+import { useAuth } from "../store/auth";
 import { useUi } from "../store/ui";
 import { useLocale } from "../store/locale";
 import { ErrorBox, PageTitle, Spinner } from "../components/ui";
@@ -35,7 +37,9 @@ export default function ProjectDetail() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const notify = useUi((s) => s.notify);
+  const setUser = useAuth((s) => s.setUser);
   const p = useLocale((s) => s.dict.projectDetail);
+  const d = useLocale((s) => s.dict.dashboard);
   const lk = useLocale((s) => s.dict.locked);
 
   const project = useQuery({ queryKey: ["project", id], queryFn: () => getProject(id) });
@@ -94,10 +98,15 @@ export default function ProjectDetail() {
     mutationFn: () =>
       createBacktest({ factor_id: projectFactor!.id, symbol, timeframe: activeTimeframe }),
     onMutate: () => setBusy("backtest"),
-    onSuccess: (bt) => {
+    onSuccess: async (bt) => {
       void trackEvent("backtest_run", { project: id, status: bt.status });
       notify(p.backtestDone(bt.status), "success");
+      const msg = academyRewardMessage(bt.academy_rewards, d.academyXpEarned);
+      if (msg) notify(msg, "success");
       void qc.invalidateQueries({ queryKey: ["backtests"] });
+      void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
+      const me = await useAuth.getState().refreshMe();
+      if (me) setUser(me);
       refreshAll();
     },
     onError: (e) => notify(apiErrorMessage(e, p.backtestFail), "error"),
@@ -108,10 +117,15 @@ export default function ProjectDetail() {
     mutationFn: () =>
       createValidation({ factor_id: projectFactor!.id, symbol, timeframe: activeTimeframe }),
     onMutate: () => setBusy("validation"),
-    onSuccess: (v) => {
+    onSuccess: async (v) => {
       void trackEvent("validation_run", { project: id, status: v.status });
       notify(p.validationDone(v.status), "success");
+      const msg = academyRewardMessage(v.academy_rewards, d.academyXpEarned);
+      if (msg) notify(msg, "success");
       void qc.invalidateQueries({ queryKey: ["validations"] });
+      void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
+      const me = await useAuth.getState().refreshMe();
+      if (me) setUser(me);
       refreshAll();
     },
     onError: (e) => notify(apiErrorMessage(e, p.validationFail), "error"),

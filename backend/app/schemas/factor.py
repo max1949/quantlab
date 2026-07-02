@@ -124,3 +124,4 @@ class FactorPreview(BaseModel):
     kind: str
     sample_rows: int
     stats: dict
+    academy_rewards: list = Field(default_factory=list)

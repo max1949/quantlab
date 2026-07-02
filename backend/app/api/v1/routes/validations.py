@@ -149,7 +149,8 @@ def create_validation(
         )
     except mdp.MarketDataAccessError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
-    return ValidationDetail.model_validate(v)
+    detail = ValidationDetail.model_validate(v)
+    return detail.model_copy(update={"academy_rewards": getattr(v, "academy_rewards", [])})
 
 
 @router.get("", response_model=list[ValidationSummary], summary="我的验证列表")

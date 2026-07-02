@@ -49,6 +49,7 @@ class BacktestDetail(BacktestSummary):
     equity_curve: list | None
     report: dict | None
     error: str | None
+    academy_rewards: list = Field(default_factory=list)
 
 
 class CrossSectionBacktestCreate(BaseModel):

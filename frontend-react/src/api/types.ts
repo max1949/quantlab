@@ -179,6 +179,7 @@ export interface FactorPreview {
   kind: string;
   sample_rows: number;
   stats: Record<string, number | null>;
+  academy_rewards?: AcademyReward[];
 }
 
 export interface Factor {
@@ -193,6 +194,13 @@ export interface Factor {
   created_at: string;
 }
 
+export interface AcademyReward {
+  code: string;
+  title: string;
+  awarded_xp: number;
+  leveled_up: boolean;
+}
+
 export interface Backtest {
   id: string;
   factor_id: string;
@@ -201,6 +209,7 @@ export interface Backtest {
   metrics: Record<string, number> | null;
   created_at: string;
   finished_at: string | null;
+  academy_rewards?: AcademyReward[];
 }
 
 export interface BacktestDetail extends Backtest {
@@ -301,6 +310,7 @@ export interface Validation {
   robustness: Record<string, unknown> | null;
   created_at: string;
   finished_at: string | null;
+  academy_rewards?: AcademyReward[];
 }
 
 export interface ValidationDetail extends Validation {

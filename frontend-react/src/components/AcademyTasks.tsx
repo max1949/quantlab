@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { completeTask, listTasks } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
+import { AUTO_ACADEMY_TASK_CODES } from "../lib/academy";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
@@ -66,7 +67,10 @@ export default function AcademyTasks() {
                   </p>
                 )}
               </div>
-              {!t.completed && !t.locked && (
+              {!t.completed && !t.locked && AUTO_ACADEMY_TASK_CODES.has(t.code) && (
+                <span className="text-sm text-brand-600">{d.academyAuto}</span>
+              )}
+              {!t.completed && !t.locked && !AUTO_ACADEMY_TASK_CODES.has(t.code) && (
                 <button
                   type="button"
                   className="btn-primary w-full shrink-0 sm:w-auto"

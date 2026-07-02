@@ -118,6 +118,11 @@ def execute(db: Session, backtest_id) -> Backtest | None:
         bt.report = report
         bt.status = BacktestStatus.SUCCESS.value
         bt.error = None
+        owner = db.get(User, bt.owner_id)
+        if owner is not None:
+            from backend.app.services import academy_hooks
+
+            bt.academy_rewards = academy_hooks.on_backtest_success(db, owner)
     except Exception as exc:  # noqa: BLE001 - 落库失败原因, 不让 worker 崩
         bt.status = BacktestStatus.FAILED.value
         bt.error = f"{type(exc).__name__}: {exc}"

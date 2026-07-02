@@ -339,7 +339,11 @@ def preview_factor(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
         )
-    return FactorPreview(**result)
+    from backend.app.services import academy_hooks
+
+    rewards = academy_hooks.on_factor_preview(db, current_user)
+    preview = FactorPreview(**result)
+    return preview.model_copy(update={"academy_rewards": rewards})
 
 
 @router.delete(

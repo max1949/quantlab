@@ -40,6 +40,7 @@ class ValidationDetail(ValidationSummary):
     walk_forward: dict | None
     sensitivity: dict | None
     error: str | None
+    academy_rewards: list = Field(default_factory=list)
 
 
 class OrthogonalizeCreate(BaseModel):

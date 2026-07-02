@@ -80,7 +80,8 @@ def create_backtest(
         )
     except mdp.MarketDataAccessError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
-    return BacktestDetail.model_validate(bt)
+    detail = BacktestDetail.model_validate(bt)
+    return detail.model_copy(update={"academy_rewards": getattr(bt, "academy_rewards", [])})
 
 
 @router.post(

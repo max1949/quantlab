@@ -190,13 +190,6 @@ def start(db: Session, user: User, code: str, with_factor: bool = True, tier: in
 
 def _try_complete_welcome_task(db: Session, user: User) -> None:
     """首次从模板开局时自动完成学院「欢迎」任务。"""
-    from backend.app.services import task_service
+    from backend.app.services import academy_hooks
 
-    try:
-        task_service.complete_task(db, user, "welcome")
-    except (
-        task_service.TaskAlreadyCompletedError,
-        task_service.TaskNotFoundError,
-        task_service.TaskLockedError,
-    ):
-        pass
+    academy_hooks.on_welcome(db, user)

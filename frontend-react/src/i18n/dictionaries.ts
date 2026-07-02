@@ -121,6 +121,8 @@ const en = {
     academyDone: "Done",
     academyClaim: "Claim reward",
     academyClaimed: "Reward claimed",
+    academyAuto: "Auto-completes when you finish this step in your project",
+    academyXpEarned: (title: string, xp: number) => `Academy +${xp} XP · ${title}`,
   },
   stages: {
     create_project: "Start from template →",
@@ -291,6 +293,34 @@ const en = {
     stackWeightHint: "Set weights (0 = exclude). Pick at least one.",
     factorNameLabel: "Factor name",
     creating: "Creating…",
+  },
+  factorGuide: {
+    title: "Factor basics (read this first)",
+    intro:
+      "A factor turns price/volume into a daily score. Positive → lean long; negative → lean short. Start with templates, then try formulas.",
+    tip: "Flow: preview → backtest → scientific validation. In-sample profit alone is not enough.",
+    lessons: [
+      {
+        title: "Variables & functions",
+        body: "Use open/high/low/close/volume plus sma, ema, std, rsi, mom, zscore.",
+        example: "close, sma(close, 20), rsi(close, 14)",
+      },
+      {
+        title: "Momentum (trend)",
+        body: "Recent winners may keep winning. Longer window = smoother but slower.",
+        example: "mom(close, 20)",
+      },
+      {
+        title: "Mean reversion",
+        body: "Price far from its average may snap back.",
+        example: "(close - sma(close, 20)) / std(close, 20)",
+      },
+      {
+        title: "Blend signals",
+        body: "Combine trend with volume or RSI filters.",
+        example: "mom(close, 20) - zscore(rsi(close, 14), 60)",
+      },
+    ],
   },
   paperTracking: {
     title: "Paper tracking",
@@ -665,6 +695,8 @@ const zh = {
     academyDone: "已完成",
     academyClaim: "领取奖励",
     academyClaimed: "已领取",
+    academyAuto: "在项目里完成对应步骤后自动点亮",
+    academyXpEarned: (title: string, xp: number) => `学院 +${xp} 经验 · ${title}`,
   },
   stages: {
     create_project: "从模板开始 →",
@@ -831,6 +863,34 @@ const zh = {
     stackWeightHint: "给因子设权重 (0 表示不参与), 至少选 1 个。",
     factorNameLabel: "因子名称",
     creating: "创建中…",
+  },
+  factorGuide: {
+    title: "因子入门（建议先看）",
+    intro:
+      "因子把行情变成每天的打分：正分偏多、负分偏空。小白先用模板，熟练后再写公式。",
+    tip: "推荐流程：预览 → 回测 → 科学验证。全样本赚钱不算数，样本外才算数。",
+    lessons: [
+      {
+        title: "能用哪些变量/函数",
+        body: "变量：开高低收、成交量。函数：sma、ema、std、rsi、mom、zscore 等。",
+        example: "close, sma(close, 20), rsi(close, 14)",
+      },
+      {
+        title: "动量（趋势）",
+        body: "涨得多的可能继续涨。窗口越长信号越平滑、越慢。",
+        example: "mom(close, 20)",
+      },
+      {
+        title: "均值回归",
+        body: "价格偏离均线太远，可能往回拉。",
+        example: "(close - sma(close, 20)) / std(close, 20)",
+      },
+      {
+        title: "组合思路",
+        body: "把趋势和成交量、RSI 等过滤条件拼在一起。",
+        example: "mom(close, 20) - zscore(rsi(close, 14), 60)",
+      },
+    ],
   },
   paperTracking: {
     title: "纸面跟踪",

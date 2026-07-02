@@ -47,3 +47,10 @@ class CompleteTaskResult(BaseModel):
     leveled_up: bool
     previous_level: int
     user: UserOut
+
+
+class AcademyRewardOut(BaseModel):
+    code: str
+    title: str
+    awarded_xp: int
+    leveled_up: bool

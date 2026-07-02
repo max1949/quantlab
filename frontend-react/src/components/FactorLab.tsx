@@ -20,12 +20,16 @@ import { useUi } from "../store/ui";
 import { useLocale } from "../store/locale";
 import { Spinner } from "./ui";
 import type { Factor, FactorPreview, FeatureState } from "../api/types";
+import FactorFormulaGuide from "./FactorFormulaGuide";
+import { academyRewardMessage } from "../lib/academy";
 
 export default function FactorLab({ projectId }: { projectId: string }) {
   const user = useAuth((s) => s.user)!;
+  const setUser = useAuth((s) => s.setUser);
   const qc = useQueryClient();
   const notify = useUi((s) => s.notify);
   const fl = useLocale((s) => s.dict.factorLab);
+  const d = useLocale((s) => s.dict.dashboard);
   const c = useLocale((s) => s.dict.common);
 
   const templates = useQuery({
@@ -58,7 +62,16 @@ export default function FactorLab({ projectId }: { projectId: string }) {
 
   const doPreview = useMutation({
     mutationFn: (id: string) => previewFactor(id),
-    onSuccess: (p) => setPreview((m) => ({ ...m, [p.factor_id]: p })),
+    onSuccess: async (p) => {
+      setPreview((m) => ({ ...m, [p.factor_id]: p }));
+      const msg = academyRewardMessage(p.academy_rewards, d.academyXpEarned);
+      if (msg) {
+        notify(msg, "success");
+        void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
+        const me = await useAuth.getState().refreshMe();
+        if (me) setUser(me);
+      }
+    },
     onError: (e) => notify(apiErrorMessage(e, fl.previewFailed), "error"),
   });
 
@@ -93,6 +106,8 @@ export default function FactorLab({ projectId }: { projectId: string }) {
           </button>
         </div>
       </div>
+
+      <FactorFormulaGuide compact={mode !== "template"} />
 
       <div className="mb-4">
         <p className="mb-2 text-xs font-medium text-slate-400">{fl.projectFactors}</p>
@@ -231,7 +246,7 @@ function FormulaForm({
       </div>
 
       {help.data && (
-        <details className="text-xs text-slate-500">
+        <details className="text-xs text-slate-500" open>
           <summary className="cursor-pointer text-brand-600">
             {fl.formulaHelpTitle}
           </summary>

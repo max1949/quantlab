@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getBacktest, listBacktests, summarizeBacktest } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
+import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
 import { Spinner } from "./ui";
@@ -17,7 +18,10 @@ export default function BacktestResultsPanel({ factorId, enabled }: Props) {
   const v = useLocale((s) => s.dict.backtestPanel);
   const ai = useLocale((s) => s.dict.aiReview);
   const notify = useUi((s) => s.notify);
+  const qc = useQueryClient();
+  const setUser = useAuth((s) => s.setUser);
   const [insight, setInsight] = useState<string | null>(null);
+  const syncedBacktest = useRef<string | null>(null);
 
   const list = useQuery({
     queryKey: ["backtests"],
@@ -35,6 +39,16 @@ export default function BacktestResultsPanel({ factorId, enabled }: Props) {
     queryFn: () => getBacktest(latestId!),
     enabled: Boolean(latestId),
   });
+
+  useEffect(() => {
+    if (!latestId || detail.data?.status !== "success") return;
+    if (syncedBacktest.current === latestId) return;
+    syncedBacktest.current = latestId;
+    void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
+    void useAuth.getState().refreshMe().then((me) => {
+      if (me) setUser(me);
+    });
+  }, [latestId, detail.data?.status, qc, setUser]);
 
   const aiSummary = useMutation({
     mutationFn: () => summarizeBacktest(latestId!),

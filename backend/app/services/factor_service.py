@@ -231,6 +231,9 @@ def create_formula_factor(
     db.add(factor)
     db.commit()
     db.refresh(factor)
+    from backend.app.services import task_service
+
+    task_service.try_auto_complete(db, owner, "write-formula-factor")
     return factor
 
 

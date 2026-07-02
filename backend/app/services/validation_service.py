@@ -156,6 +156,9 @@ def execute(db: Session, validation_id) -> Validation | None:
         owner = db.get(User, v.owner_id)
         if owner is not None:
             growth_service.recompute_contribution_score(db, owner)
+            from backend.app.services import academy_hooks
+
+            v.academy_rewards = academy_hooks.on_validation_success(db, owner)
         try:
             from backend.app.services import paper_tracking_service as pts
 
