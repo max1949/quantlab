@@ -131,9 +131,9 @@ function AnalysisBox({
 }) {
   const locked = feat && !feat.allowed;
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/40">
       <div className="mb-3">
-        <h4 className="font-medium text-slate-800">
+        <h4 className="font-medium text-slate-800 dark:text-slate-100">
           {title} {locked && "🔒"}
         </h4>
         <p className="text-sm text-slate-500">{desc}</p>
@@ -190,30 +190,56 @@ function CostResult({
   data: CostSensitivity;
   l2: Dictionary["l2Analysis"];
 }) {
+  const allNegative = data.results.every(
+    (r) => r.metrics.annual_return == null || r.metrics.annual_return < 0,
+  );
+
   return (
-    <div className="mt-4 overflow-x-auto text-xs">
-      <table className="min-w-full border-separate border-spacing-y-1">
-        <thead className="text-slate-400">
-          <tr>
-            <th className="text-left">{l2.fee}</th>
-            <th className="text-left">{l2.slippage}</th>
-            <th className="text-left">{l2.annual}</th>
-            <th className="text-left">{l2.sharpe}</th>
-            <th className="text-left">{l2.drawdown}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.results.map((r) => (
-            <tr key={`${r.fee_rate}-${r.slippage_bps}`} className="bg-white">
-              <td className="rounded-l px-2 py-1">{fmtPct(r.fee_rate)}</td>
-              <td className="px-2 py-1">{r.slippage_bps}bp</td>
-              <td className="px-2 py-1">{fmtPct(r.metrics.annual_return)}</td>
-              <td className="px-2 py-1">{fmtNum(r.metrics.sharpe)}</td>
-              <td className="rounded-r px-2 py-1">{fmtPct(r.metrics.max_drawdown)}</td>
+    <div className="mt-4 space-y-2">
+      <p className="text-xs text-slate-500 dark:text-slate-400">{l2.costSummary(data.results.length)}</p>
+      {allNegative && (
+        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+          {l2.costAllNegative}
+        </p>
+      )}
+      <div className="overflow-x-auto text-xs">
+        <table className="min-w-full border-separate border-spacing-y-1">
+          <thead className="text-slate-500 dark:text-slate-400">
+            <tr>
+              <th className="px-2 py-1 text-left font-medium">{l2.fee}</th>
+              <th className="px-2 py-1 text-left font-medium">{l2.slippage}</th>
+              <th className="px-2 py-1 text-left font-medium">{l2.annual}</th>
+              <th className="px-2 py-1 text-left font-medium">{l2.sharpe}</th>
+              <th className="px-2 py-1 text-left font-medium">{l2.drawdown}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {data.results.map((r) => {
+              const neg = (r.metrics.annual_return ?? 0) < 0;
+              return (
+                <tr
+                  key={`${r.fee_rate}-${r.slippage_bps}`}
+                  className="text-slate-800 dark:text-slate-100"
+                >
+                  <td className="rounded-l bg-white px-2 py-1.5 dark:bg-slate-800">{fmtPct(r.fee_rate)}</td>
+                  <td className="bg-white px-2 py-1.5 dark:bg-slate-800">{r.slippage_bps}bp</td>
+                  <td
+                    className={`bg-white px-2 py-1.5 font-medium dark:bg-slate-800 ${
+                      neg ? "text-rose-600 dark:text-rose-400" : "text-emerald-700 dark:text-emerald-400"
+                    }`}
+                  >
+                    {fmtPct(r.metrics.annual_return)}
+                  </td>
+                  <td className="bg-white px-2 py-1.5 dark:bg-slate-800">{fmtNum(r.metrics.sharpe)}</td>
+                  <td className="rounded-r bg-white px-2 py-1.5 dark:bg-slate-800">
+                    {fmtPct(r.metrics.max_drawdown)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -234,9 +260,9 @@ function MetricGrid({
   return (
     <div className="grid grid-cols-2 gap-2">
       {items.map(([k, v]) => (
-        <div key={k} className="rounded-lg bg-white px-3 py-2">
-          <div className="text-xs text-slate-400">{k}</div>
-          <div className="font-semibold text-slate-800">{v}</div>
+        <div key={k} className="rounded-lg bg-white px-3 py-2 dark:bg-slate-800">
+          <div className="text-xs text-slate-500 dark:text-slate-400">{k}</div>
+          <div className="font-semibold text-slate-800 dark:text-slate-100">{v}</div>
         </div>
       ))}
     </div>

@@ -472,6 +472,9 @@ const en = {
     costBtn: "Run cost analysis",
     costDone: "Cost sensitivity complete",
     costFail: "Cost sensitivity failed",
+    costAllNegative:
+      "All scenarios show negative annual returns — the factor is very sensitive to trading costs. Consider longer holding periods or lower turnover.",
+    costSummary: (n: number) => `${n} fee/slippage scenarios calculated.`,
     latestHoldings: "Latest holdings",
     fee: "Fee",
     slippage: "Slippage",
@@ -1134,6 +1137,9 @@ const zh = {
     costBtn: "运行成本分析",
     costDone: "成本敏感性分析完成",
     costFail: "成本敏感性分析失败",
+    costAllNegative:
+      "所有手续费/滑点情景下年化收益均为负 — 说明该因子对交易成本非常敏感，可尝试加长持仓周期或降低换手。",
+    costSummary: (n: number) => `已计算 ${n} 组手续费/滑点情景。`,
     latestHoldings: "最新持仓",
     fee: "手续费",
     slippage: "滑点",

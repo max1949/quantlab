@@ -17,11 +17,24 @@ TRADING_DAYS = 252
 
 
 def _f(x) -> float | None:
-    """转 JSON 友好的 float (NaN/inf -> None)。"""
+    """转 JSON 友好的 float (NaN/inf/complex -> None)。"""
     if x is None:
         return None
-    xf = float(x)
+    if isinstance(x, complex):
+        return None
+    try:
+        xf = float(x)
+    except (TypeError, ValueError):
+        return None
     return None if (np.isnan(xf) or np.isinf(xf)) else xf
+
+
+def _annual_return(final_equity: float, n: int, mean: float) -> float | None:
+    if n <= 0:
+        return 0.0
+    if final_equity > 0:
+        return final_equity ** (TRADING_DAYS / n) - 1.0
+    return (1.0 + mean) ** TRADING_DAYS - 1.0
 
 
 def signal_to_positions(signal: pd.Series) -> pd.Series:
@@ -63,7 +76,7 @@ def run_backtest(
     trade_count = int((turnover(positions) > 0).sum())
     total_turnover = float(turnover(positions).sum())
 
-    annual_return = final_equity ** (TRADING_DAYS / n) - 1.0 if n else 0.0
+    annual_return = _annual_return(final_equity, n, mean)
     annual_vol = std * np.sqrt(TRADING_DAYS)
     sharpe = (mean / std * np.sqrt(TRADING_DAYS)) if std > 0 else None
 
