@@ -199,6 +199,15 @@ DEFAULT_TASKS: list[dict] = [
         "order_index": 34,
     },
     {
+        "code": "first-share",
+        "title": "首次分享研究",
+        "description": "首次生成研究分享卡片后自动完成。",
+        "category": "research",
+        "min_level": UserLevel.L0.value,
+        "xp_reward": 75,
+        "order_index": 35,
+    },
+    {
         "code": "write-formula-factor",
         "title": "编写公式因子",
         "description": "在因子实验室创建公式因子后自动完成 (L2 + 研究员会员)。",

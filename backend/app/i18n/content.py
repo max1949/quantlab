@@ -308,6 +308,27 @@ TYPE_INTRO: dict[str, dict[Locale, str]] = {
     },
 }
 
+JOURNEY_STEPS: dict[Locale, dict[str, str]] = {
+    "en": {
+        "template": "Pick template",
+        "factor": "Create factor",
+        "backtest": "Backtest",
+        "validation": "Validate",
+        "report": "Report",
+        "publish": "Publish",
+        "share": "Share card",
+    },
+    "zh": {
+        "template": "选模板",
+        "factor": "建因子",
+        "backtest": "回测",
+        "validation": "验证",
+        "report": "报告",
+        "publish": "发布",
+        "share": "分享",
+    },
+}
+
 STEP_DETAIL: dict[str, dict[Locale, dict[str, str]]] = {
     "create_project": {
         "en": {

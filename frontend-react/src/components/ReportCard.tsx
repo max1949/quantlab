@@ -5,33 +5,40 @@ import { GradeBadge } from "./ui";
 
 export default function ReportCard({ report }: { report: ReportSummary }) {
   const { dict } = useLocale();
+  const rc = dict.reportCard;
+
   return (
-    <Link to={`/reports/${report.id}`} className="card block hover:shadow-md">
+    <div className="card flex h-full flex-col hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
-        <h3 className="font-semibold text-slate-800">{report.title}</h3>
+        <Link to={`/reports/${report.id}`} className="min-w-0 flex-1">
+          <h3 className="font-semibold text-slate-800 hover:text-brand-600 dark:text-slate-100">
+            {report.title}
+          </h3>
+        </Link>
         <GradeBadge grade={report.grade} />
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-400">
         <span className="badge">{report.symbol}</span>
         {report.oos_sharpe != null && (
           <span>
-            {dict.reportCard.oosSharpe}: {report.oos_sharpe.toFixed(2)}
+            {rc.oosSharpe}: {report.oos_sharpe.toFixed(2)}
           </span>
         )}
         {report.robustness_score != null && (
           <span>
-            {dict.reportCard.robustness}: {report.robustness_score.toFixed(0)}
+            {rc.robustness}: {report.robustness_score.toFixed(0)}
           </span>
         )}
-        <Link
-          to={`/u/${report.owner_id}`}
-          className="text-brand-600 hover:underline"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {dict.reportCard.viewResearcher}
-        </Link>
         <span>{new Date(report.created_at).toLocaleDateString()}</span>
       </div>
-    </Link>
+      <div className="mt-auto flex items-center justify-between pt-3 text-sm">
+        <Link to={`/reports/${report.id}`} className="font-medium text-brand-600 hover:underline">
+          {rc.readFull} →
+        </Link>
+        <Link to={`/u/${report.owner_id}`} className="text-xs text-slate-500 hover:text-brand-600">
+          {rc.viewResearcher}
+        </Link>
+      </div>
+    </div>
   );
 }

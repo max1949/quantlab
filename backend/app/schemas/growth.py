@@ -27,6 +27,19 @@ class NextStepOut(BaseModel):
     active_project_id: uuid.UUID | None = None
 
 
+class JourneyStepOut(BaseModel):
+    key: str
+    label: str
+    done: bool
+
+
+class ResearchJourneyOut(BaseModel):
+    done_count: int
+    total: int
+    steps: list[JourneyStepOut]
+    active_project_id: uuid.UUID | None = None
+
+
 # ---- 研究模板 ----
 class TemplateOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -66,6 +79,7 @@ class ShareOut(BaseModel):
     share_path: str
     card: dict
     views: int
+    academy_rewards: list = Field(default_factory=list)
 
 
 class ShareCardOut(BaseModel):

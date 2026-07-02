@@ -6,6 +6,7 @@ type Props = {
   onScrollToFactorLab: () => void;
   onRunValidation?: () => void;
   canRunValidation: boolean;
+  showDataPlanHint?: boolean;
 };
 
 type TipKey = "validation" | "oos" | "robustness" | "backtest" | "holdout" | "generic";
@@ -24,6 +25,7 @@ export default function QualityCoach({
   onScrollToFactorLab,
   onRunValidation,
   canRunValidation,
+  showDataPlanHint,
 }: Props) {
   const c = useLocale((s) => s.dict.qualityCoach);
   if (!reasons.length) return null;
@@ -41,6 +43,14 @@ export default function QualityCoach({
   return (
     <div className="mt-4 rounded-lg border border-brand-200 bg-white/60 p-4 dark:border-brand-900 dark:bg-slate-900/40">
       <p className="mb-3 font-medium text-slate-800 dark:text-slate-100">{c.title}</p>
+      {showDataPlanHint && (
+        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50/80 px-3 py-2 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+          <p>{c.dataPlanNote}</p>
+          <Link to="/pricing" className="mt-2 inline-block text-xs font-medium text-brand-600 hover:underline">
+            {c.upgradeData}
+          </Link>
+        </div>
+      )}
       <ul className="space-y-3">
         {tips.map((key) => (
           <li key={key} className="text-sm text-slate-600 dark:text-slate-300">

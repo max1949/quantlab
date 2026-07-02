@@ -207,5 +207,9 @@ def share_report(
     except (share_service.ReportNotFoundError, ValueError):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="报告不存在")
     return ShareOut(
-        token=share.token, share_path=f"/share/{share.token}", card=share.card, views=share.views
+        token=share.token,
+        share_path=f"/share/{share.token}",
+        card=share.card,
+        views=share.views,
+        academy_rewards=getattr(share, "academy_rewards", []),
     )

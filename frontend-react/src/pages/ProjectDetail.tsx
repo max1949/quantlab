@@ -105,6 +105,7 @@ export default function ProjectDetail() {
       if (msg) notify(msg, "success");
       void qc.invalidateQueries({ queryKey: ["backtests"] });
       void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
+      void qc.invalidateQueries({ queryKey: ["research-journey"] });
       const me = await useAuth.getState().refreshMe();
       if (me) setUser(me);
       refreshAll();
@@ -124,6 +125,7 @@ export default function ProjectDetail() {
       if (msg) notify(msg, "success");
       void qc.invalidateQueries({ queryKey: ["validations"] });
       void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
+      void qc.invalidateQueries({ queryKey: ["research-journey"] });
       const me = await useAuth.getState().refreshMe();
       if (me) setUser(me);
       refreshAll();
@@ -141,6 +143,7 @@ export default function ProjectDetail() {
       const msg = academyRewardMessage(r.academy_rewards, d.academyXpEarned);
       if (msg) notify(msg, "success");
       void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
+      void qc.invalidateQueries({ queryKey: ["research-journey"] });
       const me = await useAuth.getState().refreshMe();
       if (me) setUser(me);
       refreshAll();
@@ -159,6 +162,7 @@ export default function ProjectDetail() {
       const msg = academyRewardMessage(res.academy_rewards, d.academyXpEarned);
       if (msg) notify(msg, "success");
       void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
+      void qc.invalidateQueries({ queryKey: ["research-journey"] });
       const me = await useAuth.getState().refreshMe();
       if (me) setUser(me);
       refreshAll();
@@ -392,6 +396,17 @@ export default function ProjectDetail() {
               onScrollToFactorLab={scrollToFactorLab}
               onRunValidation={() => runValidation.mutate()}
               canRunValidation={Boolean(projectFactor) && done.backtest && !done.validation}
+              showDataPlanHint={
+                (entitlements.data?.tier ?? 0) < 2 &&
+                (barsCapped ||
+                  quality.data.reasons.some(
+                    (r) =>
+                      r.includes("holdout") ||
+                      r.includes("封印") ||
+                      r.includes("样本外") ||
+                      r.includes("OOS"),
+                  ))
+              }
             />
           )}
         </div>

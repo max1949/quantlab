@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from backend.app.auth.deps import CurrentUser
 from backend.app.core.database import get_db
 from backend.app.core.locale import RequestLocale
-from backend.app.schemas.growth import ChooseTypeRequest, NextStepOut
+from backend.app.schemas.growth import ChooseTypeRequest, NextStepOut, ResearchJourneyOut
 from backend.app.schemas.user import UserOut
 from backend.app.services import growth_service, onboarding_service
 
@@ -38,3 +38,12 @@ def next_step(
     locale: RequestLocale,
 ) -> NextStepOut:
     return NextStepOut(**onboarding_service.next_step(db, current_user, locale))
+
+
+@router.get("/journey", response_model=ResearchJourneyOut, summary="七步研究闭环进度")
+def research_journey(
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+    locale: RequestLocale,
+) -> ResearchJourneyOut:
+    return ResearchJourneyOut(**onboarding_service.research_journey(db, current_user, locale))

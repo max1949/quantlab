@@ -62,6 +62,7 @@ def create_share(db: Session, owner: User, report_id: uuid.UUID) -> ResearchShar
         existing.card = _build_card(report, owner)
         db.commit()
         db.refresh(existing)
+        existing.academy_rewards = []
         return existing
 
     share = ResearchShare(
@@ -79,6 +80,9 @@ def create_share(db: Session, owner: User, report_id: uuid.UUID) -> ResearchShar
         db.commit()
     growth_service.award_reward_points(db, owner, SHARE_REWARD)
     growth_service.log_event(db, "share", owner.id, {"report_id": str(report_id), "token": share.token})
+    from backend.app.services import academy_hooks
+
+    share.academy_rewards = academy_hooks.on_first_share(db, owner)
     return share
 
 

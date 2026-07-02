@@ -60,6 +60,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/feed" element={<Feed />} />
+          <Route path="/reports/:id" element={<ReportDetail />} />
           <Route path="/u/:userId" element={<Researcher />} />
           <Route path="/leaderboards" element={<Leaderboards />} />
           <Route path="/pricing" element={<Pricing />} />
@@ -70,7 +71,6 @@ export default function App() {
             <Route path="/templates" element={<Templates />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/projects/:id" element={<ProjectDetail />} />
-            <Route path="/reports/:id" element={<ReportDetail />} />
             <Route path="/challenges" element={<Challenges />} />
             <Route path="/me" element={<MyProfile />} />
             <Route path="/me/referral" element={<Referral />} />

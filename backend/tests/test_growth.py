@@ -48,6 +48,35 @@ def test_register_with_user_type_and_onboarding_next(client, db_session):
     assert nxt["recommended_template"] == "vol-regime"
 
 
+def test_research_journey_endpoint(client, db_session):
+    seed_sample_market_data(db_session)
+    h = _register(client, "journey1")
+    j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    assert j["total"] == 7
+    assert j["done_count"] == 0
+    assert len(j["steps"]) == 7
+    assert j["steps"][0]["key"] == "template"
+    proj, _ = _full_research(client, h, db_session)
+    j2 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    assert j2["done_count"] >= 4
+    assert j2["active_project_id"] == proj["id"]
+
+
+def test_public_report_detail(client, db_session):
+    seed_sample_market_data(db_session)
+    h = _register(client, "pubrep")
+    proj, rep = _full_research(client, h, db_session)
+    rid = rep["id"]
+    assert client.get(f"{BASE}/public/reports/{rid}").status_code == 404
+    client.post(f"{BASE}/projects/{proj['id']}/publish", headers=h)
+    client.post(f"{BASE}/research/reports/{rid}/share", headers=h)
+    pub = client.get(f"{BASE}/public/reports/{rid}").json()
+    assert pub["id"] == rid
+    assert pub["title"]
+    anon = client.get(f"{BASE}/public/reports/{rid}")
+    assert anon.status_code == 200
+
+
 def test_choose_type_updates_user(client, db_session):
     h = _register(client, "oscar")
     out = client.post(f"{BASE}/onboarding/choose-type", headers=h, json={"user_type": "python"}).json()

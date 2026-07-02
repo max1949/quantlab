@@ -134,6 +134,11 @@ const en = {
     academyClaimed: "Reward claimed",
     academyAuto: "Auto-completes when you finish this step in your project",
     academyXpEarned: (title: string, xp: number) => `Academy +${xp} XP · ${title}`,
+    journeyTitle: "Research journey",
+    journeySubtitle: "7 steps from template to sharing your work",
+    journeyProgress: (done: number, total: number) => `${done}/${total} complete`,
+    journeyNext: (label: string) => `Next: ${label}`,
+    journeyGoProject: "Open project →",
   },
   stages: {
     create_project: "Start from template →",
@@ -213,6 +218,8 @@ const en = {
     adjustFactor: "Adjust factor",
     runValidation: "Run validation",
     upgradeData: "Upgrade data plan",
+    dataPlanNote:
+      "Free plan uses shorter daily history (~1 year). Holdout and out-of-sample checks need more bars — upgrade for minute data and longer history.",
     tips: {
       validation:
         "You have not finished scientific validation — OOS and walk-forward are required before trusting this factor.",
@@ -482,6 +489,7 @@ const en = {
     copyLink: "Copy link",
     copied: "Link copied — share it!",
     preview: "Preview",
+    guestCta: "Sign up to run your own research →",
     publishNextTitle: "Next: publish to the research feed",
     publishNextDesc:
       "Your report is ready. Publish the project so others can discover it on the feed (quality gate required).",
@@ -568,6 +576,7 @@ const en = {
   },
   reportCard: {
     viewResearcher: "View researcher",
+    readFull: "Read full report",
     oosSharpe: "OOS Sharpe",
     robustness: "Robustness",
   },
@@ -728,6 +737,11 @@ const zh = {
     academyClaimed: "已领取",
     academyAuto: "在项目里完成对应步骤后自动点亮",
     academyXpEarned: (title: string, xp: number) => `学院 +${xp} 经验 · ${title}`,
+    journeyTitle: "研究闭环进度",
+    journeySubtitle: "从模板到分享，共 7 步",
+    journeyProgress: (done: number, total: number) => `已完成 ${done}/${total}`,
+    journeyNext: (label: string) => `下一步：${label}`,
+    journeyGoProject: "打开项目 →",
   },
   stages: {
     create_project: "从模板开始 →",
@@ -807,6 +821,8 @@ const zh = {
     adjustFactor: "去改因子",
     runValidation: "运行验证",
     upgradeData: "升级行情套餐",
+    dataPlanNote:
+      "免费套餐只有约一年的日线。封印 holdout 和样本外验证需要更长历史 — 升级后可解锁分钟级与更长数据。",
     tips: {
       validation: "尚未完成科学验证 — 必须做样本外 + Walk-Forward 才能判断因子是否可靠。",
       oos: "样本外夏普太低 — 简化公式、调整回看窗口，或换一个研究模板。",
@@ -1072,6 +1088,7 @@ const zh = {
     copyLink: "复制链接",
     copied: "链接已复制, 去分享吧!",
     preview: "预览",
+    guestCta: "注册账号，开始你自己的研究 →",
     publishNextTitle: "下一步：发布到研究广场",
     publishNextDesc: "报告已生成。把项目发布出去，别人才能在广场上看到你的研究（需通过质量门槛）。",
     publishNow: "发布到广场",
@@ -1156,6 +1173,7 @@ const zh = {
   },
   reportCard: {
     viewResearcher: "查看研究员",
+    readFull: "阅读全文",
     oosSharpe: "样本外夏普",
     robustness: "稳健性",
   },

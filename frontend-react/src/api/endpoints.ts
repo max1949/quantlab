@@ -1,3 +1,4 @@
+import axios from "axios";
 import { api } from "./client";
 import type {
   Backtest,
@@ -26,6 +27,7 @@ import type {
   Referral,
   ReportDetail,
   ReportSummary,
+  ResearchJourney,
   ResearcherProfile,
   RobustnessTest,
   ShareCardPublic,
@@ -87,6 +89,11 @@ export async function chooseType(user_type: UserType): Promise<User> {
 
 export async function getNextStep(): Promise<NextStep> {
   const { data } = await api.get<NextStep>("/onboarding/next");
+  return data;
+}
+
+export async function getResearchJourney(): Promise<ResearchJourney> {
+  const { data } = await api.get<ResearchJourney>("/onboarding/journey");
   return data;
 }
 
@@ -467,6 +474,24 @@ export async function listMyReports(): Promise<ReportSummary[]> {
 export async function getReport(id: string): Promise<ReportDetail> {
   const { data } = await api.get<ReportDetail>(`/research/reports/${id}`);
   return data;
+}
+
+export async function getPublicReport(id: string): Promise<ReportDetail> {
+  const { data } = await api.get<ReportDetail>(`/public/reports/${id}`);
+  return data;
+}
+
+/** 登录用户优先私有接口；未公开报告对他人仍 404。 */
+export async function getReportForViewer(id: string, loggedIn: boolean): Promise<ReportDetail> {
+  if (!loggedIn) return getPublicReport(id);
+  try {
+    return await getReport(id);
+  } catch (e) {
+    if (axios.isAxiosError(e) && (e.response?.status === 404 || e.response?.status === 403)) {
+      return getPublicReport(id);
+    }
+    throw e;
+  }
 }
 
 export async function shareReport(id: string): Promise<ShareOut> {

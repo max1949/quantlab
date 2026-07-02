@@ -125,3 +125,57 @@ def next_step(db: Session, user: User, locale: Locale = "en") -> dict:
     if stage == "create_project":
         out["recommended_template"] = TYPE_DEFAULT_TEMPLATE.get(user_type, "gold-trend")
     return out
+
+
+JOURNEY_STEP_KEYS = (
+    "template",
+    "factor",
+    "backtest",
+    "validation",
+    "report",
+    "publish",
+    "share",
+)
+
+
+def research_journey(db: Session, user: User, locale: Locale = "en") -> dict:
+    """七步研究闭环进度 (工作台进度环)。"""
+    from backend.app.models.growth import ResearchShare
+
+    uid = user.id
+    flags = {
+        "template": _count(db, select(func.count(ResearchProject.id)).where(ResearchProject.owner_id == uid)) > 0,
+        "factor": _count(db, select(func.count(Factor.id)).where(Factor.owner_id == uid)) > 0,
+        "backtest": _count(
+            db,
+            select(func.count(Backtest.id)).where(
+                Backtest.owner_id == uid, Backtest.status == BacktestStatus.SUCCESS.value
+            ),
+        )
+        > 0,
+        "validation": _count(
+            db,
+            select(func.count(Validation.id)).where(
+                Validation.owner_id == uid, Validation.status == ValidationStatus.SUCCESS.value
+            ),
+        )
+        > 0,
+        "report": _count(db, select(func.count(ResearchReport.id)).where(ResearchReport.owner_id == uid)) > 0,
+        "publish": _count(
+            db,
+            select(func.count(ResearchProject.id)).where(
+                ResearchProject.owner_id == uid, ResearchProject.status == ProjectStatus.PUBLISHED.value
+            ),
+        )
+        > 0,
+        "share": _count(db, select(func.count(ResearchShare.id)).where(ResearchShare.owner_id == uid)) > 0,
+    }
+    labels = i18n.JOURNEY_STEPS.get(locale) or i18n.JOURNEY_STEPS["en"]
+    steps = [{"key": k, "label": labels[k], "done": flags[k]} for k in JOURNEY_STEP_KEYS]
+    done_count = sum(1 for s in steps if s["done"])
+    return {
+        "done_count": done_count,
+        "total": len(steps),
+        "steps": steps,
+        "active_project_id": _active_project_id(db, user),
+    }

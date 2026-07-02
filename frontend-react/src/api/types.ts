@@ -37,6 +37,19 @@ export interface NextStep {
   active_project_id: string | null;
 }
 
+export interface JourneyStep {
+  key: string;
+  label: string;
+  done: boolean;
+}
+
+export interface ResearchJourney {
+  done_count: number;
+  total: number;
+  steps: JourneyStep[];
+  active_project_id: string | null;
+}
+
 export interface Mentor {
   stage: string;
   title: string;
@@ -370,6 +383,7 @@ export interface ShareOut {
   share_path: string;
   card: ShareCard;
   views: number;
+  academy_rewards?: AcademyReward[];
 }
 
 export interface ShareCard {

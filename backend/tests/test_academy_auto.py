@@ -114,3 +114,24 @@ def test_first_publish_auto_completes(client, db_session):
     assert any(r["code"] == "first-publish" for r in body.get("academy_rewards", []))
     tasks = {t["code"]: t for t in client.get(f"{BASE}/tasks", headers=h).json()}
     assert tasks["first-publish"]["completed"] is True
+
+
+def test_first_share_auto_completes(client, db_session):
+    from backend.tests.test_growth import _full_research
+
+    seed_default_tasks(db_session)
+    seed_sample_market_data(db_session)
+    h = _register(client, "acad_sh")
+    proj, rep = _full_research(client, h, db_session)
+    pub = client.post(f"{BASE}/projects/{proj['id']}/publish", headers=h)
+    assert pub.status_code == 200, pub.text
+    share = client.post(f"{BASE}/research/reports/{rep['id']}/share", headers=h)
+    assert share.status_code == 201, share.text
+    body = share.json()
+    assert any(r["code"] == "first-share" for r in body.get("academy_rewards", []))
+    tasks = {t["code"]: t for t in client.get(f"{BASE}/tasks", headers=h).json()}
+    assert tasks["first-share"]["completed"] is True
+    # Re-share should not re-award XP
+    again = client.post(f"{BASE}/research/reports/{rep['id']}/share", headers=h)
+    assert again.status_code == 201, again.text
+    assert not again.json().get("academy_rewards")
