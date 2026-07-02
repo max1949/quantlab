@@ -34,6 +34,7 @@ export interface NextStep {
   action: string;
   cta_path: string;
   recommended_template: string | null;
+  active_project_id: string | null;
 }
 
 export interface Mentor {
@@ -200,6 +201,24 @@ export interface Backtest {
   metrics: Record<string, number> | null;
   created_at: string;
   finished_at: string | null;
+}
+
+export interface BacktestDetail extends Backtest {
+  equity_curve?: { date: string; equity: number | null }[] | null;
+  report?: Record<string, unknown> | null;
+  error?: string | null;
+}
+
+export interface Insight {
+  id: string;
+  kind: string;
+  target_type: string;
+  target_id: string;
+  source: string;
+  model: string | null;
+  content: string;
+  analysis: Record<string, unknown>;
+  created_at: string;
 }
 
 export interface CrossSectionBacktest {

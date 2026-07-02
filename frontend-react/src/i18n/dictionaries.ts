@@ -170,6 +170,47 @@ const en = {
     wfSummary: (folds: number, pct: number) =>
       `Walk-forward: ${folds} folds, ${pct}% periods with positive Sharpe`,
     sealedHoldout: (s: string) => `Sealed holdout Sharpe ${s} (never used in tuning)`,
+    oosWeak: (s: string) =>
+      `OOS Sharpe ${s} is below the publish bar (0.15) — try simpler params or a different hypothesis.`,
+    robustWeak: (score: number) =>
+      `Robustness ${score}/100 is weak — the factor may be overfit. Adjust window/threshold and re-validate.`,
+  },
+  backtestPanel: {
+    title: "Backtest results",
+    subtitle: "Full-sample metrics — pretty numbers here do not prove the factor works out of sample.",
+    empty: "Run a backtest to see Sharpe, drawdown, and win rate.",
+    sharpe: "Sharpe",
+    annualReturn: "Annual return",
+    maxDrawdown: "Max drawdown",
+    winRate: "Win rate",
+    lowSharpeWarning:
+      "Sharpe looks weak on full history — tweak the factor in Factor Lab before spending time on validation.",
+  },
+  aiReview: {
+    validationBtn: "AI review",
+    backtestBtn: "AI summary",
+    validationTitle: "AI validation review",
+    backtestTitle: "AI backtest summary",
+    loading: "Analyzing…",
+    done: "AI insight ready",
+    fail: "AI analysis failed",
+  },
+  qualityCoach: {
+    title: "What to do next",
+    adjustFactor: "Adjust factor",
+    runValidation: "Run validation",
+    upgradeData: "Upgrade data plan",
+    tips: {
+      validation:
+        "You have not finished scientific validation — OOS and walk-forward are required before trusting this factor.",
+      oos: "Out-of-sample Sharpe is too low — simplify the formula, change lookback windows, or pick another template.",
+      robustness:
+        "Robustness score is low — the factor may only work in one period. Try orthogonal checks or different symbols.",
+      backtest: "Backtest metrics are weak — revisit your hypothesis and factor definition before validating.",
+      holdout:
+        "Sealed holdout failed or lacks data — use more history (paid plan) or avoid over-tuning parameters.",
+      generic: "Iterate in Factor Lab, re-run backtest, then validation until quality gate passes.",
+    },
   },
   leaderboards: {
     title: "Leaderboards",
@@ -673,6 +714,44 @@ const zh = {
     wfSummary: (folds: number, pct: number) =>
       `Walk-Forward: ${folds} 段, ${pct}% 时段夏普为正`,
     sealedHoldout: (s: string) => `封印 holdout 夏普 ${s}（该段未参与调参）`,
+    oosWeak: (s: string) =>
+      `样本外夏普 ${s} 未达发布线 (0.15) — 建议简化参数或换假设后再验证。`,
+    robustWeak: (score: number) =>
+      `稳健性 ${score}/100 偏弱 — 可能过拟合，请调整窗口/阈值后重新验证。`,
+  },
+  backtestPanel: {
+    title: "回测结果",
+    subtitle: "全样本指标仅供参考 — 必须通过科学验证才能判断因子是否真能用。",
+    empty: "先运行回测，查看夏普、回撤和胜率。",
+    sharpe: "夏普比率",
+    annualReturn: "年化收益",
+    maxDrawdown: "最大回撤",
+    winRate: "胜率",
+    lowSharpeWarning:
+      "全样本夏普偏弱 — 建议先在因子实验室调整公式/参数，再花时间做验证。",
+  },
+  aiReview: {
+    validationBtn: "AI 复盘",
+    backtestBtn: "AI 解读",
+    validationTitle: "AI 验证复盘",
+    backtestTitle: "AI 回测解读",
+    loading: "分析中…",
+    done: "AI 解读已生成",
+    fail: "AI 分析失败",
+  },
+  qualityCoach: {
+    title: "下一步怎么做",
+    adjustFactor: "去改因子",
+    runValidation: "运行验证",
+    upgradeData: "升级行情套餐",
+    tips: {
+      validation: "尚未完成科学验证 — 必须做样本外 + Walk-Forward 才能判断因子是否可靠。",
+      oos: "样本外夏普太低 — 简化公式、调整回看窗口，或换一个研究模板。",
+      robustness: "稳健性评分偏低 — 因子可能只在某段行情有效，可换标的或做正交检验。",
+      backtest: "回测指标偏弱 — 先回到假设与因子定义，再重新回测和验证。",
+      holdout: "封印 holdout 未通过或数据不足 — 升级套餐获取更长历史，或减少调参次数。",
+      generic: "在因子实验室迭代 → 重新回测 → 再验证，直到通过质量门槛。",
+    },
   },
   leaderboards: {
     title: "排行榜",

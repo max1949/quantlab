@@ -184,4 +184,19 @@ def start(db: Session, user: User, code: str, with_factor: bool = True, tier: in
             project_id=project.id,
         )
         factor_id = factor.id
+    _try_complete_welcome_task(db, user)
     return {"project": project, "factor_id": factor_id, "template_code": tpl.code}
+
+
+def _try_complete_welcome_task(db: Session, user: User) -> None:
+    """首次从模板开局时自动完成学院「欢迎」任务。"""
+    from backend.app.services import task_service
+
+    try:
+        task_service.complete_task(db, user, "welcome")
+    except (
+        task_service.TaskAlreadyCompletedError,
+        task_service.TaskNotFoundError,
+        task_service.TaskLockedError,
+    ):
+        pass

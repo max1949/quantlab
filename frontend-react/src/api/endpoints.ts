@@ -36,6 +36,8 @@ import type {
   UserType,
   Validation,
   ValidationDetail,
+  BacktestDetail,
+  Insight,
 } from "./types";
 
 // ---- auth ----
@@ -333,6 +335,26 @@ export async function createBacktest(body: {
   timeframe?: string;
 }): Promise<Backtest> {
   const { data } = await api.post<Backtest>("/backtests", body);
+  return data;
+}
+
+export async function listBacktests(): Promise<Backtest[]> {
+  const { data } = await api.get<Backtest[]>("/backtests");
+  return data;
+}
+
+export async function getBacktest(id: string): Promise<BacktestDetail> {
+  const { data } = await api.get<BacktestDetail>(`/backtests/${id}`);
+  return data;
+}
+
+export async function reviewValidation(validationId: string): Promise<Insight> {
+  const { data } = await api.post<Insight>(`/ai/validations/${validationId}/review`);
+  return data;
+}
+
+export async function summarizeBacktest(backtestId: string): Promise<Insight> {
+  const { data } = await api.post<Insight>(`/ai/backtests/${backtestId}/summary`);
   return data;
 }
 

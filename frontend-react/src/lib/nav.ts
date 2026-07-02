@@ -4,6 +4,7 @@ import type { Dictionary } from "../i18n/dictionaries";
 export function stageToRoute(
   stage: string,
   recommendedTemplate?: string | null,
+  activeProjectId?: string | null,
 ): string {
   switch (stage) {
     case "create_project":
@@ -15,7 +16,7 @@ export function stageToRoute(
     case "run_validation":
     case "generate_report":
     case "publish_share":
-      return "/projects";
+      return activeProjectId ? `/projects/${activeProjectId}` : "/projects";
     case "keep_going":
     default:
       return "/feed";

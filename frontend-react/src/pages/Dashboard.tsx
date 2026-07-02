@@ -56,6 +56,7 @@ export default function Dashboard() {
                   stageToRoute(
                     nextStep.data!.stage,
                     nextStep.data!.recommended_template,
+                    nextStep.data!.active_project_id,
                   ),
                 )
               }

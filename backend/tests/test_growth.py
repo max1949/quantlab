@@ -66,6 +66,10 @@ def test_template_one_click_start(client, db_session):
     assert res.status_code == 201, res.text
     body = res.json()
     assert body["factor_id"] is not None
+    nxt = client.get(f"{BASE}/onboarding/next", headers=h).json()
+    assert nxt["stage"] == "run_backtest"
+    assert nxt["active_project_id"] == str(body["project_id"])
+    assert nxt["cta_path"] == f"/projects/{body['project_id']}"
     # 因子确实归属新建项目
     f = client.get(f"{BASE}/factors/{body['factor_id']}", headers=h).json()
     assert f["project_id"] == str(body["project_id"])

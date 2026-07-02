@@ -39,6 +39,16 @@ def _count(db: Session, stmt) -> int:
     return int(db.execute(stmt).scalar_one() or 0)
 
 
+def _active_project_id(db: Session, user: User):
+    """用户最近更新的研究项目 — 用于「下一步」深链到具体项目页。"""
+    return db.execute(
+        select(ResearchProject.id)
+        .where(ResearchProject.owner_id == user.id)
+        .order_by(ResearchProject.updated_at.desc())
+        .limit(1)
+    ).scalar_one_or_none()
+
+
 def _stage(db: Session, user: User) -> str:
     uid = user.id
     projects = _count(db, select(func.count(ResearchProject.id)).where(ResearchProject.owner_id == uid))
@@ -82,6 +92,26 @@ def next_step(db: Session, user: User, locale: Locale = "en") -> dict:
     stage = _stage(db, user)
     detail = i18n.STEP_DETAIL[stage][locale]
     user_type = user.user_type
+    active_id = _active_project_id(db, user)
+    project_stages = {
+        "create_factor",
+        "run_backtest",
+        "run_validation",
+        "generate_report",
+        "publish_share",
+    }
+    if active_id and stage in project_stages:
+        cta_path = f"/projects/{active_id}"
+    else:
+        cta_path = {
+            "create_project": "/templates",
+            "create_factor": "/projects",
+            "run_backtest": "/projects",
+            "run_validation": "/projects",
+            "generate_report": "/dashboard",
+            "publish_share": "/dashboard",
+            "keep_going": "/feed",
+        }[stage]
     out = {
         "user_type": user_type,
         "user_type_label": i18n.USER_TYPE_LABEL.get(user_type, {}).get(locale, user_type),
@@ -89,15 +119,8 @@ def next_step(db: Session, user: User, locale: Locale = "en") -> dict:
         "stage": stage,
         "title": detail["title"],
         "action": detail["action"],
-        "cta_path": {
-            "create_project": "/research/create",
-            "create_factor": "/factor-lab",
-            "run_backtest": "/factor-lab",
-            "run_validation": "/factor-lab",
-            "generate_report": "/dashboard",
-            "publish_share": "/dashboard",
-            "keep_going": "/leaderboard",
-        }[stage],
+        "cta_path": cta_path,
+        "active_project_id": active_id,
     }
     if stage == "create_project":
         out["recommended_template"] = TYPE_DEFAULT_TEMPLATE.get(user_type, "gold-trend")

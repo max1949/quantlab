@@ -24,6 +24,8 @@ import L3ResearchTools from "../components/L3ResearchTools";
 import PaperTrackingPanel from "../components/PaperTrackingPanel";
 import L4PortfolioTools from "../components/L4PortfolioTools";
 import ValidationResultsPanel from "../components/ValidationResultsPanel";
+import BacktestResultsPanel from "../components/BacktestResultsPanel";
+import QualityCoach from "../components/QualityCoach";
 import type { Graph } from "../api/types";
 
 type StepKey = "factor" | "backtest" | "validation" | "report" | "publish";
@@ -95,6 +97,7 @@ export default function ProjectDetail() {
     onSuccess: (bt) => {
       void trackEvent("backtest_run", { project: id, status: bt.status });
       notify(p.backtestDone(bt.status), "success");
+      void qc.invalidateQueries({ queryKey: ["backtests"] });
       refreshAll();
     },
     onError: (e) => notify(apiErrorMessage(e, p.backtestFail), "error"),
@@ -143,6 +146,10 @@ export default function ProjectDetail() {
   if (project.isLoading) return <Spinner />;
   if (project.isError)
     return <ErrorBox message={apiErrorMessage(project.error, p.notFound)} />;
+
+  function scrollToFactorLab() {
+    document.getElementById("factor-lab")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   const proj = project.data!;
 
@@ -355,6 +362,20 @@ export default function ProjectDetail() {
               ))}
             </ul>
           )}
+          {!quality.data.passed && (
+            <QualityCoach
+              reasons={quality.data.reasons}
+              onScrollToFactorLab={scrollToFactorLab}
+              onRunValidation={() => runValidation.mutate()}
+              canRunValidation={Boolean(projectFactor) && done.backtest && !done.validation}
+            />
+          )}
+        </div>
+      )}
+
+      {done.backtest && (
+        <div className="mb-6">
+          <BacktestResultsPanel factorId={projectFactor?.id ?? null} enabled={done.backtest} />
         </div>
       )}
 
@@ -414,7 +435,7 @@ export default function ProjectDetail() {
         </div>
       </div>
 
-      <div className="mt-4">
+      <div className="mt-4" id="factor-lab">
         <FactorLab projectId={id} />
       </div>
 

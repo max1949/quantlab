@@ -24,6 +24,7 @@ class NextStepOut(BaseModel):
     action: str
     cta_path: str
     recommended_template: str | None = None
+    active_project_id: uuid.UUID | None = None
 
 
 # ---- 研究模板 ----

@@ -1,6 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
-import { getValidation, listValidations } from "../api/endpoints";
+import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getValidation, listValidations, reviewValidation } from "../api/endpoints";
+import { apiErrorMessage } from "../api/client";
 import { useLocale } from "../store/locale";
+import { useUi } from "../store/ui";
 import { GradeBadge, Spinner } from "./ui";
 
 type Props = {
@@ -10,6 +13,9 @@ type Props = {
 
 export default function ValidationResultsPanel({ factorId, enabled }: Props) {
   const v = useLocale((s) => s.dict.validationPanel);
+  const ai = useLocale((s) => s.dict.aiReview);
+  const notify = useUi((s) => s.notify);
+  const [insight, setInsight] = useState<string | null>(null);
 
   const list = useQuery({
     queryKey: ["validations"],
@@ -26,6 +32,15 @@ export default function ValidationResultsPanel({ factorId, enabled }: Props) {
     queryKey: ["validation", latestId],
     queryFn: () => getValidation(latestId!),
     enabled: Boolean(latestId),
+  });
+
+  const aiReview = useMutation({
+    mutationFn: () => reviewValidation(latestId!),
+    onSuccess: (res) => {
+      setInsight(res.content);
+      notify(ai.done, "success");
+    },
+    onError: (e) => notify(apiErrorMessage(e, ai.fail), "error"),
   });
 
   if (!enabled || !factorId) return null;
@@ -56,13 +71,37 @@ export default function ValidationResultsPanel({ factorId, enabled }: Props) {
     ? null
     : rob?.sealed_holdout?.metrics?.sharpe;
 
+  const oosOk = oosSharpe != null && oosSharpe >= 0.15;
+  const robOk = rob?.score != null && rob.score >= 50;
+
   return (
     <div className="card">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h3 className="font-semibold text-slate-800 dark:text-slate-100">{v.title}</h3>
-        {rob?.grade && <GradeBadge grade={rob.grade} />}
+        <div className="flex items-center gap-2">
+          {rob?.grade && <GradeBadge grade={rob.grade} />}
+          <button
+            type="button"
+            className="btn text-sm"
+            disabled={aiReview.isPending}
+            onClick={() => aiReview.mutate()}
+          >
+            {aiReview.isPending ? ai.loading : ai.validationBtn}
+          </button>
+        </div>
       </div>
       <p className="mb-4 text-sm text-slate-500">{v.subtitle}</p>
+
+      {!oosOk && oosSharpe != null && (
+        <p className="mb-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
+          {v.oosWeak(oosSharpe.toFixed(2))}
+        </p>
+      )}
+      {!robOk && rob?.score != null && (
+        <p className="mb-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
+          {v.robustWeak(rob.score)}
+        </p>
+      )}
 
       <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Metric label={v.isSharpe} value={fmtSharpe(isSharpe)} />
@@ -95,6 +134,13 @@ export default function ValidationResultsPanel({ factorId, enabled }: Props) {
             <li key={note}>{note}</li>
           ))}
         </ul>
+      )}
+
+      {insight && (
+        <div className="mt-4 rounded-lg border border-brand-200 bg-brand-50/50 p-4 text-sm text-slate-700 dark:border-brand-900 dark:bg-brand-950/30 dark:text-slate-200">
+          <p className="mb-2 font-medium text-brand-700 dark:text-brand-300">{ai.validationTitle}</p>
+          <div className="whitespace-pre-wrap">{insight}</div>
+        </div>
       )}
     </div>
   );
