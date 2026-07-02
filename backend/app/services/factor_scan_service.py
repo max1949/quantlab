@@ -7,6 +7,7 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from backend.app.models.factor import Factor, FactorKind
 from backend.app.models.factor_scan import FactorScan
 from backend.app.models.user import User
 from backend.app.services import factor_service, market_data_policy as mdp
@@ -14,6 +15,7 @@ from engine import factor_engine as fe
 from engine.param_scan import (
     build_param_grid,
     build_random_param_grid,
+    scan_stack_weights,
     scan_template_grid,
     scan_template_multi_symbol,
 )
@@ -87,6 +89,113 @@ def _serialize_row(row: dict) -> dict:
     }
 
 
+def _stack_coach_summary(
+    factor_names: list[str],
+    results: list[dict],
+    symbol: str,
+    timeframe: str,
+) -> str:
+    if not results:
+        return "组合权重扫描未产生有效结果，请换因子或标的重试。"
+    top = results[0]
+    lines = [
+        f"在 {symbol} · {timeframe} 上对「{' + '.join(factor_names)}」完成了 {len(results)} 组权重扫描。",
+        f"当前最优: {top.get('label')}，综合分 {top.get('score')}。",
+    ]
+    oos = top.get("oos_sharpe")
+    if oos is not None and oos < 0.3:
+        lines.append("样本外偏弱，可尝试换一组基础因子或调整权重范围。")
+    elif oos is not None and oos >= 0.5:
+        lines.append("组合表现尚可，可一键载入该权重并跑完整科学验证。")
+    return " ".join(lines)
+
+
+def _load_stack_factors(
+    db: Session,
+    user: User,
+    factor_ids: list[uuid.UUID],
+    *,
+    project_id: uuid.UUID | None = None,
+) -> list[Factor]:
+    if len(factor_ids) != 2:
+        raise ScanError("组合权重扫描需要恰好 2 个因子")
+    factors: list[Factor] = []
+    for fid in factor_ids:
+        factor = db.get(Factor, fid)
+        if factor is None or factor.owner_id != user.id:
+            raise ScanError("因子不存在或无权使用")
+        if factor.kind not in (
+            FactorKind.TEMPLATE.value,
+            FactorKind.FORMULA.value,
+        ):
+            raise ScanError("组合扫描仅支持模板或公式因子")
+        if project_id is not None and factor.project_id != project_id:
+            raise ScanError("所选因子须属于当前项目")
+        factors.append(factor)
+    if user.level < 1:
+        raise ScanError("组合权重扫描需要 L1")
+    return factors
+
+
+def _run_stack_scan(
+    db: Session,
+    user: User,
+    *,
+    symbol: str,
+    factor_ids: list[uuid.UUID],
+    timeframe: str = "1d",
+    project_id: uuid.UUID | None = None,
+    steps: int = 8,
+) -> FactorScan:
+    factors = _load_stack_factors(db, user, factor_ids, project_id=project_id)
+    ohlcv = mdp.load_for_user(db, user, symbol.upper(), timeframe)
+    if ohlcv is None or ohlcv.empty:
+        raise ScanError("行情数据为空")
+
+    components: list[tuple[str, object]] = []
+    for factor in factors:
+        def make_fn(f: Factor):
+            def fn(df):
+                return factor_service.compute_factor_series(db, user.id, f, df)
+
+            return fn
+
+        components.append((factor.name, make_fn(factor)))
+
+    results = scan_stack_weights(
+        ohlcv,
+        components,
+        ic_horizon=_ic_horizon(timeframe),
+        steps=steps,
+        factor_ids=[str(f.id) for f in factors],
+    )
+    best = results[0] if results else None
+    names = [f.name for f in factors]
+    coach = _stack_coach_summary(names, results, symbol.upper(), timeframe)
+    dq = assess_ohlcv_quality(ohlcv, timeframe)
+    if dq.get("warnings"):
+        coach = f"【数据质量】{'；'.join(dq['warnings'][:2])} {coach}"
+    template_key = f"stack:{factors[0].id},{factors[1].id}"
+    scan = FactorScan(
+        owner_id=user.id,
+        project_id=project_id,
+        symbol=symbol.upper(),
+        timeframe=timeframe,
+        template_type=template_key,
+        results=results,
+        best_params=best.get("params") if best else None,
+        best_score=best.get("score") if best else None,
+        coach_summary=coach,
+    )
+    db.add(scan)
+    db.commit()
+    db.refresh(scan)
+    from backend.app.services import academy_hooks
+
+    scan.academy_rewards = academy_hooks.on_factor_scan(db, user)
+    return scan
+
+
 def run_scan(
     db: Session,
     user: User,
@@ -98,7 +207,18 @@ def run_scan(
     steps: int = 8,
     symbols: list[str] | None = None,
     search_mode: str = "grid",
+    factor_ids: list[uuid.UUID] | None = None,
 ) -> FactorScan:
+    if factor_ids:
+        return _run_stack_scan(
+            db,
+            user,
+            symbol=symbol,
+            factor_ids=factor_ids,
+            timeframe=timeframe,
+            project_id=project_id,
+            steps=steps,
+        )
     if template_type not in fe.TEMPLATES:
         raise ScanError(f"不支持的模板: {template_type}")
     sym_list = [s.strip().upper() for s in (symbols or [symbol]) if s and s.strip()]
@@ -236,14 +356,30 @@ def apply_scan(
     if not params:
         raise ScanError("参数为空")
     factor_name = name or f"{scan.template_type}-{scan.symbol}-scan{rank}"
-    factor = factor_service.create_template_factor(
-        db,
-        user,
-        factor_name,
-        scan.template_type,
-        params,
-        project_id=scan.project_id,
-    )
+    if scan.template_type.startswith("stack:"):
+        weights = params.get("weights")
+        if not weights:
+            raise ScanError("组合权重为空")
+        components = [
+            {"factor_id": str(w["factor_id"]), "weight": float(w["weight"])}
+            for w in weights
+        ]
+        factor = factor_service.create_stack_factor(
+            db,
+            user,
+            factor_name,
+            components,
+            project_id=scan.project_id,
+        )
+    else:
+        factor = factor_service.create_template_factor(
+            db,
+            user,
+            factor_name,
+            scan.template_type,
+            params,
+            project_id=scan.project_id,
+        )
     scan.applied_factor_id = factor.id
     db.commit()
     db.refresh(scan)

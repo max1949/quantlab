@@ -250,6 +250,7 @@ def run_factor_scan(
             project_id=payload.project_id,
             steps=payload.steps,
             search_mode=payload.search_mode,
+            factor_ids=payload.factor_ids,
         )
     except MarketDataAccessError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)

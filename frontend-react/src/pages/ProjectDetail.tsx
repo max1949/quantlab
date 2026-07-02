@@ -498,7 +498,12 @@ export default function ProjectDetail() {
       </div>
 
       <div className="mt-4" id="factor-scan">
-        <FactorScanPanel projectId={id} symbol={symbol} timeframe={activeTimeframe} />
+        <FactorScanPanel
+          projectId={id}
+          symbol={symbol}
+          timeframe={activeTimeframe}
+          factors={projectFactors}
+        />
       </div>
 
       <div className="mt-4" id="factor-lab">

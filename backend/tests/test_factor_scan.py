@@ -159,6 +159,69 @@ def test_batch_scan_ai_review(client, db_session):
     assert batch.json()["content"]
 
 
+def test_stack_weight_scan(client, db_session):
+    seed_sample_market_data(db_session)
+    h = _register(client, "stk1")
+    from backend.app.models.user import User, UserLevel
+    from sqlalchemy import select
+
+    user = db_session.execute(select(User).where(User.username == "stk1")).scalar_one()
+    user.level = UserLevel.L1
+    user.experience = 100
+    db_session.commit()
+
+    proj = client.post(f"{BASE}/projects", headers=h, json={"title": "p", "symbol": "RB"}).json()
+    f1_resp = client.post(
+        f"{BASE}/factors/template",
+        headers=h,
+        json={
+            "name": "stk_mom",
+            "template_type": "momentum",
+            "params": {"window": 10},
+            "project_id": proj["id"],
+        },
+    )
+    assert f1_resp.status_code == 201, f1_resp.text
+    f1 = f1_resp.json()["id"]
+    f2_resp = client.post(
+        f"{BASE}/factors/template",
+        headers=h,
+        json={
+            "name": "stk_mr",
+            "template_type": "mean_reversion",
+            "params": {"window": 20},
+            "project_id": proj["id"],
+        },
+    )
+    assert f2_resp.status_code == 201, f2_resp.text
+    f2 = f2_resp.json()["id"]
+    res = client.post(
+        f"{BASE}/factors/scan",
+        headers=h,
+        json={
+            "symbol": "RB",
+            "factor_ids": [f1, f2],
+            "timeframe": "1d",
+            "project_id": proj["id"],
+            "steps": 6,
+        },
+    )
+    assert res.status_code == 201, res.text
+    body = res.json()
+    assert body["results"]
+    assert body["template_type"].startswith("stack:")
+    assert "组合" in body["coach_summary"] or "权重" in body["coach_summary"]
+    assert body["results"][0]["params"].get("weights")
+
+    applied = client.post(
+        f"{BASE}/factors/scans/{body['id']}/apply",
+        headers=h,
+        json={"rank": 1, "name": "stack-best"},
+    )
+    assert applied.status_code == 200, applied.text
+    assert applied.json()["kind"] == "stack"
+
+
 def test_random_search_mode(client, db_session):
     seed_sample_market_data(db_session)
     h = _register(client, "rnd1")

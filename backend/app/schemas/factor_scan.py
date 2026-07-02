@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from backend.app.schemas.task import AcademyRewardOut
 
@@ -13,11 +13,21 @@ from backend.app.schemas.task import AcademyRewardOut
 class FactorScanRequest(BaseModel):
     symbol: str = Field(min_length=1, max_length=32)
     symbols: list[str] | None = Field(default=None, max_length=3)
-    template_type: str = Field(min_length=1, max_length=64)
+    template_type: str = Field(default="momentum", min_length=1, max_length=64)
     timeframe: str = Field(default="1d", max_length=16)
     project_id: uuid.UUID | None = None
     steps: int = Field(default=8, ge=4, le=12)
     search_mode: str = Field(default="grid", pattern=r"^(grid|random)$")
+    factor_ids: list[uuid.UUID] | None = Field(default=None, max_length=2)
+
+    @model_validator(mode="after")
+    def validate_scan_target(self) -> FactorScanRequest:
+        if self.factor_ids is not None:
+            if len(self.factor_ids) != 2:
+                raise ValueError("组合权重扫描需要恰好 2 个因子")
+            if self.symbols:
+                raise ValueError("组合权重扫描暂不支持跨标的")
+        return self
 
 
 class ScanResultRow(BaseModel):

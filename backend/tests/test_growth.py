@@ -168,6 +168,19 @@ def test_share_html_preview_has_og(client, db_session):
     assert "/app/share/" in html
 
 
+def test_seed_public_example_studies(client, db_session):
+    from backend.app.services.example_studies_service import seed_public_example_studies
+
+    seed_sample_market_data(db_session)
+    out = seed_public_example_studies(db_session)
+    assert out["total_examples"] >= 3
+    ok = [c for c in out["created"] if c.get("status") in ("published", "shared")]
+    assert len(ok) + len(out["skipped"]) >= 3
+    feed = client.get(f"{BASE}/public/feed").json()
+    seeded_ids = {c["report_id"] for c in ok if c.get("report_id")}
+    assert any(str(r["id"]) in seeded_ids for r in feed)
+
+
 def test_public_feed_no_auth(client, db_session):
     seed_sample_market_data(db_session)
     h = _register(client, "jade")

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import uuid
 
+import pandas as pd
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -177,6 +178,8 @@ def create_stack_factor(
     clean_components = []
     for comp in components:
         fid = comp["factor_id"]
+        if isinstance(fid, str):
+            fid = uuid.UUID(fid)
         # 组件必须是本人已存在的因子
         child = db.get(Factor, fid)
         if child is None or child.owner_id != owner.id:
@@ -285,6 +288,13 @@ def delete_factor(db: Session, owner_id: uuid.UUID, factor_id: uuid.UUID) -> Non
 # ---------------------------------------------------------------------------
 # 预览: 在确定性样本行情上计算因子 (真行情 Sprint 4 接入)
 # ---------------------------------------------------------------------------
+def compute_factor_series(
+    db: Session, owner_id: uuid.UUID, factor: Factor, market: pd.DataFrame
+) -> pd.Series:
+    """在给定行情上计算因子序列 (回测/扫描用)。"""
+    return _compute_series(db, owner_id, factor, market)
+
+
 def _compute_series(db: Session, owner_id: uuid.UUID, factor: Factor, market):
     """递归计算因子在给定行情上的 Series。"""
     if factor.kind == FactorKind.TEMPLATE.value:

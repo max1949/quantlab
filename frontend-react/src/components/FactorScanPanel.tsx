@@ -13,7 +13,7 @@ import {
   runFactorScan,
 } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
-import type { FactorScan, FactorScanCompare } from "../api/types";
+import type { Factor, FactorScan, FactorScanCompare } from "../api/types";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
 import { Spinner } from "./ui";
@@ -22,9 +22,10 @@ type Props = {
   projectId: string;
   symbol: string;
   timeframe: string;
+  factors?: Factor[];
 };
 
-export default function FactorScanPanel({ projectId, symbol, timeframe }: Props) {
+export default function FactorScanPanel({ projectId, symbol, timeframe, factors = [] }: Props) {
   const s = useLocale((x) => x.dict.factorScan);
   const ai = useLocale((x) => x.dict.aiReview);
   const lk = useLocale((x) => x.dict.locked);
@@ -39,6 +40,8 @@ export default function FactorScanPanel({ projectId, symbol, timeframe }: Props)
   const scanFeat = ent.data?.features.find((f) => f.key === "factor_param_scan");
 
   const [templateType, setTemplateType] = useState("momentum");
+  const [scanKind, setScanKind] = useState<"template" | "stack">("template");
+  const [stackFactorIds, setStackFactorIds] = useState<string[]>([]);
   const [searchMode, setSearchMode] = useState<"grid" | "random">("grid");
   const [extraSymbols, setExtraSymbols] = useState<string[]>([]);
   const crossSymbolOptions = useMemo(
@@ -52,8 +55,28 @@ export default function FactorScanPanel({ projectId, symbol, timeframe }: Props)
 
   const activeScan = lastScan;
 
+  const stackCandidates = useMemo(
+    () =>
+      factors.filter(
+        (f) => f.project_id === projectId && (f.kind === "template" || f.kind === "formula"),
+      ),
+    [factors, projectId],
+  );
+
   const scan = useMutation({
     mutationFn: () => {
+      if (scanKind === "stack") {
+        if (stackFactorIds.length !== 2) {
+          return Promise.reject(new Error(s.stackNeedTwoPick));
+        }
+        return runFactorScan({
+          symbol,
+          factor_ids: stackFactorIds,
+          timeframe,
+          project_id: projectId,
+          steps: 8,
+        });
+      }
       const symbols = [symbol.toUpperCase(), ...extraSymbols].filter(
         (v, i, a) => a.indexOf(v) === i,
       );
@@ -176,33 +199,85 @@ export default function FactorScanPanel({ projectId, symbol, timeframe }: Props)
 
       <div className="mt-4 flex flex-wrap items-end gap-3">
         <div>
-          <label className="label">{s.template}</label>
+          <label className="label">{s.scanKind}</label>
           <select
             className="input"
-            value={templateType}
-            onChange={(e) => setTemplateType(e.target.value)}
+            value={scanKind}
+            onChange={(e) => {
+              setScanKind(e.target.value as "template" | "stack");
+              setCompareResult(null);
+            }}
           >
-            {(templates.data ?? [])
-              .filter((t) => t.allowed !== false)
-              .map((t) => (
-                <option key={t.code} value={t.code}>
-                  {t.label}
-                </option>
+            <option value="template">{s.scanTemplate}</option>
+            <option value="stack">{s.scanStack}</option>
+          </select>
+        </div>
+        {scanKind === "template" ? (
+          <div>
+            <label className="label">{s.template}</label>
+            <select
+              className="input"
+              value={templateType}
+              onChange={(e) => setTemplateType(e.target.value)}
+            >
+              {(templates.data ?? [])
+                .filter((t) => t.allowed !== false)
+                .map((t) => (
+                  <option key={t.code} value={t.code}>
+                    {t.label}
+                  </option>
+                ))}
+            </select>
+          </div>
+        ) : (
+          <div>
+            <label className="label">{s.stackFactors}</label>
+            <div className="flex flex-wrap gap-2">
+              {stackCandidates.map((f) => (
+                <label
+                  key={f.id}
+                  className="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-300"
+                >
+                  <input
+                    type="checkbox"
+                    checked={stackFactorIds.includes(f.id)}
+                    disabled={
+                      !stackFactorIds.includes(f.id) && stackFactorIds.length >= 2
+                    }
+                    onChange={() =>
+                      setStackFactorIds((prev) =>
+                        prev.includes(f.id)
+                          ? prev.filter((x) => x !== f.id)
+                          : prev.length >= 2
+                            ? [prev[1], f.id]
+                            : [...prev, f.id],
+                      )
+                    }
+                  />
+                  {f.name}
+                </label>
               ))}
-          </select>
-        </div>
-        <div>
-          <label className="label">{s.searchMode}</label>
-          <select
-            className="input"
-            value={searchMode}
-            onChange={(e) => setSearchMode(e.target.value as "grid" | "random")}
-          >
-            <option value="grid">{s.searchGrid}</option>
-            <option value="random">{s.searchRandom}</option>
-          </select>
-        </div>
-        {crossSymbolOptions.length > 0 && (
+            </div>
+            {stackCandidates.length < 2 && (
+              <p className="mt-1 text-xs text-amber-600">{s.stackNeedTwoPick}</p>
+            )}
+            <p className="mt-1 text-xs text-slate-400">{s.stackWeightHint}</p>
+          </div>
+        )}
+        {scanKind === "template" && (
+          <div>
+            <label className="label">{s.searchMode}</label>
+            <select
+              className="input"
+              value={searchMode}
+              onChange={(e) => setSearchMode(e.target.value as "grid" | "random")}
+            >
+              <option value="grid">{s.searchGrid}</option>
+              <option value="random">{s.searchRandom}</option>
+            </select>
+          </div>
+        )}
+        {scanKind === "template" && crossSymbolOptions.length > 0 && (
           <div>
             <label className="label">{s.multiSymbol}</label>
             <div className="flex flex-wrap gap-2">
@@ -228,7 +303,11 @@ export default function FactorScanPanel({ projectId, symbol, timeframe }: Props)
         <button
           type="button"
           className="btn-primary"
-          disabled={!symbol || scan.isPending}
+          disabled={
+            !symbol ||
+            scan.isPending ||
+            (scanKind === "stack" && stackFactorIds.length !== 2)
+          }
           onClick={() => scan.mutate()}
         >
           {scan.isPending ? s.running : s.run}

@@ -140,6 +140,81 @@ def scan_template_grid(
     return results
 
 
+def build_stack_weight_grid(steps: int = 8) -> list[list[float]]:
+    """两因子组合权重网格 — w0 从 0.15 到 0.85, w1 = 1 - w0。"""
+    import numpy as np
+
+    cap = max(2, min(int(steps), MAX_VARIANTS))
+    w0_vals = np.linspace(0.15, 0.85, num=cap)
+    return [[round(float(w0), 3), round(1.0 - float(w0), 3)] for w0 in w0_vals]
+
+
+def scan_stack_weights(
+    ohlcv: pd.DataFrame,
+    components: list[tuple[str, SignalFn]],
+    *,
+    weight_grid: list[list[float]] | None = None,
+    cost_config: CostConfig | None = None,
+    oos_ratio: float = 0.3,
+    ic_horizon: int = 1,
+    steps: int = 8,
+    factor_ids: list[str] | None = None,
+) -> list[dict[str, Any]]:
+    """对两个因子做权重网格扫描 (标准化后线性组合)。"""
+    if "close" not in ohlcv.columns:
+        raise ValueError("行情缺少 close")
+    if len(components) < 2:
+        raise ValueError("组合扫描至少需要 2 个因子")
+    cfg = cost_config or CostConfig()
+    grid = (weight_grid or build_stack_weight_grid(steps))[:MAX_VARIANTS]
+    close = ohlcv["close"]
+    labels = [name for name, _ in components]
+    fns = [fn for _, fn in components]
+    ids = factor_ids or [str(i) for i in range(len(components))]
+    results: list[dict[str, Any]] = []
+
+    for weights in grid:
+        w0, w1 = weights[0], weights[1]
+
+        def stack_signal(df: pd.DataFrame, _w0=w0, _w1=w1) -> pd.Series:
+            items = [(fn(df), w) for fn, w in zip(fns, (_w0, _w1))]
+            return fe.compute_factor_stack(items)
+
+        full_signal = stack_signal(ohlcv)
+        bt = run_backtest(full_signal, ohlcv, cfg)
+        metrics = bt["metrics"]
+        oos = evaluate_oos(stack_signal, ohlcv, cfg, oos_ratio=oos_ratio)
+        ic = factor_ic(full_signal, close, horizon=ic_horizon)
+        oos_sharpe = (oos.get("out_of_sample") or {}).get("sharpe")
+        score = composite_factor_score(
+            sharpe=metrics.get("sharpe"),
+            oos_sharpe=oos_sharpe,
+            ic_mean=ic.get("ic_mean"),
+            turnover=metrics.get("turnover"),
+        )
+        weight_params = [
+            {"factor_id": ids[0], "weight": w0},
+            {"factor_id": ids[1], "weight": w1},
+        ]
+        label = f"{w0:.0%}×{labels[0]} + {w1:.0%}×{labels[1]}"
+        results.append(
+            {
+                "params": {"weights": weight_params},
+                "label": label,
+                "metrics": metrics,
+                "oos_sharpe": oos_sharpe,
+                "oos_degradation": oos.get("sharpe_degradation"),
+                "ic": ic,
+                "score": score,
+            }
+        )
+
+    results.sort(key=lambda r: (r.get("score") is None, -(r.get("score") or 0)))
+    for i, row in enumerate(results):
+        row["rank"] = i + 1
+    return results
+
+
 def _params_key(params: dict) -> str:
     return ",".join(f"{k}={v}" for k, v in sorted(params.items()))
 

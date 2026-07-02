@@ -26,6 +26,31 @@ def test_random_param_grid():
     assert all("window" in g for g in grid)
 
 
+def test_stack_weight_grid_scan():
+    from engine.factor_engine import compute_template_factor, sample_price_frame
+    from engine.param_scan import build_stack_weight_grid, scan_stack_weights
+
+    df = sample_price_frame(400)
+
+    def mom(df_in):
+        return compute_template_factor(df_in, "momentum", {"window": 15})
+
+    def rsi(df_in):
+        return compute_template_factor(df_in, "rsi", {"window": 14})
+
+    grid = build_stack_weight_grid(6)
+    assert len(grid) == 6
+    results = scan_stack_weights(
+        df,
+        [("mom", mom), ("rsi", rsi)],
+        weight_grid=grid,
+        factor_ids=["a", "b"],
+    )
+    assert len(results) == 6
+    assert results[0]["rank"] == 1
+    assert results[0]["params"]["weights"][0]["weight"] is not None
+
+
 def test_param_grid_scan_ranks():
     df = sample_price_frame(400)
     grid = build_param_grid("momentum", steps=6)

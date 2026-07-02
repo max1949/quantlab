@@ -204,11 +204,12 @@ export async function createTemplateFactor(body: {
 export async function runFactorScan(body: {
   symbol: string;
   symbols?: string[];
-  template_type: string;
+  template_type?: string;
   timeframe?: string;
   project_id?: string;
   steps?: number;
   search_mode?: "grid" | "random";
+  factor_ids?: string[];
 }): Promise<FactorScan> {
   const { data } = await api.post<FactorScan>("/factors/scan", body);
   return data;
