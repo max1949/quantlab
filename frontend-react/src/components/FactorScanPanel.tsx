@@ -4,6 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   applyFactorScan,
   compareFactorScans,
+  createBacktest,
+  createValidation,
   getEntitlements,
   getFactorTemplates,
   listFactorScans,
@@ -75,6 +77,25 @@ export default function FactorScanPanel({ projectId, symbol, timeframe }: Props)
       void qc.invalidateQueries({ queryKey: ["factor-scans", projectId] });
     },
     onError: (e) => notify(apiErrorMessage(e, s.applyFail), "error"),
+  });
+
+  const applyAndValidate = useMutation({
+    mutationFn: async (rank: number) => {
+      const factor = await applyFactorScan(activeScan!.id, { rank });
+      const bt = await createBacktest({ factor_id: factor.id, symbol, timeframe });
+      const validation = await createValidation({ factor_id: factor.id, symbol, timeframe });
+      return { factor, bt, validation };
+    },
+    onSuccess: () => {
+      notify(s.validateStarted, "success");
+      void qc.invalidateQueries({ queryKey: ["factors"] });
+      void qc.invalidateQueries({ queryKey: ["backtests"] });
+      void qc.invalidateQueries({ queryKey: ["validations"] });
+      void qc.invalidateQueries({ queryKey: ["graph", projectId] });
+      void qc.invalidateQueries({ queryKey: ["factor-scans", projectId] });
+      void qc.invalidateQueries({ queryKey: ["research-journey"] });
+    },
+    onError: (e) => notify(apiErrorMessage(e, s.validateFail), "error"),
   });
 
   const compare = useMutation({
@@ -254,14 +275,24 @@ export default function FactorScanPanel({ projectId, symbol, timeframe }: Props)
                     <td className="py-2 pr-2">{fmt(row.ic_mean)}</td>
                     <td className="py-2 pr-2">{fmt(row.turnover)}</td>
                     <td className="py-2">
-                      <button
-                        type="button"
-                        className="btn text-xs"
-                        disabled={apply.isPending}
-                        onClick={() => apply.mutate(row.rank)}
-                      >
-                        {s.apply}
-                      </button>
+                      <div className="flex flex-wrap gap-1">
+                        <button
+                          type="button"
+                          className="btn text-xs"
+                          disabled={apply.isPending || applyAndValidate.isPending}
+                          onClick={() => apply.mutate(row.rank)}
+                        >
+                          {s.apply}
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-primary px-2 py-1 text-xs"
+                          disabled={apply.isPending || applyAndValidate.isPending}
+                          onClick={() => applyAndValidate.mutate(row.rank)}
+                        >
+                          {applyAndValidate.isPending ? s.validating : s.applyAndValidate}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

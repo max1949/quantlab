@@ -46,8 +46,12 @@ def test_vnpy_import_roundtrip(db_session, tmp_path):
 
     info = market_data.import_vnpy_sqlite(db_session, db_path, symbol="RB99", interval="1m")
     assert info["rows"] == 2
+    assert {d["timeframe"] for d in info["derived"]} >= {"5m", "15m"}
     df = market_data.load_ohlcv("RB99", "1m")
     assert "open_interest" in df.columns
+    derived = market_data.materialize_derived_timeframes(db_session, ["RB99"])
+    assert {d["timeframe"] for d in derived["datasets"]} >= {"5m", "15m"}
+    assert market_data.get_dataset(db_session, "RB99", "5m") is not None
 
 
 def test_publish_blocked_when_gate_enabled(client, db_session):

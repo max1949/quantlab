@@ -250,14 +250,31 @@ def seed_sample_market_data(db: Session, symbols: list[str] | None = None) -> di
         register_dataset(db, sym, df_1m, "1m")
         out.append({"symbol": sym, "timeframe": "1m", "rows": len(df_1m)})
 
-        for tf, rule in (("5m", "5min"), ("15m", "15min"), ("30m", "30min"), ("1h", "1h")):
-            rdf = resample_ohlcv(df_1m, rule)
-            if rdf.empty:
-                continue
-            rdf.to_parquet(dataset_path(sym, tf))
-            register_dataset(db, sym, rdf, tf)
-            out.append({"symbol": sym, "timeframe": tf, "rows": len(rdf)})
+        out.extend(ensure_derived_timeframes(db, sym, "1m"))
 
+    return {"datasets": out, "dir": str(market_dir())}
+
+
+def materialize_derived_timeframes(
+    db: Session, symbols: list[str] | None = None
+) -> dict:
+    """为已有 1m 数据批量派生 5m/15m/30m/1h Parquet + 索引。
+
+    这一步是中频研究的基础设施: 导入或同步 1m 后可重复运行, 不影响 1m 原始数据。
+    """
+    if symbols is None:
+        symbols = [
+            s
+            for (s,) in db.execute(
+                select(MarketDataset.symbol)
+                .where(MarketDataset.timeframe == "1m")
+                .distinct()
+                .order_by(MarketDataset.symbol)
+            ).all()
+        ]
+    out: list[dict] = []
+    for sym in symbols:
+        out.extend(ensure_derived_timeframes(db, sym, "1m"))
     return {"datasets": out, "dir": str(market_dir())}
 
 
@@ -276,13 +293,16 @@ def seed_real_market_data(
         if path.exists():
             df = load_ohlcv(sym, "1d")
             ds = register_dataset(db, sym, df, "1d")
+            derived = ensure_derived_timeframes(db, sym, "1m")
             out.append(
                 {
                     "symbol": sym,
+                    "timeframe": "1d",
                     "rows": ds.rows,
                     "source": "local_parquet",
                     "start": str(ds.start_date),
                     "end": str(ds.end_date),
+                    "derived": derived,
                 }
             )
             continue
@@ -296,13 +316,16 @@ def seed_real_market_data(
             df = generate_sample_ohlcv(sym)
         df.to_parquet(dataset_path(sym))
         ds = register_dataset(db, sym, df)
+        derived = ensure_derived_timeframes(db, sym, "1m")
         out.append(
             {
                 "symbol": sym,
+                "timeframe": "1d",
                 "rows": ds.rows,
                 "source": source,
                 "start": str(ds.start_date),
                 "end": str(ds.end_date),
+                "derived": derived,
             }
         )
     return {"datasets": out, "dir": str(market_dir())}
