@@ -20,6 +20,8 @@ from backend.app.schemas.factor import (
     FactorPreview,
     FactorTemplateOut,
     FormulaFactorCreate,
+    FormulaEvaluateOut,
+    FormulaEvaluateRequest,
     FormulaHelpOut,
     PaperHistoryOut,
     PythonFactorCreate,
@@ -176,6 +178,35 @@ def create_formula_factor(
             status_code=status.HTTP_409_CONFLICT, detail="同名因子已存在"
         )
     return FactorOut.model_validate(factor)
+
+
+@router.post(
+    "/formula/evaluate",
+    response_model=FormulaEvaluateOut,
+    summary="公式因子快评 (不创建因子)",
+)
+def evaluate_formula_factor(
+    payload: FormulaEvaluateRequest,
+    current_user: Annotated[User, Depends(require_feature("factor_formula"))],
+    db: Annotated[Session, Depends(get_db)],
+) -> FormulaEvaluateOut:
+    from backend.app.services.market_data_policy import MarketDataAccessError
+
+    try:
+        result = factor_service.evaluate_formula_expr(
+            db,
+            current_user,
+            payload.expr,
+            payload.symbol,
+            timeframe=payload.timeframe,
+        )
+    except MarketDataAccessError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
+    except factor_service.FactorValidationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+        )
+    return FormulaEvaluateOut(**result)
 
 
 @router.get(

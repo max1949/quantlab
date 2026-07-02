@@ -68,6 +68,27 @@ class FormulaFactorCreate(BaseModel):
     project_id: uuid.UUID | None = None
 
 
+class FormulaEvaluateRequest(BaseModel):
+    """公式因子快评 (不创建因子)。"""
+
+    expr: str = Field(min_length=1, max_length=500)
+    symbol: str = Field(min_length=1, max_length=32)
+    timeframe: str = Field(default="1d", max_length=16)
+
+
+class FormulaEvaluateOut(BaseModel):
+    expr: str
+    score: float | None = None
+    sharpe: float | None = None
+    oos_sharpe: float | None = None
+    ic_mean: float | None = None
+    turnover: float | None = None
+    max_drawdown: float | None = None
+    publish_promising: bool = False
+    publish_hints: list[str] = Field(default_factory=list)
+    coach_summary: str = ""
+
+
 class PythonFactorCreate(BaseModel):
     """创建 Python 因子 (L3 + 研究员会员)。"""
 

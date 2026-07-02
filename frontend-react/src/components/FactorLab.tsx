@@ -6,6 +6,7 @@ import {
   createPythonFactor,
   createStackFactor,
   createTemplateFactor,
+  evaluateFormulaExpr,
   getEntitlements,
   getFactorTemplates,
   getFormulaHelp,
@@ -19,12 +20,20 @@ import { useAuth } from "../store/auth";
 import { useUi } from "../store/ui";
 import { useLocale } from "../store/locale";
 import { Spinner } from "./ui";
-import type { Factor, FactorPreview, FeatureState } from "../api/types";
+import type { Factor, FactorPreview, FeatureState, FormulaEvaluate } from "../api/types";
 import FactorFormulaGuide from "./FactorFormulaGuide";
 import TemplateParamHelp from "./TemplateParamHelp";
 import { academyRewardMessage } from "../lib/academy";
 
-export default function FactorLab({ projectId }: { projectId: string }) {
+export default function FactorLab({
+  projectId,
+  symbol,
+  timeframe = "1d",
+}: {
+  projectId: string;
+  symbol: string;
+  timeframe?: string;
+}) {
   const user = useAuth((s) => s.user)!;
   const setUser = useAuth((s) => s.setUser);
   const qc = useQueryClient();
@@ -165,7 +174,12 @@ export default function FactorLab({ projectId }: { projectId: string }) {
       )}
       {mode === "formula" &&
         (formulaFeat?.allowed ? (
-          <FormulaForm projectId={projectId} onCreated={refresh} />
+          <FormulaForm
+            projectId={projectId}
+            symbol={symbol}
+            timeframe={timeframe}
+            onCreated={refresh}
+          />
         ) : (
           <FeatureLock feat={formulaFeat} lockedText={fl.formulaLocked} />
         ))}
@@ -206,9 +220,13 @@ function FeatureLock({ feat, lockedText }: { feat?: FeatureState; lockedText: st
 
 function FormulaForm({
   projectId,
+  symbol,
+  timeframe,
   onCreated,
 }: {
   projectId: string;
+  symbol: string;
+  timeframe: string;
   onCreated: () => void;
 }) {
   const notify = useUi((s) => s.notify);
@@ -216,6 +234,17 @@ function FormulaForm({
   const help = useQuery({ queryKey: ["formula-help"], queryFn: getFormulaHelp });
   const [name, setName] = useState("");
   const [expr, setExpr] = useState("");
+  const [evalResult, setEvalResult] = useState<FormulaEvaluate | null>(null);
+
+  const evaluate = useMutation({
+    mutationFn: () =>
+      evaluateFormulaExpr({ expr: expr.trim(), symbol, timeframe }),
+    onSuccess: (data) => {
+      setEvalResult(data);
+      notify(fl.formulaEvalDone, "success");
+    },
+    onError: (e) => notify(apiErrorMessage(e, fl.formulaEvalFail), "error"),
+  });
 
   const create = useMutation({
     mutationFn: () =>
@@ -282,6 +311,36 @@ function FormulaForm({
             </div>
           </div>
         </details>
+      )}
+
+      <button
+        type="button"
+        className="btn w-full"
+        disabled={evaluate.isPending || !expr.trim() || !symbol}
+        onClick={() => evaluate.mutate()}
+      >
+        {evaluate.isPending ? fl.formulaEvaluating : fl.formulaEvaluate}
+      </button>
+
+      {evalResult && (
+        <div className="space-y-2 rounded-lg border border-brand-200 bg-brand-50/50 p-3 text-sm dark:border-brand-900 dark:bg-brand-950/30">
+          <p className="text-slate-700 dark:text-slate-200">{evalResult.coach_summary}</p>
+          <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
+            <Metric label={fl.evalScore} value={evalResult.score} />
+            <Metric label={fl.evalSharpe} value={evalResult.sharpe} />
+            <Metric label={fl.evalOos} value={evalResult.oos_sharpe} />
+            <Metric label={fl.evalIc} value={evalResult.ic_mean} />
+            <Metric label={fl.evalTurnover} value={evalResult.turnover} />
+            <Metric label={fl.evalMdd} value={evalResult.max_drawdown} />
+          </div>
+          {evalResult.publish_hints.length > 0 && (
+            <ul className="list-inside list-disc text-xs text-slate-500">
+              {evalResult.publish_hints.map((hint) => (
+                <li key={hint}>{hint}</li>
+              ))}
+            </ul>
+          )}
+        </div>
       )}
 
       <div>
@@ -371,6 +430,17 @@ function PythonForm({
       >
         {create.isPending ? "…" : fl.createPython}
       </button>
+    </div>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: number | null }) {
+  return (
+    <div className="rounded bg-white/80 px-2 py-1 dark:bg-slate-900/50">
+      <div className="text-slate-400">{label}</div>
+      <div className="font-medium text-slate-700 dark:text-slate-200">
+        {value == null ? "—" : value.toFixed(2)}
+      </div>
     </div>
   );
 }

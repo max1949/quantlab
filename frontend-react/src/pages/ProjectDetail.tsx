@@ -507,7 +507,7 @@ export default function ProjectDetail() {
       </div>
 
       <div className="mt-4" id="factor-lab">
-        <FactorLab projectId={id} />
+        <FactorLab projectId={id} symbol={symbol} timeframe={activeTimeframe} />
       </div>
 
       <div className="mt-4">

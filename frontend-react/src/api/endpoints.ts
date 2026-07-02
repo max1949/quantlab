@@ -15,6 +15,7 @@ import type {
   FactorScanCompare,
   FactorTemplateMeta,
   FormulaHelp,
+  FormulaEvaluate,
   Graph,
   LeaderRow,
   Plan,
@@ -290,6 +291,18 @@ export async function createFormulaFactor(body: {
   project_id?: string;
 }): Promise<Factor> {
   const { data } = await api.post<Factor>("/factors/formula", body);
+  return data;
+}
+
+export async function evaluateFormulaExpr(body: {
+  expr: string;
+  symbol: string;
+  timeframe?: string;
+}): Promise<FormulaEvaluate> {
+  const { data } = await api.post<FormulaEvaluate>(
+    "/factors/formula/evaluate",
+    body,
+  );
   return data;
 }
 

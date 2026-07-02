@@ -340,3 +340,34 @@ def preview(
         "sample_rows": sample_rows,
         "stats": fe.summarize(series),
     }
+
+
+def evaluate_formula_expr(
+    db: Session,
+    user: User,
+    expr: str,
+    symbol: str,
+    timeframe: str = "1d",
+) -> dict:
+    """公式快评: 在用户可访问行情上评估表达式。"""
+    from backend.app.services import market_data_policy as mdp
+    from engine import formula as ff
+    from engine.data_quality import assess_ohlcv_quality
+    from engine.formula_eval import evaluate_formula
+
+    try:
+        ff.validate(expr)
+        ff.compute(fe.sample_price_frame(n=120), expr.strip())
+    except ff.FormulaError as exc:
+        raise FactorValidationError(str(exc))
+
+    ohlcv = mdp.load_for_user(db, user, symbol.upper(), timeframe)
+    if ohlcv is None or ohlcv.empty:
+        raise FactorValidationError("行情数据为空")
+    result = evaluate_formula(ohlcv, expr.strip(), timeframe=timeframe)
+    dq = assess_ohlcv_quality(ohlcv, timeframe)
+    if dq.get("warnings"):
+        result["coach_summary"] = (
+            f"【数据质量】{'；'.join(dq['warnings'][:2])} {result.get('coach_summary', '')}"
+        )
+    return result
