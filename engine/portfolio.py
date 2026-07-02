@@ -34,7 +34,7 @@ def _normalize_long_only(w: np.ndarray) -> np.ndarray:
 
 def returns_from_closes(closes: dict[str, pd.Series]) -> pd.DataFrame:
     price = pd.concat({k: v.astype(float) for k, v in closes.items()}, axis=1).sort_index()
-    return price.pct_change().dropna(how="all").fillna(0.0)
+    return price.ffill().pct_change(fill_method=None).dropna(how="all").fillna(0.0)
 
 
 def optimize_weights(returns: pd.DataFrame, method: str = "risk_parity") -> dict:

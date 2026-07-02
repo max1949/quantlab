@@ -53,7 +53,7 @@ def run_backtest(
     cfg = cost_config or CostConfig()
 
     close = ohlcv["close"].astype(float)
-    asset_ret = close.pct_change().fillna(0.0)
+    asset_ret = close.pct_change(fill_method=None).fillna(0.0)
 
     positions = signal_to_positions(signal).reindex(close.index).fillna(0.0)
     lagged = positions.shift(1).fillna(0.0)  # 避免前视

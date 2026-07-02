@@ -24,7 +24,7 @@ import pandas as pd
 # ---------------------------------------------------------------------------
 def momentum(df: pd.DataFrame, window: int = 20) -> pd.Series:
     """动量: 过去 window 期的收益率。"""
-    return df["close"].pct_change(window)
+    return df["close"].pct_change(window, fill_method=None)
 
 
 def sma_ratio(df: pd.DataFrame, window: int = 20) -> pd.Series:
@@ -46,7 +46,7 @@ def rsi(df: pd.DataFrame, window: int = 14) -> pd.Series:
 
 def volatility(df: pd.DataFrame, window: int = 20) -> pd.Series:
     """波动率: 收益率的滚动标准差。"""
-    return df["close"].pct_change().rolling(window).std()
+    return df["close"].pct_change(fill_method=None).rolling(window).std()
 
 
 def mean_reversion(df: pd.DataFrame, window: int = 20) -> pd.Series:

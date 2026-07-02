@@ -104,7 +104,7 @@ def run_cross_section_backtest(
     common = scores.index.intersection(price.index)
     scores = scores.loc[common]
     price = price.loc[common]
-    asset_ret = price.pct_change().fillna(0.0)
+    asset_ret = price.ffill().pct_change(fill_method=None).fillna(0.0)
 
     weights = _rank_weights(scores, top_n=top_n, long_short=long_short)
     lagged = weights.shift(1).fillna(0.0)

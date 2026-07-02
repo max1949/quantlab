@@ -49,7 +49,7 @@ def _std(x, n):
 
 
 def _ret(x, n=1):
-    return pd.Series(x).pct_change(_as_window(n))
+    return pd.Series(x).pct_change(_as_window(n), fill_method=None)
 
 
 def _delay(x, n):

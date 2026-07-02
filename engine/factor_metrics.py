@@ -31,7 +31,7 @@ def _f(x) -> float | None:
 
 
 def forward_returns(close: pd.Series, horizon: int = 1) -> pd.Series:
-    return close.pct_change(horizon).shift(-horizon)
+    return close.pct_change(horizon, fill_method=None).shift(-horizon)
 
 
 def _rank_corr(a: pd.Series, b: pd.Series) -> float | None:
