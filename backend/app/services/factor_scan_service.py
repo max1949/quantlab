@@ -11,7 +11,12 @@ from backend.app.models.factor_scan import FactorScan
 from backend.app.models.user import User
 from backend.app.services import factor_service, market_data_policy as mdp
 from engine import factor_engine as fe
-from engine.param_scan import scan_template_grid, scan_template_multi_symbol
+from engine.param_scan import (
+    build_param_grid,
+    build_random_param_grid,
+    scan_template_grid,
+    scan_template_multi_symbol,
+)
 from engine.factor_metrics import IC_HORIZON_BY_TF
 from engine.research_quality import assess_scan_preview
 from engine.data_quality import assess_ohlcv_quality
@@ -92,6 +97,7 @@ def run_scan(
     project_id: uuid.UUID | None = None,
     steps: int = 8,
     symbols: list[str] | None = None,
+    search_mode: str = "grid",
 ) -> FactorScan:
     if template_type not in fe.TEMPLATES:
         raise ScanError(f"不支持的模板: {template_type}")
@@ -100,6 +106,12 @@ def run_scan(
         sym_list = [symbol.upper()]
     sym_list = list(dict.fromkeys(sym_list))[:3]
     multi = len(sym_list) > 1
+    mode = (search_mode or "grid").lower()
+    if mode == "random":
+        param_grid = build_random_param_grid(template_type, n_trials=steps)
+        scan_kwargs = {"param_grid": param_grid, "steps": steps}
+    else:
+        scan_kwargs = {"steps": steps}
 
     if multi:
         ohlcv_map: dict = {}
@@ -111,8 +123,8 @@ def run_scan(
         results = scan_template_multi_symbol(
             ohlcv_map,
             template_type,
-            steps=steps,
             ic_horizon=_ic_horizon(timeframe),
+            **scan_kwargs,
         )
         symbol_label = ",".join(sym_list)
         dq_notes: list[str] = []
@@ -127,8 +139,8 @@ def run_scan(
         results = scan_template_grid(
             ohlcv,
             template_type,
-            steps=steps,
             ic_horizon=_ic_horizon(timeframe),
+            **scan_kwargs,
         )
         symbol_label = s
         dq = assess_ohlcv_quality(ohlcv, timeframe)
@@ -140,6 +152,8 @@ def run_scan(
     )
     if dq_notes:
         coach = f"【数据质量】{'；'.join(dq_notes[:2])} {coach}"
+    if mode == "random":
+        coach = f"【随机搜索 {steps} 组】{coach}"
     scan = FactorScan(
         owner_id=user.id,
         project_id=project_id,

@@ -157,3 +157,29 @@ def test_batch_scan_ai_review(client, db_session):
     )
     assert batch.status_code == 201, batch.text
     assert batch.json()["content"]
+
+
+def test_random_search_mode(client, db_session):
+    seed_sample_market_data(db_session)
+    h = _register(client, "rnd1")
+    from backend.app.models.user import User, UserLevel
+    from sqlalchemy import select
+
+    user = db_session.execute(select(User).where(User.username == "rnd1")).scalar_one()
+    user.level = UserLevel.L1
+    user.experience = 100
+    db_session.commit()
+
+    res = client.post(
+        f"{BASE}/factors/scan",
+        headers=h,
+        json={
+            "symbol": "RB",
+            "template_type": "momentum",
+            "timeframe": "1d",
+            "steps": 8,
+            "search_mode": "random",
+        },
+    )
+    assert res.status_code == 201, res.text
+    assert "随机搜索" in res.json()["coach_summary"]

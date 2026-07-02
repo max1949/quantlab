@@ -50,6 +50,36 @@ def build_param_grid(template_type: str, steps: int = 8) -> list[dict[str, int]]
     return grids[:MAX_VARIANTS]
 
 
+def build_random_param_grid(
+    template_type: str,
+    n_trials: int = 12,
+    *,
+    seed: int = 42,
+) -> list[dict[str, int]]:
+    """随机采样参数组合 (避免规则网格过拟合于步长)。"""
+    import numpy as np
+
+    tpl = fe.TEMPLATES.get(template_type)
+    if tpl is None:
+        raise fe.FactorError(f"未知模板: {template_type}")
+    rng = np.random.default_rng(seed)
+    cap = max(4, min(int(n_trials), MAX_VARIANTS))
+    seen: set[tuple[tuple[str, int], ...]] = set()
+    grid: list[dict[str, int]] = []
+    attempts = 0
+    while len(grid) < cap and attempts < cap * 20:
+        attempts += 1
+        row: dict[str, int] = {}
+        for spec in tpl.params:
+            row[spec.name] = int(rng.integers(spec.min, spec.max + 1))
+        key = tuple(sorted(row.items()))
+        if key in seen:
+            continue
+        seen.add(key)
+        grid.append(row)
+    return grid
+
+
 def _signal_fn(template_type: str, params: dict) -> SignalFn:
     clean = fe.validate_template_params(template_type, params)
 

@@ -252,6 +252,31 @@ def _feed_metrics(db: Session, report: ResearchReport) -> tuple[float | None, fl
     return _validation_metrics(val)
 
 
+def _feed_factor_meta(db: Session, report: ResearchReport) -> dict:
+    factor = db.get(Factor, report.factor_id)
+    timeframe = "1d"
+    for key in ("validation_id", "backtest_id"):
+        raw = (report.based_on or {}).get(key)
+        if not raw:
+            continue
+        try:
+            ref_id = uuid.UUID(str(raw))
+        except (TypeError, ValueError):
+            continue
+        model = Validation if key == "validation_id" else Backtest
+        row = db.get(model, ref_id)
+        if row and row.snapshot_id:
+            snap = db.get(DataSnapshot, row.snapshot_id)
+            if snap and snap.timeframe:
+                timeframe = snap.timeframe
+                break
+    return {
+        "factor_kind": factor.kind if factor else None,
+        "factor_template": factor.template_type if factor else None,
+        "timeframe": timeframe,
+    }
+
+
 def feed_summary(
     db: Session,
     report: ResearchReport,
@@ -262,6 +287,7 @@ def feed_summary(
         **ReportSummary.model_validate(report).model_dump(),
         "oos_sharpe": oos_sharpe,
         "robustness_score": robustness_score,
+        **_feed_factor_meta(db, report),
     }
 
 

@@ -27,6 +27,9 @@ class ReportSummary(BaseModel):
     created_at: datetime
     oos_sharpe: float | None = None
     robustness_score: float | None = None
+    factor_kind: str | None = None
+    factor_template: str | None = None
+    timeframe: str | None = None
 
 
 class ReportDetail(BaseModel):

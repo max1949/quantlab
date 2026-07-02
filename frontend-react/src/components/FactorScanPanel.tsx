@@ -39,6 +39,7 @@ export default function FactorScanPanel({ projectId, symbol, timeframe }: Props)
   const scanFeat = ent.data?.features.find((f) => f.key === "factor_param_scan");
 
   const [templateType, setTemplateType] = useState("momentum");
+  const [searchMode, setSearchMode] = useState<"grid" | "random">("grid");
   const [extraSymbols, setExtraSymbols] = useState<string[]>([]);
   const crossSymbolOptions = useMemo(
     () => ["RB", "AU", "IF", "CU", "I", "MA"].filter((s) => s !== symbol.toUpperCase()),
@@ -63,6 +64,7 @@ export default function FactorScanPanel({ projectId, symbol, timeframe }: Props)
         timeframe,
         project_id: projectId,
         steps: 8,
+        search_mode: searchMode,
       });
     },
     onSuccess: (data) => {
@@ -187,6 +189,17 @@ export default function FactorScanPanel({ projectId, symbol, timeframe }: Props)
                   {t.label}
                 </option>
               ))}
+          </select>
+        </div>
+        <div>
+          <label className="label">{s.searchMode}</label>
+          <select
+            className="input"
+            value={searchMode}
+            onChange={(e) => setSearchMode(e.target.value as "grid" | "random")}
+          >
+            <option value="grid">{s.searchGrid}</option>
+            <option value="random">{s.searchRandom}</option>
           </select>
         </div>
         {crossSymbolOptions.length > 0 && (

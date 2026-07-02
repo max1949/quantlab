@@ -322,6 +322,9 @@ const en = {
     publishHintTitle: "Publish preview (scan only)",
     multiSymbol: "Cross-symbol scan (max 3)",
     multiSymbolHint: "Scores are averaged across selected symbols.",
+    searchMode: "Search mode",
+    searchGrid: "Grid",
+    searchRandom: "Random",
     compare: "Compare selected",
     comparing: "Comparing…",
     compareDone: "Comparison ready",
@@ -702,6 +705,9 @@ const en = {
     readFull: "Read full report",
     oosSharpe: "OOS Sharpe",
     robustness: "Robustness",
+    factorKind: (k: string) =>
+      ({ template: "Template", stack: "Stack", formula: "Formula", python: "Python" } as Record<string, string>)[k] ?? k,
+    timeframe: "TF",
   },
   l4Tools: {
     title: "L4 Pro portfolio tools",
@@ -1043,6 +1049,9 @@ const zh = {
     publishHintTitle: "发布潜力预览（仅扫描，非最终结论）",
     multiSymbol: "多标的联合扫描（最多3个）",
     multiSymbolHint: "综合分按所选标的平均计算。",
+    searchMode: "搜索方式",
+    searchGrid: "网格",
+    searchRandom: "随机",
     compare: "对比所选",
     comparing: "对比中…",
     compareDone: "对比完成",
@@ -1420,6 +1429,9 @@ const zh = {
     readFull: "阅读全文",
     oosSharpe: "样本外夏普",
     robustness: "稳健性",
+    factorKind: (k: string) =>
+      ({ template: "模板", stack: "组合", formula: "公式", python: "Python" } as Record<string, string>)[k] ?? k,
+    timeframe: "周期",
   },
   l4Tools: {
     title: "L4 准职业组合工具",

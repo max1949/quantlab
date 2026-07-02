@@ -19,6 +19,17 @@ export default function ReportCard({ report }: { report: ReportSummary }) {
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-400">
         <span className="badge">{report.symbol}</span>
+        {report.timeframe && (
+          <span>
+            {rc.timeframe}: {report.timeframe}
+          </span>
+        )}
+        {report.factor_kind && (
+          <span className="badge">{rc.factorKind(report.factor_kind)}</span>
+        )}
+        {report.factor_template && (
+          <span className="badge">{report.factor_template}</span>
+        )}
         {report.oos_sharpe != null && (
           <span>
             {rc.oosSharpe}: {report.oos_sharpe.toFixed(2)}

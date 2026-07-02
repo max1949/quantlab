@@ -177,6 +177,9 @@ def test_public_feed_no_auth(client, db_session):
     feed = client.get(f"{BASE}/public/feed").json()
     assert isinstance(feed, list)
     assert any(r["id"] == rep["id"] for r in feed)
+    card = next(r for r in feed if r["id"] == rep["id"])
+    assert card.get("factor_kind") is not None
+    assert card.get("timeframe") is not None
 
 
 def test_share_missing_report_404(client, db_session):

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from engine.factor_engine import compute_template_factor, sample_price_frame
 from engine.factor_metrics import composite_factor_score, factor_ic
-from engine.param_scan import build_param_grid, scan_template_grid
+from engine.param_scan import build_param_grid, build_random_param_grid, scan_template_grid
 
 
 def test_factor_ic_and_composite_score():
@@ -18,6 +18,12 @@ def test_factor_ic_and_composite_score():
     )
     assert score is not None
     assert 0 <= score <= 100
+
+
+def test_random_param_grid():
+    grid = build_random_param_grid("momentum", n_trials=8)
+    assert len(grid) == 8
+    assert all("window" in g for g in grid)
 
 
 def test_param_grid_scan_ranks():

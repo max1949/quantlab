@@ -424,6 +424,9 @@ export interface ReportSummary {
   created_at: string;
   oos_sharpe?: number | null;
   robustness_score?: number | null;
+  factor_kind?: string | null;
+  factor_template?: string | null;
+  timeframe?: string | null;
 }
 
 export interface ReportDetail extends ReportSummary {

@@ -17,6 +17,7 @@ class FactorScanRequest(BaseModel):
     timeframe: str = Field(default="1d", max_length=16)
     project_id: uuid.UUID | None = None
     steps: int = Field(default=8, ge=4, le=12)
+    search_mode: str = Field(default="grid", pattern=r"^(grid|random)$")
 
 
 class ScanResultRow(BaseModel):

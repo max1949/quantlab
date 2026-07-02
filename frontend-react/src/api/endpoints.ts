@@ -208,6 +208,7 @@ export async function runFactorScan(body: {
   timeframe?: string;
   project_id?: string;
   steps?: number;
+  search_mode?: "grid" | "random";
 }): Promise<FactorScan> {
   const { data } = await api.post<FactorScan>("/factors/scan", body);
   return data;
