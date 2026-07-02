@@ -12,6 +12,7 @@ def test_factor_ic_and_composite_score():
     sig = compute_template_factor(df, "momentum", {"window": 20})
     ic = factor_ic(sig, df["close"])
     assert ic["n_obs"] > 50
+    assert isinstance(ic.get("ic_series"), list)
     score = composite_factor_score(
         sharpe=1.2, oos_sharpe=0.8, ic_mean=ic.get("ic_mean"), turnover=12.0
     )

@@ -37,6 +37,9 @@ def test_factor_scan_run_and_apply(client, db_session):
     assert body["results"]
     assert body["best_params"]
     assert body["coach_summary"]
+    top = body["results"][0]
+    assert "publish_hints" in top
+    assert "publish_promising" in top
     sid = body["id"]
     assert any(r.get("code") == "first-factor-scan" for r in body.get("academy_rewards", []))
 

@@ -143,7 +143,11 @@ def execute(db: Session, validation_id) -> Validation | None:
                 signal, dev_ohlcv["close"], horizon=ic_horizon
             )
         except Exception:
-            robustness["factor_ic"] = {"ic_mean": None, "rank_ic_mean": None}
+            robustness["factor_ic"] = {
+                "ic_mean": None,
+                "rank_ic_mean": None,
+                "ic_series": [],
+            }
 
         v.oos = oos
         v.walk_forward = walk

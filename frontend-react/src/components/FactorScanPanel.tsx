@@ -94,6 +94,12 @@ export default function FactorScanPanel({ projectId, symbol, timeframe }: Props)
       void qc.invalidateQueries({ queryKey: ["graph", projectId] });
       void qc.invalidateQueries({ queryKey: ["factor-scans", projectId] });
       void qc.invalidateQueries({ queryKey: ["research-journey"] });
+      window.setTimeout(() => {
+        document.getElementById("validation-results")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 500);
     },
     onError: (e) => notify(apiErrorMessage(e, s.validateFail), "error"),
   });
@@ -249,6 +255,26 @@ export default function FactorScanPanel({ projectId, symbol, timeframe }: Props)
               {aiReview.isPending ? ai.loading : ai.scanBtn}
             </button>
           </div>
+
+          {activeScan.results[0]?.publish_hints && activeScan.results[0].publish_hints.length > 0 && (
+            <div
+              className={`rounded-lg border px-3 py-2 text-sm ${
+                activeScan.results[0].publish_promising
+                  ? "border-emerald-300 bg-emerald-50/70 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-100"
+                  : "border-amber-300 bg-amber-50/70 text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100"
+              }`}
+            >
+              <p className="font-medium">
+                {s.publishHintTitle} —{" "}
+                {activeScan.results[0].publish_promising ? s.publishPromising : s.publishCaution}
+              </p>
+              <ul className="mt-1 list-inside list-disc space-y-0.5 text-xs opacity-90">
+                {activeScan.results[0].publish_hints.map((hint) => (
+                  <li key={hint}>{hint}</li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">

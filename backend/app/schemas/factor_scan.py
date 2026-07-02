@@ -28,6 +28,8 @@ class ScanResultRow(BaseModel):
     ic_mean: float | None = None
     turnover: float | None = None
     max_drawdown: float | None = None
+    publish_promising: bool = False
+    publish_hints: list[str] = Field(default_factory=list)
 
 
 class FactorScanOut(BaseModel):

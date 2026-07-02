@@ -420,7 +420,7 @@ export default function ProjectDetail() {
       )}
 
       {done.validation && (
-        <div className="mb-6">
+        <div className="mb-6" id="validation-results">
           <ValidationResultsPanel factorId={projectFactor?.id ?? null} enabled={done.validation} />
         </div>
       )}

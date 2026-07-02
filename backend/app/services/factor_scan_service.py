@@ -13,6 +13,7 @@ from backend.app.services import factor_service, market_data_policy as mdp
 from engine import factor_engine as fe
 from engine.param_scan import scan_template_grid
 from engine.factor_metrics import IC_HORIZON_BY_TF
+from engine.research_quality import assess_scan_preview
 
 
 class ScanError(Exception):
@@ -50,6 +51,12 @@ def _coach_summary(template_type: str, results: list[dict], symbol: str, timefra
 def _serialize_row(row: dict) -> dict:
     m = row.get("metrics") or {}
     ic = row.get("ic") or {}
+    preview = assess_scan_preview(
+        sharpe=m.get("sharpe"),
+        oos_sharpe=row.get("oos_sharpe"),
+        ic_mean=ic.get("ic_mean"),
+        turnover=m.get("turnover"),
+    )
     return {
         "rank": row.get("rank", 0),
         "params": row.get("params") or {},
@@ -60,6 +67,8 @@ def _serialize_row(row: dict) -> dict:
         "ic_mean": ic.get("ic_mean"),
         "turnover": m.get("turnover"),
         "max_drawdown": m.get("max_drawdown"),
+        "publish_promising": preview.promising,
+        "publish_hints": preview.hints,
     }
 
 

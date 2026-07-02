@@ -244,6 +244,8 @@ export interface ScanResultRow {
   ic_mean: number | null;
   turnover: number | null;
   max_drawdown: number | null;
+  publish_promising?: boolean;
+  publish_hints?: string[];
 }
 
 export interface FactorScan {

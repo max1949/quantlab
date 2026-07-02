@@ -71,9 +71,17 @@ export default function ValidationResultsPanel({ factorId, enabled }: Props) {
   const sealedSharpe = rob?.sealed_holdout?.skipped
     ? null
     : rob?.sealed_holdout?.metrics?.sharpe;
-  const icBlock = rob?.factor_ic as { ic_mean?: number; rank_ic_mean?: number } | undefined;
+  const icBlock = rob?.factor_ic as {
+    ic_mean?: number;
+    rank_ic_mean?: number;
+    ic_std?: number;
+    ic_ir?: number;
+    ic_series?: { date: string; ic: number }[];
+  } | undefined;
   const icMean = icBlock?.ic_mean;
   const rankIc = icBlock?.rank_ic_mean;
+  const icIr = icBlock?.ic_ir;
+  const icSeries = icBlock?.ic_series ?? [];
 
   const oosOk = oosSharpe != null && oosSharpe >= 0.15;
   const robOk = rob?.score != null && rob.score >= 50;
@@ -117,10 +125,18 @@ export default function ValidationResultsPanel({ factorId, enabled }: Props) {
         />
       </div>
 
-      {(icMean != null || rankIc != null) && (
-        <div className="mb-4 grid gap-3 sm:grid-cols-2">
+      {(icMean != null || rankIc != null || icIr != null) && (
+        <div className="mb-4 grid gap-3 sm:grid-cols-3">
           <Metric label={v.icMean} value={icMean != null ? icMean.toFixed(3) : "—"} />
           <Metric label={v.rankIc} value={rankIc != null ? rankIc.toFixed(3) : "—"} />
+          <Metric label={v.icIr} value={icIr != null ? icIr.toFixed(2) : "—"} />
+        </div>
+      )}
+
+      {icSeries.length > 1 && (
+        <div className="mb-4">
+          <p className="mb-2 text-xs text-slate-500">{v.icSeriesTitle}</p>
+          <IcSparkline points={icSeries} />
         </div>
       )}
 
@@ -183,4 +199,33 @@ function Metric({
 function fmtSharpe(v: number | null | undefined): string {
   if (v == null) return "—";
   return v.toFixed(2);
+}
+
+function IcSparkline({ points }: { points: { date: string; ic: number }[] }) {
+  const vals = points.map((p) => p.ic);
+  const maxAbs = Math.max(...vals.map((v) => Math.abs(v)), 0.001);
+  return (
+    <div
+      className="flex h-16 items-end gap-px rounded-lg border border-slate-200 bg-slate-50/60 px-2 py-2 dark:border-slate-700 dark:bg-slate-900/40"
+      role="img"
+      aria-label="IC time series"
+    >
+      {points.map((p) => {
+        const h = Math.max(4, (Math.abs(p.ic) / maxAbs) * 100);
+        const positive = p.ic >= 0;
+        return (
+          <div
+            key={p.date}
+            title={`${p.date}: ${p.ic.toFixed(3)}`}
+            className={`min-w-[3px] flex-1 rounded-sm ${
+              positive
+                ? "bg-emerald-500/80 dark:bg-emerald-400/70"
+                : "bg-rose-500/80 dark:bg-rose-400/70"
+            }`}
+            style={{ height: `${h}%` }}
+          />
+        );
+      })}
+    </div>
+  );
 }

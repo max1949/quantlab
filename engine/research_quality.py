@@ -28,6 +28,69 @@ class QualityVerdict:
     scorecard: dict
 
 
+@dataclass
+class ScanPreview:
+    """参数扫描阶段的发布潜力预估 (非完整闸门, 需科学验证确认)。"""
+
+    promising: bool
+    hints: list[str]
+    scorecard: dict
+
+
+def assess_scan_preview(
+    *,
+    sharpe: float | None,
+    oos_sharpe: float | None,
+    ic_mean: float | None,
+    turnover: float | None,
+    thresholds: QualityThresholds | None = None,
+) -> ScanPreview:
+    """根据扫描指标给出「是否值得跑完整验证」的粗判与提示。"""
+    th = thresholds or QualityThresholds()
+    hints: list[str] = []
+    promising = True
+
+    if oos_sharpe is None:
+        hints.append("扫描未产出样本外夏普，需完整验证确认")
+        promising = False
+    elif float(oos_sharpe) < th.min_oos_sharpe:
+        hints.append(
+            f"样本外夏普 {float(oos_sharpe):.2f} 可能低于发布线 {th.min_oos_sharpe:.2f}"
+        )
+        promising = False
+    elif float(oos_sharpe) >= 0.35:
+        hints.append("样本外表现较好，建议一键载入并跑科学验证")
+
+    if turnover is not None and th.max_turnover is not None:
+        if float(turnover) > th.max_turnover:
+            hints.append(
+                f"换手率 {float(turnover):.1f} 超过 {th.max_turnover:.0f}，实盘成本可能侵蚀收益"
+            )
+            promising = False
+
+    if ic_mean is not None:
+        if abs(float(ic_mean)) < 0.02:
+            hints.append("IC 偏低，预测力有限 — 可试组合因子或其它模板")
+            promising = False
+        elif abs(float(ic_mean)) >= 0.04:
+            hints.append(f"IC {float(ic_mean):.3f} 有一定预测力")
+
+    if sharpe is not None and float(sharpe) < 0:
+        hints.append("全样本夏普为负，不太适合继续深挖这组参数")
+        promising = False
+
+    if not hints:
+        hints.append("指标中规中矩 — 载入后跑验证才能判断是否可发布")
+
+    scorecard = {
+        "sharpe": sharpe,
+        "oos_sharpe": oos_sharpe,
+        "ic_mean": ic_mean,
+        "turnover": turnover,
+    }
+    return ScanPreview(promising=promising, hints=hints, scorecard=scorecard)
+
+
 def evaluate_sealed_holdout_metrics(sealed: dict | None) -> float | None:
     if not sealed or sealed.get("skipped"):
         return None
