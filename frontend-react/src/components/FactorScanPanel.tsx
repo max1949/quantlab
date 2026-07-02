@@ -39,6 +39,11 @@ export default function FactorScanPanel({ projectId, symbol, timeframe }: Props)
   const scanFeat = ent.data?.features.find((f) => f.key === "factor_param_scan");
 
   const [templateType, setTemplateType] = useState("momentum");
+  const [extraSymbols, setExtraSymbols] = useState<string[]>([]);
+  const crossSymbolOptions = useMemo(
+    () => ["RB", "AU", "IF", "CU", "I", "MA"].filter((s) => s !== symbol.toUpperCase()),
+    [symbol],
+  );
   const [lastScan, setLastScan] = useState<FactorScan | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [compareResult, setCompareResult] = useState<FactorScanCompare | null>(null);
@@ -47,14 +52,19 @@ export default function FactorScanPanel({ projectId, symbol, timeframe }: Props)
   const activeScan = lastScan;
 
   const scan = useMutation({
-    mutationFn: () =>
-      runFactorScan({
+    mutationFn: () => {
+      const symbols = [symbol.toUpperCase(), ...extraSymbols].filter(
+        (v, i, a) => a.indexOf(v) === i,
+      );
+      return runFactorScan({
         symbol,
+        symbols: symbols.length > 1 ? symbols : undefined,
         template_type: templateType,
         timeframe,
         project_id: projectId,
         steps: 8,
-      }),
+      });
+    },
     onSuccess: (data) => {
       setLastScan(data);
       setCompareResult(null);
@@ -179,6 +189,29 @@ export default function FactorScanPanel({ projectId, symbol, timeframe }: Props)
               ))}
           </select>
         </div>
+        {crossSymbolOptions.length > 0 && (
+          <div>
+            <label className="label">{s.multiSymbol}</label>
+            <div className="flex flex-wrap gap-2">
+              {crossSymbolOptions.map((sym) => (
+                <label key={sym} className="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-300">
+                  <input
+                    type="checkbox"
+                    checked={extraSymbols.includes(sym)}
+                    disabled={!extraSymbols.includes(sym) && extraSymbols.length >= 2}
+                    onChange={() =>
+                      setExtraSymbols((prev) =>
+                        prev.includes(sym) ? prev.filter((x) => x !== sym) : [...prev, sym],
+                      )
+                    }
+                  />
+                  {sym}
+                </label>
+              ))}
+            </div>
+            <p className="mt-1 text-xs text-slate-400">{s.multiSymbolHint}</p>
+          </div>
+        )}
         <button
           type="button"
           className="btn-primary"

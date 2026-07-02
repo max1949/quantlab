@@ -100,6 +100,35 @@ def review_factor_scan(
     return InsightOut.model_validate(insight)
 
 
+class ScanBatchReviewRequest(BaseModel):
+    scan_ids: list[str] = Field(min_length=2, max_length=5)
+
+
+@router.post(
+    "/scans/review-batch",
+    response_model=InsightOut,
+    status_code=status.HTTP_201_CREATED,
+    summary="AI 批量对比解读多条参数扫描",
+)
+def review_factor_scans_batch(
+    payload: ScanBatchReviewRequest,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> InsightOut:
+    _check_ai_quota(current_user.id)
+    try:
+        ids = [uuid.UUID(s) for s in payload.scan_ids]
+        insight = ai_service.review_scans_batch(db, current_user, ids)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="无效的扫描 ID")
+    except ai_service.TargetNotReadyError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="扫描不存在 / 非本人, 无法批量解读",
+        )
+    return InsightOut.model_validate(insight)
+
+
 @router.post(
     "/validations/{validation_id}/review",
     response_model=InsightOut,

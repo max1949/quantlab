@@ -12,6 +12,7 @@ from backend.app.schemas.task import AcademyRewardOut
 
 class FactorScanRequest(BaseModel):
     symbol: str = Field(min_length=1, max_length=32)
+    symbols: list[str] | None = Field(default=None, max_length=3)
     template_type: str = Field(min_length=1, max_length=64)
     timeframe: str = Field(default="1d", max_length=16)
     project_id: uuid.UUID | None = None
@@ -30,6 +31,7 @@ class ScanResultRow(BaseModel):
     max_drawdown: float | None = None
     publish_promising: bool = False
     publish_hints: list[str] = Field(default_factory=list)
+    symbol_breakdown: dict | None = None
 
 
 class FactorScanOut(BaseModel):

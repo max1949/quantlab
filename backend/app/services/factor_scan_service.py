@@ -11,7 +11,7 @@ from backend.app.models.factor_scan import FactorScan
 from backend.app.models.user import User
 from backend.app.services import factor_service, market_data_policy as mdp
 from engine import factor_engine as fe
-from engine.param_scan import scan_template_grid
+from engine.param_scan import scan_template_grid, scan_template_multi_symbol
 from engine.factor_metrics import IC_HORIZON_BY_TF
 from engine.research_quality import assess_scan_preview
 from engine.data_quality import assess_ohlcv_quality
@@ -25,7 +25,14 @@ def _ic_horizon(timeframe: str) -> int:
     return IC_HORIZON_BY_TF.get(timeframe, 1)
 
 
-def _coach_summary(template_type: str, results: list[dict], symbol: str, timeframe: str) -> str:
+def _coach_summary(
+    template_type: str,
+    results: list[dict],
+    symbol: str,
+    timeframe: str,
+    *,
+    multi_symbol: bool = False,
+) -> str:
     if not results:
         return "扫描未产生有效结果，请换标的或模板重试。"
     top = results[0]
@@ -34,8 +41,9 @@ def _coach_summary(template_type: str, results: list[dict], symbol: str, timefra
     oos = top.get("oos_sharpe")
     ic = (top.get("ic") or {}).get("ic_mean")
     turnover = (top.get("metrics") or {}).get("turnover")
+    scope = f"{symbol}（跨标的平均）" if multi_symbol else symbol
     lines = [
-        f"在 {symbol} · {timeframe} 上对「{template_type}」完成了 {len(results)} 组参数扫描。",
+        f"在 {scope} · {timeframe} 上对「{template_type}」完成了 {len(results)} 组参数扫描。",
         f"当前最优: {top.get('label')}，综合分 {score}。",
     ]
     if oos is not None and oos < 0.3:
@@ -70,6 +78,7 @@ def _serialize_row(row: dict) -> dict:
         "max_drawdown": m.get("max_drawdown"),
         "publish_promising": preview.promising,
         "publish_hints": preview.hints,
+        "symbol_breakdown": row.get("symbol_breakdown"),
     }
 
 
@@ -82,27 +91,59 @@ def run_scan(
     timeframe: str = "1d",
     project_id: uuid.UUID | None = None,
     steps: int = 8,
+    symbols: list[str] | None = None,
 ) -> FactorScan:
     if template_type not in fe.TEMPLATES:
         raise ScanError(f"不支持的模板: {template_type}")
-    ohlcv = mdp.load_for_user(db, user, symbol, timeframe)
-    if ohlcv is None or ohlcv.empty:
-        raise ScanError("行情数据为空")
-    results = scan_template_grid(
-        ohlcv,
-        template_type,
-        steps=steps,
-        ic_horizon=_ic_horizon(timeframe),
-    )
+    sym_list = [s.strip().upper() for s in (symbols or [symbol]) if s and s.strip()]
+    if not sym_list:
+        sym_list = [symbol.upper()]
+    sym_list = list(dict.fromkeys(sym_list))[:3]
+    multi = len(sym_list) > 1
+
+    if multi:
+        ohlcv_map: dict = {}
+        for s in sym_list:
+            df = mdp.load_for_user(db, user, s, timeframe)
+            if df is None or df.empty:
+                raise ScanError(f"{s} 行情数据为空")
+            ohlcv_map[s] = df
+        results = scan_template_multi_symbol(
+            ohlcv_map,
+            template_type,
+            steps=steps,
+            ic_horizon=_ic_horizon(timeframe),
+        )
+        symbol_label = ",".join(sym_list)
+        dq_notes: list[str] = []
+        for s, df in ohlcv_map.items():
+            dq = assess_ohlcv_quality(df, timeframe)
+            dq_notes.extend([f"{s}:{w}" for w in dq.get("warnings", [])[:1]])
+    else:
+        s = sym_list[0]
+        ohlcv = mdp.load_for_user(db, user, s, timeframe)
+        if ohlcv is None or ohlcv.empty:
+            raise ScanError("行情数据为空")
+        results = scan_template_grid(
+            ohlcv,
+            template_type,
+            steps=steps,
+            ic_horizon=_ic_horizon(timeframe),
+        )
+        symbol_label = s
+        dq = assess_ohlcv_quality(ohlcv, timeframe)
+        dq_notes = dq.get("warnings") or []
+
     best = results[0] if results else None
-    coach = _coach_summary(template_type, results, symbol, timeframe)
-    dq = assess_ohlcv_quality(ohlcv, timeframe)
-    if dq.get("warnings"):
-        coach = f"【数据质量】{'；'.join(dq['warnings'][:2])} {coach}"
+    coach = _coach_summary(
+        template_type, results, symbol_label, timeframe, multi_symbol=multi
+    )
+    if dq_notes:
+        coach = f"【数据质量】{'；'.join(dq_notes[:2])} {coach}"
     scan = FactorScan(
         owner_id=user.id,
         project_id=project_id,
-        symbol=symbol.upper(),
+        symbol=symbol_label,
         timeframe=timeframe,
         template_type=template_type,
         results=results,

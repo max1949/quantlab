@@ -396,6 +396,23 @@ export default function ProjectDetail() {
               ))}
             </ul>
           )}
+          {quality.data.hints && quality.data.hints.length > 0 && (
+            <div className="mt-3 rounded-lg border border-slate-200 bg-white/60 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/40">
+              <p className="font-medium text-slate-700 dark:text-slate-200">{p.qualityHintsTitle}</p>
+              <ul className="mt-1 list-inside list-disc text-slate-600 dark:text-slate-300">
+                {quality.data.hints.map((h) => (
+                  <li key={h}>{h}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {quality.data.orthogonal && (
+            <p className="mt-3 text-xs text-slate-500">
+              {p.orthogonalTitle}: {p.orthogonalVerdict(quality.data.orthogonal.verdict)}
+              {quality.data.orthogonal.r2 != null &&
+                ` (R² ${Number(quality.data.orthogonal.r2).toFixed(2)})`}
+            </p>
+          )}
           {!quality.data.passed && (
             <QualityCoach
               reasons={quality.data.reasons}

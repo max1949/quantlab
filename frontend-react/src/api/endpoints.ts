@@ -152,6 +152,15 @@ export interface ProjectQuality {
   passed: boolean;
   reasons: string[];
   scorecard: Record<string, number | string | null>;
+  hints?: string[];
+  orthogonal?: {
+    target_factor: string;
+    control_factors: string[];
+    r2: number | null;
+    unique_ratio: number | null;
+    verdict: string;
+    hint: string | null;
+  } | null;
   thresholds?: {
     min_oos_sharpe: number;
     min_robustness_score: number;
@@ -194,6 +203,7 @@ export async function createTemplateFactor(body: {
 
 export async function runFactorScan(body: {
   symbol: string;
+  symbols?: string[];
   template_type: string;
   timeframe?: string;
   project_id?: string;
@@ -237,6 +247,11 @@ export async function compareFactorScans(
 
 export async function reviewFactorScan(scanId: string): Promise<Insight> {
   const { data } = await api.post<Insight>(`/ai/scans/${scanId}/review`);
+  return data;
+}
+
+export async function reviewFactorScansBatch(scanIds: string[]): Promise<Insight> {
+  const { data } = await api.post<Insight>("/ai/scans/review-batch", { scan_ids: scanIds });
   return data;
 }
 

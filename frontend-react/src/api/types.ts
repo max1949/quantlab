@@ -246,6 +246,7 @@ export interface ScanResultRow {
   max_drawdown: number | null;
   publish_promising?: boolean;
   publish_hints?: string[];
+  symbol_breakdown?: Record<string, { score?: number; oos_sharpe?: number; sharpe?: number }>;
 }
 
 export interface FactorScan {

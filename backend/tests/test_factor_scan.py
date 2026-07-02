@@ -100,3 +100,60 @@ def test_factor_scan_requires_l1(client, db_session):
         json={"symbol": "RB", "template_type": "momentum", "timeframe": "1d"},
     )
     assert res.status_code == 403
+
+
+def test_multi_symbol_scan(client, db_session):
+    seed_sample_market_data(db_session)
+    h = _register(client, "ms1")
+    from backend.app.models.user import User, UserLevel
+    from sqlalchemy import select
+
+    user = db_session.execute(select(User).where(User.username == "ms1")).scalar_one()
+    user.level = UserLevel.L1
+    user.experience = 100
+    db_session.commit()
+
+    res = client.post(
+        f"{BASE}/factors/scan",
+        headers=h,
+        json={
+            "symbol": "RB",
+            "symbols": ["RB", "AU"],
+            "template_type": "momentum",
+            "timeframe": "1d",
+            "steps": 6,
+        },
+    )
+    assert res.status_code == 201, res.text
+    body = res.json()
+    assert "RB,AU" == body["symbol"] or "AU,RB" in body["symbol"] or "," in body["symbol"]
+    assert body["results"][0].get("symbol_breakdown")
+
+
+def test_batch_scan_ai_review(client, db_session):
+    seed_sample_market_data(db_session)
+    h = _register(client, "batch1")
+    from backend.app.models.user import User, UserLevel
+    from sqlalchemy import select
+
+    user = db_session.execute(select(User).where(User.username == "batch1")).scalar_one()
+    user.level = UserLevel.L1
+    user.experience = 100
+    db_session.commit()
+
+    ids = []
+    for tpl in ("momentum", "mean_reversion"):
+        r = client.post(
+            f"{BASE}/factors/scan",
+            headers=h,
+            json={"symbol": "RB", "template_type": tpl, "timeframe": "1d", "steps": 6},
+        )
+        assert r.status_code == 201
+        ids.append(r.json()["id"])
+    batch = client.post(
+        f"{BASE}/ai/scans/review-batch",
+        headers=h,
+        json={"scan_ids": ids},
+    )
+    assert batch.status_code == 201, batch.text
+    assert batch.json()["content"]

@@ -108,3 +108,84 @@ def scan_template_grid(
     for i, row in enumerate(results):
         row["rank"] = i + 1
     return results
+
+
+def _params_key(params: dict) -> str:
+    return ",".join(f"{k}={v}" for k, v in sorted(params.items()))
+
+
+def scan_template_multi_symbol(
+    ohlcv_map: dict[str, pd.DataFrame],
+    template_type: str,
+    *,
+    param_grid: list[dict[str, int]] | None = None,
+    cost_config: CostConfig | None = None,
+    oos_ratio: float = 0.3,
+    ic_horizon: int = 1,
+    steps: int = 8,
+) -> list[dict[str, Any]]:
+    """多标的同一参数网格 — 按跨标的平均综合分排序。"""
+    if not ohlcv_map:
+        raise ValueError("至少需要一个标的")
+    if len(ohlcv_map) > 3:
+        raise ValueError("最多同时扫描 3 个标的")
+
+    grid = (param_grid or build_param_grid(template_type, steps=steps))[:MAX_VARIANTS]
+    per_symbol: dict[str, list[dict[str, Any]]] = {}
+    for sym, df in ohlcv_map.items():
+        per_symbol[sym] = scan_template_grid(
+            df,
+            template_type,
+            param_grid=grid,
+            cost_config=cost_config,
+            oos_ratio=oos_ratio,
+            ic_horizon=ic_horizon,
+            steps=steps,
+        )
+
+    merged: dict[str, dict[str, Any]] = {}
+    for sym, rows in per_symbol.items():
+        for row in rows:
+            key = _params_key(row.get("params") or {})
+            if key not in merged:
+                merged[key] = {
+                    "params": row.get("params") or {},
+                    "label": row.get("label") or key,
+                    "per_symbol": {},
+                    "template_row": row,
+                }
+            merged[key]["per_symbol"][sym] = {
+                "score": row.get("score"),
+                "oos_sharpe": row.get("oos_sharpe"),
+                "sharpe": (row.get("metrics") or {}).get("sharpe"),
+                "ic_mean": (row.get("ic") or {}).get("ic_mean"),
+                "turnover": (row.get("metrics") or {}).get("turnover"),
+            }
+
+    results: list[dict[str, Any]] = []
+    for entry in merged.values():
+        breakdown = entry["per_symbol"]
+        scores = [v["score"] for v in breakdown.values() if v.get("score") is not None]
+        oos_vals = [v["oos_sharpe"] for v in breakdown.values() if v.get("oos_sharpe") is not None]
+        ic_vals = [v["ic_mean"] for v in breakdown.values() if v.get("ic_mean") is not None]
+        turn_vals = [v["turnover"] for v in breakdown.values() if v.get("turnover") is not None]
+        avg_score = sum(scores) / len(scores) if scores else None
+        avg_oos = sum(oos_vals) / len(oos_vals) if oos_vals else None
+        base = dict(entry["template_row"])
+        base["score"] = round(avg_score, 1) if avg_score is not None else None
+        base["oos_sharpe"] = avg_oos
+        if ic_vals:
+            base["ic"] = {**(base.get("ic") or {}), "ic_mean": sum(ic_vals) / len(ic_vals)}
+        if turn_vals and base.get("metrics"):
+            base["metrics"] = {
+                **base["metrics"],
+                "turnover": sum(turn_vals) / len(turn_vals),
+            }
+        base["symbol_breakdown"] = breakdown
+        base["multi_symbol"] = True
+        results.append(base)
+
+    results.sort(key=lambda r: (r.get("score") is None, -(r.get("score") or 0)))
+    for i, row in enumerate(results):
+        row["rank"] = i + 1
+    return results

@@ -390,3 +390,76 @@ def build_scan_review_prompt(context: dict) -> dict:
         + json.dumps(payload, ensure_ascii=False, default=str, indent=2)
     )
     return {"system": MENTOR_SYSTEM, "user": user}
+
+
+def local_batch_scan_review(context: dict) -> dict:
+    """对比多条扫描实验，给出批量解读。"""
+    scans = context.get("scans") or []
+    if not scans:
+        return {
+            "headline": "未选择可对比的扫描记录。",
+            "strengths": [],
+            "risks": [],
+            "suggestions": ["在项目页或「我的实验」中先完成至少两次参数扫描。"],
+            "markdown": "**结论**: 暂无扫描可对比。",
+        }
+
+    strengths: list[str] = []
+    risks: list[str] = []
+    suggestions: list[str] = []
+
+    ranked = sorted(
+        scans,
+        key=lambda s: (s.get("best_score") is None, -(s.get("best_score") or 0)),
+    )
+    best = ranked[0]
+    worst = ranked[-1] if len(ranked) > 1 else None
+
+    strengths.append(
+        f"最优实验: {best.get('template_type')} @ {best.get('symbol')}·{best.get('timeframe')} "
+        f"(综合分 {best.get('best_score')})"
+    )
+    if worst and worst.get("id") != best.get("id"):
+        risks.append(
+            f"最弱实验: {worst.get('template_type')} @ {worst.get('symbol')} "
+            f"(综合分 {worst.get('best_score')})"
+        )
+
+    templates = {s.get("template_type") for s in scans}
+    if len(templates) > 1:
+        suggestions.append("模板类型不同 — 优先选跨标的/跨期更稳的那组参数。")
+    else:
+        suggestions.append("同模板多次扫描 — 关注最优参数区间是否一致。")
+    suggestions.append("对最优记录执行「载入并验证」，再考虑发布。")
+
+    headline = f"共对比 {len(scans)} 次参数扫描，当前领先: {best.get('symbol')} · {best.get('template_type')}。"
+    coach_bits = "；".join((s.get("coach_summary") or "")[:80] for s in scans[:3])
+    markdown = _render_review_md(headline, coach_bits, strengths, risks, suggestions)
+    return {
+        "headline": headline,
+        "strengths": strengths,
+        "risks": risks,
+        "suggestions": suggestions,
+        "markdown": markdown,
+    }
+
+
+def build_batch_scan_review_prompt(context: dict) -> dict:
+    scans = context.get("scans") or []
+    payload = [
+        {
+            "symbol": s.get("symbol"),
+            "timeframe": s.get("timeframe"),
+            "template": s.get("template_type"),
+            "best_score": s.get("best_score"),
+            "top_result": (s.get("results") or [{}])[0],
+            "coach": s.get("coach_summary"),
+        }
+        for s in scans[:5]
+    ]
+    user = (
+        "请对比以下多条因子参数扫描实验，给出:\n"
+        "1) 哪条更值得深入验证; 2) 共性与差异; 3) 风险; 4) 下一步。\n\n"
+        + json.dumps(payload, ensure_ascii=False, default=str, indent=2)
+    )
+    return {"system": MENTOR_SYSTEM, "user": user}

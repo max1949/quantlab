@@ -10,6 +10,7 @@ import {
   getFactorTemplates,
   listFactorScans,
   reviewFactorScan,
+  reviewFactorScansBatch,
 } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
 import type { FactorScan, FactorScanCompare } from "../api/types";
@@ -62,6 +63,15 @@ export default function Experiments() {
     onError: (err) => notify(apiErrorMessage(err, fs.compareFail), "error"),
   });
 
+  const aiBatch = useMutation({
+    mutationFn: () => reviewFactorScansBatch(compareIds),
+    onSuccess: (res) => {
+      setAiInsight(res.content);
+      notify(ai.done, "success");
+    },
+    onError: (err) => notify(apiErrorMessage(err, ai.fail), "error"),
+  });
+
   const apply = useMutation({
     mutationFn: (rank: number) => applyFactorScan(selected!.id, { rank }),
     onSuccess: () => {
@@ -110,7 +120,7 @@ export default function Experiments() {
     setCompareResult(null);
     setCompareIds((prev) => {
       if (prev.includes(id)) return prev.filter((x) => x !== id);
-      if (prev.length >= 2) return [prev[1], id];
+      if (prev.length >= 5) return [...prev.slice(1), id];
       return [...prev, id];
     });
   }
@@ -168,6 +178,16 @@ export default function Experiments() {
             onClick={() => compare.mutate()}
           >
             {compare.isPending ? fs.comparing : e.compareSelected}
+          </button>
+        )}
+        {compareIds.length >= 2 && compareIds.length <= 5 && (
+          <button
+            type="button"
+            className="btn"
+            disabled={aiBatch.isPending}
+            onClick={() => aiBatch.mutate()}
+          >
+            {aiBatch.isPending ? ai.loading : e.aiBatchReview}
           </button>
         )}
       </div>
@@ -247,12 +267,19 @@ export default function Experiments() {
             </table>
           </div>
 
-          {compareResult && (
-            <div className="rounded-lg border border-violet-200 bg-violet-50/60 px-3 py-2 text-sm text-violet-900 dark:border-violet-900 dark:bg-violet-950/30 dark:text-violet-100">
-              <p className="font-medium">{fs.compareTitle}</p>
-              <p className="mt-1">{compareResult.summary}</p>
-            </div>
-          )}
+      {compareResult && (
+        <div className="rounded-lg border border-violet-200 bg-violet-50/60 px-3 py-2 text-sm text-violet-900 dark:border-violet-900 dark:bg-violet-950/30 dark:text-violet-100">
+          <p className="font-medium">{fs.compareTitle}</p>
+          <p className="mt-1">{compareResult.summary}</p>
+        </div>
+      )}
+
+      {aiInsight && compareIds.length >= 2 && !selected && (
+        <div className="rounded-lg border border-brand-200 bg-brand-50/50 p-4 text-sm text-slate-700 dark:border-brand-900 dark:bg-brand-950/30 dark:text-slate-200">
+          <p className="mb-2 font-medium text-brand-700 dark:text-brand-300">{ai.scanBatchTitle}</p>
+          <div className="whitespace-pre-wrap">{aiInsight}</div>
+        </div>
+      )}
 
           {selected && (
             <ScanDetail

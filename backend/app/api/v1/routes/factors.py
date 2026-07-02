@@ -244,6 +244,7 @@ def run_factor_scan(
             db,
             current_user,
             symbol=payload.symbol,
+            symbols=payload.symbols,
             template_type=payload.template_type,
             timeframe=payload.timeframe,
             project_id=payload.project_id,

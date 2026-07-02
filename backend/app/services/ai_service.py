@@ -156,6 +156,41 @@ def review_scan(db: Session, owner: User, scan_id: uuid.UUID) -> AiInsight:
     )
 
 
+def review_scans_batch(
+    db: Session, owner: User, scan_ids: list[uuid.UUID]
+) -> AiInsight:
+    from backend.app.services import factor_scan_service as fss
+
+    if not scan_ids:
+        raise TargetNotReadyError("empty")
+    if len(scan_ids) > 5:
+        scan_ids = scan_ids[:5]
+    scans_out: list[dict] = []
+    for sid in scan_ids:
+        scan = fss.get_scan(db, owner.id, sid)
+        if scan is None:
+            raise TargetNotReadyError(str(sid))
+        row = fss.scan_to_out(scan)
+        row["id"] = str(scan.id)
+        scans_out.append(row)
+    context = {"scans": scans_out}
+    local = ai_advisor.local_batch_scan_review(context)
+    prompt = ai_advisor.build_batch_scan_review_prompt(context)
+    content, source, model = _generate(prompt, local)
+    batch_id = uuid.uuid5(uuid.NAMESPACE_DNS, ":".join(sorted(str(i) for i in scan_ids)))
+    return _persist(
+        db,
+        owner,
+        "scan_batch_review",
+        "factor_scan_batch",
+        batch_id,
+        content,
+        source,
+        model,
+        local,
+    )
+
+
 def research_plan(db: Session, owner: User, theme: str) -> AiInsight:
     """AI 研究指导: 给方向 -> 研究假设 + 推荐因子 + 实验计划 (不给交易建议)。"""
     local = ai_advisor.local_research_plan(theme)

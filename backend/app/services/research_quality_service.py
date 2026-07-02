@@ -125,6 +125,77 @@ def assess_project(db: Session, project_id: uuid.UUID) -> QualityVerdict:
     return assess_factor(db, factor_id)
 
 
+def orthogonal_preview(db: Session, project_id: uuid.UUID) -> dict | None:
+    """发布前正交化预览 — 主因子相对同项目其它因子的冗余度 (非硬闸门)。"""
+    from backend.app.models.project import ResearchProject
+    from backend.app.models.user import User
+    from backend.app.services import factor_service, market_data
+    from engine import advanced_research as ar
+
+    project = db.get(ResearchProject, project_id)
+    if project is None or not project.symbol:
+        return None
+    factors = list(
+        db.execute(select(Factor).where(Factor.project_id == project_id)).scalars().all()
+    )
+    if len(factors) < 2:
+        return None
+    rep_id = _representative_factor_id(db, project_id)
+    if rep_id is None:
+        return None
+    target = next((f for f in factors if f.id == rep_id), None)
+    if target is None:
+        return None
+    controls = [f for f in factors if f.id != rep_id][:5]
+    owner = db.get(User, target.owner_id)
+    if owner is None:
+        return None
+    if market_data.get_dataset(db, project.symbol) is None:
+        return None
+    ohlcv = market_data.load_ohlcv(project.symbol, "1d")
+    try:
+        target_signal = factor_service._compute_series(db, owner.id, target, ohlcv)
+        control_signals = {
+            f.name: factor_service._compute_series(db, owner.id, f, ohlcv)
+            for f in controls
+        }
+        result = ar.orthogonalize(target_signal, control_signals)
+    except ValueError:
+        return None
+    hint = None
+    r2 = result.get("r2")
+    if r2 is not None and float(r2) >= 0.5:
+        names = "、".join(f.name for f in controls)
+        hint = (
+            f"主因子「{target.name}」与同项目因子（{names}）解释度 R²={float(r2):.2f}，"
+            "发布前请确认是否仍有独立增量价值。"
+        )
+    return {
+        "target_factor": target.name,
+        "control_factors": [f.name for f in controls],
+        "r2": r2,
+        "unique_ratio": result.get("unique_ratio"),
+        "verdict": result.get("verdict"),
+        "hint": hint,
+    }
+
+
+def project_quality_payload(db: Session, project_id: uuid.UUID) -> dict:
+    verdict = assess_project(db, project_id)
+    hints: list[str] = []
+    orth = orthogonal_preview(db, project_id)
+    if orth and orth.get("hint"):
+        hints.append(orth["hint"])
+    return {
+        "passed": verdict.passed,
+        "reasons": verdict.reasons,
+        "scorecard": verdict.scorecard,
+        "thresholds": thresholds_payload(),
+        "hints": hints,
+        "orthogonal": orth,
+    }
+
+
 def require_project_publishable(db: Session, project_id: uuid.UUID) -> QualityVerdict:
     verdict = assess_project(db, project_id)
     if not verdict.passed:

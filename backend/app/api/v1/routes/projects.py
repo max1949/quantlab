@@ -84,13 +84,7 @@ def project_quality(
     from backend.app.services import research_quality_service as rq
 
     project_service.get_owned_project(db, current_user.id, uuid.UUID(project_id))
-    verdict = rq.assess_project(db, uuid.UUID(project_id))
-    return {
-        "passed": verdict.passed,
-        "reasons": verdict.reasons,
-        "scorecard": verdict.scorecard,
-        "thresholds": rq.thresholds_payload(),
-    }
+    return rq.project_quality_payload(db, uuid.UUID(project_id))
 
 
 @router.post("/{project_id}/publish", response_model=PublishProjectOut, summary="发布项目到研究 Feed")
