@@ -8,6 +8,7 @@ import {
   getOrgActivity,
   getOrgBilling,
   getOrgBillingHistory,
+  downloadOrgBillingHistoryCsv,
   getOrgCatalog,
   listFactors,
   listOrgInvites,
@@ -42,6 +43,7 @@ export default function OrgDetail() {
   const [inviteUrl, setInviteUrl] = useState("");
   const [teamCode, setTeamCode] = useState("");
   const [ssoDomains, setSsoDomains] = useState("");
+  const [billingExporting, setBillingExporting] = useState(false);
 
   const org = useQuery({ queryKey: ["org", id], queryFn: () => getOrg(id), enabled: Boolean(id) });
   const members = useQuery({
@@ -297,7 +299,22 @@ export default function OrgDetail() {
           </div>
           {billingHistory.data && billingHistory.data.length > 0 && (
             <div className="mt-4 border-t border-slate-200 pt-3 dark:border-slate-700">
-              <p className="mb-2 text-sm font-medium">{o.billingHistoryTitle}</p>
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-medium">{o.billingHistoryTitle}</p>
+                <button
+                  type="button"
+                  className="btn text-xs"
+                  disabled={billingExporting}
+                  onClick={() => {
+                    setBillingExporting(true);
+                    void downloadOrgBillingHistoryCsv(id)
+                      .catch((e) => notify(apiErrorMessage(e, o.billingExportFail), "error"))
+                      .finally(() => setBillingExporting(false));
+                  }}
+                >
+                  {billingExporting ? o.billingExporting : o.billingExportCsv}
+                </button>
+              </div>
               <ul className="space-y-1 text-xs text-slate-600 dark:text-slate-300">
                 {billingHistory.data.slice(0, 8).map((row) => (
                   <li

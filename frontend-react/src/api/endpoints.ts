@@ -890,6 +890,18 @@ export async function getOrgBillingHistory(orgId: string, limit = 20): Promise<O
   return data;
 }
 
+export async function downloadOrgBillingHistoryCsv(orgId: string): Promise<void> {
+  const { data } = await api.get<Blob>(`/orgs/${orgId}/billing/history/export`, {
+    responseType: "blob",
+  });
+  const url = URL.createObjectURL(data);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `org-${orgId}-billing.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export async function orgBillingCheckout(
   orgId: string,
   plan_code: string,

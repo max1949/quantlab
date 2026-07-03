@@ -12,6 +12,7 @@ from __future__ import annotations
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from backend.app.auth.deps import CurrentUser
@@ -64,6 +65,20 @@ def my_billing_history(
 ) -> list[BillingLedgerOut]:
     rows = bls.list_user_billing_history(db, current_user.id, limit=limit)
     return [BillingLedgerOut(**r) for r in rows]
+
+
+@router.get("/history/export", summary="导出我的计费流水 CSV")
+def export_my_billing_history(
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+    limit: int = 500,
+) -> Response:
+    csv_text = bls.export_user_billing_csv(db, current_user.id, limit=limit)
+    return Response(
+        content="\ufeff" + csv_text,
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="billing-history.csv"'},
+    )
 
 
 @router.post("/redeem", response_model=RedeemOut, summary="兑换码开通会员")

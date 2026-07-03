@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import csv
+import io
 import uuid
 from datetime import datetime
 
@@ -11,6 +13,24 @@ from sqlalchemy.orm import Session
 from backend.app.models.billing_ledger import BillingLedger
 from backend.app.services import membership_service as ms
 from backend.app.services.org_service import OrgAccessDeniedError, require_admin
+
+LEDGER_CSV_HEADERS = [
+    "id",
+    "scope",
+    "event",
+    "plan_code",
+    "plan_name",
+    "tier",
+    "tier_name",
+    "seats",
+    "amount_cny",
+    "currency",
+    "source",
+    "stripe_session_id",
+    "expires_at",
+    "detail",
+    "created_at",
+]
 
 
 def _plan_meta(plan_code: str) -> tuple[str, float]:
@@ -131,3 +151,41 @@ def list_user_billing_history(db: Session, user_id: uuid.UUID, *, limit: int = 5
         .limit(min(limit, 200))
     ).scalars().all()
     return [ledger_to_dict(r) for r in rows]
+
+
+def _fmt_dt(dt: datetime | None) -> str:
+    if dt is None:
+        return ""
+    if dt.tzinfo is None:
+        return dt.isoformat()
+    return dt.astimezone().isoformat()
+
+
+def rows_to_csv(rows: list[dict]) -> str:
+    buf = io.StringIO()
+    writer = csv.DictWriter(buf, fieldnames=LEDGER_CSV_HEADERS, extrasaction="ignore")
+    writer.writeheader()
+    for row in rows:
+        writer.writerow(
+            {
+                **row,
+                "id": str(row.get("id", "")),
+                "seats": "" if row.get("seats") is None else row["seats"],
+                "stripe_session_id": row.get("stripe_session_id") or "",
+                "expires_at": _fmt_dt(row.get("expires_at")),
+                "created_at": _fmt_dt(row.get("created_at")),
+            }
+        )
+    return buf.getvalue()
+
+
+def export_org_billing_csv(
+    db: Session, org_id: uuid.UUID, actor_id: uuid.UUID, *, limit: int = 500
+) -> str:
+    rows = list_org_billing_history(db, org_id, actor_id, limit=limit)
+    return rows_to_csv(rows)
+
+
+def export_user_billing_csv(db: Session, user_id: uuid.UUID, *, limit: int = 500) -> str:
+    rows = list_user_billing_history(db, user_id, limit=limit)
+    return rows_to_csv(rows)

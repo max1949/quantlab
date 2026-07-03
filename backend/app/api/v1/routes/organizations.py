@@ -454,6 +454,29 @@ def org_billing_history(
     return [OrgBillingLedgerOut(**r) for r in rows]
 
 
+@router.get(
+    "/{org_id}/billing/history/export",
+    summary="导出机构计费流水 CSV (管理员)",
+)
+def org_billing_history_export(
+    org_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+    limit: int = 500,
+) -> Response:
+    try:
+        csv_text = bls.export_org_billing_csv(
+            db, uuid.UUID(org_id), current_user.id, limit=limit
+        )
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    return Response(
+        content="\ufeff" + csv_text,
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="org-{org_id}-billing.csv"'},
+    )
+
+
 @router.post("/{org_id}/billing/checkout", response_model=CheckoutOut, summary="机构团队套餐下单")
 def org_billing_checkout(
     org_id: str,

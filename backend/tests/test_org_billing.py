@@ -223,3 +223,37 @@ def test_personal_billing_history(client, db_session):
     rows = history.json()
     assert len(rows) >= 1
     assert rows[0]["scope"] == "personal"
+
+
+def test_personal_billing_csv_export(client, db_session):
+    h = _auth(client)
+    rc = ms.create_redeem_code(db_session, tier=ms.TIER_PLUS, plan_code="plus_monthly")
+    client.post(f"{BASE}/billing/redeem", headers=h, json={"code": rc.code})
+    resp = client.get(f"{BASE}/billing/history/export", headers=h)
+    assert resp.status_code == 200, resp.text
+    assert "text/csv" in resp.headers.get("content-type", "")
+    body = resp.text.lstrip("\ufeff")
+    assert "plan_code" in body.splitlines()[0]
+    assert "plus_monthly" in body
+
+
+def test_org_billing_csv_export(client, db_session):
+    h_owner = _auth(client, OWNER)
+    org_id = client.post(f"{BASE}/orgs", headers=h_owner, json={"name": "CSV Org"}).json()["id"]
+    rc = ms.create_redeem_code(
+        db_session,
+        tier=ms.TIER_PLUS,
+        plan_code="org_plus_monthly",
+        kind="org",
+        seats=5,
+    )
+    client.post(
+        f"{BASE}/orgs/{org_id}/billing/redeem",
+        headers=h_owner,
+        json={"code": rc.code},
+    )
+    resp = client.get(f"{BASE}/orgs/{org_id}/billing/history/export", headers=h_owner)
+    assert resp.status_code == 200, resp.text
+    assert "text/csv" in resp.headers.get("content-type", "")
+    body = resp.text.lstrip("\ufeff")
+    assert "org_plus_monthly" in body
