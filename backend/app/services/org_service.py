@@ -93,6 +93,45 @@ def set_sso_domains(
     return cleaned
 
 
+def get_billing_profile(db: Session, org_id: uuid.UUID, actor_id: uuid.UUID) -> dict:
+    require_admin(db, org_id, actor_id)
+    org = db.get(ResearchOrg, org_id)
+    if org is None:
+        raise OrgNotFoundError(str(org_id))
+    company = (org.billing_company_name or "").strip()
+    tax_id = (org.billing_tax_id or "").strip()
+    address = (org.billing_address or "").strip()
+    return {
+        "company_name": company,
+        "tax_id": tax_id,
+        "address": address,
+        "configured": bool(company or tax_id or address),
+    }
+
+
+def set_billing_profile(
+    db: Session,
+    org_id: uuid.UUID,
+    actor_id: uuid.UUID,
+    *,
+    company_name: str,
+    tax_id: str,
+    address: str,
+) -> dict:
+    member = require_admin(db, org_id, actor_id)
+    if member.role != OrgRole.OWNER.value:
+        raise OrgAccessDeniedError("仅所有者可配置开票信息")
+    org = db.get(ResearchOrg, org_id)
+    if org is None:
+        raise OrgNotFoundError(str(org_id))
+    org.billing_company_name = (company_name or "").strip()[:200]
+    org.billing_tax_id = (tax_id or "").strip()[:64]
+    org.billing_address = (address or "").strip()[:300]
+    db.commit()
+    db.refresh(org)
+    return get_billing_profile(db, org_id, actor_id)
+
+
 def get_alert_webhook(db: Session, org_id: uuid.UUID, actor_id: uuid.UUID) -> dict:
     require_admin(db, org_id, actor_id)
     org = db.get(ResearchOrg, org_id)

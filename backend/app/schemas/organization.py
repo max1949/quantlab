@@ -158,3 +158,16 @@ class OrgAlertWebhookIn(BaseModel):
 class OrgAlertWebhookOut(BaseModel):
     webhook_url: str
     secret_configured: bool = False
+
+
+class OrgBillingProfileIn(BaseModel):
+    company_name: str = Field(default="", max_length=200)
+    tax_id: str = Field(default="", max_length=64)
+    address: str = Field(default="", max_length=300)
+
+
+class OrgBillingProfileOut(BaseModel):
+    company_name: str
+    tax_id: str
+    address: str
+    configured: bool = False

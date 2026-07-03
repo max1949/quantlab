@@ -257,21 +257,34 @@ def _pdf_text_lines(lines: list[str]) -> bytes:
     return out.getvalue()
 
 
-def render_invoice_pdf(row: dict) -> bytes:
+def render_invoice_pdf(row: dict, *, billing_profile: dict | None = None) -> bytes:
     created = row.get("created_at")
     expires = row.get("expires_at")
-    lines = [
-        "QuantLab Billing Receipt",
-        f"Receipt ID: {row.get('id')}",
-        f"Scope: {row.get('scope')}",
-        f"Event: {row.get('event')}",
-        f"Plan: {row.get('plan_name')} ({row.get('plan_code')})",
-        f"Tier: {row.get('tier_name')}",
-        f"Amount: {row.get('currency', 'CNY')} {row.get('amount_cny')}",
-        f"Source: {row.get('source')}",
-        f"Stripe Session: {row.get('stripe_session_id') or '-'}",
-        f"Created At: {_fmt_dt(created) if isinstance(created, datetime) else created}",
-        f"Expires At: {_fmt_dt(expires) if isinstance(expires, datetime) else (expires or '-')}",
-        f"Detail: {row.get('detail') or '-'}",
-    ]
+    lines = ["QuantLab Billing Receipt"]
+    if billing_profile and billing_profile.get("configured"):
+        company = (billing_profile.get("company_name") or "").strip()
+        tax_id = (billing_profile.get("tax_id") or "").strip()
+        address = (billing_profile.get("address") or "").strip()
+        if company:
+            lines.append(f"Bill To: {company}")
+        if tax_id:
+            lines.append(f"Tax ID: {tax_id}")
+        if address:
+            lines.append(f"Address: {address}")
+        lines.append("---")
+    lines.extend(
+        [
+            f"Receipt ID: {row.get('id')}",
+            f"Scope: {row.get('scope')}",
+            f"Event: {row.get('event')}",
+            f"Plan: {row.get('plan_name')} ({row.get('plan_code')})",
+            f"Tier: {row.get('tier_name')}",
+            f"Amount: {row.get('currency', 'CNY')} {row.get('amount_cny')}",
+            f"Source: {row.get('source')}",
+            f"Stripe Session: {row.get('stripe_session_id') or '-'}",
+            f"Created At: {_fmt_dt(created) if isinstance(created, datetime) else created}",
+            f"Expires At: {_fmt_dt(expires) if isinstance(expires, datetime) else (expires or '-')}",
+            f"Detail: {row.get('detail') or '-'}",
+        ]
+    )
     return _pdf_text_lines(lines)

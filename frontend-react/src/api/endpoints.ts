@@ -914,6 +914,26 @@ export async function getOrgBilling(orgId: string): Promise<OrgBilling> {
   return data;
 }
 
+export interface OrgBillingProfile {
+  company_name: string;
+  tax_id: string;
+  address: string;
+  configured: boolean;
+}
+
+export async function getOrgBillingProfile(orgId: string): Promise<OrgBillingProfile> {
+  const { data } = await api.get<OrgBillingProfile>(`/orgs/${orgId}/billing/profile`);
+  return data;
+}
+
+export async function setOrgBillingProfile(
+  orgId: string,
+  profile: { company_name: string; tax_id: string; address: string },
+): Promise<OrgBillingProfile> {
+  const { data } = await api.put<OrgBillingProfile>(`/orgs/${orgId}/billing/profile`, profile);
+  return data;
+}
+
 export async function getOrgBillingHistory(orgId: string, limit = 20): Promise<OrgBillingLedgerEntry[]> {
   const { data } = await api.get<OrgBillingLedgerEntry[]>(`/orgs/${orgId}/billing/history`, {
     params: { limit },

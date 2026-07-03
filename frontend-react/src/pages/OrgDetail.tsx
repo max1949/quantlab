@@ -8,6 +8,8 @@ import {
   getOrgActivity,
   getOrgBilling,
   getOrgBillingHistory,
+  getOrgBillingProfile,
+  setOrgBillingProfile,
   downloadOrgBillingHistoryCsv,
   downloadOrgBillingInvoicePdf,
   getOrgCatalog,
@@ -49,6 +51,9 @@ export default function OrgDetail() {
   const [teamCode, setTeamCode] = useState("");
   const [ssoDomains, setSsoDomains] = useState("");
   const [billingExporting, setBillingExporting] = useState(false);
+  const [billingCompany, setBillingCompany] = useState("");
+  const [billingTaxId, setBillingTaxId] = useState("");
+  const [billingAddress, setBillingAddress] = useState("");
   const [alertWebhook, setAlertWebhook] = useState("");
   const [alertWebhookSecret, setAlertWebhookSecret] = useState("");
 
@@ -82,6 +87,11 @@ export default function OrgDetail() {
   const billingHistory = useQuery({
     queryKey: ["org-billing-history", id],
     queryFn: () => getOrgBillingHistory(id),
+    enabled: Boolean(id) && org.data?.my_role === "owner",
+  });
+  const billingProfileQuery = useQuery({
+    queryKey: ["org-billing-profile", id],
+    queryFn: () => getOrgBillingProfile(id),
     enabled: Boolean(id) && org.data?.my_role === "owner",
   });
   const ssoDomainQuery = useQuery({
@@ -201,6 +211,24 @@ export default function OrgDetail() {
     onError: (e) => notify(apiErrorMessage(e, o.billingCheckoutFail), "error"),
   });
 
+  const saveBillingProfile = useMutation({
+    mutationFn: () =>
+      setOrgBillingProfile(id, {
+        company_name: billingCompany.trim(),
+        tax_id: billingTaxId.trim(),
+        address: billingAddress.trim(),
+      }),
+    onSuccess: (r) => {
+      setBillingCompany(r.company_name);
+      setBillingTaxId(r.tax_id);
+      setBillingAddress(r.address);
+      void qc.invalidateQueries({ queryKey: ["org-billing-profile", id] });
+      void qc.invalidateQueries({ queryKey: ["org-activity", id] });
+      notify(o.billingProfileSaved, "success");
+    },
+    onError: (e) => notify(apiErrorMessage(e, o.billingProfileFail), "error"),
+  });
+
   const saveSsoDomains = useMutation({
     mutationFn: () =>
       setOrgSsoDomains(
@@ -270,6 +298,14 @@ export default function OrgDetail() {
       setSsoDomains(ssoDomainQuery.data.domains.join(", "));
     }
   }, [ssoDomainQuery.data]);
+
+  useEffect(() => {
+    if (billingProfileQuery.data) {
+      setBillingCompany(billingProfileQuery.data.company_name);
+      setBillingTaxId(billingProfileQuery.data.tax_id);
+      setBillingAddress(billingProfileQuery.data.address);
+    }
+  }, [billingProfileQuery.data]);
 
   useEffect(() => {
     if (alertWebhookQuery.data) {
@@ -342,6 +378,38 @@ export default function OrgDetail() {
             >
               {teamRedeem.isPending ? o.billingRedeeming : o.billingRedeemBtn}
             </button>
+          </div>
+          <div className="mt-4 border-t border-slate-200 pt-3 dark:border-slate-700">
+            <p className="mb-2 text-sm font-medium">{o.billingProfileTitle}</p>
+            <p className="mb-2 text-xs text-slate-500">{o.billingProfileHint}</p>
+            <div className="flex flex-col gap-2">
+              <input
+                className="input text-sm"
+                placeholder={o.billingProfileCompany}
+                value={billingCompany}
+                onChange={(e) => setBillingCompany(e.target.value)}
+              />
+              <input
+                className="input text-sm font-mono"
+                placeholder={o.billingProfileTaxId}
+                value={billingTaxId}
+                onChange={(e) => setBillingTaxId(e.target.value)}
+              />
+              <input
+                className="input text-sm"
+                placeholder={o.billingProfileAddress}
+                value={billingAddress}
+                onChange={(e) => setBillingAddress(e.target.value)}
+              />
+              <button
+                type="button"
+                className="btn text-sm self-start"
+                disabled={saveBillingProfile.isPending || billingProfileQuery.isLoading}
+                onClick={() => saveBillingProfile.mutate()}
+              >
+                {saveBillingProfile.isPending ? o.billingProfileSaving : o.billingProfileSave}
+              </button>
+            </div>
           </div>
           {billingHistory.data && billingHistory.data.length > 0 && (
             <div className="mt-4 border-t border-slate-200 pt-3 dark:border-slate-700">

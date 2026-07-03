@@ -17,6 +17,8 @@ from backend.app.schemas.organization import (
     OrgBillingRedeemIn,
     OrgBillingRedeemOut,
     OrgBillingLedgerOut,
+    OrgBillingProfileIn,
+    OrgBillingProfileOut,
     OrgCreate,
     OrgFactorShareIn,
     OrgFactorShareOut,
@@ -439,6 +441,60 @@ def org_billing_status(
 
 
 @router.get(
+    "/{org_id}/billing/profile",
+    response_model=OrgBillingProfileOut,
+    summary="机构开票信息 (管理员可读)",
+)
+def get_org_billing_profile(
+    org_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> OrgBillingProfileOut:
+    try:
+        profile = org_service.get_billing_profile(db, uuid.UUID(org_id), current_user.id)
+    except org_service.OrgNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="机构不存在")
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    return OrgBillingProfileOut(**profile)
+
+
+@router.put(
+    "/{org_id}/billing/profile",
+    response_model=OrgBillingProfileOut,
+    summary="配置机构开票信息 (仅所有者)",
+)
+def set_org_billing_profile(
+    org_id: str,
+    payload: OrgBillingProfileIn,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> OrgBillingProfileOut:
+    try:
+        profile = org_service.set_billing_profile(
+            db,
+            uuid.UUID(org_id),
+            current_user.id,
+            company_name=payload.company_name,
+            tax_id=payload.tax_id,
+            address=payload.address,
+        )
+        audit_service.log(
+            db,
+            actor_id=current_user.id,
+            action="org.billing.profile",
+            resource_type="org",
+            resource_id=org_id,
+            detail={"configured": profile["configured"]},
+        )
+    except org_service.OrgNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="机构不存在")
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    return OrgBillingProfileOut(**profile)
+
+
+@router.get(
     "/{org_id}/billing/history",
     response_model=list[OrgBillingLedgerOut],
     summary="机构计费流水 (管理员)",
@@ -497,8 +553,12 @@ def org_billing_invoice_pdf(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="计费流水不存在")
+    try:
+        profile = org_service.get_billing_profile(db, uuid.UUID(org_id), current_user.id)
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     return Response(
-        content=bls.render_invoice_pdf(row),
+        content=bls.render_invoice_pdf(row, billing_profile=profile),
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="org-{org_id}-billing-{ledger_id}.pdf"'},
     )

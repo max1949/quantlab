@@ -293,3 +293,50 @@ def test_org_billing_invoice_pdf(client, db_session):
     assert resp.status_code == 200, resp.text
     assert resp.headers["content-type"] == "application/pdf"
     assert resp.content.startswith(b"%PDF")
+
+
+def test_org_billing_profile_and_invoice_header(client, db_session):
+    from backend.app.services import billing_ledger_service as bls
+
+    h_owner = _auth(client, OWNER)
+    org_id = client.post(f"{BASE}/orgs", headers=h_owner, json={"name": "Invoice Org"}).json()["id"]
+
+    empty = client.get(f"{BASE}/orgs/{org_id}/billing/profile", headers=h_owner)
+    assert empty.status_code == 200
+    assert empty.json()["configured"] is False
+
+    put = client.put(
+        f"{BASE}/orgs/{org_id}/billing/profile",
+        headers=h_owner,
+        json={
+            "company_name": "QuantLab Research Ltd",
+            "tax_id": "91310000MA1K12345X",
+            "address": "Shanghai, China",
+        },
+    )
+    assert put.status_code == 200, put.text
+    profile = put.json()
+    assert profile["configured"] is True
+    assert profile["company_name"] == "QuantLab Research Ltd"
+
+    rc = ms.create_redeem_code(
+        db_session,
+        tier=ms.TIER_PLUS,
+        plan_code="org_plus_monthly",
+        kind="org",
+        seats=5,
+    )
+    client.post(
+        f"{BASE}/orgs/{org_id}/billing/redeem",
+        headers=h_owner,
+        json={"code": rc.code},
+    )
+    rows = client.get(f"{BASE}/orgs/{org_id}/billing/history", headers=h_owner).json()
+    resp = client.get(
+        f"{BASE}/orgs/{org_id}/billing/history/{rows[0]['id']}/invoice.pdf",
+        headers=h_owner,
+    )
+    assert resp.status_code == 200, resp.text
+    pdf = bls.render_invoice_pdf(rows[0], billing_profile=profile)
+    assert b"QuantLab Research Ltd" in pdf
+    assert b"91310000MA1K12345X" in pdf
