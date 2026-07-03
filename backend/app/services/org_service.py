@@ -12,6 +12,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from backend.app.models.backtest import Backtest, BacktestStatus
+from backend.app.models.audit import AuditEvent
 from backend.app.models.factor import Factor
 from backend.app.models.organization import (
     OrgFactorShare,
@@ -23,6 +24,7 @@ from backend.app.models.organization import (
 from backend.app.models.user import User
 from backend.app.models.validation import Validation, ValidationStatus
 from backend.app.services import factor_service, market_data_policy as mdp
+from backend.app.services import audit_service
 from engine import advanced_research as ar
 
 _WRITE_ROLES = frozenset({OrgRole.OWNER.value, OrgRole.ADMIN.value, OrgRole.MEMBER.value})
@@ -161,6 +163,113 @@ def add_member(
     db.commit()
     db.refresh(row)
     return row
+
+
+def update_member_role(
+    db: Session,
+    org_id: uuid.UUID,
+    actor_id: uuid.UUID,
+    target_user_id: uuid.UUID,
+    role: str,
+) -> OrgMember:
+    actor = require_admin(db, org_id, actor_id)
+    target = _member_row(db, org_id, target_user_id)
+    if target is None:
+        raise OrgMemberNotFoundError(str(target_user_id))
+    if target.role == OrgRole.OWNER.value:
+        raise OrgAccessDeniedError("不能修改所有者角色")
+    if role == OrgRole.OWNER.value:
+        raise OrgAccessDeniedError("不能设置为所有者")
+    if role == OrgRole.ADMIN.value and actor.role != OrgRole.OWNER.value:
+        raise OrgAccessDeniedError("仅所有者可设置管理员")
+    target.role = role
+    db.commit()
+    db.refresh(target)
+    return target
+
+
+def remove_member(
+    db: Session,
+    org_id: uuid.UUID,
+    actor_id: uuid.UUID,
+    target_user_id: uuid.UUID,
+) -> None:
+    actor = require_member(db, org_id, actor_id)
+    target = _member_row(db, org_id, target_user_id)
+    if target is None:
+        return
+    if target.role == OrgRole.OWNER.value:
+        raise OrgAccessDeniedError("不能移除所有者")
+    is_self = actor_id == target_user_id
+    if not is_self and actor.role not in _ADMIN_ROLES:
+        raise OrgAccessDeniedError("需要管理员权限")
+    if (
+        actor.role == OrgRole.ADMIN.value
+        and target.role == OrgRole.ADMIN.value
+        and not is_self
+    ):
+        raise OrgAccessDeniedError("管理员不能移除其他管理员")
+    db.delete(target)
+    db.commit()
+
+
+def list_invites(db: Session, org_id: uuid.UUID, actor_id: uuid.UUID) -> list[dict]:
+    require_admin(db, org_id, actor_id)
+    now = datetime.now(timezone.utc)
+    rows = list(
+        db.execute(
+            select(OrgInvite)
+            .where(OrgInvite.org_id == org_id)
+            .order_by(OrgInvite.created_at.desc())
+        )
+        .scalars()
+        .all()
+    )
+    out: list[dict] = []
+    for inv in rows:
+        expires = inv.expires_at
+        if expires.tzinfo is None:
+            expires = expires.replace(tzinfo=timezone.utc)
+        active = expires > now and inv.used_count < inv.max_uses
+        out.append({**_invite_to_dict(db, inv), "active": active})
+    return out
+
+
+def revoke_invite(
+    db: Session, org_id: uuid.UUID, actor_id: uuid.UUID, invite_id: uuid.UUID
+) -> None:
+    require_admin(db, org_id, actor_id)
+    invite = db.get(OrgInvite, invite_id)
+    if invite is None or invite.org_id != org_id:
+        return
+    db.delete(invite)
+    db.commit()
+
+
+def _event_belongs_to_org(event: AuditEvent, org_id: str) -> bool:
+    if event.resource_type == "org" and event.resource_id == org_id:
+        return True
+    detail = event.detail or {}
+    return str(detail.get("org_id", "")) == org_id
+
+
+def org_activity(db: Session, org_id: uuid.UUID, user_id: uuid.UUID, *, limit: int = 50) -> list[dict]:
+    require_member(db, org_id, user_id)
+    oid = str(org_id)
+    rows = audit_service.list_recent(db, limit=300, action_prefix="org")
+    filtered = [r for r in rows if _event_belongs_to_org(r, oid)][: max(1, min(limit, 100))]
+    return [
+        {
+            "id": str(r.id),
+            "action": r.action,
+            "actor_id": str(r.actor_id) if r.actor_id else None,
+            "resource_type": r.resource_type,
+            "resource_id": r.resource_id,
+            "detail": r.detail,
+            "created_at": r.created_at.isoformat(),
+        }
+        for r in filtered
+    ]
 
 
 def _invite_to_dict(db: Session, invite: OrgInvite) -> dict:

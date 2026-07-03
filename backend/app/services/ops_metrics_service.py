@@ -13,6 +13,7 @@ from backend.app.models.growth import ResearchShare, UserEvent
 from backend.app.models.membership import Subscription, SubscriptionStatus
 from backend.app.models.project import ProjectStatus, ResearchProject
 from backend.app.models.research import ResearchReport
+from backend.app.models.organization import OrgFactorShare, OrgMember, ResearchOrg
 from backend.app.models.user import User
 from backend.app.models.validation import Validation, ValidationStatus
 
@@ -70,6 +71,10 @@ def compute_pmf_metrics(db: Session, *, exclude_test: bool = True) -> dict:
         select(func.count()).select_from(ResearchReport).where(ResearchReport.is_public.is_(True))
     ).scalar_one()
 
+    total_orgs = db.execute(select(func.count()).select_from(ResearchOrg)).scalar_one()
+    total_org_members = db.execute(select(func.count()).select_from(OrgMember)).scalar_one()
+    shared_org_factors = db.execute(select(func.count()).select_from(OrgFactorShare)).scalar_one()
+
     return {
         "registered_users": registered,
         "test_accounts_excluded": len(test_ids) if exclude_test else 0,
@@ -90,4 +95,9 @@ def compute_pmf_metrics(db: Session, *, exclude_test: bool = True) -> dict:
         "public_reports": int(public_reports or 0),
         "retention_day7": None,
         "retention_note": "需要 login/session 埋点",
+        "institutional": {
+            "total_orgs": int(total_orgs or 0),
+            "total_org_members": int(total_org_members or 0),
+            "shared_org_factors": int(shared_org_factors or 0),
+        },
     }

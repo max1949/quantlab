@@ -15,6 +15,7 @@ export default function AdminOps() {
   const a = useLocale((s) => s.dict.adminOps);
   const [keyInput, setKeyInput] = useState(getAdminKey() ?? "");
   const [unlocked, setUnlocked] = useState(Boolean(getAdminKey()));
+  const [auditFilter, setAuditFilter] = useState("");
   const qc = useQueryClient();
 
   const metrics = useQuery({
@@ -32,8 +33,8 @@ export default function AdminOps() {
   });
 
   const audit = useQuery({
-    queryKey: ["admin-ops-audit"],
-    queryFn: () => fetchOpsAudit(80),
+    queryKey: ["admin-ops-audit", auditFilter],
+    queryFn: () => fetchOpsAudit(80, auditFilter || undefined),
     enabled: unlocked,
     retry: false,
   });
@@ -113,6 +114,14 @@ export default function AdminOps() {
         <Stat label={a.published} value={m.published_projects} />
       </div>
 
+      {m.institutional && (
+        <div className="mb-6 grid gap-4 sm:grid-cols-3">
+          <Stat label={a.instOrgs} value={m.institutional.total_orgs} />
+          <Stat label={a.instMembers} value={m.institutional.total_org_members} />
+          <Stat label={a.instSharedFactors} value={m.institutional.shared_org_factors} />
+        </div>
+      )}
+
       <div className="mb-6 card">
         <h2 className="mb-3 font-semibold text-slate-800 dark:text-slate-100">{a.funnelTitle}</h2>
         <div className="grid gap-2 text-sm sm:grid-cols-5">
@@ -145,15 +154,27 @@ export default function AdminOps() {
       </div>
 
       <div className="card">
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h2 className="font-semibold text-slate-800 dark:text-slate-100">{a.auditTitle}</h2>
-          <button
-            type="button"
-            className="btn text-sm"
-            onClick={() => void audit.refetch()}
-          >
-            {a.refresh}
-          </button>
+          <div className="flex items-center gap-2">
+            <select
+              className="input text-sm"
+              value={auditFilter}
+              onChange={(e) => setAuditFilter(e.target.value)}
+            >
+              <option value="">{a.auditFilterAll}</option>
+              <option value="org">{a.auditFilterOrg}</option>
+              <option value="project">{a.auditFilterProject}</option>
+              <option value="backtest">{a.auditFilterBacktest}</option>
+            </select>
+            <button
+              type="button"
+              className="btn text-sm"
+              onClick={() => void audit.refetch()}
+            >
+              {a.refresh}
+            </button>
+          </div>
         </div>
         {audit.isLoading ? (
           <Spinner />

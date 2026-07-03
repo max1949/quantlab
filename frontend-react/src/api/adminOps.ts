@@ -35,6 +35,11 @@ export interface OpsMetrics {
   public_reports: number;
   retention_day7: number | null;
   retention_note: string;
+  institutional?: {
+    total_orgs: number;
+    total_org_members: number;
+    shared_org_factors: number;
+  };
 }
 
 export interface OpsHealth {
@@ -67,9 +72,9 @@ export async function fetchOpsHealth(): Promise<OpsHealth> {
   return data;
 }
 
-export async function fetchOpsAudit(limit = 50): Promise<AuditEventRow[]> {
+export async function fetchOpsAudit(limit = 50, actionPrefix?: string): Promise<AuditEventRow[]> {
   const { data } = await adminApi.get<AuditEventRow[]>("/audit", {
-    params: { limit },
+    params: { limit, action_prefix: actionPrefix || undefined },
   });
   return data;
 }

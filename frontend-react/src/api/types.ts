@@ -535,6 +535,7 @@ export interface OrgInvite {
   expires_at: string;
   created_at: string;
   invite_path: string;
+  active?: boolean;
 }
 
 export interface OrgInvitePreview {

@@ -36,8 +36,9 @@ def ops_audit(
     db: Annotated[Session, Depends(get_db)],
     _: Annotated[None, Depends(require_admin)],
     limit: int = 50,
+    action_prefix: str | None = None,
 ) -> list[dict]:
-    rows = audit_service.list_recent(db, limit=limit)
+    rows = audit_service.list_recent(db, limit=limit, action_prefix=action_prefix)
     return [
         {
             "id": str(r.id),

@@ -17,6 +17,10 @@ class OrgMemberAdd(BaseModel):
     role: str = Field(default="member", pattern=r"^(admin|member|viewer)$")
 
 
+class OrgMemberUpdate(BaseModel):
+    role: str = Field(pattern=r"^(admin|member|viewer)$")
+
+
 class OrgInviteCreate(BaseModel):
     role: str = Field(default="member", pattern=r"^(admin|member|viewer)$")
     expires_in_days: int = Field(default=7, ge=1, le=90)
@@ -77,3 +81,17 @@ class OrgInvitePreviewOut(BaseModel):
     used_count: int
     max_uses: int
     already_member: bool
+
+
+class OrgInviteListOut(OrgInviteOut):
+    active: bool
+
+
+class OrgActivityOut(BaseModel):
+    id: str
+    action: str
+    actor_id: str | None
+    resource_type: str
+    resource_id: str
+    detail: dict
+    created_at: str

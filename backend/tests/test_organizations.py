@@ -137,3 +137,33 @@ def test_non_admin_cannot_create_invite(client, db_session):
         json={"role": "member", "expires_in_days": 7, "max_uses": 1},
     )
     assert resp.status_code == 403
+
+
+def test_update_member_role_and_remove(client, db_session):
+    h_owner = _auth(client, OWNER)
+    h_member = _auth(client, MEMBER)
+    org_id = client.post(f"{BASE}/orgs", headers=h_owner, json={"name": "Gov Desk"}).json()["id"]
+    client.post(
+        f"{BASE}/orgs/{org_id}/members",
+        headers=h_owner,
+        json={"username": MEMBER["username"], "role": "member"},
+    )
+    members = client.get(f"{BASE}/orgs/{org_id}/members", headers=h_owner).json()
+    member_id = next(m["user_id"] for m in members if m["username"] == MEMBER["username"])
+
+    updated = client.patch(
+        f"{BASE}/orgs/{org_id}/members/{member_id}",
+        headers=h_owner,
+        json={"role": "viewer"},
+    )
+    assert updated.status_code == 200
+    assert updated.json()["role"] == "viewer"
+
+    activity = client.get(f"{BASE}/orgs/{org_id}/activity", headers=h_owner)
+    assert activity.status_code == 200
+    assert any(a["action"] == "org.member.role" for a in activity.json())
+
+    removed = client.delete(f"{BASE}/orgs/{org_id}/members/{member_id}", headers=h_owner)
+    assert removed.status_code == 204
+    members_after = client.get(f"{BASE}/orgs/{org_id}/members", headers=h_owner).json()
+    assert all(m["username"] != MEMBER["username"] for m in members_after)

@@ -38,10 +38,14 @@ def log(
     return row
 
 
-def list_recent(db: Session, *, limit: int = 100) -> list[AuditEvent]:
+def list_recent(
+    db: Session,
+    *,
+    limit: int = 100,
+    action_prefix: str | None = None,
+) -> list[AuditEvent]:
     cap = max(1, min(int(limit), 500))
-    return list(
-        db.execute(
-            select(AuditEvent).order_by(AuditEvent.created_at.desc()).limit(cap)
-        ).scalars().all()
-    )
+    stmt = select(AuditEvent).order_by(AuditEvent.created_at.desc())
+    if action_prefix:
+        stmt = stmt.where(AuditEvent.action.like(f"{action_prefix}%"))
+    return list(db.execute(stmt.limit(cap)).scalars().all())

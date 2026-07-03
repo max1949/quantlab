@@ -44,6 +44,7 @@ def test_admin_ops_metrics_with_key(client, db_session):
     metrics = ops_metrics_service.compute_pmf_metrics(db_session)
     assert "registered_users" in metrics
     assert "funnel" in metrics
+    assert "institutional" in metrics
 
     resp = client.get(f"{BASE}/admin/ops/metrics", headers=_admin_headers())
     assert resp.status_code == 200

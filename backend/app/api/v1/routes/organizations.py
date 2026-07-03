@@ -11,14 +11,17 @@ from sqlalchemy.orm import Session
 from backend.app.auth.deps import CurrentUser
 from backend.app.core.database import get_db
 from backend.app.schemas.organization import (
+    OrgActivityOut,
     OrgCreate,
     OrgFactorShareIn,
     OrgFactorShareOut,
     OrgInviteCreate,
+    OrgInviteListOut,
     OrgInviteOut,
     OrgInvitePreviewOut,
     OrgMemberAdd,
     OrgMemberOut,
+    OrgMemberUpdate,
     OrgOut,
 )
 from backend.app.services import audit_service, org_service
@@ -159,6 +162,135 @@ def list_members(
     except org_service.OrgAccessDeniedError:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="无权访问该机构")
     return [OrgMemberOut(**r) for r in rows]
+
+
+@router.patch(
+    "/{org_id}/members/{user_id}",
+    response_model=OrgMemberOut,
+    summary="更新成员角色 (管理员)",
+)
+def update_member_role(
+    org_id: str,
+    user_id: str,
+    payload: OrgMemberUpdate,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> OrgMemberOut:
+    try:
+        org_service.update_member_role(
+            db,
+            uuid.UUID(org_id),
+            current_user.id,
+            uuid.UUID(user_id),
+            payload.role,
+        )
+        rows = org_service.list_members(db, uuid.UUID(org_id), current_user.id)
+        match = next((m for m in rows if str(m["user_id"]) == user_id), None)
+        audit_service.log(
+            db,
+            actor_id=current_user.id,
+            action="org.member.role",
+            resource_type="org",
+            resource_id=org_id,
+            detail={"user_id": user_id, "role": payload.role},
+        )
+        if match:
+            return OrgMemberOut(**match)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="成员不存在")
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    except org_service.OrgMemberNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="成员不存在")
+
+
+@router.delete(
+    "/{org_id}/members/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="移除成员或自行退出",
+)
+def remove_member(
+    org_id: str,
+    user_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> Response:
+    try:
+        org_service.remove_member(
+            db, uuid.UUID(org_id), current_user.id, uuid.UUID(user_id)
+        )
+        audit_service.log(
+            db,
+            actor_id=current_user.id,
+            action="org.member.remove",
+            resource_type="org",
+            resource_id=org_id,
+            detail={"user_id": user_id},
+        )
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get(
+    "/{org_id}/invites",
+    response_model=list[OrgInviteListOut],
+    summary="机构邀请列表 (管理员)",
+)
+def list_invites(
+    org_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> list[OrgInviteListOut]:
+    try:
+        return [OrgInviteListOut(**row) for row in org_service.list_invites(db, uuid.UUID(org_id), current_user.id)]
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+
+
+@router.delete(
+    "/{org_id}/invites/{invite_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="撤销邀请 (管理员)",
+)
+def revoke_invite(
+    org_id: str,
+    invite_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> Response:
+    try:
+        org_service.revoke_invite(
+            db, uuid.UUID(org_id), current_user.id, uuid.UUID(invite_id)
+        )
+        audit_service.log(
+            db,
+            actor_id=current_user.id,
+            action="org.invite.revoke",
+            resource_type="org",
+            resource_id=org_id,
+            detail={"invite_id": invite_id},
+        )
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get(
+    "/{org_id}/activity",
+    response_model=list[OrgActivityOut],
+    summary="机构活动审计",
+)
+def org_activity(
+    org_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+    limit: int = 50,
+) -> list[OrgActivityOut]:
+    try:
+        rows = org_service.org_activity(db, uuid.UUID(org_id), current_user.id, limit=limit)
+    except org_service.OrgAccessDeniedError:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="无权访问该机构")
+    return [OrgActivityOut(**r) for r in rows]
 
 
 @router.post("/{org_id}/members", response_model=OrgMemberOut, summary="添加成员 (管理员)")

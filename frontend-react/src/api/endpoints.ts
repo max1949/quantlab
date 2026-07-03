@@ -779,6 +779,45 @@ export async function addOrgMember(
   return data;
 }
 
+export async function updateOrgMemberRole(
+  orgId: string,
+  userId: string,
+  role: string,
+): Promise<OrgMember> {
+  const { data } = await api.patch<OrgMember>(`/orgs/${orgId}/members/${userId}`, { role });
+  return data;
+}
+
+export async function removeOrgMember(orgId: string, userId: string): Promise<void> {
+  await api.delete(`/orgs/${orgId}/members/${userId}`);
+}
+
+export async function listOrgInvites(orgId: string): Promise<OrgInvite[]> {
+  const { data } = await api.get<OrgInvite[]>(`/orgs/${orgId}/invites`);
+  return data;
+}
+
+export async function revokeOrgInvite(orgId: string, inviteId: string): Promise<void> {
+  await api.delete(`/orgs/${orgId}/invites/${inviteId}`);
+}
+
+export interface OrgActivity {
+  id: string;
+  action: string;
+  actor_id: string | null;
+  resource_type: string;
+  resource_id: string;
+  detail: Record<string, unknown>;
+  created_at: string;
+}
+
+export async function getOrgActivity(orgId: string, limit = 50): Promise<OrgActivity[]> {
+  const { data } = await api.get<OrgActivity[]>(`/orgs/${orgId}/activity`, {
+    params: { limit },
+  });
+  return data;
+}
+
 export async function createOrgInvite(
   orgId: string,
   body: { role?: string; expires_in_days?: number; max_uses?: number },

@@ -5,12 +5,18 @@ import {
   addOrgMember,
   createOrgInvite,
   getOrg,
+  getOrgActivity,
   getOrgCatalog,
   listFactors,
+  listOrgInvites,
   listOrgMembers,
+  removeOrgMember,
+  revokeOrgInvite,
   shareFactorToOrg,
+  updateOrgMemberRole,
 } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
+import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
 import { ErrorBox, PageTitle, Spinner } from "../components/ui";
@@ -19,6 +25,7 @@ export default function OrgDetail() {
   const { id = "" } = useParams();
   const o = useLocale((s) => s.dict.orgLibrary);
   const notify = useUi((s) => s.notify);
+  const me = useAuth((s) => s.user);
   const qc = useQueryClient();
   const [username, setUsername] = useState("");
   const [factorId, setFactorId] = useState("");
@@ -37,8 +44,19 @@ export default function OrgDetail() {
     enabled: Boolean(id),
   });
   const myFactors = useQuery({ queryKey: ["factors"], queryFn: listFactors });
+  const invites = useQuery({
+    queryKey: ["org-invites", id],
+    queryFn: () => listOrgInvites(id),
+    enabled: Boolean(id) && (org.data?.my_role === "owner" || org.data?.my_role === "admin"),
+  });
+  const activity = useQuery({
+    queryKey: ["org-activity", id],
+    queryFn: () => getOrgActivity(id),
+    enabled: Boolean(id),
+  });
 
-  const canAdmin = org.data?.my_role === "owner" || org.data?.my_role === "admin";
+  const isOwner = org.data?.my_role === "owner";
+  const canAdmin = isOwner || org.data?.my_role === "admin";
   const canShare = canAdmin || org.data?.my_role === "member";
 
   const addMember = useMutation({
@@ -67,10 +85,56 @@ export default function OrgDetail() {
     onSuccess: (res) => {
       const origin = window.location.origin;
       setInviteUrl(`${origin}${res.invite_path}`);
+      void qc.invalidateQueries({ queryKey: ["org-invites", id] });
       notify(o.inviteCreated, "success");
     },
     onError: (e) => notify(apiErrorMessage(e, o.inviteFail), "error"),
   });
+
+  const updateRole = useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: string }) =>
+      updateOrgMemberRole(id, userId, role),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["org-members", id] });
+      void qc.invalidateQueries({ queryKey: ["org-activity", id] });
+      notify(o.roleUpdated, "success");
+    },
+    onError: (e) => notify(apiErrorMessage(e, o.roleUpdateFail), "error"),
+  });
+
+  const removeMember = useMutation({
+    mutationFn: (userId: string) => removeOrgMember(id, userId),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["org-members", id] });
+      void qc.invalidateQueries({ queryKey: ["org", id] });
+      void qc.invalidateQueries({ queryKey: ["org-activity", id] });
+      notify(o.memberRemoved, "success");
+    },
+    onError: (e) => notify(apiErrorMessage(e, o.removeFail), "error"),
+  });
+
+  const revokeInviteMut = useMutation({
+    mutationFn: (inviteId: string) => revokeOrgInvite(id, inviteId),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["org-invites", id] });
+      void qc.invalidateQueries({ queryKey: ["org-activity", id] });
+      notify(o.inviteRevoked, "success");
+    },
+    onError: (e) => notify(apiErrorMessage(e, o.revokeFail), "error"),
+  });
+
+  function canManageMember(userId: string, role: string) {
+    if (role === "owner") return false;
+    if (!canAdmin) return me?.id === userId;
+    if (role === "admin" && !isOwner && userId !== me?.id) return false;
+    return true;
+  }
+
+  function roleOptionsForMember(role: string) {
+    if (isOwner) return ["admin", "member", "viewer"];
+    if (role === "admin") return ["admin"];
+    return ["member", "viewer"];
+  }
 
   if (org.isLoading) return <Spinner />;
   if (org.isError || !org.data) {
@@ -225,16 +289,99 @@ export default function OrgDetail() {
         )}
       </div>
 
-      <div className="card">
+      <div className="mb-6 card">
         <h2 className="mb-3 font-semibold">{o.memberList}</h2>
-        <ul className="space-y-1 text-sm">
+        <ul className="space-y-2 text-sm">
           {(members.data ?? []).map((m) => (
-            <li key={m.user_id} className="flex justify-between border-b border-slate-100 py-1 dark:border-slate-800">
-              <span>{m.username}</span>
-              <span className="text-xs text-slate-500">{m.role}</span>
+            <li
+              key={m.user_id}
+              className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 py-2 dark:border-slate-800"
+            >
+              <span className="font-medium">{m.username}</span>
+              <div className="flex items-center gap-2">
+                {canManageMember(m.user_id, m.role) ? (
+                  <>
+                    <select
+                      className="input text-xs"
+                      value={m.role}
+                      disabled={m.role === "owner" || updateRole.isPending}
+                      onChange={(e) =>
+                        updateRole.mutate({ userId: m.user_id, role: e.target.value })
+                      }
+                    >
+                      {(m.role === "owner" ? ["owner"] : roleOptionsForMember(m.role)).map((r) => (
+                        <option key={r} value={r}>
+                          {r}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      className="btn text-xs"
+                      disabled={removeMember.isPending}
+                      onClick={() => removeMember.mutate(m.user_id)}
+                    >
+                      {me?.id === m.user_id ? o.leaveOrg : o.removeMember}
+                    </button>
+                  </>
+                ) : (
+                  <span className="text-xs text-slate-500">{m.role}</span>
+                )}
+              </div>
             </li>
           ))}
         </ul>
+      </div>
+
+      {canAdmin && (invites.data?.length ?? 0) > 0 && (
+        <div className="mb-6 card">
+          <h2 className="mb-3 font-semibold">{o.activeInvites}</h2>
+          <ul className="space-y-2 text-sm">
+            {invites.data?.map((inv) => (
+              <li
+                key={inv.id}
+                className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 py-2 dark:border-slate-800"
+              >
+                <div>
+                  <p className="font-mono text-xs">{inv.token.slice(0, 12)}…</p>
+                  <p className="text-xs text-slate-500">
+                    {o.inviteUsage(inv.used_count, inv.max_uses)} · {inv.active ? o.inviteActive : o.inviteExpired}
+                  </p>
+                </div>
+                {inv.active && (
+                  <button
+                    type="button"
+                    className="btn text-xs"
+                    disabled={revokeInviteMut.isPending}
+                    onClick={() => revokeInviteMut.mutate(inv.id)}
+                  >
+                    {o.revokeInvite}
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className="card">
+        <h2 className="mb-3 font-semibold">{o.activityTitle}</h2>
+        {activity.isLoading ? (
+          <Spinner />
+        ) : (activity.data ?? []).length === 0 ? (
+          <p className="text-sm text-slate-500">{o.activityEmpty}</p>
+        ) : (
+          <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+            {activity.data?.map((ev) => (
+              <li key={ev.id} className="border-b border-slate-100 py-1 dark:border-slate-800">
+                <span className="font-mono">{ev.action}</span>
+                <span className="ml-2 text-slate-400">
+                  {new Date(ev.created_at).toLocaleString()}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
