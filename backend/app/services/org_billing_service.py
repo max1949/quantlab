@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from backend.app.models.membership import RedeemCode
@@ -18,6 +18,10 @@ _SUB_ACTIVE = "active"
 
 
 class OrgBillingError(Exception):
+    pass
+
+
+class OrgSeatLimitError(Exception):
     pass
 
 
@@ -48,9 +52,38 @@ def _active_org_subs(db: Session, org_id: uuid.UUID) -> list[OrgSubscription]:
     ]
 
 
+# 未付费机构的免费席位额度 (含所有者本人)。
+FREE_SEATS = 3
+
+
 def org_tier(db: Session, org_id: uuid.UUID) -> int:
     subs = _active_org_subs(db, org_id)
     return max((s.tier for s in subs), default=ms.TIER_FREE)
+
+
+def org_seat_limit(db: Session, org_id: uuid.UUID) -> int:
+    """机构当前席位上限 = 未过期团队订阅里的最大 seats; 无付费则免费额度。"""
+    subs = _active_org_subs(db, org_id)
+    return max((s.seats for s in subs), default=FREE_SEATS)
+
+
+def org_seat_usage(db: Session, org_id: uuid.UUID) -> int:
+    return int(
+        db.execute(
+            select(func.count()).select_from(OrgMember).where(OrgMember.org_id == org_id)
+        ).scalar_one()
+        or 0
+    )
+
+
+def ensure_seat_available(db: Session, org_id: uuid.UUID, *, adding: int = 1) -> None:
+    """成员数 + 拟新增是否超过席位上限; 超过则抛 OrgSeatLimitError。"""
+    limit = org_seat_limit(db, org_id)
+    used = org_seat_usage(db, org_id)
+    if used + adding > limit:
+        raise OrgSeatLimitError(
+            f"团队席位已满 ({used}/{limit})，请升级团队套餐以增加席位。"
+        )
 
 
 def org_tiers_for_user(db: Session, user_id: uuid.UUID) -> int:
@@ -104,10 +137,8 @@ def get_org_billing(db: Session, org_id: uuid.UUID, user_id: uuid.UUID) -> dict:
             subs, key=lambda s: (s.tier, s.expires_at or datetime.max.replace(tzinfo=timezone.utc))
         )[-1]
 
-    member_count = db.execute(
-        select(OrgMember).where(OrgMember.org_id == org_id)
-    ).scalars().all()
-    seats = primary.seats if primary else 0
+    member_count = org_seat_usage(db, org_id)
+    seats = org_seat_limit(db, org_id)
 
     team_plans = [p for p in ms.PLANS if p.get("kind") == "org"]
     return {
@@ -118,7 +149,7 @@ def get_org_billing(db: Session, org_id: uuid.UUID, user_id: uuid.UUID) -> dict:
         "plan_code": primary.plan_code if primary else "free",
         "expires_at": primary.expires_at if primary else None,
         "seats": seats,
-        "member_count": len(member_count),
+        "member_count": member_count,
         "is_paid": tier > 0,
         "team_plans": team_plans,
     }

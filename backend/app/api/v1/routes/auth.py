@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from backend.app.auth.security import create_access_token
@@ -17,6 +18,7 @@ from backend.app.services import (
     growth_service,
     referral_service,
     rate_limit,
+    sso_service,
     user_service,
 )
 
@@ -96,3 +98,49 @@ def login(
         )
     token = create_access_token(subject=str(user.id))
     return Token(access_token=token)
+
+
+def _sso_redirect_uri(request: Request) -> str:
+    settings = get_settings()
+    origin = (settings.public_base_url or str(request.base_url)).rstrip("/")
+    return f"{origin}/api/v1/auth/sso/callback"
+
+
+@router.get("/sso/config", summary="SSO 是否启用")
+def sso_config() -> dict:
+    return {"enabled": sso_service.sso_configured()}
+
+
+@router.get("/sso/login", summary="发起企业 SSO 登录 (重定向到 IdP)")
+def sso_login(request: Request) -> RedirectResponse:
+    if not sso_service.sso_configured():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="SSO 未启用")
+    url = sso_service.build_authorize_url(_sso_redirect_uri(request))
+    return RedirectResponse(url=url)
+
+
+@router.get("/sso/callback", summary="企业 SSO 回调 (交换令牌并签发本站 JWT)")
+def sso_callback(
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+    code: str | None = None,
+    state: str | None = None,
+    error: str | None = None,
+) -> RedirectResponse:
+    settings = get_settings()
+    origin = (settings.public_base_url or str(request.base_url)).rstrip("/")
+    if not sso_service.sso_configured():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="SSO 未启用")
+    if error or not code or not state:
+        return RedirectResponse(url=f"{origin}/app/login?sso_error=1")
+    if not sso_service.verify_state(state):
+        return RedirectResponse(url=f"{origin}/app/login?sso_error=state")
+    try:
+        tokens = sso_service.exchange_code(code, _sso_redirect_uri(request))
+        userinfo = sso_service.fetch_userinfo(tokens.get("access_token", ""))
+        user = sso_service.get_or_create_user(db, userinfo)
+    except sso_service.SsoError:
+        return RedirectResponse(url=f"{origin}/app/login?sso_error=exchange")
+    growth_service.log_event(db, "sso_login", user.id, {})
+    token = create_access_token(subject=str(user.id))
+    return RedirectResponse(url=f"{origin}/app/login?sso_token={token}")

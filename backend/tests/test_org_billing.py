@@ -120,6 +120,66 @@ def test_personal_code_rejected_for_org(client, db_session):
     assert resp.status_code == 422
 
 
+def test_seat_limit_blocks_over_free_quota(client, db_session):
+    from backend.app.services.org_billing_service import FREE_SEATS
+
+    h_owner = _auth(client, OWNER)
+    org = client.post(f"{BASE}/orgs", headers=h_owner, json={"name": "Seat Org"}).json()
+    org_id = org["id"]
+
+    # owner 占 1 席; 免费额度 FREE_SEATS。逐个添加成员直到超额被拦。
+    created = 0
+    last_status = 200
+    for i in range(FREE_SEATS + 2):
+        uname = f"seatuser{i}"
+        client.post(
+            f"{BASE}/auth/register",
+            json={"email": f"{uname}@x.com", "username": uname, "password": "s3cret-pass"},
+        )
+        resp = client.post(
+            f"{BASE}/orgs/{org_id}/members",
+            headers=h_owner,
+            json={"username": uname, "role": "member"},
+        )
+        last_status = resp.status_code
+        if resp.status_code == 201 or resp.status_code == 200:
+            created += 1
+        else:
+            break
+
+    # owner(1) + created 不应超过 FREE_SEATS, 且最终一次是 422。
+    assert 1 + created <= FREE_SEATS
+    assert last_status == 422
+
+
+def test_seat_limit_expands_with_team_plan(client, db_session):
+    h_owner = _auth(client, OWNER)
+    org = client.post(f"{BASE}/orgs", headers=h_owner, json={"name": "Seat Grow Org"}).json()
+    org_id = org["id"]
+
+    rc = ms.create_redeem_code(
+        db_session, tier=ms.TIER_PLUS, plan_code="org_plus_monthly", kind="org", seats=5
+    )
+    client.post(f"{BASE}/orgs/{org_id}/billing/redeem", headers=h_owner, json={"code": rc.code})
+
+    billing = client.get(f"{BASE}/orgs/{org_id}/billing", headers=h_owner).json()
+    assert billing["seats"] == 5
+
+    # 现在可以加到 5 席 (owner + 4)。
+    for i in range(4):
+        uname = f"growuser{i}"
+        client.post(
+            f"{BASE}/auth/register",
+            json={"email": f"{uname}@x.com", "username": uname, "password": "s3cret-pass"},
+        )
+        resp = client.post(
+            f"{BASE}/orgs/{org_id}/members",
+            headers=h_owner,
+            json={"username": uname, "role": "member"},
+        )
+        assert resp.status_code in (200, 201), resp.text
+
+
 def test_grant_org_subscription_service(db_session):
     from backend.app.models.organization import OrgMember, ResearchOrg
     from backend.app.models.user import User

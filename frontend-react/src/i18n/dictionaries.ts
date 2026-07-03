@@ -59,6 +59,9 @@ const en = {
     loginFailed: "Sign in failed",
     registerFailed: "Sign up failed",
     welcomeBack: (name: string) => `Welcome back, ${name}`,
+    ssoDivider: "or",
+    ssoSignIn: "Sign in with company SSO",
+    ssoFailed: "SSO sign-in failed. Please try again.",
   },
   pricing: {
     title: "Membership / Unlock research tools",
@@ -959,6 +962,9 @@ const zh = {
     loginFailed: "登录失败",
     registerFailed: "注册失败",
     welcomeBack: (name: string) => `欢迎回来, ${name}`,
+    ssoDivider: "或",
+    ssoSignIn: "使用企业 SSO 登录",
+    ssoFailed: "SSO 登录失败，请重试。",
   },
   pricing: {
     title: "会员 / 解锁更多研究能力",

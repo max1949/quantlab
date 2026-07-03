@@ -60,6 +60,15 @@ class Settings(BaseSettings):
     stripe_secret_key: str = ""
     stripe_webhook_secret: str = ""
 
+    # 企业 SSO (OIDC; 全部留空则禁用 /auth/sso 接口)
+    oidc_issuer: str = ""              # 例如 https://accounts.google.com
+    oidc_client_id: str = ""
+    oidc_client_secret: str = ""
+    oidc_authorization_endpoint: str = ""  # 留空则按 issuer 推断标准路径
+    oidc_token_endpoint: str = ""
+    oidc_userinfo_endpoint: str = ""
+    oidc_scopes: str = "openid email profile"
+
     # 研究质量闸门 (发布/分享)
     research_gate_enabled: bool = True
     sealed_holdout_ratio: float = 0.15

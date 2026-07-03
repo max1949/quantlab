@@ -94,6 +94,11 @@ export async function getMe(): Promise<User> {
   return data;
 }
 
+export async function getSsoConfig(): Promise<{ enabled: boolean }> {
+  const { data } = await api.get<{ enabled: boolean }>("/auth/sso/config");
+  return data;
+}
+
 // ---- onboarding ----
 export async function chooseType(user_type: UserType): Promise<User> {
   const { data } = await api.post<User>("/onboarding/choose-type", {

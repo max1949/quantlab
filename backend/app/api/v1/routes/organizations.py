@@ -100,6 +100,8 @@ def accept_invite(
         return OrgOut(**out)
     except org_service.OrgInviteInvalidError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except org_billing_service.OrgSeatLimitError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
 
 
 @router.get("/{org_id}", response_model=OrgOut, summary="机构详情")
@@ -325,6 +327,8 @@ def add_member(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     except org_service.OrgMemberNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="用户不存在")
+    except org_billing_service.OrgSeatLimitError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
 
 
 @router.get("/{org_id}/factors", response_model=list[OrgFactorShareOut], summary="已共享因子")

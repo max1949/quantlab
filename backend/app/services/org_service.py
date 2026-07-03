@@ -158,6 +158,9 @@ def add_member(
         raise OrgMemberNotFoundError(username)
     if _member_row(db, org_id, user.id):
         return _member_row(db, org_id, user.id)  # type: ignore[return-value]
+    from backend.app.services import org_billing_service as obs
+
+    obs.ensure_seat_available(db, org_id, adding=1)
     row = OrgMember(org_id=org_id, user_id=user.id, role=role)
     db.add(row)
     db.commit()
@@ -351,6 +354,9 @@ def accept_invite(db: Session, token: str, user_id: uuid.UUID) -> dict:
     invite = _load_valid_invite(db, token)
     existing = _member_row(db, invite.org_id, user_id)
     if existing is None:
+        from backend.app.services import org_billing_service as obs
+
+        obs.ensure_seat_available(db, invite.org_id, adding=1)
         db.add(OrgMember(org_id=invite.org_id, user_id=user_id, role=invite.role))
         invite.used_count += 1
         db.commit()

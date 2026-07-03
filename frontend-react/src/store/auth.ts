@@ -17,6 +17,7 @@ interface AuthState {
     captcha_token?: string;
     captcha_answer?: string;
   }) => Promise<User>;
+  loginWithToken: (token: string) => Promise<User>;
   logout: () => void;
   refreshMe: () => Promise<User | null>;
   setUser: (user: User) => void;
@@ -36,6 +37,14 @@ export const useAuth = create<AuthState>((set) => ({
     });
     setToken(tok.access_token);
     set({ token: tok.access_token });
+    const user = await ep.getMe();
+    set({ user, ready: true });
+    return user;
+  },
+
+  async loginWithToken(token) {
+    setToken(token);
+    set({ token });
     const user = await ep.getMe();
     set({ user, ready: true });
     return user;
