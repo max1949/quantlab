@@ -261,3 +261,66 @@ def test_retry_failed_delivery(client, db_session):
     finally:
         settings.execution_sla_webhook_url = prev_url
         settings.execution_kill_switch = prev_kill
+
+
+def test_org_retry_failed_delivery(client, db_session):
+    from uuid import UUID
+
+    from backend.app.models.sla_alert_delivery import SlaAlertDelivery
+
+    settings = get_settings()
+    prev_kill = settings.execution_kill_switch
+    settings.execution_kill_switch = True
+
+    owner = {"email": "orgretry@x.com", "username": "orgretryowner", "password": "s3cret-pass"}
+    client.post(f"{BASE}/auth/register", json=owner)
+    tok = client.post(
+        f"{BASE}/auth/login",
+        json={"identifier": owner["username"], "password": owner["password"]},
+    ).json()["access_token"]
+    h = {"Authorization": f"Bearer {tok}"}
+    org_id = client.post(f"{BASE}/orgs", headers=h, json={"name": "Retry Desk"}).json()["id"]
+    client.put(
+        f"{BASE}/orgs/{org_id}/execution/alert-webhook",
+        headers=h,
+        json={"webhook_url": "https://hooks.example.com/org-retry"},
+    )
+
+    row = SlaAlertDelivery(
+        scope="org",
+        org_id=UUID(org_id),
+        status="failed",
+        trigger="scheduled",
+        alert_count=1,
+        error_message="timeout",
+        webhook_url="https://hooks.example.com/org-retry",
+    )
+    db_session.add(row)
+    db_session.commit()
+
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.raise_for_status = MagicMock()
+
+    with patch("backend.app.services.execution_alert_service.httpx.Client") as mock_client_cls:
+        mock_client = MagicMock()
+        mock_client.__enter__ = MagicMock(return_value=mock_client)
+        mock_client.__exit__ = MagicMock(return_value=False)
+        mock_client.post.return_value = mock_resp
+        mock_client_cls.return_value = mock_client
+
+        with patch("backend.app.services.execution_alert_service.filter_new_alerts") as mock_filter:
+            mock_filter.return_value = [{"code": "kill_switch_on", "severity": "critical", "message": "x"}]
+            resp = client.post(
+                f"{BASE}/orgs/{org_id}/execution/alert-deliveries/retry",
+                headers=h,
+            )
+
+    try:
+        assert resp.status_code == 200, resp.text
+        body = resp.json()
+        assert body["retried"] == 1
+        assert body["results"][0]["scope"] == "org"
+        assert body["results"][0]["sent"] == 1
+    finally:
+        settings.execution_kill_switch = prev_kill

@@ -1139,6 +1139,13 @@ export async function fetchOrgAlertDeliveries(
   return data;
 }
 
+export async function retryOrgFailedAlertDeliveries(orgId: string): Promise<{ retried: number }> {
+  const { data } = await api.post<{ retried: number }>(
+    `/orgs/${orgId}/execution/alert-deliveries/retry`,
+  );
+  return data;
+}
+
 // ---- events (埋点, 允许匿名) ----
 export async function trackEvent(
   event: string,

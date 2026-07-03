@@ -27,6 +27,7 @@ import {
   dispatchOrgSlaAlerts,
   fetchOrgAlertDeliveries,
   refreshOrgExecutionOrders,
+  retryOrgFailedAlertDeliveries,
   removeOrgMember,
   revokeOrgInvite,
   shareFactorToOrg,
@@ -278,6 +279,15 @@ export default function OrgDetail() {
       else notify(o.alertWebhookDispatchSkipped(r.reason ?? "none"), "info");
     },
     onError: (e) => notify(apiErrorMessage(e, o.alertWebhookDispatchFail), "error"),
+  });
+
+  const retryOrgAlertDeliveries = useMutation({
+    mutationFn: () => retryOrgFailedAlertDeliveries(id),
+    onSuccess: (r) => {
+      void qc.invalidateQueries({ queryKey: ["org-alert-deliveries", id] });
+      notify(o.alertDeliveryRetryDone(r.retried), "success");
+    },
+    onError: (e) => notify(apiErrorMessage(e, o.alertDeliveryRetryFail), "error"),
   });
 
   function canManageMember(userId: string, role: string) {
@@ -707,7 +717,19 @@ export default function OrgDetail() {
                 </div>
               </div>
               <div className="mt-4 border-t border-slate-200 pt-3 dark:border-slate-700">
-                <p className="mb-2 text-sm font-medium">{o.alertDeliveryTitle}</p>
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm font-medium">{o.alertDeliveryTitle}</p>
+                  <button
+                    type="button"
+                    className="btn text-xs"
+                    disabled={retryOrgAlertDeliveries.isPending}
+                    onClick={() => retryOrgAlertDeliveries.mutate()}
+                  >
+                    {retryOrgAlertDeliveries.isPending
+                      ? o.alertDeliveryRetrying
+                      : o.alertDeliveryRetry}
+                  </button>
+                </div>
                 {alertDeliveries.isLoading ? (
                   <Spinner />
                 ) : alertDeliveries.data && alertDeliveries.data.length === 0 ? (

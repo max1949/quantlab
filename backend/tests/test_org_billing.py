@@ -296,8 +296,6 @@ def test_org_billing_invoice_pdf(client, db_session):
 
 
 def test_org_billing_profile_and_invoice_header(client, db_session):
-    from backend.app.services import billing_ledger_service as bls
-
     h_owner = _auth(client, OWNER)
     org_id = client.post(f"{BASE}/orgs", headers=h_owner, json={"name": "Invoice Org"}).json()["id"]
 
@@ -337,6 +335,5 @@ def test_org_billing_profile_and_invoice_header(client, db_session):
         headers=h_owner,
     )
     assert resp.status_code == 200, resp.text
-    pdf = bls.render_invoice_pdf(rows[0], billing_profile=profile)
-    assert b"QuantLab Research Ltd" in pdf
-    assert b"91310000MA1K12345X" in pdf
+    assert b"QuantLab Research Ltd" in resp.content
+    assert b"91310000MA1K12345X" in resp.content

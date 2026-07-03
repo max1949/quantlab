@@ -832,3 +832,30 @@ def org_execution_alert_deliveries(
     except org_service.OrgAccessDeniedError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     return [SlaAlertDeliveryOut(**r) for r in rows]
+
+
+@router.post(
+    "/{org_id}/execution/alert-deliveries/retry",
+    summary="重试机构失败 SLA 投递 (管理员)",
+)
+def retry_org_execution_alert_deliveries(
+    org_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> dict:
+    try:
+        org_uuid = uuid.UUID(org_id)
+        org_service.require_admin(db, org_uuid, current_user.id)
+        result = eas.retry_failed_deliveries(db, scope="org", org_id=org_uuid)
+        if result.get("retried", 0) > 0:
+            audit_service.log(
+                db,
+                actor_id=current_user.id,
+                action="org.execution.alert_deliveries.retry",
+                resource_type="org",
+                resource_id=org_id,
+                detail={"retried": result["retried"]},
+            )
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    return result

@@ -458,16 +458,28 @@ def dispatch_all_org_sla_webhooks(db: Session) -> list[dict]:
     return results
 
 
-def retry_failed_deliveries(db: Session, *, hours: int = 24, limit: int = 20) -> dict:
+def retry_failed_deliveries(
+    db: Session,
+    *,
+    hours: int = 24,
+    limit: int = 20,
+    scope: str | None = None,
+    org_id: uuid.UUID | None = None,
+) -> dict:
     """重试近期失败的 SLA 投递 (按 scope/org 去重后 force 推送)。"""
     since = _now() - timedelta(hours=max(1, hours))
+    conditions = [
+        SlaAlertDelivery.status == "failed",
+        SlaAlertDelivery.created_at >= since,
+    ]
+    if scope:
+        conditions.append(SlaAlertDelivery.scope == scope)
+    if org_id:
+        conditions.append(SlaAlertDelivery.org_id == org_id)
     rows = list(
         db.execute(
             select(SlaAlertDelivery)
-            .where(
-                SlaAlertDelivery.status == "failed",
-                SlaAlertDelivery.created_at >= since,
-            )
+            .where(*conditions)
             .order_by(SlaAlertDelivery.created_at.desc())
             .limit(min(limit, 100))
         ).scalars().all()
