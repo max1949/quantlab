@@ -38,3 +38,9 @@ if settings.execution_gateway_sync_enabled and not settings.celery_task_always_e
             "options": {"expires": max(60, settings.execution_gateway_sync_interval_seconds - 30)},
         },
     }
+    if settings.execution_sla_alert_enabled and settings.execution_sla_webhook_url.strip():
+        celery_app.conf.beat_schedule["check-execution-sla-alerts"] = {
+            "task": "quantlab.check_execution_sla_alerts",
+            "schedule": float(settings.execution_sla_alert_interval_seconds),
+            "options": {"expires": max(60, settings.execution_sla_alert_interval_seconds - 30)},
+        }

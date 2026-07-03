@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from backend.app.api.v1.routes.admin_billing import require_admin
 from backend.app.core.database import get_db
 from backend.app.schemas.execution import ExecutionComplianceOut, GatewayRefreshOut
-from backend.app.services import audit_service, execution_compliance_service as ecs, health_service, ops_metrics_service, execution_service as exs
+from backend.app.services import audit_service, execution_compliance_service as ecs, execution_alert_service as eas, health_service, ops_metrics_service, execution_service as exs
 
 router = APIRouter()
 
@@ -89,3 +89,22 @@ def ops_execution_compliance(
     stale_limit: int = 50,
 ) -> ExecutionComplianceOut:
     return ExecutionComplianceOut(**ecs.build_global_compliance_report(db, stale_limit=stale_limit))
+
+
+@router.post("/execution/alerts/dispatch", summary="推送 SLA 告警 Webhook (X-Admin-Key)")
+def ops_execution_alerts_dispatch(
+    db: Annotated[Session, Depends(get_db)],
+    _: Annotated[None, Depends(require_admin)],
+    force: bool = False,
+) -> dict:
+    result = eas.dispatch_sla_webhook(db, force=force)
+    if result.get("sent", 0) > 0:
+        audit_service.log(
+            db,
+            actor_id=None,
+            action="admin.execution.alerts.dispatch",
+            resource_type="execution",
+            resource_id="global",
+            detail=result,
+        )
+    return result

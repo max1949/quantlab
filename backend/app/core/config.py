@@ -82,6 +82,10 @@ class Settings(BaseSettings):
     execution_gateway_sync_batch_size: int = 50
     execution_gateway_sync_interval_seconds: int = 300
     execution_sla_stale_minutes: int = 60
+    execution_sla_webhook_url: str = ""  # Slack/钉钉/PagerDuty 等 Webhook
+    execution_sla_alert_enabled: bool = True
+    execution_sla_alert_cooldown_minutes: int = 60
+    execution_sla_alert_interval_seconds: int = 300
 
     # 研究质量闸门 (发布/分享)
     research_gate_enabled: bool = True

@@ -88,6 +88,16 @@ export async function fetchOpsExecutionCompliance(): Promise<ExecutionCompliance
   return data;
 }
 
+export async function dispatchSlaAlerts(force = false): Promise<{
+  sent: number;
+  skipped: boolean;
+  reason?: string;
+  total_alerts?: number;
+}> {
+  const { data } = await adminApi.post("/execution/alerts/dispatch", null, { params: { force } });
+  return data;
+}
+
 export interface OpsHealth {
   status: string;
   database: { ok: boolean; error?: string };

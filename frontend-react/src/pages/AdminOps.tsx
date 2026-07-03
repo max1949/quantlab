@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   fetchOpsAudit,
   fetchOpsExecutionCompliance,
+  dispatchSlaAlerts,
   fetchOpsHealth,
   fetchOpsMetrics,
   isAdminForbidden,
@@ -61,6 +62,15 @@ export default function AdminOps() {
       void qc.invalidateQueries({ queryKey: ["admin-ops-metrics"] });
     },
     onError: (e) => notify(apiErrorMessage(e, a.gatewaySyncFail), "error"),
+  });
+
+  const slaDispatch = useMutation({
+    mutationFn: () => dispatchSlaAlerts(true),
+    onSuccess: (r) => {
+      if (r.sent > 0) notify(a.slaDispatchDone(r.sent), "success");
+      else notify(a.slaDispatchSkipped(r.reason ?? "none"), "info");
+    },
+    onError: (e) => notify(apiErrorMessage(e, a.slaDispatchFail), "error"),
   });
 
   function unlock() {
@@ -181,7 +191,17 @@ export default function AdminOps() {
 
       {compliance.data && (
         <div className="mb-6 card">
-          <h2 className="mb-2 font-semibold text-slate-800 dark:text-slate-100">{a.complianceTitle}</h2>
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="font-semibold text-slate-800 dark:text-slate-100">{a.complianceTitle}</h2>
+            <button
+              type="button"
+              className="btn text-sm"
+              disabled={slaDispatch.isPending}
+              onClick={() => slaDispatch.mutate()}
+            >
+              {slaDispatch.isPending ? a.slaDispatching : a.slaDispatch}
+            </button>
+          </div>
           <p className="mb-3 text-sm text-slate-500">
             {compliance.data.alert_count > 0
               ? a.complianceAlerts(compliance.data.alert_count)
