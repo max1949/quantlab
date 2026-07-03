@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from backend.app.services import membership_service as ms
 
 BASE = "/api/v1"
@@ -115,9 +117,85 @@ def test_paper_order_submit_and_list(client, db_session):
     assert created.status_code == 201, created.text
     body = created.json()
     assert body["status"] == "filled"
+    assert body["channel"] == "paper"
     assert body["regime"] in ("low", "mid", "high", None)
     assert body["regime_fit_score"] is not None
 
     listed = client.get(f"{BASE}/execution/paper/orders", headers=h)
     assert listed.status_code == 200
     assert len(listed.json()) >= 1
+
+
+def test_execution_config(client, db_session):
+    h = _pro_headers(client, db_session)
+    resp = client.get(f"{BASE}/execution/config", headers=h)
+    assert resp.status_code == 200
+    body = resp.json()
+    assert "channels" in body
+    assert body["max_notional_cny"] > 0
+
+
+def test_risk_preflight_blocks_vnpy_low_fit():
+    from unittest.mock import MagicMock
+
+    from backend.app.services.execution_risk import RiskBlockedError, preflight
+
+    settings = MagicMock()
+    settings.execution_kill_switch = False
+    settings.execution_max_notional_cny = 5_000_000
+    settings.execution_min_regime_fit_vnpy = 80
+
+    from backend.app.services import execution_risk as er
+
+    orig = er.get_settings
+    er.get_settings = lambda: settings
+    try:
+        with pytest.raises(RiskBlockedError):
+            preflight(notional_cny=10000, channel="vnpy", regime_fit_score=30)
+        ok = preflight(
+            notional_cny=10000, channel="vnpy", regime_fit_score=30, acknowledge_risk=True
+        )
+        assert ok["verdict"] == "passed"
+    finally:
+        er.get_settings = orig
+
+
+def test_vnpy_channel_stub_order(client, db_session):
+    from backend.app.services.market_data import seed_sample_market_data
+
+    h = _pro_headers(client, db_session)
+    seed_sample_market_data(db_session)
+
+    created = client.post(
+        f"{BASE}/execution/paper/orders",
+        headers=h,
+        json={
+            "symbol": "RB",
+            "side": "sell",
+            "notional_cny": 20000,
+            "channel": "vnpy",
+            "acknowledge_risk": True,
+        },
+    )
+    assert created.status_code == 201, created.text
+    body = created.json()
+    assert body["channel"] == "vnpy"
+    assert body["status"] == "routed"
+    assert body["external_ref"] and body["external_ref"].startswith("VNPY-")
+
+
+def test_route_paper_to_vnpy(client, db_session):
+    from backend.app.services.market_data import seed_sample_market_data
+
+    h = _pro_headers(client, db_session)
+    seed_sample_market_data(db_session)
+    order = client.post(
+        f"{BASE}/execution/paper/orders",
+        headers=h,
+        json={"symbol": "RB", "side": "buy", "notional_cny": 15000, "channel": "paper"},
+    ).json()
+
+    routed = client.post(f"{BASE}/execution/paper/orders/{order['id']}/route-vnpy", headers=h)
+    assert routed.status_code == 200, routed.text
+    assert routed.json()["channel"] == "vnpy"
+    assert routed.json()["external_ref"]

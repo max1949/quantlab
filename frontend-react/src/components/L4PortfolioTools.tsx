@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import PaperExecutionPanel from "./PaperExecutionPanel";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   getEntitlements,
@@ -83,6 +84,7 @@ export default function L4PortfolioTools({ projectId }: { projectId: string }) {
           </div>
         </div>
       )}
+      {!locked && <PaperExecutionPanel />}
     </div>
   );
 }

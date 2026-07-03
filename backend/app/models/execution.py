@@ -20,6 +20,8 @@ class OrderSide(str, enum.Enum):
 
 class OrderStatus(str, enum.Enum):
     FILLED = "filled"
+    PENDING = "pending"
+    ROUTED = "routed"
     CANCELLED = "cancelled"
 
 
@@ -40,6 +42,11 @@ class PaperOrder(Base):
     signal_value: Mapped[float | None] = mapped_column(Numeric(12, 6), nullable=True)
     regime: Mapped[str | None] = mapped_column(String(8), nullable=True)
     regime_fit_score: Mapped[int | None] = mapped_column(nullable=True)
+    channel: Mapped[str] = mapped_column(String(16), nullable=False, default="paper")
+    external_ref: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    risk_verdict: Mapped[str] = mapped_column(String(16), nullable=False, default="passed")
+    risk_detail: Mapped[str] = mapped_column(String(300), nullable=False, default="")
+    routed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     note: Mapped[str] = mapped_column(String(200), nullable=False, default="")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

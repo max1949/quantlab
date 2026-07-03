@@ -119,6 +119,8 @@ export default function AdminOps() {
           <Stat label={a.instOrgs} value={m.institutional.total_orgs} />
           <Stat label={a.instMembers} value={m.institutional.total_org_members} />
           <Stat label={a.instSharedFactors} value={m.institutional.shared_org_factors} />
+          <Stat label={a.instPaperOrders} value={m.institutional.paper_orders ?? 0} />
+          <Stat label={a.instVnpyOrders} value={m.institutional.vnpy_orders ?? 0} />
         </div>
       )}
 

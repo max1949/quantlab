@@ -39,6 +39,8 @@ export interface OpsMetrics {
     total_orgs: number;
     total_org_members: number;
     shared_org_factors: number;
+    paper_orders?: number;
+    vnpy_orders?: number;
   };
 }
 

@@ -1,4 +1,4 @@
-"""模拟执行 / 纸面下单路由 (机构级执行适配 v0)。"""
+"""模拟执行 / 纸面下单路由 (机构级执行适配)。"""
 
 from __future__ import annotations
 
@@ -11,17 +11,50 @@ from sqlalchemy.orm import Session
 from backend.app.auth.deps import require_feature
 from backend.app.core.database import get_db
 from backend.app.models.user import User
-from backend.app.schemas.execution import PaperOrderCreate, PaperOrderOut
+from backend.app.schemas.execution import (
+    ExecutionConfigOut,
+    PaperOrderCreate,
+    PaperOrderOut,
+    RiskCheckIn,
+    RiskCheckOut,
+)
 from backend.app.services import audit_service, execution_service as exs
+from engine.execution_adapter import execution_config_payload
 
 router = APIRouter()
+
+
+@router.get("/config", response_model=ExecutionConfigOut, summary="执行通道与风控配置")
+def execution_config(
+    current_user: Annotated[User, Depends(require_feature("paper_trading"))],
+) -> ExecutionConfigOut:
+    return ExecutionConfigOut(**execution_config_payload())
+
+
+@router.post("/risk-check", response_model=RiskCheckOut, summary="下单前风控预检")
+def risk_check(
+    payload: RiskCheckIn,
+    current_user: Annotated[User, Depends(require_feature("paper_trading"))],
+    db: Annotated[Session, Depends(get_db)],
+) -> RiskCheckOut:
+    return RiskCheckOut(
+        **exs.risk_check_preview(
+            db,
+            current_user,
+            symbol=payload.symbol,
+            notional_cny=payload.notional_cny,
+            channel=payload.channel,
+            factor_id=payload.factor_id,
+            acknowledge_risk=payload.acknowledge_risk,
+        )
+    )
 
 
 @router.post(
     "/paper/orders",
     response_model=PaperOrderOut,
     status_code=status.HTTP_201_CREATED,
-    summary="提交模拟订单 (需专业月卡)",
+    summary="提交模拟/网关订单 (需专业月卡)",
 )
 def create_paper_order(
     payload: PaperOrderCreate,
@@ -38,6 +71,8 @@ def create_paper_order(
             factor_id=payload.factor_id,
             signal_value=payload.signal_value,
             note=payload.note,
+            channel=payload.channel,
+            acknowledge_risk=payload.acknowledge_risk,
         )
     except exs.ExecutionError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
@@ -51,9 +86,36 @@ def create_paper_order(
             "symbol": order.symbol,
             "side": order.side,
             "notional_cny": float(order.notional_cny),
+            "channel": order.channel,
+            "external_ref": order.external_ref,
             "regime": order.regime,
             "regime_fit_score": order.regime_fit_score,
         },
+    )
+    return PaperOrderOut(**exs.order_to_dict(order))
+
+
+@router.post(
+    "/paper/orders/{order_id}/route-vnpy",
+    response_model=PaperOrderOut,
+    summary="将纸面订单路由到 vn.py 网关",
+)
+def route_order_vnpy(
+    order_id: str,
+    current_user: Annotated[User, Depends(require_feature("paper_trading"))],
+    db: Annotated[Session, Depends(get_db)],
+) -> PaperOrderOut:
+    try:
+        order = exs.route_existing_to_vnpy(db, current_user.id, uuid.UUID(order_id))
+    except exs.ExecutionError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    audit_service.log(
+        db,
+        actor_id=current_user.id,
+        action="execution.vnpy.route",
+        resource_type="paper_order",
+        resource_id=str(order.id),
+        detail={"external_ref": order.external_ref},
     )
     return PaperOrderOut(**exs.order_to_dict(order))
 

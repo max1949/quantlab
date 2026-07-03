@@ -15,6 +15,32 @@ class PaperOrderCreate(BaseModel):
     factor_id: uuid.UUID | None = None
     signal_value: float | None = None
     note: str = Field(default="", max_length=200)
+    channel: str = Field(default="paper", pattern=r"^(paper|vnpy)$")
+    acknowledge_risk: bool = False
+
+
+class RiskCheckIn(BaseModel):
+    symbol: str = Field(min_length=1, max_length=16)
+    notional_cny: float = Field(gt=0, le=50_000_000)
+    channel: str = Field(default="paper", pattern=r"^(paper|vnpy)$")
+    factor_id: uuid.UUID | None = None
+    acknowledge_risk: bool = False
+
+
+class ExecutionConfigOut(BaseModel):
+    kill_switch: bool
+    max_notional_cny: float
+    min_regime_fit_vnpy: int
+    vnpy_configured: bool
+    channels: list[dict]
+
+
+class RiskCheckOut(BaseModel):
+    allowed: bool
+    message: str
+    channel: str
+    regime: dict | None = None
+    risk: dict
 
 
 class PaperOrderOut(BaseModel):
@@ -27,5 +53,10 @@ class PaperOrderOut(BaseModel):
     signal_value: float | None
     regime: str | None
     regime_fit_score: int | None
+    channel: str
+    external_ref: str | None
+    risk_verdict: str
+    risk_detail: str
+    routed_at: datetime | None
     note: str
     created_at: datetime

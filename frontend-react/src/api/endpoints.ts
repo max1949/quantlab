@@ -11,6 +11,7 @@ import type {
   FactorCatalog,
   VolRegime,
   Entitlements,
+  ExecutionConfig,
   Factor,
   FactorPreview,
   FactorScan,
@@ -37,6 +38,7 @@ import type {
   ResearchOrg,
   OverfitCheck,
   PaperSimulate,
+  PaperOrder,
   PortfolioOptimize,
   Project,
   Referral,
@@ -905,6 +907,42 @@ export async function orgBillingRedeem(
   message: string;
 }> {
   const { data } = await api.post(`/orgs/${orgId}/billing/redeem`, { code });
+  return data;
+}
+
+// ---- execution (institutional paper / vn.py) ----
+export async function getExecutionConfig(): Promise<ExecutionConfig> {
+  const { data } = await api.get<ExecutionConfig>("/execution/config");
+  return data;
+}
+
+export async function checkExecutionRisk(body: {
+  symbol: string;
+  notional_cny: number;
+  channel?: string;
+  factor_id?: string;
+  acknowledge_risk?: boolean;
+}): Promise<{ allowed: boolean; message: string; channel: string; regime?: VolRegime; risk: Record<string, string> }> {
+  const { data } = await api.post("/execution/risk-check", body);
+  return data;
+}
+
+export async function submitPaperOrder(body: {
+  symbol: string;
+  side: string;
+  notional_cny: number;
+  channel?: string;
+  factor_id?: string;
+  signal_value?: number;
+  note?: string;
+  acknowledge_risk?: boolean;
+}): Promise<PaperOrder> {
+  const { data } = await api.post<PaperOrder>("/execution/paper/orders", body);
+  return data;
+}
+
+export async function listPaperOrders(limit = 20): Promise<PaperOrder[]> {
+  const { data } = await api.get<PaperOrder[]>("/execution/paper/orders", { params: { limit } });
   return data;
 }
 

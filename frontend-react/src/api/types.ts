@@ -594,6 +594,33 @@ export interface OrgCatalog {
   high_overlap_count: number;
 }
 
+export interface ExecutionConfig {
+  kill_switch: boolean;
+  max_notional_cny: number;
+  min_regime_fit_vnpy: number;
+  vnpy_configured: boolean;
+  channels: { code: string; label: string; available: boolean; stub_mode?: boolean }[];
+}
+
+export interface PaperOrder {
+  id: string;
+  factor_id: string | null;
+  symbol: string;
+  side: string;
+  notional_cny: number;
+  status: string;
+  signal_value: number | null;
+  regime: string | null;
+  regime_fit_score: number | null;
+  channel: string;
+  external_ref: string | null;
+  risk_verdict: string;
+  risk_detail: string;
+  routed_at: string | null;
+  note: string;
+  created_at: string;
+}
+
 export interface ReportSummary {
   id: string;
   owner_id: string;

@@ -69,6 +69,13 @@ class Settings(BaseSettings):
     oidc_userinfo_endpoint: str = ""
     oidc_scopes: str = "openid email profile"
 
+    # 执行适配 (vn.py / 纸面); kill_switch=True 时拒绝所有下单
+    execution_kill_switch: bool = False
+    execution_max_notional_cny: float = 5_000_000
+    execution_min_regime_fit_vnpy: int = 40
+    vnpy_gateway_url: str = ""       # 留空则 vnpy 通道走本地 stub
+    vnpy_gateway_token: str = ""
+
     # 研究质量闸门 (发布/分享)
     research_gate_enabled: bool = True
     sealed_holdout_ratio: float = 0.15
