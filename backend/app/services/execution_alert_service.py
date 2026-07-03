@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
+import hmac
+import json
 import logging
 import uuid
 from datetime import datetime, timezone
@@ -17,6 +20,8 @@ from backend.app.services import execution_compliance_service as ecs
 from backend.app.services.org_service import require_admin
 
 logger = logging.getLogger(__name__)
+
+SIGNATURE_HEADER = "X-QuantLab-Signature"
 
 
 def _now() -> datetime:
@@ -57,9 +62,28 @@ def filter_new_alerts(alerts: list[dict], *, dedup_prefix: str = "global") -> li
     return fresh
 
 
-def _post_webhook(url: str, payload: dict) -> int:
+def serialize_webhook_payload(payload: dict) -> bytes:
+    return json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
+
+
+def sign_webhook_body(body: bytes, secret: str) -> str:
+    return hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+
+
+def verify_webhook_signature(body: bytes, signature: str, secret: str) -> bool:
+    if not secret.strip() or not signature.strip():
+        return False
+    expected = sign_webhook_body(body, secret.strip())
+    return hmac.compare_digest(expected, signature.strip())
+
+
+def _post_webhook(url: str, payload: dict, *, secret: str = "") -> int:
+    body = serialize_webhook_payload(payload)
+    headers = {"Content-Type": "application/json"}
+    if secret.strip():
+        headers[SIGNATURE_HEADER] = sign_webhook_body(body, secret.strip())
     with httpx.Client(timeout=15.0) as client:
-        resp = client.post(url, json=payload)
+        resp = client.post(url, content=body, headers=headers)
         resp.raise_for_status()
     return resp.status_code
 
@@ -108,13 +132,16 @@ def dispatch_sla_webhook(db: Session, *, force: bool = False) -> dict:
             "total_alerts": len(alerts),
         }
 
-    status_code = _post_webhook(url, _build_payload(report, to_send))
+    status_code = _post_webhook(
+        url, _build_payload(report, to_send), secret=settings.execution_sla_webhook_secret
+    )
     return {
         "sent": len(to_send),
         "skipped": False,
         "status_code": status_code,
         "total_alerts": len(alerts),
         "scope": "global",
+        "signed": bool(settings.execution_sla_webhook_secret.strip()),
     }
 
 
@@ -161,7 +188,9 @@ def dispatch_org_sla_webhook(
             "org_id": str(org_id),
         }
 
-    status_code = _post_webhook(url, _build_payload(report, to_send))
+    status_code = _post_webhook(
+        url, _build_payload(report, to_send), secret=settings.execution_sla_webhook_secret
+    )
     return {
         "sent": len(to_send),
         "skipped": False,
@@ -169,6 +198,7 @@ def dispatch_org_sla_webhook(
         "total_alerts": len(alerts),
         "org_id": str(org_id),
         "scope": "org",
+        "signed": bool(settings.execution_sla_webhook_secret.strip()),
     }
 
 

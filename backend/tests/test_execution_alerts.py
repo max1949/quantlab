@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from unittest.mock import MagicMock, patch
 
 from backend.app.core.config import get_settings
@@ -33,8 +34,10 @@ def test_dispatch_skipped_when_webhook_not_configured(client, db_session):
 def test_dispatch_sends_webhook_on_kill_switch(client, db_session):
     settings = get_settings()
     prev_url = settings.execution_sla_webhook_url
+    prev_secret = settings.execution_sla_webhook_secret
     prev_kill = settings.execution_kill_switch
     settings.execution_sla_webhook_url = "https://hooks.example.com/sla"
+    settings.execution_sla_webhook_secret = "test-sla-secret"
     settings.execution_kill_switch = True
 
     mock_resp = MagicMock()
@@ -67,12 +70,18 @@ def test_dispatch_sends_webhook_on_kill_switch(client, db_session):
         body = resp.json()
         assert body["sent"] == 1
         assert body["skipped"] is False
+        assert body.get("signed") is True
         mock_client.post.assert_called_once()
-        payload = mock_client.post.call_args.kwargs["json"]
+        call_kwargs = mock_client.post.call_args.kwargs
+        body_bytes = call_kwargs["content"]
+        sig = call_kwargs["headers"][eas.SIGNATURE_HEADER]
+        assert eas.verify_webhook_signature(body_bytes, sig, "test-sla-secret")
+        payload = json.loads(body_bytes.decode())
         assert payload["event"] == "execution_sla_alert"
         assert payload["alerts"][0]["code"] == "kill_switch_on"
     finally:
         settings.execution_sla_webhook_url = prev_url
+        settings.execution_sla_webhook_secret = prev_secret
         settings.execution_kill_switch = prev_kill
 
 
@@ -80,6 +89,14 @@ def test_alert_fingerprint_stable():
     a = {"code": "gateway_down", "channel": "qmt", "order_id": None}
     b = {"code": "gateway_down", "channel": "qmt"}
     assert eas.alert_fingerprint(a) == eas.alert_fingerprint(b)
+
+
+def test_webhook_signature_roundtrip():
+    payload = {"event": "execution_sla_alert", "alert_count": 1}
+    body = eas.serialize_webhook_payload(payload)
+    sig = eas.sign_webhook_body(body, "secret-key")
+    assert eas.verify_webhook_signature(body, sig, "secret-key")
+    assert not eas.verify_webhook_signature(body, "bad", "secret-key")
 
 
 def test_org_alert_webhook_config_and_dispatch(client, db_session):
@@ -133,7 +150,8 @@ def test_org_alert_webhook_config_and_dispatch(client, db_session):
         body = resp.json()
         assert body["sent"] == 1
         assert body["scope"] == "org"
-        payload = mock_client.post.call_args.kwargs["json"]
+        body_bytes = mock_client.post.call_args.kwargs["content"]
+        payload = json.loads(body_bytes.decode())
         assert payload["scope"] == "org"
         assert payload["org_id"] == org_id
     finally:
