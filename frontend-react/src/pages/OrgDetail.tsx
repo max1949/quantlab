@@ -17,6 +17,7 @@ import {
   getOrgSsoDomains,
   setOrgSsoDomains,
   listOrgExecutionOrders,
+  fetchOrgExecutionCompliance,
   refreshOrgExecutionOrders,
   removeOrgMember,
   revokeOrgInvite,
@@ -82,6 +83,11 @@ export default function OrgDetail() {
   const execOrders = useQuery({
     queryKey: ["org-exec-orders", id],
     queryFn: () => listOrgExecutionOrders(id),
+    enabled: Boolean(id) && (org.data?.my_role === "owner" || org.data?.my_role === "admin"),
+  });
+  const execCompliance = useQuery({
+    queryKey: ["org-exec-compliance", id],
+    queryFn: () => fetchOrgExecutionCompliance(id),
     enabled: Boolean(id) && (org.data?.my_role === "owner" || org.data?.my_role === "admin"),
   });
 
@@ -480,6 +486,50 @@ export default function OrgDetail() {
           </>
         )}
       </div>
+
+      {canAdmin && (
+        <div className="mb-6 card">
+          <h2 className="mb-2 font-semibold">{o.execComplianceTitle}</h2>
+          {execCompliance.isLoading ? (
+            <Spinner />
+          ) : execCompliance.data ? (
+            <>
+              <p
+                className={`mb-2 text-sm ${
+                  execCompliance.data.alert_count > 0
+                    ? "text-amber-700 dark:text-amber-300"
+                    : "text-slate-500"
+                }`}
+              >
+                {execCompliance.data.alert_count > 0
+                  ? o.execComplianceAlerts(execCompliance.data.alert_count)
+                  : o.execComplianceNone}
+              </p>
+              {execCompliance.data.sla_alerts.length > 0 && (
+                <ul className="mb-2 space-y-1 text-xs">
+                  {execCompliance.data.sla_alerts.slice(0, 6).map((alert, i) => (
+                    <li
+                      key={`${alert.code}-${alert.order_id ?? i}`}
+                      className={
+                        alert.severity === "critical"
+                          ? "text-red-600 dark:text-red-400"
+                          : "text-amber-700 dark:text-amber-300"
+                      }
+                    >
+                      [{alert.severity}] {alert.message}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {execCompliance.data.stale_orders.length > 0 && (
+                <p className="text-xs text-slate-500">
+                  {o.execComplianceStale}: {execCompliance.data.stale_orders.length}
+                </p>
+              )}
+            </>
+          ) : null}
+        </div>
+      )}
 
       {canAdmin && (
         <div className="mb-6 card">

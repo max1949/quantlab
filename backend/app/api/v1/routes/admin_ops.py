@@ -9,8 +9,8 @@ from sqlalchemy.orm import Session
 
 from backend.app.api.v1.routes.admin_billing import require_admin
 from backend.app.core.database import get_db
-from backend.app.services import audit_service, health_service, ops_metrics_service, execution_service as exs
-from backend.app.schemas.execution import GatewayRefreshOut
+from backend.app.schemas.execution import ExecutionComplianceOut, GatewayRefreshOut
+from backend.app.services import audit_service, execution_compliance_service as ecs, health_service, ops_metrics_service, execution_service as exs
 
 router = APIRouter()
 
@@ -80,3 +80,12 @@ def ops_execution_sync(
         detail=result,
     )
     return GatewayRefreshOut(**result)
+
+
+@router.get("/execution/compliance", response_model=ExecutionComplianceOut, summary="执行合规与 SLA 报表 (X-Admin-Key)")
+def ops_execution_compliance(
+    db: Annotated[Session, Depends(get_db)],
+    _: Annotated[None, Depends(require_admin)],
+    stale_limit: int = 50,
+) -> ExecutionComplianceOut:
+    return ExecutionComplianceOut(**ecs.build_global_compliance_report(db, stale_limit=stale_limit))

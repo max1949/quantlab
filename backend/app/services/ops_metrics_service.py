@@ -90,6 +90,9 @@ def compute_pmf_metrics(db: Session, *, exclude_test: bool = True) -> dict:
     ).scalar_one()
 
     from engine.execution_adapter import gateway_health_summary
+    from backend.app.services import execution_compliance_service as ecs
+
+    compliance = ecs.build_global_compliance_report(db, stale_limit=20)
 
     return {
         "registered_users": registered,
@@ -120,5 +123,7 @@ def compute_pmf_metrics(db: Session, *, exclude_test: bool = True) -> dict:
             "qmt_orders": int(qmt_orders or 0),
             "routed_gateway_orders": int(routed_gateway_orders or 0),
             "gateway_health": gateway_health_summary(),
+            "execution_sla_alerts": compliance["alert_count"],
+            "execution_stale_orders": len(compliance["stale_orders"]),
         },
     }

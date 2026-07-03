@@ -81,6 +81,7 @@ class Settings(BaseSettings):
     execution_gateway_sync_enabled: bool = True
     execution_gateway_sync_batch_size: int = 50
     execution_gateway_sync_interval_seconds: int = 300
+    execution_sla_stale_minutes: int = 60
 
     # 研究质量闸门 (发布/分享)
     research_gate_enabled: bool = True

@@ -35,7 +35,7 @@ export interface OpsMetrics {
   public_reports: number;
   retention_day7: number | null;
   retention_note: string;
-  institutional?: {
+    institutional?: {
     total_orgs: number;
     total_org_members: number;
     shared_org_factors: number;
@@ -43,6 +43,8 @@ export interface OpsMetrics {
     vnpy_orders?: number;
     qmt_orders?: number;
     routed_gateway_orders?: number;
+    execution_sla_alerts?: number;
+    execution_stale_orders?: number;
     gateway_health?: Array<{
       channel: string;
       configured: boolean;
@@ -60,6 +62,29 @@ export async function syncOpsExecutionOrders(): Promise<{
   skipped: boolean;
 }> {
   const { data } = await adminApi.post("/execution/sync");
+  return data;
+}
+
+export interface ExecutionComplianceReport {
+  generated_at: string;
+  scope: string;
+  kill_switch: boolean;
+  sla_stale_minutes: number;
+  order_summary: Record<string, number>;
+  stale_orders: Record<string, unknown>[];
+  sla_alerts: Array<{
+    code: string;
+    severity: string;
+    message: string;
+    channel?: string;
+    order_id?: string;
+    age_minutes?: number;
+  }>;
+  alert_count: number;
+}
+
+export async function fetchOpsExecutionCompliance(): Promise<ExecutionComplianceReport> {
+  const { data } = await adminApi.get<ExecutionComplianceReport>("/execution/compliance");
   return data;
 }
 

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   fetchOpsAudit,
+  fetchOpsExecutionCompliance,
   fetchOpsHealth,
   fetchOpsMetrics,
   isAdminForbidden,
@@ -38,6 +39,13 @@ export default function AdminOps() {
   const audit = useQuery({
     queryKey: ["admin-ops-audit", auditFilter],
     queryFn: () => fetchOpsAudit(80, auditFilter || undefined),
+    enabled: unlocked,
+    retry: false,
+  });
+
+  const compliance = useQuery({
+    queryKey: ["admin-ops-compliance"],
+    queryFn: fetchOpsExecutionCompliance,
     enabled: unlocked,
     retry: false,
   });
@@ -136,6 +144,7 @@ export default function AdminOps() {
             <Stat label={a.instVnpyOrders} value={m.institutional.vnpy_orders ?? 0} />
             <Stat label={a.instQmtOrders} value={m.institutional.qmt_orders ?? 0} />
             <Stat label={a.instRoutedOrders} value={m.institutional.routed_gateway_orders ?? 0} />
+            <Stat label={a.instSlaAlerts} value={m.institutional.execution_sla_alerts ?? 0} />
           </div>
           {m.institutional.gateway_health && (
             <div className="mb-6 card">
@@ -168,6 +177,38 @@ export default function AdminOps() {
             </div>
           )}
         </>
+      )}
+
+      {compliance.data && (
+        <div className="mb-6 card">
+          <h2 className="mb-2 font-semibold text-slate-800 dark:text-slate-100">{a.complianceTitle}</h2>
+          <p className="mb-3 text-sm text-slate-500">
+            {compliance.data.alert_count > 0
+              ? a.complianceAlerts(compliance.data.alert_count)
+              : a.complianceNone}
+          </p>
+          {compliance.data.sla_alerts.length > 0 && (
+            <ul className="mb-3 space-y-1 text-xs text-slate-600 dark:text-slate-300">
+              {compliance.data.sla_alerts.slice(0, 8).map((alert, i) => (
+                <li
+                  key={`${alert.code}-${i}`}
+                  className={
+                    alert.severity === "critical"
+                      ? "text-rose-600 dark:text-rose-400"
+                      : "text-amber-700 dark:text-amber-300"
+                  }
+                >
+                  [{alert.severity}] {alert.message}
+                </li>
+              ))}
+            </ul>
+          )}
+          {compliance.data.stale_orders.length > 0 && (
+            <p className="text-xs text-slate-500">
+              {a.complianceStale}: {compliance.data.stale_orders.length}
+            </p>
+          )}
+        </div>
       )}
 
       <div className="mb-6 card">

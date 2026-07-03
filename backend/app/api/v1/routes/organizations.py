@@ -31,8 +31,8 @@ from backend.app.schemas.organization import (
     OrgSsoDomainsIn,
     OrgSsoDomainsOut,
 )
-from backend.app.schemas.execution import GatewayRefreshOut, OrgPaperOrderOut
-from backend.app.services import audit_service, execution_service as exs, org_billing_service, org_service
+from backend.app.schemas.execution import ExecutionComplianceOut, GatewayRefreshOut, OrgPaperOrderOut
+from backend.app.services import audit_service, execution_compliance_service as ecs, execution_service as exs, org_billing_service, org_service
 from backend.app.services import billing_ledger_service as bls
 
 router = APIRouter()
@@ -596,3 +596,23 @@ def refresh_org_execution_orders(
     except org_service.OrgAccessDeniedError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     return GatewayRefreshOut(**result)
+
+
+@router.get(
+    "/{org_id}/execution/compliance",
+    response_model=ExecutionComplianceOut,
+    summary="机构执行合规与 SLA 报表 (管理员)",
+)
+def org_execution_compliance(
+    org_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+    stale_limit: int = 30,
+) -> ExecutionComplianceOut:
+    try:
+        report = ecs.build_org_compliance_report(
+            db, uuid.UUID(org_id), current_user.id, stale_limit=stale_limit
+        )
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    return ExecutionComplianceOut(**report)

@@ -105,3 +105,27 @@ class GatewayRefreshOut(BaseModel):
     updated: int
     errors: int = 0
     skipped: bool = False
+
+
+class SlaAlertOut(BaseModel):
+    code: str
+    severity: str
+    message: str
+    channel: str | None = None
+    order_id: str | None = None
+    external_ref: str | None = None
+    age_minutes: int | None = None
+    scope: str | None = None
+
+
+class ExecutionComplianceOut(BaseModel):
+    generated_at: datetime
+    scope: str
+    org_id: uuid.UUID | None = None
+    kill_switch: bool
+    sla_stale_minutes: int
+    gateways: list[dict]
+    order_summary: dict
+    stale_orders: list[dict]
+    sla_alerts: list[SlaAlertOut]
+    alert_count: int

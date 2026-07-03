@@ -986,6 +986,29 @@ export async function refreshOrgExecutionOrders(orgId: string): Promise<{ checke
   return data;
 }
 
+export interface OrgExecutionCompliance {
+  generated_at: string;
+  scope: string;
+  kill_switch: boolean;
+  sla_stale_minutes: number;
+  order_summary: Record<string, number>;
+  stale_orders: Array<Record<string, unknown>>;
+  sla_alerts: Array<{
+    code: string;
+    severity: string;
+    message: string;
+    channel?: string;
+    order_id?: string;
+    age_minutes?: number;
+  }>;
+  alert_count: number;
+}
+
+export async function fetchOrgExecutionCompliance(orgId: string): Promise<OrgExecutionCompliance> {
+  const { data } = await api.get<OrgExecutionCompliance>(`/orgs/${orgId}/execution/compliance`);
+  return data;
+}
+
 // ---- events (埋点, 允许匿名) ----
 export async function trackEvent(
   event: string,
