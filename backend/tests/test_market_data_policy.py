@@ -79,11 +79,14 @@ def test_plus_tier_gets_minute_and_longer_daily(client, db_session):
     ms.grant(db_session, user, tier=1, period_days=30, plan_code="plus_monthly", source="test")
 
     resp = client.get(f"{BASE}/datasets", headers=h)
-    tfs = {d["timeframe"] for d in resp.json() if d["symbol"] == "RB"}
-    assert tfs == {"1d", "1m"}
-    rb_1m = next(d for d in resp.json() if d["symbol"] == "RB" and d["timeframe"] == "1m")
+    rows = resp.json()
+    tfs = {d["timeframe"] for d in rows if d["symbol"] == "RB"}
+    assert tfs == {"1d", "1m", "5m", "15m"}
+    rb_1m = next(d for d in rows if d["symbol"] == "RB" and d["timeframe"] == "1m")
     assert rb_1m["effective_rows"] == 50_000
     assert rb_1m["tier_cap"] == 50_000
+    rb_5m = next(d for d in rows if d["symbol"] == "RB" and d["timeframe"] == "5m")
+    assert rb_5m["tier_cap"] == 20_000
 
 
 def test_trim_and_effective_rows():
