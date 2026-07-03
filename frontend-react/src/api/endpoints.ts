@@ -28,6 +28,7 @@ import type {
   Mentor,
   NextStep,
   OrgCatalog,
+  OrgBilling,
   OrgFactorShare,
   OrgInvite,
   OrgInvitePreview,
@@ -433,6 +434,8 @@ export async function checkout(plan_code: string): Promise<{
   plan_name: string;
   price_cny: number;
   message: string;
+  pay_url?: string | null;
+  org_id?: string | null;
 }> {
   const { data } = await api.post("/billing/checkout", { plan_code });
   return data;
@@ -858,6 +861,41 @@ export async function getOrgCatalog(
   params?: { symbol?: string; timeframe?: string },
 ): Promise<OrgCatalog> {
   const { data } = await api.get<OrgCatalog>(`/orgs/${orgId}/catalog`, { params });
+  return data;
+}
+
+export async function getOrgBilling(orgId: string): Promise<OrgBilling> {
+  const { data } = await api.get<OrgBilling>(`/orgs/${orgId}/billing`);
+  return data;
+}
+
+export async function orgBillingCheckout(
+  orgId: string,
+  plan_code: string,
+): Promise<{
+  configured: boolean;
+  plan_code: string;
+  plan_name: string;
+  price_cny: number;
+  message: string;
+  pay_url?: string | null;
+}> {
+  const { data } = await api.post(`/orgs/${orgId}/billing/checkout`, { plan_code });
+  return data;
+}
+
+export async function orgBillingRedeem(
+  orgId: string,
+  code: string,
+): Promise<{
+  ok: boolean;
+  tier: number;
+  tier_name: string;
+  expires_at: string | null;
+  seats: number;
+  message: string;
+}> {
+  const { data } = await api.post(`/orgs/${orgId}/billing/redeem`, { code });
   return data;
 }
 

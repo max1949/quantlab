@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   checkout,
@@ -46,7 +47,13 @@ export default function Pricing() {
 
   const doCheckout = useMutation({
     mutationFn: (planCode: string) => checkout(planCode),
-    onSuccess: (r) => notify(r.message, r.configured ? "success" : "info"),
+    onSuccess: (r) => {
+      if (r.configured && r.pay_url) {
+        window.location.href = r.pay_url;
+        return;
+      }
+      notify(r.message, r.configured ? "success" : "info");
+    },
     onError: (e) => notify(apiErrorMessage(e, p.redeemFailed), "error"),
   });
 
@@ -54,6 +61,8 @@ export default function Pricing() {
   if (plans.isError || !plans.data) return <ErrorBox message={p.loadFailed} />;
 
   const currentTier = sub.data?.tier ?? 0;
+  const personalPlans = plans.data.filter((plan) => plan.kind !== "org");
+  const orgPlans = plans.data.filter((plan) => plan.kind === "org");
 
   return (
     <div>
@@ -72,6 +81,9 @@ export default function Pricing() {
               {new Date(sub.data.expires_at).toLocaleDateString()})
             </span>
           )}
+          {sub.data.org_benefit && (
+            <div className="mt-1 text-slate-600 dark:text-slate-400">{p.orgBenefit}</div>
+          )}
           {ent.data?.market_data?.summary && (
             <div className="mt-1 text-slate-600 dark:text-slate-400">
               {p.dataPlan}: {ent.data.market_data.summary}
@@ -81,7 +93,7 @@ export default function Pricing() {
       )}
 
       <div className="grid gap-4 md:grid-cols-3">
-        {plans.data.map((plan) => {
+        {personalPlans.map((plan) => {
           const isCurrent = currentTier === plan.tier;
           const isFree = plan.tier === 0;
           return (
@@ -129,6 +141,33 @@ export default function Pricing() {
           );
         })}
       </div>
+
+      {orgPlans.length > 0 && (
+        <div className="mt-10">
+          <h2 className="mb-2 text-lg font-semibold">{p.teamTitle}</h2>
+          <p className="mb-4 text-sm text-slate-500">{p.teamHint}</p>
+          <div className="grid gap-4 md:grid-cols-2">
+            {orgPlans.map((plan) => (
+              <div key={plan.code} className="card flex flex-col">
+                <h3 className="text-lg font-semibold">{plan.name}</h3>
+                <p className="mb-2 text-sm text-slate-500">{plan.tagline}</p>
+                <div className="mb-3">
+                  <span className="text-2xl font-bold">¥{plan.price_cny}</span>
+                  <span className="text-slate-400">{p.perMonth}</span>
+                </div>
+                <ul className="mb-4 flex-1 space-y-1 text-sm text-slate-600 dark:text-slate-300">
+                  {plan.features.map((f) => (
+                    <li key={f}>✓ {f}</li>
+                  ))}
+                </ul>
+                <Link to="/orgs" className="btn-primary w-full text-center">
+                  {p.teamCta}
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {user && (
         <div className="mt-8 max-w-md">

@@ -89,3 +89,24 @@ class OrgInvite(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+
+
+class OrgSubscription(Base):
+    """机构团队订阅 — 成员继承机构档位 (取所属机构最大 tier)。"""
+
+    __tablename__ = "org_subscriptions"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    org_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("research_orgs.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    plan_code: Mapped[str] = mapped_column(String(40), nullable=False)
+    tier: Mapped[int] = mapped_column(nullable=False, default=1)
+    seats: Mapped[int] = mapped_column(nullable=False, default=5)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="active")
+    source: Mapped[str] = mapped_column(String(20), nullable=False, default="redeem")
+    stripe_session_id: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )

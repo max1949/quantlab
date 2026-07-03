@@ -6,10 +6,13 @@ import {
   createOrgInvite,
   getOrg,
   getOrgActivity,
+  getOrgBilling,
   getOrgCatalog,
   listFactors,
   listOrgInvites,
   listOrgMembers,
+  orgBillingCheckout,
+  orgBillingRedeem,
   removeOrgMember,
   revokeOrgInvite,
   shareFactorToOrg,
@@ -31,6 +34,7 @@ export default function OrgDetail() {
   const [factorId, setFactorId] = useState("");
   const [symbol, setSymbol] = useState("RB");
   const [inviteUrl, setInviteUrl] = useState("");
+  const [teamCode, setTeamCode] = useState("");
 
   const org = useQuery({ queryKey: ["org", id], queryFn: () => getOrg(id), enabled: Boolean(id) });
   const members = useQuery({
@@ -53,6 +57,11 @@ export default function OrgDetail() {
     queryKey: ["org-activity", id],
     queryFn: () => getOrgActivity(id),
     enabled: Boolean(id),
+  });
+  const billing = useQuery({
+    queryKey: ["org-billing", id],
+    queryFn: () => getOrgBilling(id),
+    enabled: Boolean(id) && org.data?.my_role === "owner",
   });
 
   const isOwner = org.data?.my_role === "owner";
@@ -123,6 +132,28 @@ export default function OrgDetail() {
     onError: (e) => notify(apiErrorMessage(e, o.revokeFail), "error"),
   });
 
+  const teamRedeem = useMutation({
+    mutationFn: () => orgBillingRedeem(id, teamCode.trim()),
+    onSuccess: (r) => {
+      setTeamCode("");
+      void qc.invalidateQueries({ queryKey: ["org-billing", id] });
+      notify(r.message, "success");
+    },
+    onError: (e) => notify(apiErrorMessage(e, o.billingRedeemFail), "error"),
+  });
+
+  const teamCheckout = useMutation({
+    mutationFn: (planCode: string) => orgBillingCheckout(id, planCode),
+    onSuccess: (r) => {
+      if (r.configured && r.pay_url) {
+        window.location.href = r.pay_url;
+        return;
+      }
+      notify(r.message, "info");
+    },
+    onError: (e) => notify(apiErrorMessage(e, o.billingCheckoutFail), "error"),
+  });
+
   function canManageMember(userId: string, role: string) {
     if (role === "owner") return false;
     if (!canAdmin) return me?.id === userId;
@@ -155,6 +186,55 @@ export default function OrgDetail() {
         <StatCard label={o.sharedFactors} value={org.data.shared_factor_count} />
         <StatCard label={o.overlap} value={cat?.high_overlap_count ?? 0} />
       </div>
+
+      {isOwner && billing.data && (
+        <div className="mb-6 card">
+          <h2 className="mb-2 font-semibold">{o.billingTitle}</h2>
+          <p className="mb-3 text-sm text-slate-500">
+            {billing.data.is_paid
+              ? o.billingActive(
+                  billing.data.tier_name,
+                  billing.data.member_count,
+                  billing.data.seats,
+                  billing.data.expires_at
+                    ? new Date(billing.data.expires_at).toLocaleDateString()
+                    : "—",
+                )
+              : o.billingInactive}
+          </p>
+          <div className="mb-4 flex flex-wrap gap-2">
+            {billing.data.team_plans.map((plan) => (
+              <button
+                key={plan.code}
+                type="button"
+                className="btn text-sm"
+                disabled={teamCheckout.isPending || billing.data.tier >= plan.tier}
+                onClick={() => teamCheckout.mutate(plan.code)}
+              >
+                {plan.name} · ¥{plan.price_cny}
+                {plan.seats ? ` · ${plan.seats}${o.billingSeats}` : ""}
+              </button>
+            ))}
+          </div>
+          <p className="mb-2 text-sm text-slate-500">{o.billingRedeemHint}</p>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              className="input flex-1 font-mono"
+              placeholder="QLT-XXXXXXXX"
+              value={teamCode}
+              onChange={(e) => setTeamCode(e.target.value)}
+            />
+            <button
+              type="button"
+              className="btn"
+              disabled={!teamCode.trim() || teamRedeem.isPending}
+              onClick={() => teamRedeem.mutate()}
+            >
+              {teamRedeem.isPending ? o.billingRedeeming : o.billingRedeemBtn}
+            </button>
+          </div>
+        </div>
+      )}
 
       {canAdmin && (
         <div className="mb-6 grid gap-4 lg:grid-cols-2">

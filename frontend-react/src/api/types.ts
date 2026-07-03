@@ -170,6 +170,8 @@ export interface Plan {
   period_days: number;
   tagline: string;
   features: string[];
+  kind?: string;
+  seats?: number | null;
 }
 
 export interface SubscriptionStatus {
@@ -178,6 +180,9 @@ export interface SubscriptionStatus {
   plan_code: string;
   expires_at: string | null;
   is_paid: boolean;
+  personal_tier?: number;
+  org_tier?: number;
+  org_benefit?: boolean;
 }
 
 export interface FeatureState {
@@ -513,6 +518,19 @@ export interface OrgMember {
   username: string;
   role: string;
   joined_at: string;
+}
+
+export interface OrgBilling {
+  org_id: string;
+  org_name: string;
+  tier: number;
+  tier_name: string;
+  plan_code: string;
+  expires_at: string | null;
+  seats: number;
+  member_count: number;
+  is_paid: boolean;
+  team_plans: Plan[];
 }
 
 export interface OrgFactorShare {

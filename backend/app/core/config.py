@@ -56,6 +56,10 @@ class Settings(BaseSettings):
     # 运营批量发卡 (留空则禁用 /admin/billing 接口)
     admin_api_key: str = ""
 
+    # Stripe (机构在线支付; 留空则 checkout 走兑换码引导)
+    stripe_secret_key: str = ""
+    stripe_webhook_secret: str = ""
+
     # 研究质量闸门 (发布/分享)
     research_gate_enabled: bool = True
     sealed_holdout_ratio: float = 0.15

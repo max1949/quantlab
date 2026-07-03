@@ -5,6 +5,7 @@ from backend.app.models.organization import (  # noqa: F401
     OrgInvite,
     OrgMember,
     OrgRole,
+    OrgSubscription,
     ResearchOrg,
 )
 from backend.app.models.audit import AuditEvent  # noqa: F401
@@ -95,4 +96,5 @@ __all__ = [
     "OrgFactorShare",
     "OrgInvite",
     "OrgRole",
+    "OrgSubscription",
 ]

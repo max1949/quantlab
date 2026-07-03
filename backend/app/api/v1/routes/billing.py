@@ -32,7 +32,10 @@ router = APIRouter()
 
 @router.get("/plans", response_model=list[PlanOut], summary="套餐目录")
 def list_plans() -> list[PlanOut]:
-    return [PlanOut(**p) for p in ms.PLANS]
+    return [
+        PlanOut(**{**p, "kind": p.get("kind", "personal"), "seats": p.get("seats")})
+        for p in ms.PLANS
+    ]
 
 
 @router.get("/me", response_model=SubscriptionStatusOut, summary="我的订阅状态")
@@ -93,3 +96,57 @@ def checkout(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
         )
     return CheckoutOut(**result)
+
+
+@router.post("/webhook/stripe", summary="Stripe 支付回调", include_in_schema=False)
+async def stripe_webhook(
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+) -> dict:
+    import json
+    import uuid as uuid_mod
+
+    from backend.app.core.config import get_settings
+    from backend.app.services import org_billing_service as obs
+    from backend.app.services import payment_service
+
+    settings = get_settings()
+    body = await request.body()
+    sig = request.headers.get("stripe-signature", "")
+    secret = settings.stripe_webhook_secret.strip()
+    if not secret or not payment_service.verify_stripe_webhook(body, sig, secret):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="invalid signature")
+
+    event = json.loads(body)
+    if event.get("type") != "checkout.session.completed":
+        return {"ok": True, "ignored": True}
+
+    session = event.get("data", {}).get("object", {})
+    metadata = session.get("metadata") or {}
+    kind = metadata.get("kind", "personal")
+    plan_code = metadata.get("plan_code", "")
+    stripe_session_id = session.get("id")
+
+    user_id = None
+    if metadata.get("user_id"):
+        try:
+            user_id = uuid_mod.UUID(metadata["user_id"])
+        except ValueError:
+            user_id = None
+
+    org_id = None
+    if metadata.get("org_id"):
+        try:
+            org_id = uuid_mod.UUID(metadata["org_id"])
+        except ValueError:
+            org_id = None
+
+    obs.fulfill_checkout_session(
+        db,
+        kind=kind,
+        plan_code=plan_code,
+        user_id=user_id,
+        org_id=org_id,
+        stripe_session_id=stripe_session_id,
+    )
+    return {"ok": True}

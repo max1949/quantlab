@@ -95,3 +95,29 @@ class OrgActivityOut(BaseModel):
     resource_id: str
     detail: dict
     created_at: str
+
+
+class OrgBillingOut(BaseModel):
+    org_id: uuid.UUID
+    org_name: str
+    tier: int
+    tier_name: str
+    plan_code: str
+    expires_at: datetime | None
+    seats: int
+    member_count: int
+    is_paid: bool
+    team_plans: list[dict]
+
+
+class OrgBillingRedeemIn(BaseModel):
+    code: str
+
+
+class OrgBillingRedeemOut(BaseModel):
+    ok: bool
+    tier: int
+    tier_name: str
+    expires_at: datetime | None
+    seats: int
+    message: str

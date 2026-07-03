@@ -10,8 +10,12 @@ from sqlalchemy.orm import Session
 
 from backend.app.auth.deps import CurrentUser
 from backend.app.core.database import get_db
+from backend.app.schemas.membership import CheckoutIn, CheckoutOut
 from backend.app.schemas.organization import (
     OrgActivityOut,
+    OrgBillingOut,
+    OrgBillingRedeemIn,
+    OrgBillingRedeemOut,
     OrgCreate,
     OrgFactorShareIn,
     OrgFactorShareOut,
@@ -24,7 +28,7 @@ from backend.app.schemas.organization import (
     OrgMemberUpdate,
     OrgOut,
 )
-from backend.app.services import audit_service, org_service
+from backend.app.services import audit_service, org_billing_service, org_service
 
 router = APIRouter()
 
@@ -405,3 +409,64 @@ def org_catalog(
         )
     except org_service.OrgAccessDeniedError:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="无权访问该机构")
+
+
+@router.get("/{org_id}/billing", response_model=OrgBillingOut, summary="机构团队订阅状态")
+def org_billing_status(
+    org_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> OrgBillingOut:
+    try:
+        return OrgBillingOut(**org_billing_service.get_org_billing(db, uuid.UUID(org_id), current_user.id))
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+
+
+@router.post("/{org_id}/billing/checkout", response_model=CheckoutOut, summary="机构团队套餐下单")
+def org_billing_checkout(
+    org_id: str,
+    payload: CheckoutIn,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> CheckoutOut:
+    try:
+        result = org_billing_service.start_org_checkout(
+            db, uuid.UUID(org_id), current_user.id, payload.plan_code
+        )
+    except org_billing_service.OrgBillingError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    return CheckoutOut(**result)
+
+
+@router.post("/{org_id}/billing/redeem", response_model=OrgBillingRedeemOut, summary="机构团队兑换码")
+def org_billing_redeem(
+    org_id: str,
+    payload: OrgBillingRedeemIn,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> OrgBillingRedeemOut:
+    from backend.app.services import membership_service as ms
+
+    try:
+        sub = org_billing_service.redeem_org_code(
+            db, uuid.UUID(org_id), current_user.id, payload.code
+        )
+    except org_billing_service.OrgBillingError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    audit_service.log(
+        db,
+        actor_id=current_user.id,
+        action="org.billing.redeem",
+        resource_type="org",
+        resource_id=org_id,
+        detail={"plan_code": sub.plan_code, "tier": sub.tier, "seats": sub.seats},
+    )
+    return OrgBillingRedeemOut(
+        ok=True,
+        tier=sub.tier,
+        tier_name=ms.TIER_NAMES.get(sub.tier, "免费"),
+        expires_at=sub.expires_at,
+        seats=sub.seats,
+        message=f"机构已开通「{ms.TIER_NAMES.get(sub.tier, '免费')}」团队套餐",
+    )

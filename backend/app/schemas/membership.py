@@ -15,6 +15,8 @@ class PlanOut(BaseModel):
     period_days: int
     tagline: str
     features: list[str]
+    kind: str = "personal"
+    seats: int | None = None
 
 
 class SubscriptionStatusOut(BaseModel):
@@ -23,6 +25,9 @@ class SubscriptionStatusOut(BaseModel):
     plan_code: str
     expires_at: datetime | None
     is_paid: bool
+    personal_tier: int = 0
+    org_tier: int = 0
+    org_benefit: bool = False
 
 
 class FeatureState(BaseModel):
@@ -74,3 +79,5 @@ class CheckoutOut(BaseModel):
     plan_name: str
     price_cny: int
     message: str
+    pay_url: str | None = None
+    org_id: str | None = None

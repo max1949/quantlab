@@ -83,6 +83,38 @@ PLANS: list[dict] = [
             "优先支持",
         ],
     },
+    {
+        "code": "org_plus_monthly",
+        "name": "团队研究员",
+        "tier": 1,
+        "price_cny": 1999,
+        "period_days": 30,
+        "kind": "org",
+        "seats": 5,
+        "tagline": "5 席位 · 全员解锁研究员工具档",
+        "features": [
+            "研究员月卡全部功能 (按席位)",
+            "团队因子库与冗余扫描",
+            "机构活动审计",
+            "邀请链接入组",
+        ],
+    },
+    {
+        "code": "org_pro_monthly",
+        "name": "团队专业版",
+        "tier": 2,
+        "price_cny": 9999,
+        "period_days": 30,
+        "kind": "org",
+        "seats": 20,
+        "tagline": "20 席位 · 准职业机构工作流",
+        "features": [
+            "团队研究员全部功能",
+            "全历史行情 · 组合优化",
+            "模拟实盘 (paper trading)",
+            "优先支持",
+        ],
+    },
 ]
 
 PLAN_BY_CODE = {p["code"]: p for p in PLANS}
@@ -135,15 +167,21 @@ def _active_subscriptions(db: Session, user_id: uuid.UUID) -> list[Subscription]
 
 
 def current_tier(db: Session, user: User) -> int:
-    """当前付费档位 = 所有未过期订阅里的最大 tier; 无则 0 (免费)。"""
-    subs = _active_subscriptions(db, user.id)
-    return max((s.tier for s in subs), default=TIER_FREE)
+    """当前付费档位 = max(个人订阅, 所属机构团队订阅)。"""
+    from backend.app.services import org_billing_service as obs
+
+    personal = max((s.tier for s in _active_subscriptions(db, user.id)), default=TIER_FREE)
+    org = obs.org_tiers_for_user(db, user.id)
+    return max(personal, org)
 
 
 def get_status(db: Session, user: User) -> dict:
+    from backend.app.services import org_billing_service as obs
+
     subs = _active_subscriptions(db, user.id)
-    tier = max((s.tier for s in subs), default=TIER_FREE)
-    # 取档位最高、到期最晚的一条作为"主订阅"展示。
+    personal_tier = max((s.tier for s in subs), default=TIER_FREE)
+    org_tier = obs.org_tiers_for_user(db, user.id)
+    tier = max(personal_tier, org_tier)
     primary = None
     if subs:
         primary = sorted(
@@ -155,6 +193,9 @@ def get_status(db: Session, user: User) -> dict:
         "plan_code": primary.plan_code if primary else "free",
         "expires_at": primary.expires_at if primary else None,
         "is_paid": tier > 0,
+        "personal_tier": personal_tier,
+        "org_tier": org_tier,
+        "org_benefit": org_tier > personal_tier,
     }
 
 
@@ -204,6 +245,7 @@ def grant(
     period_days: int,
     plan_code: str,
     source: str = "redeem",
+    stripe_session_id: str | None = None,
 ) -> Subscription:
     expires = None if period_days <= 0 else _now() + timedelta(days=period_days)
     sub = Subscription(
@@ -213,6 +255,7 @@ def grant(
         status=SubscriptionStatus.ACTIVE.value,
         source=source,
         expires_at=expires,
+        stripe_session_id=stripe_session_id,
     )
     db.add(sub)
     db.commit()
@@ -250,12 +293,25 @@ def redeem(db: Session, user: User, code: str) -> Subscription:
 
 
 def create_redeem_code(
-    db: Session, tier: int = TIER_PLUS, period_days: int = 30,
-    plan_code: str = "plus_monthly", note: str | None = None,
+    db: Session,
+    tier: int = TIER_PLUS,
+    period_days: int = 30,
+    plan_code: str = "plus_monthly",
+    note: str | None = None,
+    *,
+    kind: str = "personal",
+    seats: int | None = None,
 ) -> RedeemCode:
-    code = "QL-" + secrets.token_hex(4).upper()
+    prefix = "QLT-" if kind == "org" else "QL-"
+    code = prefix + secrets.token_hex(4).upper()
     rc = RedeemCode(
-        code=code, tier=tier, period_days=period_days, plan_code=plan_code, note=note
+        code=code,
+        tier=tier,
+        period_days=period_days,
+        plan_code=plan_code,
+        note=note,
+        kind=kind,
+        seats=seats,
     )
     db.add(rc)
     db.commit()
@@ -264,19 +320,47 @@ def create_redeem_code(
 
 
 def start_checkout(db: Session, user: User, plan_code: str) -> dict:
-    """支付下单占位。
+    """在线支付下单 — Stripe 已配置则返回 pay_url, 否则引导兑换码。"""
+    from backend.app.core.config import get_settings
+    from backend.app.services import payment_service
 
-    真实收款需要商户号 (微信支付/支付宝/Stripe)。商户号到位后, 在此处生成支付
-    订单并返回 pay_url; 支付回调里调用 grant() 开通。当前返回未配置提示 +
-    兑换码引导, 保证流程闭环。
-    """
     plan = PLAN_BY_CODE.get(plan_code)
     if plan is None or plan["tier"] == 0:
         raise RedeemError("无效的套餐")
-    return {
-        "configured": False,
+    if plan.get("kind") == "org":
+        raise RedeemError("团队套餐请在机构详情页购买")
+
+    base = {
         "plan_code": plan_code,
         "plan_name": plan["name"],
         "price_cny": plan["price_cny"],
-        "message": "请向师父购买卡密，在本页下方输入 BKTA-XXXX-XXXX 兑换开通。",
+        "pay_url": None,
+        "org_id": None,
+    }
+
+    if not payment_service.stripe_configured():
+        return {
+            **base,
+            "configured": False,
+            "message": "请向师父购买卡密，在本页下方输入 BKTA-XXXX-XXXX 兑换开通。",
+        }
+
+    settings = get_settings()
+    origin = (settings.public_base_url or "http://localhost:8000").rstrip("/")
+    pay_url = payment_service.create_checkout_session(
+        plan_name=plan["name"],
+        price_cny=plan["price_cny"],
+        metadata={
+            "kind": "personal",
+            "plan_code": plan_code,
+            "user_id": str(user.id),
+        },
+        success_url=f"{origin}/app/pricing?checkout=success",
+        cancel_url=f"{origin}/app/pricing?checkout=cancel",
+    )
+    return {
+        **base,
+        "configured": True,
+        "pay_url": pay_url,
+        "message": "正在跳转支付…",
     }

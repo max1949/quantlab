@@ -63,6 +63,7 @@ class Subscription(Base):
     expires_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+    stripe_session_id: Mapped[str | None] = mapped_column(String(120), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -86,6 +87,9 @@ class RedeemCode(Base):
         DateTime(timezone=True), nullable=True
     )
     note: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    # personal: 个人会员; org: 机构团队套餐 (由机构 owner 兑换)
+    kind: Mapped[str] = mapped_column(String(16), nullable=False, default="personal")
+    seats: Mapped[int | None] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

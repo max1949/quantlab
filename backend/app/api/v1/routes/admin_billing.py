@@ -23,6 +23,15 @@ class BatchCodesIn(BaseModel):
     note: str | None = None
 
 
+class OrgBatchCodesIn(BaseModel):
+    count: int = Field(ge=1, le=200, default=5)
+    tier: int = Field(ge=1, le=2, default=1)
+    period_days: int = Field(ge=1, le=365, default=30)
+    plan_code: str = "org_plus_monthly"
+    seats: int = Field(ge=1, le=200, default=5)
+    note: str | None = None
+
+
 class BatchCodesOut(BaseModel):
     created: int
     codes: list[str]
@@ -53,6 +62,31 @@ def batch_create_codes(
             period_days=payload.period_days,
             plan_code=payload.plan_code,
             note=payload.note,
+        )
+        codes.append(rc.code)
+    return BatchCodesOut(created=len(codes), codes=codes)
+
+
+@router.post(
+    "/org-codes/batch",
+    response_model=BatchCodesOut,
+    summary="批量生成团队兑换码 (Header: X-Admin-Key)",
+)
+def batch_create_org_codes(
+    payload: OrgBatchCodesIn,
+    db: Annotated[Session, Depends(get_db)],
+    _: Annotated[None, Depends(require_admin)],
+) -> BatchCodesOut:
+    codes: list[str] = []
+    for _ in range(payload.count):
+        rc = ms.create_redeem_code(
+            db,
+            tier=payload.tier,
+            period_days=payload.period_days,
+            plan_code=payload.plan_code,
+            note=payload.note,
+            kind="org",
+            seats=payload.seats,
         )
         codes.append(rc.code)
     return BatchCodesOut(created=len(codes), codes=codes)
