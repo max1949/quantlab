@@ -123,6 +123,25 @@ class OrgBillingRedeemOut(BaseModel):
     message: str
 
 
+class OrgBillingLedgerOut(BaseModel):
+    id: uuid.UUID
+    scope: str
+    event: str
+    org_id: uuid.UUID | None
+    plan_code: str
+    plan_name: str
+    tier: int
+    tier_name: str
+    seats: int | None
+    amount_cny: float
+    currency: str
+    source: str
+    stripe_session_id: str | None
+    expires_at: datetime | None
+    detail: str
+    created_at: datetime
+
+
 class OrgSsoDomainsIn(BaseModel):
     domains: list[str] = Field(default_factory=list, max_length=20)
 

@@ -16,6 +16,7 @@ from backend.app.schemas.organization import (
     OrgBillingOut,
     OrgBillingRedeemIn,
     OrgBillingRedeemOut,
+    OrgBillingLedgerOut,
     OrgCreate,
     OrgFactorShareIn,
     OrgFactorShareOut,
@@ -32,6 +33,7 @@ from backend.app.schemas.organization import (
 )
 from backend.app.schemas.execution import GatewayRefreshOut, OrgPaperOrderOut
 from backend.app.services import audit_service, execution_service as exs, org_billing_service, org_service
+from backend.app.services import billing_ledger_service as bls
 
 router = APIRouter()
 
@@ -432,6 +434,24 @@ def org_billing_status(
         return OrgBillingOut(**org_billing_service.get_org_billing(db, uuid.UUID(org_id), current_user.id))
     except org_service.OrgAccessDeniedError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+
+
+@router.get(
+    "/{org_id}/billing/history",
+    response_model=list[OrgBillingLedgerOut],
+    summary="机构计费流水 (管理员)",
+)
+def org_billing_history(
+    org_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+    limit: int = 50,
+) -> list[OrgBillingLedgerOut]:
+    try:
+        rows = bls.list_org_billing_history(db, uuid.UUID(org_id), current_user.id, limit=limit)
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    return [OrgBillingLedgerOut(**r) for r in rows]
 
 
 @router.post("/{org_id}/billing/checkout", response_model=CheckoutOut, summary="机构团队套餐下单")

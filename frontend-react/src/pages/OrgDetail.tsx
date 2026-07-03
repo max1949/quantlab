@@ -7,6 +7,7 @@ import {
   getOrg,
   getOrgActivity,
   getOrgBilling,
+  getOrgBillingHistory,
   getOrgCatalog,
   listFactors,
   listOrgInvites,
@@ -66,6 +67,11 @@ export default function OrgDetail() {
   const billing = useQuery({
     queryKey: ["org-billing", id],
     queryFn: () => getOrgBilling(id),
+    enabled: Boolean(id) && org.data?.my_role === "owner",
+  });
+  const billingHistory = useQuery({
+    queryKey: ["org-billing-history", id],
+    queryFn: () => getOrgBillingHistory(id),
     enabled: Boolean(id) && org.data?.my_role === "owner",
   });
   const ssoDomainQuery = useQuery({
@@ -152,6 +158,7 @@ export default function OrgDetail() {
     onSuccess: (r) => {
       setTeamCode("");
       void qc.invalidateQueries({ queryKey: ["org-billing", id] });
+      void qc.invalidateQueries({ queryKey: ["org-billing-history", id] });
       notify(r.message, "success");
     },
     onError: (e) => notify(apiErrorMessage(e, o.billingRedeemFail), "error"),
@@ -282,6 +289,28 @@ export default function OrgDetail() {
               {teamRedeem.isPending ? o.billingRedeeming : o.billingRedeemBtn}
             </button>
           </div>
+          {billingHistory.data && billingHistory.data.length > 0 && (
+            <div className="mt-4 border-t border-slate-200 pt-3 dark:border-slate-700">
+              <p className="mb-2 text-sm font-medium">{o.billingHistoryTitle}</p>
+              <ul className="space-y-1 text-xs text-slate-600 dark:text-slate-300">
+                {billingHistory.data.slice(0, 8).map((row) => (
+                  <li
+                    key={row.id}
+                    className="flex flex-wrap justify-between gap-2 border-b border-slate-100 py-1 dark:border-slate-800"
+                  >
+                    <span>
+                      {row.plan_name} · {row.tier_name}
+                      {row.seats ? ` · ${row.seats}${o.billingSeats}` : ""}
+                    </span>
+                    <span className="text-slate-400">
+                      ¥{row.amount_cny.toLocaleString()} · {row.source} ·{" "}
+                      {new Date(row.created_at).toLocaleDateString()}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
 

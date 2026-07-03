@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 from backend.app.auth.deps import CurrentUser
 from backend.app.core.database import get_db
 from backend.app.schemas.membership import (
+    BillingLedgerOut,
     CheckoutIn,
     CheckoutOut,
     EntitlementsOut,
@@ -25,6 +26,7 @@ from backend.app.schemas.membership import (
     RedeemOut,
     SubscriptionStatusOut,
 )
+from backend.app.services import billing_ledger_service as bls
 from backend.app.services import membership_service as ms
 
 router = APIRouter()
@@ -52,6 +54,16 @@ def my_entitlements(
     db: Annotated[Session, Depends(get_db)],
 ) -> EntitlementsOut:
     return EntitlementsOut(**ms.entitlements(db, current_user))
+
+
+@router.get("/history", response_model=list[BillingLedgerOut], summary="我的计费流水")
+def my_billing_history(
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+    limit: int = 50,
+) -> list[BillingLedgerOut]:
+    rows = bls.list_user_billing_history(db, current_user.id, limit=limit)
+    return [BillingLedgerOut(**r) for r in rows]
 
 
 @router.post("/redeem", response_model=RedeemOut, summary="兑换码开通会员")

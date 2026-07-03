@@ -30,6 +30,7 @@ import type {
   NextStep,
   OrgCatalog,
   OrgBilling,
+  OrgBillingLedgerEntry,
   OrgFactorShare,
   OrgInvite,
   OrgInvitePreview,
@@ -879,6 +880,13 @@ export async function getOrgCatalog(
 
 export async function getOrgBilling(orgId: string): Promise<OrgBilling> {
   const { data } = await api.get<OrgBilling>(`/orgs/${orgId}/billing`);
+  return data;
+}
+
+export async function getOrgBillingHistory(orgId: string, limit = 20): Promise<OrgBillingLedgerEntry[]> {
+  const { data } = await api.get<OrgBillingLedgerEntry[]>(`/orgs/${orgId}/billing/history`, {
+    params: { limit },
+  });
   return data;
 }
 

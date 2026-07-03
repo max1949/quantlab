@@ -538,6 +538,23 @@ export interface OrgBilling {
   team_plans: Plan[];
 }
 
+export interface OrgBillingLedgerEntry {
+  id: string;
+  scope: string;
+  event: string;
+  plan_code: string;
+  plan_name: string;
+  tier: number;
+  tier_name: string;
+  seats: number | null;
+  amount_cny: number;
+  currency: string;
+  source: string;
+  expires_at: string | null;
+  detail: string;
+  created_at: string;
+}
+
 export interface OrgFactorShare {
   factor_id: string;
   factor_name: string;

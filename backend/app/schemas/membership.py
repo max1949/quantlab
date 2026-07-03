@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import uuid
 from datetime import datetime
 
 from pydantic import BaseModel
@@ -81,3 +82,22 @@ class CheckoutOut(BaseModel):
     message: str
     pay_url: str | None = None
     org_id: str | None = None
+
+
+class BillingLedgerOut(BaseModel):
+    id: uuid.UUID
+    scope: str
+    event: str
+    org_id: uuid.UUID | None = None
+    plan_code: str
+    plan_name: str
+    tier: int
+    tier_name: str
+    seats: int | None = None
+    amount_cny: float
+    currency: str
+    source: str
+    stripe_session_id: str | None = None
+    expires_at: datetime | None = None
+    detail: str
+    created_at: datetime

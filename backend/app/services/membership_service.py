@@ -260,6 +260,18 @@ def grant(
     db.add(sub)
     db.commit()
     db.refresh(sub)
+    from backend.app.services import billing_ledger_service as bls
+
+    bls.record_personal_subscription(
+        db,
+        user_id=user.id,
+        plan_code=plan_code,
+        tier=tier,
+        source=source,
+        subscription_id=sub.id,
+        expires_at=sub.expires_at,
+        stripe_session_id=stripe_session_id,
+    )
     return sub
 
 

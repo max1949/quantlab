@@ -105,6 +105,7 @@ def grant_org_subscription(
     seats: int,
     source: str = "redeem",
     stripe_session_id: str | None = None,
+    actor_id: uuid.UUID | None = None,
 ) -> OrgSubscription:
     expires = None if period_days <= 0 else _now() + timedelta(days=period_days)
     sub = OrgSubscription(
@@ -120,6 +121,20 @@ def grant_org_subscription(
     db.add(sub)
     db.commit()
     db.refresh(sub)
+    from backend.app.services import billing_ledger_service as bls
+
+    bls.record_org_subscription(
+        db,
+        org_id=org_id,
+        actor_id=actor_id,
+        plan_code=plan_code,
+        tier=tier,
+        seats=seats,
+        source=source,
+        subscription_id=sub.id,
+        expires_at=sub.expires_at,
+        stripe_session_id=stripe_session_id,
+    )
     return sub
 
 
@@ -190,6 +205,7 @@ def redeem_org_code(
         plan_code=rc.plan_code,
         seats=seats,
         source="redeem",
+        actor_id=user_id,
     )
 
 
@@ -276,6 +292,7 @@ def fulfill_checkout_session(
             seats=plan.get("seats", 5),
             source="checkout",
             stripe_session_id=stripe_session_id,
+            actor_id=user_id,
         )
         return
 

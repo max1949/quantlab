@@ -50,6 +50,14 @@ def test_org_subscription_inherits_tier(client, db_session):
     assert redeem.json()["tier"] == 1
     assert redeem.json()["seats"] == 5
 
+    history = client.get(f"{BASE}/orgs/{org_id}/billing/history", headers=h_owner)
+    assert history.status_code == 200, history.text
+    rows = history.json()
+    assert len(rows) >= 1
+    assert rows[0]["scope"] == "org"
+    assert rows[0]["event"] == "redeem"
+    assert rows[0]["seats"] == 5
+
     billing = client.get(f"{BASE}/orgs/{org_id}/billing", headers=h_owner)
     assert billing.status_code == 200
     assert billing.json()["is_paid"] is True
@@ -204,3 +212,14 @@ def test_grant_org_subscription_service(db_session):
     )
     assert obs.org_tier(db_session, org.id) == 2
     assert obs.org_tiers_for_user(db_session, user.id) == 2
+
+
+def test_personal_billing_history(client, db_session):
+    h = _auth(client)
+    rc = ms.create_redeem_code(db_session, tier=ms.TIER_PLUS, plan_code="plus_monthly")
+    client.post(f"{BASE}/billing/redeem", headers=h, json={"code": rc.code})
+    history = client.get(f"{BASE}/billing/history", headers=h)
+    assert history.status_code == 200, history.text
+    rows = history.json()
+    assert len(rows) >= 1
+    assert rows[0]["scope"] == "personal"
