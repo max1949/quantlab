@@ -1,18 +1,21 @@
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   fetchOpsAudit,
   fetchOpsHealth,
   fetchOpsMetrics,
   isAdminForbidden,
+  syncOpsExecutionOrders,
 } from "../api/adminOps";
 import { apiErrorMessage } from "../api/client";
 import { getAdminKey, setAdminKey } from "../lib/adminKey";
 import { useLocale } from "../store/locale";
+import { useUi } from "../store/ui";
 import { ErrorBox, PageTitle, Spinner, Stat } from "../components/ui";
 
 export default function AdminOps() {
   const a = useLocale((s) => s.dict.adminOps);
+  const notify = useUi((s) => s.notify);
   const [keyInput, setKeyInput] = useState(getAdminKey() ?? "");
   const [unlocked, setUnlocked] = useState(Boolean(getAdminKey()));
   const [auditFilter, setAuditFilter] = useState("");
@@ -42,6 +45,15 @@ export default function AdminOps() {
   const authError =
     (metrics.isError && isAdminForbidden(metrics.error)) ||
     (health.isError && isAdminForbidden(health.error));
+
+  const gatewaySync = useMutation({
+    mutationFn: syncOpsExecutionOrders,
+    onSuccess: (r) => {
+      notify(a.gatewaySyncDone(r.updated), "success");
+      void qc.invalidateQueries({ queryKey: ["admin-ops-metrics"] });
+    },
+    onError: (e) => notify(apiErrorMessage(e, a.gatewaySyncFail), "error"),
+  });
 
   function unlock() {
     const trimmed = keyInput.trim();
@@ -115,14 +127,47 @@ export default function AdminOps() {
       </div>
 
       {m.institutional && (
-        <div className="mb-6 grid gap-4 sm:grid-cols-3">
-          <Stat label={a.instOrgs} value={m.institutional.total_orgs} />
-          <Stat label={a.instMembers} value={m.institutional.total_org_members} />
-          <Stat label={a.instSharedFactors} value={m.institutional.shared_org_factors} />
-          <Stat label={a.instPaperOrders} value={m.institutional.paper_orders ?? 0} />
-          <Stat label={a.instVnpyOrders} value={m.institutional.vnpy_orders ?? 0} />
-          <Stat label={a.instQmtOrders} value={m.institutional.qmt_orders ?? 0} />
-        </div>
+        <>
+          <div className="mb-6 grid gap-4 sm:grid-cols-3">
+            <Stat label={a.instOrgs} value={m.institutional.total_orgs} />
+            <Stat label={a.instMembers} value={m.institutional.total_org_members} />
+            <Stat label={a.instSharedFactors} value={m.institutional.shared_org_factors} />
+            <Stat label={a.instPaperOrders} value={m.institutional.paper_orders ?? 0} />
+            <Stat label={a.instVnpyOrders} value={m.institutional.vnpy_orders ?? 0} />
+            <Stat label={a.instQmtOrders} value={m.institutional.qmt_orders ?? 0} />
+            <Stat label={a.instRoutedOrders} value={m.institutional.routed_gateway_orders ?? 0} />
+          </div>
+          {m.institutional.gateway_health && (
+            <div className="mb-6 card">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <h2 className="font-semibold text-slate-800 dark:text-slate-100">{a.gatewayHealthTitle}</h2>
+                <button
+                  type="button"
+                  className="btn text-sm"
+                  disabled={gatewaySync.isPending}
+                  onClick={() => gatewaySync.mutate()}
+                >
+                  {gatewaySync.isPending ? a.gatewaySyncing : a.gatewaySync}
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2 text-sm">
+                {m.institutional.gateway_health.map((g) => (
+                  <span
+                    key={g.channel}
+                    className="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-700"
+                  >
+                    {g.channel}:{" "}
+                    {!g.configured
+                      ? a.gatewayStub
+                      : g.ok
+                        ? a.gatewayUp
+                        : a.gatewayDown}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       <div className="mb-6 card">

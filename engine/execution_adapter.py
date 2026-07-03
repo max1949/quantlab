@@ -44,6 +44,8 @@ def execution_config_payload() -> dict:
         "min_regime_fit_vnpy": s.execution_min_regime_fit_vnpy,
         "vnpy_configured": vnpy_configured(),
         "qmt_configured": qmt_configured(),
+        "gateway_sync_enabled": s.execution_gateway_sync_enabled,
+        "gateway_sync_interval_seconds": s.execution_gateway_sync_interval_seconds,
         "channels": [
             {"code": CHANNEL_PAPER, "label": "纸面模拟", "available": True},
             {
@@ -142,6 +144,55 @@ def fetch_gateway_order_status(*, channel: str, external_ref: str) -> str:
     if not status:
         raise AdapterError("网关响应缺少 status")
     return str(status)
+
+
+def probe_gateway_health(channel: str) -> dict[str, Any]:
+    """探测执行网关连通性 (GET /health 或 /)。"""
+    try:
+        base_url, token = _gateway_credentials(channel)
+    except AdapterError:
+        return {"channel": channel, "configured": False, "ok": None, "mode": "stub"}
+
+    base = base_url.strip()
+    if not base:
+        return {"channel": channel, "configured": False, "ok": None, "mode": "stub"}
+
+    headers: dict[str, str] = {}
+    if token.strip():
+        headers["Authorization"] = f"Bearer {token.strip()}"
+
+    last_error = ""
+    for path in ("/health", "/"):
+        url = base.rstrip("/") + path
+        try:
+            with httpx.Client(timeout=10.0) as client:
+                resp = client.get(url, headers=headers)
+            if resp.status_code in (200, 204):
+                return {
+                    "channel": channel,
+                    "configured": True,
+                    "ok": True,
+                    "mode": "gateway",
+                    "endpoint": path,
+                }
+            last_error = f"HTTP {resp.status_code}"
+        except Exception as exc:  # noqa: BLE001
+            last_error = str(exc)
+
+    return {
+        "channel": channel,
+        "configured": True,
+        "ok": False,
+        "mode": "gateway",
+        "error": last_error or "unreachable",
+    }
+
+
+def gateway_health_summary() -> list[dict[str, Any]]:
+    return [
+        probe_gateway_health(CHANNEL_VNPY),
+        probe_gateway_health(CHANNEL_QMT),
+    ]
 
 
 def route_vnpy_order(

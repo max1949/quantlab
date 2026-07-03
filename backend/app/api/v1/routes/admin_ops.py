@@ -9,7 +9,8 @@ from sqlalchemy.orm import Session
 
 from backend.app.api.v1.routes.admin_billing import require_admin
 from backend.app.core.database import get_db
-from backend.app.services import audit_service, health_service, ops_metrics_service
+from backend.app.services import audit_service, health_service, ops_metrics_service, execution_service as exs
+from backend.app.schemas.execution import GatewayRefreshOut
 
 router = APIRouter()
 
@@ -52,3 +53,30 @@ def ops_audit(
         }
         for r in rows
     ]
+
+
+@router.get("/execution/health", summary="执行网关健康 (X-Admin-Key)")
+def ops_execution_health(
+    _: Annotated[None, Depends(require_admin)],
+) -> dict:
+    from engine.execution_adapter import gateway_health_summary
+
+    return {"gateways": gateway_health_summary()}
+
+
+@router.post("/execution/sync", response_model=GatewayRefreshOut, summary="全站网关订单同步 (X-Admin-Key)")
+def ops_execution_sync(
+    db: Annotated[Session, Depends(get_db)],
+    _: Annotated[None, Depends(require_admin)],
+    limit: int = 50,
+) -> GatewayRefreshOut:
+    result = exs.sync_all_pending_gateway_orders(db, limit=limit)
+    audit_service.log(
+        db,
+        actor_id=None,
+        action="admin.execution.sync",
+        resource_type="execution",
+        resource_id="global",
+        detail=result,
+    )
+    return GatewayRefreshOut(**result)

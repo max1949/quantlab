@@ -105,3 +105,39 @@ def test_factor_catalog(client, db_session):
     body = resp.json()
     assert len(body["factors"]) >= 1
     assert body["factors"][0]["factor_id"] == fid
+
+
+def test_admin_execution_health_and_sync(client, db_session, monkeypatch):
+    monkeypatch.setattr(
+        "backend.app.services.execution_service.fetch_gateway_order_status",
+        lambda **_: "filled",
+    )
+    from backend.app.models.user import UserLevel
+    from backend.app.services import membership_service as ms
+    from sqlalchemy import select
+    from backend.app.models.user import User
+
+    h = _auth(client)
+    user = db_session.execute(select(User).where(User.username == USER["username"])).scalar_one()
+    user.level = UserLevel.L4
+    db_session.add(user)
+    db_session.commit()
+    ms.grant(db_session, user, ms.TIER_PRO, 30, "pro_monthly")
+
+    client.post(
+        f"{BASE}/execution/paper/orders",
+        headers=h,
+        json={"symbol": "RB", "side": "buy", "notional_cny": 13000, "channel": "qmt", "acknowledge_risk": True},
+    )
+
+    health = client.get(f"{BASE}/admin/ops/execution/health", headers=_admin_headers())
+    assert health.status_code == 200, health.text
+    assert len(health.json()["gateways"]) == 2
+
+    sync = client.post(f"{BASE}/admin/ops/execution/sync", headers=_admin_headers())
+    assert sync.status_code == 200, sync.text
+    assert sync.json()["checked"] >= 1
+
+    metrics = client.get(f"{BASE}/admin/ops/metrics", headers=_admin_headers()).json()
+    assert "gateway_health" in metrics["institutional"]
+    assert "routed_gateway_orders" in metrics["institutional"]

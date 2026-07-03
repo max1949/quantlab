@@ -365,6 +365,63 @@ def test_refresh_gateway_order_poll(client, db_session, monkeypatch):
     assert any(e["event_type"] == "gateway_poll" for e in events)
 
 
+def test_execution_gateway_health_endpoint(client, db_session):
+    h = _pro_headers(client, db_session)
+    resp = client.get(f"{BASE}/execution/gateway-health", headers=h)
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert len(body["gateways"]) == 2
+    assert {g["channel"] for g in body["gateways"]} == {"vnpy", "qmt"}
+
+
+def test_sync_all_pending_gateway_orders(client, db_session, monkeypatch):
+    monkeypatch.setattr(
+        "backend.app.services.execution_service.fetch_gateway_order_status",
+        lambda **_: "filled",
+    )
+    from backend.app.services import execution_service as exs
+
+    h = _pro_headers(client, db_session)
+    client.post(
+        f"{BASE}/execution/paper/orders",
+        headers=h,
+        json={
+            "symbol": "RB",
+            "side": "buy",
+            "notional_cny": 14000,
+            "channel": "qmt",
+            "acknowledge_risk": True,
+        },
+    )
+    result = exs.sync_all_pending_gateway_orders(db_session)
+    assert result["checked"] >= 1
+    assert result["updated"] >= 1
+    assert result.get("skipped") is False
+
+
+def test_sync_gateway_orders_task(client, db_session, monkeypatch):
+    monkeypatch.setattr(
+        "backend.app.services.execution_service.fetch_gateway_order_status",
+        lambda **_: "filled",
+    )
+    from backend.app.services import execution_service as exs
+
+    h = _pro_headers(client, db_session)
+    client.post(
+        f"{BASE}/execution/paper/orders",
+        headers=h,
+        json={
+            "symbol": "AU",
+            "side": "sell",
+            "notional_cny": 10000,
+            "channel": "vnpy",
+            "acknowledge_risk": True,
+        },
+    )
+    out = exs.sync_all_pending_gateway_orders(db_session)
+    assert out["checked"] >= 1
+
+
 def test_refresh_stub_gateway_422(client, db_session):
     h = _pro_headers(client, db_session)
     order = client.post(

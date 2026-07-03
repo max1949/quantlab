@@ -78,6 +78,9 @@ class Settings(BaseSettings):
     qmt_gateway_url: str = ""
     qmt_gateway_token: str = ""
     execution_webhook_secret: str = ""  # 网关状态回调 HMAC 密钥
+    execution_gateway_sync_enabled: bool = True
+    execution_gateway_sync_batch_size: int = 50
+    execution_gateway_sync_interval_seconds: int = 300
 
     # 研究质量闸门 (发布/分享)
     research_gate_enabled: bool = True

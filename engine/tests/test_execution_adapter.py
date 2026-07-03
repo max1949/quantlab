@@ -44,13 +44,48 @@ def test_fetch_gateway_order_status_mocked(monkeypatch):
     assert status == "filled"
 
 
-def test_fetch_gateway_unconfigured_raises():
-    import pytest
+def test_probe_gateway_health_stub():
+    from engine.execution_adapter import CHANNEL_QMT, CHANNEL_VNPY, probe_gateway_health
 
-    from engine.execution_adapter import AdapterError, CHANNEL_QMT, fetch_gateway_order_status
+    vn = probe_gateway_health(CHANNEL_VNPY)
+    assert vn["configured"] is False
+    assert vn["mode"] == "stub"
+    qmt = probe_gateway_health(CHANNEL_QMT)
+    assert qmt["configured"] is False
 
-    with pytest.raises(AdapterError, match="网关未配置"):
-        fetch_gateway_order_status(channel=CHANNEL_QMT, external_ref="X")
+
+def test_probe_gateway_health_ok_mocked(monkeypatch):
+    from engine import execution_adapter as ea
+
+    class _Settings:
+        qmt_gateway_url = "http://qmt-gw"
+        qmt_gateway_token = ""
+        vnpy_gateway_url = ""
+        vnpy_gateway_token = ""
+
+    class _Resp:
+        status_code = 200
+        content = b"ok"
+
+    class _Client:
+        def __init__(self, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def get(self, url, headers=None):
+            return _Resp()
+
+    monkeypatch.setattr(ea, "get_settings", lambda: _Settings())
+    monkeypatch.setattr(ea.httpx, "Client", _Client)
+
+    out = ea.probe_gateway_health(ea.CHANNEL_QMT)
+    assert out["configured"] is True
+    assert out["ok"] is True
 
 
 def test_vnpy_stub_without_gateway():

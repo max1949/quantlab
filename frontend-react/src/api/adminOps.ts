@@ -42,7 +42,25 @@ export interface OpsMetrics {
     paper_orders?: number;
     vnpy_orders?: number;
     qmt_orders?: number;
+    routed_gateway_orders?: number;
+    gateway_health?: Array<{
+      channel: string;
+      configured: boolean;
+      ok: boolean | null;
+      mode: string;
+      error?: string;
+    }>;
   };
+}
+
+export async function syncOpsExecutionOrders(): Promise<{
+  checked: number;
+  updated: number;
+  errors: number;
+  skipped: boolean;
+}> {
+  const { data } = await adminApi.post("/execution/sync");
+  return data;
 }
 
 export interface OpsHealth {

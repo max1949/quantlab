@@ -14,6 +14,7 @@ from backend.app.core.database import get_db
 from backend.app.models.user import User
 from backend.app.schemas.execution import (
     ExecutionConfigOut,
+    GatewayHealthOut,
     GatewayRefreshOut,
     GatewayWebhookIn,
     OrgPaperOrderOut,
@@ -24,7 +25,7 @@ from backend.app.schemas.execution import (
     RiskCheckOut,
 )
 from backend.app.services import audit_service, execution_service as exs
-from engine.execution_adapter import execution_config_payload, verify_gateway_webhook
+from engine.execution_adapter import execution_config_payload, gateway_health_summary, verify_gateway_webhook
 
 router = APIRouter()
 
@@ -34,6 +35,13 @@ def execution_config(
     current_user: Annotated[User, Depends(require_feature("paper_trading"))],
 ) -> ExecutionConfigOut:
     return ExecutionConfigOut(**execution_config_payload())
+
+
+@router.get("/gateway-health", response_model=GatewayHealthOut, summary="执行网关健康探针")
+def execution_gateway_health(
+    current_user: Annotated[User, Depends(require_feature("paper_trading"))],
+) -> GatewayHealthOut:
+    return GatewayHealthOut(gateways=gateway_health_summary())
 
 
 @router.post("/risk-check", response_model=RiskCheckOut, summary="下单前风控预检")

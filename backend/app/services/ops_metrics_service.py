@@ -82,6 +82,14 @@ def compute_pmf_metrics(db: Session, *, exclude_test: bool = True) -> dict:
     qmt_orders = db.execute(
         select(func.count()).select_from(PaperOrder).where(PaperOrder.channel == "qmt")
     ).scalar_one()
+    routed_gateway_orders = db.execute(
+        select(func.count()).select_from(PaperOrder).where(
+            PaperOrder.channel.in_(("vnpy", "qmt")),
+            PaperOrder.status == "routed",
+        )
+    ).scalar_one()
+
+    from engine.execution_adapter import gateway_health_summary
 
     return {
         "registered_users": registered,
@@ -110,5 +118,7 @@ def compute_pmf_metrics(db: Session, *, exclude_test: bool = True) -> dict:
             "paper_orders": int(paper_orders or 0),
             "vnpy_orders": int(vnpy_orders or 0),
             "qmt_orders": int(qmt_orders or 0),
+            "routed_gateway_orders": int(routed_gateway_orders or 0),
+            "gateway_health": gateway_health_summary(),
         },
     }

@@ -18,6 +18,7 @@ celery_app = Celery(
         "backend.app.tasks.backtest_tasks",
         "backend.app.tasks.validation_tasks",
         "backend.app.tasks.paper_tracking_tasks",
+        "backend.app.tasks.execution_tasks",
     ],
 )
 
@@ -28,3 +29,12 @@ celery_app.conf.update(
     accept_content=["json"],
     task_always_eager=settings.celery_task_always_eager,
 )
+
+if settings.execution_gateway_sync_enabled and not settings.celery_task_always_eager:
+    celery_app.conf.beat_schedule = {
+        "sync-gateway-orders": {
+            "task": "quantlab.sync_gateway_orders",
+            "schedule": float(settings.execution_gateway_sync_interval_seconds),
+            "options": {"expires": max(60, settings.execution_gateway_sync_interval_seconds - 30)},
+        },
+    }

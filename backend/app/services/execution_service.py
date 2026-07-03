@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from backend.app.core.config import get_settings
 from backend.app.models.execution import OrderSide, OrderStatus, PaperOrder, PaperOrderEvent
 from backend.app.models.factor import Factor
 from backend.app.models.user import User
@@ -331,41 +332,69 @@ def refresh_org_gateway_orders(
         db.execute(select(OrgMember.user_id).where(OrgMember.org_id == org_id)).scalars().all()
     )
     if not member_ids:
-        return {"checked": 0, "updated": 0}
+        return {"checked": 0, "updated": 0, "errors": 0}
 
-    pending = list(
-        db.execute(
-            select(PaperOrder)
-            .where(
-                PaperOrder.user_id.in_(member_ids),
-                PaperOrder.channel.in_((CHANNEL_VNPY, CHANNEL_QMT)),
-                PaperOrder.status == OrderStatus.ROUTED.value,
-                PaperOrder.external_ref.is_not(None),
-            )
-            .order_by(PaperOrder.created_at.desc())
-            .limit(min(limit, 100))
-        ).scalars().all()
+    pending = _pending_gateway_orders_query(db, user_ids=member_ids, limit=limit)
+    return _sync_pending_orders(db, pending, detail_prefix="org_batch")
+
+
+def _pending_gateway_orders_query(
+    db: Session,
+    *,
+    user_ids: list | None = None,
+    limit: int = 50,
+):
+    stmt = (
+        select(PaperOrder)
+        .where(
+            PaperOrder.channel.in_((CHANNEL_VNPY, CHANNEL_QMT)),
+            PaperOrder.status == OrderStatus.ROUTED.value,
+            PaperOrder.external_ref.is_not(None),
+        )
+        .order_by(PaperOrder.created_at.desc())
+        .limit(min(limit, 200))
     )
+    if user_ids is not None:
+        stmt = stmt.where(PaperOrder.user_id.in_(user_ids))
+    return list(db.execute(stmt).scalars().all())
 
+
+def _sync_pending_orders(
+    db: Session, orders: list[PaperOrder], *, detail_prefix: str
+) -> dict:
     updated = 0
-    for order in pending:
+    errors = 0
+    for order in orders:
         prev_status = order.status
         prev_gs = (order.gateway_status or "").lower()
         try:
-            gs = fetch_gateway_order_status(channel=order.channel, external_ref=order.external_ref or "")
+            gs = fetch_gateway_order_status(
+                channel=order.channel, external_ref=order.external_ref or ""
+            )
         except AdapterError:
+            errors += 1
             continue
         refreshed = _apply_status_to_order(
             db,
             order,
             gs,
             event_type="gateway_poll",
-            detail=f"org_batch poll ref={order.external_ref}",
+            detail=f"{detail_prefix} poll ref={order.external_ref}",
         )
         if refreshed.status != prev_status or (refreshed.gateway_status or "").lower() != prev_gs:
             updated += 1
+    return {"checked": len(orders), "updated": updated, "errors": errors}
 
-    return {"checked": len(pending), "updated": updated}
+
+def sync_all_pending_gateway_orders(db: Session, *, limit: int | None = None) -> dict:
+    settings = get_settings()
+    if not settings.execution_gateway_sync_enabled:
+        return {"checked": 0, "updated": 0, "errors": 0, "skipped": True}
+    batch = limit if limit is not None else settings.execution_gateway_sync_batch_size
+    pending = _pending_gateway_orders_query(db, limit=batch)
+    result = _sync_pending_orders(db, pending, detail_prefix="cron")
+    result["skipped"] = False
+    return result
 
 
 def risk_check_preview(

@@ -33,7 +33,22 @@ class ExecutionConfigOut(BaseModel):
     min_regime_fit_vnpy: int
     vnpy_configured: bool
     qmt_configured: bool = False
+    gateway_sync_enabled: bool = True
+    gateway_sync_interval_seconds: int = 300
     channels: list[dict]
+
+
+class GatewayHealthItem(BaseModel):
+    channel: str
+    configured: bool
+    ok: bool | None = None
+    mode: str
+    error: str | None = None
+    endpoint: str | None = None
+
+
+class GatewayHealthOut(BaseModel):
+    gateways: list[GatewayHealthItem]
 
 
 class GatewayWebhookIn(BaseModel):
@@ -88,3 +103,5 @@ class PaperOrderEventOut(BaseModel):
 class GatewayRefreshOut(BaseModel):
     checked: int
     updated: int
+    errors: int = 0
+    skipped: bool = False
