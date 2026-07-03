@@ -28,6 +28,8 @@ import Leaderboards from "./pages/Leaderboards";
 import Challenges from "./pages/Challenges";
 import Pricing from "./pages/Pricing";
 import AdminOps from "./pages/AdminOps";
+import OrgLibrary from "./pages/OrgLibrary";
+import OrgDetail from "./pages/OrgDetail";
 import NotFound from "./pages/NotFound";
 
 export default function App() {
@@ -75,6 +77,8 @@ export default function App() {
             <Route path="/projects" element={<Projects />} />
             <Route path="/projects/:id" element={<ProjectDetail />} />
             <Route path="/experiments" element={<Experiments />} />
+            <Route path="/orgs" element={<OrgLibrary />} />
+            <Route path="/orgs/:id" element={<OrgDetail />} />
             <Route path="/challenges" element={<Challenges />} />
             <Route path="/me" element={<MyProfile />} />
             <Route path="/me/referral" element={<Referral />} />

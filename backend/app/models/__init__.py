@@ -1,5 +1,11 @@
 # ORM 模型包。
 # 模型需在此导入, 以便 Alembic autogenerate 能发现 (env.py 会 import 本包)。
+from backend.app.models.organization import (  # noqa: F401
+    OrgFactorShare,
+    OrgMember,
+    OrgRole,
+    ResearchOrg,
+)
 from backend.app.models.audit import AuditEvent  # noqa: F401
 from backend.app.models.ai import (  # noqa: F401
     AiInsight,
@@ -83,4 +89,8 @@ __all__ = [
     "RedeemCode",
     "PaperSnapshot",
     "FactorScan",
+    "ResearchOrg",
+    "OrgMember",
+    "OrgFactorShare",
+    "OrgRole",
 ]

@@ -23,6 +23,7 @@ export default function Layout() {
     { to: "/app", label: t.nav.workspace, auth: true },
     { to: "/feed", label: t.nav.feed, auth: false },
     { to: "/leaderboards", label: t.nav.leaderboards, auth: false },
+    { to: "/orgs", label: t.nav.orgLibrary, auth: true },
     { to: "/challenges", label: t.nav.challenges, auth: true },
     { to: "/pricing", label: t.nav.pricing, auth: false },
   ];

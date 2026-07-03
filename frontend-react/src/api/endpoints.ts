@@ -27,7 +27,11 @@ import type {
   LeaderboardKind,
   Mentor,
   NextStep,
+  OrgCatalog,
+  OrgFactorShare,
+  OrgMember,
   OrthogonalizeResult,
+  ResearchOrg,
   OverfitCheck,
   PaperSimulate,
   PortfolioOptimize,
@@ -741,6 +745,60 @@ export async function challengeProgress(code: string): Promise<ChallengeProgress
 
 export async function getCertificate(code: string): Promise<Certificate> {
   const { data } = await api.get<Certificate>(`/challenges/${code}/certificate`);
+  return data;
+}
+
+// ---- organizations (institutional) ----
+export async function listOrgs(): Promise<ResearchOrg[]> {
+  const { data } = await api.get<ResearchOrg[]>("/orgs");
+  return data;
+}
+
+export async function createOrg(name: string): Promise<ResearchOrg> {
+  const { data } = await api.post<ResearchOrg>("/orgs", { name });
+  return data;
+}
+
+export async function getOrg(orgId: string): Promise<ResearchOrg> {
+  const { data } = await api.get<ResearchOrg>(`/orgs/${orgId}`);
+  return data;
+}
+
+export async function listOrgMembers(orgId: string): Promise<OrgMember[]> {
+  const { data } = await api.get<OrgMember[]>(`/orgs/${orgId}/members`);
+  return data;
+}
+
+export async function addOrgMember(
+  orgId: string,
+  body: { username: string; role: string },
+): Promise<OrgMember> {
+  const { data } = await api.post<OrgMember>(`/orgs/${orgId}/members`, body);
+  return data;
+}
+
+export async function listOrgFactors(orgId: string): Promise<OrgFactorShare[]> {
+  const { data } = await api.get<OrgFactorShare[]>(`/orgs/${orgId}/factors`);
+  return data;
+}
+
+export async function shareFactorToOrg(
+  orgId: string,
+  factorId: string,
+  note = "",
+): Promise<OrgFactorShare> {
+  const { data } = await api.post<OrgFactorShare>(
+    `/orgs/${orgId}/factors/${factorId}/share`,
+    { note },
+  );
+  return data;
+}
+
+export async function getOrgCatalog(
+  orgId: string,
+  params?: { symbol?: string; timeframe?: string },
+): Promise<OrgCatalog> {
+  const { data } = await api.get<OrgCatalog>(`/orgs/${orgId}/catalog`, { params });
   return data;
 }
 

@@ -21,6 +21,7 @@ from backend.app.api.v1.routes import (
     leaderboards,
     me,
     onboarding,
+    organizations,
     portfolio,
     projects,
     public,
@@ -50,6 +51,7 @@ api_router.include_router(competition.router, prefix="/seasons", tags=["competit
 api_router.include_router(ai.router, prefix="/ai", tags=["ai"])
 api_router.include_router(research.router, prefix="/research", tags=["research"])
 api_router.include_router(projects.router, prefix="/projects", tags=["project"])
+api_router.include_router(organizations.router, prefix="/orgs", tags=["organization"])
 api_router.include_router(researchers.router, prefix="/researchers", tags=["researcher"])
 api_router.include_router(challenges.router, prefix="/challenges", tags=["challenge"])
 

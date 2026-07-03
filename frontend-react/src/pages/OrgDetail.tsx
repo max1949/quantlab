@@ -1,0 +1,213 @@
+import { useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  addOrgMember,
+  getOrg,
+  getOrgCatalog,
+  listFactors,
+  listOrgMembers,
+  shareFactorToOrg,
+} from "../api/endpoints";
+import { apiErrorMessage } from "../api/client";
+import { useLocale } from "../store/locale";
+import { useUi } from "../store/ui";
+import { ErrorBox, PageTitle, Spinner } from "../components/ui";
+
+export default function OrgDetail() {
+  const { id = "" } = useParams();
+  const o = useLocale((s) => s.dict.orgLibrary);
+  const notify = useUi((s) => s.notify);
+  const qc = useQueryClient();
+  const [username, setUsername] = useState("");
+  const [factorId, setFactorId] = useState("");
+  const [symbol, setSymbol] = useState("RB");
+
+  const org = useQuery({ queryKey: ["org", id], queryFn: () => getOrg(id), enabled: Boolean(id) });
+  const members = useQuery({
+    queryKey: ["org-members", id],
+    queryFn: () => listOrgMembers(id),
+    enabled: Boolean(id),
+  });
+  const catalog = useQuery({
+    queryKey: ["org-catalog", id, symbol],
+    queryFn: () => getOrgCatalog(id, { symbol, timeframe: "1d" }),
+    enabled: Boolean(id),
+  });
+  const myFactors = useQuery({ queryKey: ["factors"], queryFn: listFactors });
+
+  const canAdmin = org.data?.my_role === "owner" || org.data?.my_role === "admin";
+  const canShare = canAdmin || org.data?.my_role === "member";
+
+  const addMember = useMutation({
+    mutationFn: () => addOrgMember(id, { username: username.trim(), role: "member" }),
+    onSuccess: () => {
+      setUsername("");
+      void qc.invalidateQueries({ queryKey: ["org-members", id] });
+      notify(o.memberAdded, "success");
+    },
+    onError: (e) => notify(apiErrorMessage(e, o.memberFail), "error"),
+  });
+
+  const share = useMutation({
+    mutationFn: () => shareFactorToOrg(id, factorId),
+    onSuccess: () => {
+      setFactorId("");
+      void qc.invalidateQueries({ queryKey: ["org-catalog", id] });
+      void qc.invalidateQueries({ queryKey: ["org", id] });
+      notify(o.shared, "success");
+    },
+    onError: (e) => notify(apiErrorMessage(e, o.shareFail), "error"),
+  });
+
+  if (org.isLoading) return <Spinner />;
+  if (org.isError || !org.data) {
+    return <ErrorBox message={apiErrorMessage(org.error, o.loadFail)} />;
+  }
+
+  const cat = catalog.data;
+
+  return (
+    <div>
+      <Link to="/orgs" className="mb-4 inline-block text-sm text-brand-600 hover:underline dark:text-brand-400">
+        {o.back}
+      </Link>
+      <PageTitle title={org.data.name} subtitle={o.detailSubtitle(org.data.slug, org.data.my_role ?? "—")} />
+
+      <div className="mb-6 grid gap-4 sm:grid-cols-3">
+        <StatCard label={o.members} value={org.data.member_count} />
+        <StatCard label={o.sharedFactors} value={org.data.shared_factor_count} />
+        <StatCard label={o.overlap} value={cat?.high_overlap_count ?? 0} />
+      </div>
+
+      {canAdmin && (
+        <div className="mb-6 card">
+          <h2 className="mb-2 font-semibold">{o.addMember}</h2>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              className="input flex-1"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder={o.usernamePlaceholder}
+            />
+            <button
+              type="button"
+              className="btn"
+              disabled={!username.trim() || addMember.isPending}
+              onClick={() => addMember.mutate()}
+            >
+              {o.addMemberBtn}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {canShare && (
+        <div className="mb-6 card">
+          <h2 className="mb-2 font-semibold">{o.shareFactor}</h2>
+          <select
+            className="input mb-2 w-full"
+            value={factorId}
+            onChange={(e) => setFactorId(e.target.value)}
+          >
+            <option value="">{o.pickFactor}</option>
+            {myFactors.data?.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.name} ({f.kind})
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            className="btn"
+            disabled={!factorId || share.isPending}
+            onClick={() => share.mutate()}
+          >
+            {o.shareBtn}
+          </button>
+        </div>
+      )}
+
+      <div className="mb-6 card">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <h2 className="font-semibold">{o.catalogTitle}</h2>
+          <select className="input text-sm" value={symbol} onChange={(e) => setSymbol(e.target.value)}>
+            {["RB", "AU", "IF"].map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </div>
+        {catalog.isLoading ? (
+          <Spinner />
+        ) : !cat || cat.factors.length === 0 ? (
+          <p className="text-sm text-slate-500">{o.catalogEmpty}</p>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 text-xs text-slate-500 dark:border-slate-700">
+                    <th className="py-2 pr-2">{o.colName}</th>
+                    <th className="py-2 pr-2">{o.colOwner}</th>
+                    <th className="py-2 pr-2">{o.colSharpe}</th>
+                    <th className="py-2">{o.colOos}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cat.factors.map((f) => (
+                    <tr key={f.factor_id} className="border-b border-slate-100 dark:border-slate-800">
+                      <td className="py-2 pr-2 font-medium">{f.name}</td>
+                      <td className="py-2 pr-2 text-slate-500">{f.owner_username ?? "—"}</td>
+                      <td className="py-2 pr-2">{fmt(f.sharpe)}</td>
+                      <td className="py-2">{fmt(f.oos_sharpe)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {cat.redundancy_pairs.length > 0 && (
+              <div className="mt-4 text-xs text-slate-600 dark:text-slate-300">
+                <p className="font-medium">{o.overlapPairs}</p>
+                <ul className="mt-1 list-inside list-disc">
+                  {cat.redundancy_pairs.slice(0, 5).map((p) => (
+                    <li key={`${p.factor_a}-${p.factor_b}`}>
+                      {o.pairLine(p.name_a, p.name_b, p.owner_a, p.owner_b, p.r_squared)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      <div className="card">
+        <h2 className="mb-3 font-semibold">{o.memberList}</h2>
+        <ul className="space-y-1 text-sm">
+          {(members.data ?? []).map((m) => (
+            <li key={m.user_id} className="flex justify-between border-b border-slate-100 py-1 dark:border-slate-800">
+              <span>{m.username}</span>
+              <span className="text-xs text-slate-500">{m.role}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="card">
+      <p className="text-xs text-slate-500">{label}</p>
+      <p className="text-2xl font-semibold text-slate-800 dark:text-slate-100">{value}</p>
+    </div>
+  );
+}
+
+function fmt(v: number | null | undefined): string {
+  if (v == null || Number.isNaN(v)) return "—";
+  return v.toFixed(2);
+}

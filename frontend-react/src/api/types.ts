@@ -497,6 +497,52 @@ export interface FactorCatalog {
   high_overlap_count: number;
 }
 
+export interface ResearchOrg {
+  id: string;
+  name: string;
+  slug: string;
+  owner_id: string;
+  created_at: string;
+  member_count: number;
+  shared_factor_count: number;
+  my_role: string | null;
+}
+
+export interface OrgMember {
+  user_id: string;
+  username: string;
+  role: string;
+  joined_at: string;
+}
+
+export interface OrgFactorShare {
+  factor_id: string;
+  factor_name: string;
+  owner_username: string;
+  kind: string;
+  note: string;
+  shared_at: string;
+}
+
+export interface OrgCatalogEntry extends FactorCatalogEntry {
+  owner_username: string | null;
+  share_note: string;
+}
+
+export interface OrgCatalogRedundancy extends FactorCatalogRedundancy {
+  owner_a: string | null;
+  owner_b: string | null;
+}
+
+export interface OrgCatalog {
+  org_id: string;
+  symbol: string | null;
+  timeframe: string;
+  factors: OrgCatalogEntry[];
+  redundancy_pairs: OrgCatalogRedundancy[];
+  high_overlap_count: number;
+}
+
 export interface ReportSummary {
   id: string;
   owner_id: string;
