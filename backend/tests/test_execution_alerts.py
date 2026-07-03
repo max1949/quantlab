@@ -116,13 +116,18 @@ def test_org_alert_webhook_config_and_dispatch(client, db_session):
     get_empty = client.get(f"{BASE}/orgs/{org_id}/execution/alert-webhook", headers=h)
     assert get_empty.status_code == 200
     assert get_empty.json()["webhook_url"] == ""
+    assert get_empty.json()["secret_configured"] is False
 
     put = client.put(
         f"{BASE}/orgs/{org_id}/execution/alert-webhook",
         headers=h,
-        json={"webhook_url": "https://hooks.example.com/org-sla"},
+        json={
+            "webhook_url": "https://hooks.example.com/org-sla",
+            "webhook_secret": "org-specific-secret",
+        },
     )
     assert put.status_code == 200, put.text
+    assert put.json()["secret_configured"] is True
 
     mock_resp = MagicMock()
     mock_resp.status_code = 200
@@ -150,7 +155,12 @@ def test_org_alert_webhook_config_and_dispatch(client, db_session):
         body = resp.json()
         assert body["sent"] == 1
         assert body["scope"] == "org"
-        body_bytes = mock_client.post.call_args.kwargs["content"]
+        assert body["signed"] is True
+        assert body["org_secret"] is True
+        call_kwargs = mock_client.post.call_args.kwargs
+        body_bytes = call_kwargs["content"]
+        sig = call_kwargs["headers"][eas.SIGNATURE_HEADER]
+        assert eas.verify_webhook_signature(body_bytes, sig, "org-specific-secret")
         payload = json.loads(body_bytes.decode())
         assert payload["scope"] == "org"
         assert payload["org_id"] == org_id

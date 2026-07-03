@@ -132,9 +132,8 @@ def dispatch_sla_webhook(db: Session, *, force: bool = False) -> dict:
             "total_alerts": len(alerts),
         }
 
-    status_code = _post_webhook(
-        url, _build_payload(report, to_send), secret=settings.execution_sla_webhook_secret
-    )
+    signing_secret = settings.execution_sla_webhook_secret
+    status_code = _post_webhook(url, _build_payload(report, to_send), secret=signing_secret)
     return {
         "sent": len(to_send),
         "skipped": False,
@@ -188,9 +187,8 @@ def dispatch_org_sla_webhook(
             "org_id": str(org_id),
         }
 
-    status_code = _post_webhook(
-        url, _build_payload(report, to_send), secret=settings.execution_sla_webhook_secret
-    )
+    signing_secret = (org.alert_webhook_secret or "").strip() or settings.execution_sla_webhook_secret
+    status_code = _post_webhook(url, _build_payload(report, to_send), secret=signing_secret)
     return {
         "sent": len(to_send),
         "skipped": False,
@@ -198,7 +196,8 @@ def dispatch_org_sla_webhook(
         "total_alerts": len(alerts),
         "org_id": str(org_id),
         "scope": "org",
-        "signed": bool(settings.execution_sla_webhook_secret.strip()),
+        "signed": bool(signing_secret.strip()),
+        "org_secret": bool((org.alert_webhook_secret or "").strip()),
     }
 
 

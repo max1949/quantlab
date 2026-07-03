@@ -152,7 +152,9 @@ class OrgSsoDomainsOut(BaseModel):
 
 class OrgAlertWebhookIn(BaseModel):
     webhook_url: str = Field(default="", max_length=500)
+    webhook_secret: str | None = Field(default=None, max_length=200)
 
 
 class OrgAlertWebhookOut(BaseModel):
     webhook_url: str
+    secret_configured: bool = False

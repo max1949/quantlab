@@ -30,17 +30,18 @@ celery_app.conf.update(
     task_always_eager=settings.celery_task_always_eager,
 )
 
-if settings.execution_gateway_sync_enabled and not settings.celery_task_always_eager:
-    celery_app.conf.beat_schedule = {
-        "sync-gateway-orders": {
+if not settings.celery_task_always_eager:
+    beat_schedule = {}
+    if settings.execution_gateway_sync_enabled:
+        beat_schedule["sync-gateway-orders"] = {
             "task": "quantlab.sync_gateway_orders",
             "schedule": float(settings.execution_gateway_sync_interval_seconds),
             "options": {"expires": max(60, settings.execution_gateway_sync_interval_seconds - 30)},
-        },
-    }
+        }
     if settings.execution_sla_alert_enabled:
-        celery_app.conf.beat_schedule["check-execution-sla-alerts"] = {
+        beat_schedule["check-execution-sla-alerts"] = {
             "task": "quantlab.check_execution_sla_alerts",
             "schedule": float(settings.execution_sla_alert_interval_seconds),
             "options": {"expires": max(60, settings.execution_sla_alert_interval_seconds - 30)},
         }
+    celery_app.conf.beat_schedule = beat_schedule

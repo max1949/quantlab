@@ -93,17 +93,24 @@ def set_sso_domains(
     return cleaned
 
 
-def get_alert_webhook(db: Session, org_id: uuid.UUID, actor_id: uuid.UUID) -> str:
+def get_alert_webhook(db: Session, org_id: uuid.UUID, actor_id: uuid.UUID) -> dict:
     require_admin(db, org_id, actor_id)
     org = db.get(ResearchOrg, org_id)
     if org is None:
         raise OrgNotFoundError(str(org_id))
-    return (org.alert_webhook_url or "").strip()
+    return {
+        "webhook_url": (org.alert_webhook_url or "").strip(),
+        "secret_configured": bool((org.alert_webhook_secret or "").strip()),
+    }
 
 
 def set_alert_webhook(
-    db: Session, org_id: uuid.UUID, actor_id: uuid.UUID, webhook_url: str
-) -> str:
+    db: Session,
+    org_id: uuid.UUID,
+    actor_id: uuid.UUID,
+    webhook_url: str,
+    webhook_secret: str | None = None,
+) -> dict:
     require_admin(db, org_id, actor_id)
     org = db.get(ResearchOrg, org_id)
     if org is None:
@@ -112,9 +119,14 @@ def set_alert_webhook(
     if cleaned and not cleaned.startswith(("http://", "https://")):
         raise OrgAccessDeniedError("Webhook URL 须以 http:// 或 https:// 开头")
     org.alert_webhook_url = cleaned[:500]
+    if webhook_secret is not None:
+        org.alert_webhook_secret = webhook_secret.strip()[:200]
     db.commit()
     db.refresh(org)
-    return org.alert_webhook_url
+    return {
+        "webhook_url": (org.alert_webhook_url or "").strip(),
+        "secret_configured": bool((org.alert_webhook_secret or "").strip()),
+    }
 
 
 class OrgMemberNotFoundError(Exception):

@@ -48,6 +48,7 @@ export default function OrgDetail() {
   const [ssoDomains, setSsoDomains] = useState("");
   const [billingExporting, setBillingExporting] = useState(false);
   const [alertWebhook, setAlertWebhook] = useState("");
+  const [alertWebhookSecret, setAlertWebhookSecret] = useState("");
 
   const org = useQuery({ queryKey: ["org", id], queryFn: () => getOrg(id), enabled: Boolean(id) });
   const members = useQuery({
@@ -222,9 +223,11 @@ export default function OrgDetail() {
   });
 
   const saveAlertWebhook = useMutation({
-    mutationFn: () => setOrgAlertWebhook(id, alertWebhook.trim()),
+    mutationFn: () =>
+      setOrgAlertWebhook(id, alertWebhook.trim(), alertWebhookSecret.trim() || undefined),
     onSuccess: (r) => {
       setAlertWebhook(r.webhook_url);
+      setAlertWebhookSecret("");
       void qc.invalidateQueries({ queryKey: ["org-alert-webhook", id] });
       void qc.invalidateQueries({ queryKey: ["org-activity", id] });
       notify(o.alertWebhookSaved, "success");
@@ -587,6 +590,16 @@ export default function OrgDetail() {
                     placeholder={o.alertWebhookPlaceholder}
                     value={alertWebhook}
                     onChange={(e) => setAlertWebhook(e.target.value)}
+                  />
+                  <input
+                    className="input flex-1 font-mono text-xs"
+                    placeholder={
+                      alertWebhookQuery.data?.secret_configured
+                        ? o.alertWebhookSecretConfigured
+                        : o.alertWebhookSecretPlaceholder
+                    }
+                    value={alertWebhookSecret}
+                    onChange={(e) => setAlertWebhookSecret(e.target.value)}
                   />
                   <button
                     type="button"

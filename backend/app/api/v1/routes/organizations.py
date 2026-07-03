@@ -654,12 +654,12 @@ def get_org_alert_webhook(
     db: Annotated[Session, Depends(get_db)],
 ) -> OrgAlertWebhookOut:
     try:
-        url = org_service.get_alert_webhook(db, uuid.UUID(org_id), current_user.id)
+        data = org_service.get_alert_webhook(db, uuid.UUID(org_id), current_user.id)
     except org_service.OrgNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="机构不存在")
     except org_service.OrgAccessDeniedError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
-    return OrgAlertWebhookOut(webhook_url=url)
+    return OrgAlertWebhookOut(**data)
 
 
 @router.put(
@@ -674,8 +674,12 @@ def set_org_alert_webhook(
     db: Annotated[Session, Depends(get_db)],
 ) -> OrgAlertWebhookOut:
     try:
-        url = org_service.set_alert_webhook(
-            db, uuid.UUID(org_id), current_user.id, payload.webhook_url
+        data = org_service.set_alert_webhook(
+            db,
+            uuid.UUID(org_id),
+            current_user.id,
+            payload.webhook_url,
+            payload.webhook_secret,
         )
         audit_service.log(
             db,
@@ -683,13 +687,16 @@ def set_org_alert_webhook(
             action="org.execution.alert_webhook",
             resource_type="org",
             resource_id=org_id,
-            detail={"configured": bool(url)},
+            detail={
+                "configured": bool(data["webhook_url"]),
+                "secret_configured": bool(data["secret_configured"]),
+            },
         )
     except org_service.OrgNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="机构不存在")
     except org_service.OrgAccessDeniedError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
-    return OrgAlertWebhookOut(webhook_url=url)
+    return OrgAlertWebhookOut(**data)
 
 
 @router.post(

@@ -31,6 +31,7 @@ class ResearchOrg(Base):
     )
     sso_email_domains: Mapped[str] = mapped_column(Text, nullable=False, default="")
     alert_webhook_url: Mapped[str] = mapped_column(String(500), nullable=False, default="")
+    alert_webhook_secret: Mapped[str] = mapped_column(String(200), nullable=False, default="")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

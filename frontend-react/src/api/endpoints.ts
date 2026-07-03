@@ -1021,15 +1021,27 @@ export async function fetchOrgExecutionCompliance(orgId: string): Promise<OrgExe
   return data;
 }
 
-export async function getOrgAlertWebhook(orgId: string): Promise<{ webhook_url: string }> {
-  const { data } = await api.get<{ webhook_url: string }>(`/orgs/${orgId}/execution/alert-webhook`);
+export async function getOrgAlertWebhook(
+  orgId: string,
+): Promise<{ webhook_url: string; secret_configured: boolean }> {
+  const { data } = await api.get<{ webhook_url: string; secret_configured: boolean }>(
+    `/orgs/${orgId}/execution/alert-webhook`,
+  );
   return data;
 }
 
-export async function setOrgAlertWebhook(orgId: string, webhookUrl: string): Promise<{ webhook_url: string }> {
-  const { data } = await api.put<{ webhook_url: string }>(`/orgs/${orgId}/execution/alert-webhook`, {
-    webhook_url: webhookUrl,
-  });
+export async function setOrgAlertWebhook(
+  orgId: string,
+  webhookUrl: string,
+  webhookSecret?: string,
+): Promise<{ webhook_url: string; secret_configured: boolean }> {
+  const { data } = await api.put<{ webhook_url: string; secret_configured: boolean }>(
+    `/orgs/${orgId}/execution/alert-webhook`,
+    {
+      webhook_url: webhookUrl,
+      webhook_secret: webhookSecret || undefined,
+    },
+  );
   return data;
 }
 
