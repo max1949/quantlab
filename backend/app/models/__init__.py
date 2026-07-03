@@ -44,7 +44,7 @@ from backend.app.models.membership import (  # noqa: F401
     Subscription,
     SubscriptionStatus,
 )
-from backend.app.models.execution import PaperOrder  # noqa: F401
+from backend.app.models.execution import PaperOrder, PaperOrderEvent  # noqa: F401
 from backend.app.models.research import ResearchReport  # noqa: F401
 from backend.app.models.task import Task, TaskStatus, UserTask  # noqa: F401
 from backend.app.models.user import User, UserLevel, UserType  # noqa: F401
@@ -91,6 +91,7 @@ __all__ = [
     "RedeemCode",
     "PaperSnapshot",
     "PaperOrder",
+    "PaperOrderEvent",
     "FactorScan",
     "ResearchOrg",
     "OrgMember",

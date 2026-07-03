@@ -68,3 +68,18 @@ class PaperOrderOut(BaseModel):
     routed_at: datetime | None
     note: str
     created_at: datetime
+
+
+class OrgPaperOrderOut(PaperOrderOut):
+    username: str
+
+
+class PaperOrderEventOut(BaseModel):
+    id: uuid.UUID
+    order_id: uuid.UUID
+    event_type: str
+    from_status: str | None
+    to_status: str | None
+    gateway_status: str | None
+    detail: str
+    created_at: datetime

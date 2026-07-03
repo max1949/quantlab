@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from backend.app.models.execution import OrderSide, OrderStatus, PaperOrder
+from backend.app.models.execution import OrderSide, OrderStatus, PaperOrder, PaperOrderEvent
 from backend.app.models.factor import Factor
 from backend.app.models.user import User
 from backend.app.services import regime_advisory
@@ -28,6 +28,28 @@ class ExecutionError(Exception):
 
 def _now() -> datetime:
     return datetime.now(timezone.utc)
+
+
+def log_order_event(
+    db: Session,
+    order: PaperOrder,
+    *,
+    event_type: str,
+    from_status: str | None = None,
+    to_status: str | None = None,
+    gateway_status: str | None = None,
+    detail: str = "",
+) -> PaperOrderEvent:
+    ev = PaperOrderEvent(
+        order_id=order.id,
+        event_type=event_type,
+        from_status=from_status,
+        to_status=to_status,
+        gateway_status=gateway_status,
+        detail=(detail or "")[:500],
+    )
+    db.add(ev)
+    return ev
 
 
 def submit_paper_order(
@@ -126,16 +148,34 @@ def submit_paper_order(
         note=(note or "")[:200],
     )
     db.add(order)
+    log_order_event(
+        db,
+        order,
+        event_type="submitted",
+        to_status=status,
+        gateway_status=gateway_status,
+        detail=f"channel={channel}",
+    )
     db.commit()
     db.refresh(order)
     return order
 
 
 def route_existing_to_vnpy(db: Session, user_id: uuid.UUID, order_id: uuid.UUID) -> PaperOrder:
+    return _route_existing_to_gateway(db, user_id, order_id, CHANNEL_VNPY)
+
+
+def route_existing_to_qmt(db: Session, user_id: uuid.UUID, order_id: uuid.UUID) -> PaperOrder:
+    return _route_existing_to_gateway(db, user_id, order_id, CHANNEL_QMT)
+
+
+def _route_existing_to_gateway(
+    db: Session, user_id: uuid.UUID, order_id: uuid.UUID, channel: str
+) -> PaperOrder:
     order = get_paper_order(db, user_id, order_id)
     if order is None:
         raise ExecutionError("订单不存在")
-    if order.channel == CHANNEL_VNPY and order.external_ref:
+    if order.channel == channel and order.external_ref:
         return order
     if order.status == OrderStatus.CANCELLED.value:
         raise ExecutionError("订单已取消")
@@ -143,25 +183,36 @@ def route_existing_to_vnpy(db: Session, user_id: uuid.UUID, order_id: uuid.UUID)
     try:
         preflight(
             notional_cny=float(order.notional_cny),
-            channel=CHANNEL_PAPER,
+            channel=channel,
             regime_fit_score=order.regime_fit_score,
             acknowledge_risk=True,
         )
     except RiskBlockedError as exc:
         raise ExecutionError(str(exc)) from exc
 
-    routed = route_vnpy_order(
+    route_fn = route_vnpy_order if channel == CHANNEL_VNPY else route_qmt_order
+    routed = route_fn(
         order_id=order.id,
         symbol=order.symbol,
         side=order.side,
         notional_cny=float(order.notional_cny),
         signal_value=float(order.signal_value) if order.signal_value is not None else None,
     )
-    order.channel = CHANNEL_VNPY
+    prev_status = order.status
+    order.channel = channel
     order.external_ref = routed["external_ref"]
     order.gateway_status = routed.get("gateway_status")
     order.status = OrderStatus.ROUTED.value
     order.routed_at = _now()
+    log_order_event(
+        db,
+        order,
+        event_type="routed",
+        from_status=prev_status,
+        to_status=order.status,
+        gateway_status=order.gateway_status,
+        detail=f"channel={channel}; ref={order.external_ref}",
+    )
     db.commit()
     db.refresh(order)
     return order
@@ -184,6 +235,7 @@ def apply_gateway_status(
         return None
 
     gs = (gateway_status or "").lower()
+    prev_status = order.status
     order.gateway_status = gs
     if gs in ("filled", "complete", "completed"):
         order.status = OrderStatus.FILLED.value
@@ -195,6 +247,15 @@ def apply_gateway_status(
     elif gs in ("routed", "accepted", "pending"):
         order.status = OrderStatus.ROUTED.value
 
+    log_order_event(
+        db,
+        order,
+        event_type="gateway_update",
+        from_status=prev_status,
+        to_status=order.status,
+        gateway_status=gs,
+        detail=f"external_ref={ref}",
+    )
     db.commit()
     db.refresh(order)
     return order
@@ -257,6 +318,63 @@ def get_paper_order(db: Session, user_id: uuid.UUID, order_id: uuid.UUID) -> Pap
     if row is None or row.user_id != user_id:
         return None
     return row
+
+
+def list_order_events(
+    db: Session, user_id: uuid.UUID, order_id: uuid.UUID
+) -> list[PaperOrderEvent]:
+    order = get_paper_order(db, user_id, order_id)
+    if order is None:
+        return []
+    return list(
+        db.execute(
+            select(PaperOrderEvent)
+            .where(PaperOrderEvent.order_id == order_id)
+            .order_by(PaperOrderEvent.created_at.asc())
+        ).scalars().all()
+    )
+
+
+def list_org_execution_orders(
+    db: Session, org_id: uuid.UUID, actor_id: uuid.UUID, *, limit: int = 50
+) -> list[dict]:
+    from backend.app.models.organization import OrgMember
+    from backend.app.models.user import User
+    from backend.app.services.org_service import require_admin
+
+    require_admin(db, org_id, actor_id)
+    member_ids = db.execute(
+        select(OrgMember.user_id).where(OrgMember.org_id == org_id)
+    ).scalars().all()
+    if not member_ids:
+        return []
+
+    rows = db.execute(
+        select(PaperOrder, User.username)
+        .join(User, User.id == PaperOrder.user_id)
+        .where(PaperOrder.user_id.in_(member_ids))
+        .order_by(PaperOrder.created_at.desc())
+        .limit(min(limit, 200))
+    ).all()
+    out: list[dict] = []
+    for order, username in rows:
+        d = order_to_dict(order)
+        d["username"] = username
+        out.append(d)
+    return out
+
+
+def event_to_dict(row: PaperOrderEvent) -> dict:
+    return {
+        "id": row.id,
+        "order_id": row.order_id,
+        "event_type": row.event_type,
+        "from_status": row.from_status,
+        "to_status": row.to_status,
+        "gateway_status": row.gateway_status,
+        "detail": row.detail,
+        "created_at": row.created_at,
+    }
 
 
 def order_to_dict(row: PaperOrder) -> dict:

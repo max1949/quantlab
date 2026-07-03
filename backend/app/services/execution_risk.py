@@ -36,7 +36,7 @@ def preflight(
         min_fit = s.execution_min_regime_fit_vnpy
         if regime_fit_score is not None and regime_fit_score < min_fit and not acknowledge_risk:
             reasons.append(
-                f"制度×策略适配分 {regime_fit_score} 低于 vn.py 通道门槛 {min_fit}"
+                f"制度×策略适配分 {regime_fit_score} 低于网关通道门槛 {min_fit}"
             )
 
     if reasons:

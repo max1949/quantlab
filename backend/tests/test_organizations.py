@@ -220,3 +220,44 @@ def test_org_sso_email_domains(client, db_session):
         json={"username": corp_user["username"], "role": "member"},
     )
     assert ok_add.status_code == 200, ok_add.text
+
+
+def test_org_execution_orders_admin_view(client, db_session):
+    from backend.app.models.user import User, UserLevel
+    from backend.app.services import membership_service as ms
+    from backend.app.services.market_data import seed_sample_market_data
+    from sqlalchemy import select
+
+    h_owner = _auth(client, OWNER)
+    trader = {"email": "trader@quantlab.ai", "username": "orgtrader", "password": "s3cret-pass"}
+    h_trader = _auth(client, trader)
+    seed_sample_market_data(db_session)
+
+    org_id = client.post(f"{BASE}/orgs", headers=h_owner, json={"name": "Exec Desk"}).json()["id"]
+    client.post(
+        f"{BASE}/orgs/{org_id}/members",
+        headers=h_owner,
+        json={"username": trader["username"], "role": "member"},
+    )
+
+    user = db_session.execute(select(User).where(User.username == trader["username"])).scalar_one()
+    user.level = UserLevel.L4
+    db_session.add(user)
+    db_session.commit()
+    ms.grant(db_session, user, ms.TIER_PRO, 30, "pro_monthly")
+
+    client.post(
+        f"{BASE}/execution/paper/orders",
+        headers=h_trader,
+        json={"symbol": "RB", "side": "buy", "notional_cny": 22000, "channel": "qmt", "acknowledge_risk": True},
+    )
+
+    listed = client.get(f"{BASE}/orgs/{org_id}/execution/orders", headers=h_owner)
+    assert listed.status_code == 200, listed.text
+    rows = listed.json()
+    assert len(rows) >= 1
+    assert rows[0]["username"] == trader["username"]
+    assert rows[0]["channel"] == "qmt"
+
+    denied = client.get(f"{BASE}/orgs/{org_id}/execution/orders", headers=h_trader)
+    assert denied.status_code == 403

@@ -296,3 +296,42 @@ def test_gateway_webhook_rejects_bad_signature(client, db_session):
         assert resp.status_code == 400
     finally:
         settings.execution_webhook_secret = prev
+
+
+def test_order_events_timeline(client, db_session):
+    from backend.app.services.market_data import seed_sample_market_data
+
+    h = _pro_headers(client, db_session)
+    seed_sample_market_data(db_session)
+    order = client.post(
+        f"{BASE}/execution/paper/orders",
+        headers=h,
+        json={"symbol": "RB", "side": "buy", "notional_cny": 8000, "channel": "paper"},
+    ).json()
+
+    events = client.get(f"{BASE}/execution/paper/orders/{order['id']}/events", headers=h)
+    assert events.status_code == 200, events.text
+    body = events.json()
+    assert len(body) >= 1
+    assert body[0]["event_type"] == "submitted"
+    assert body[0]["to_status"] == "filled"
+
+
+def test_route_paper_to_qmt(client, db_session):
+    from backend.app.services.market_data import seed_sample_market_data
+
+    h = _pro_headers(client, db_session)
+    seed_sample_market_data(db_session)
+    order = client.post(
+        f"{BASE}/execution/paper/orders",
+        headers=h,
+        json={"symbol": "RB", "side": "sell", "notional_cny": 18000, "channel": "paper"},
+    ).json()
+
+    routed = client.post(f"{BASE}/execution/paper/orders/{order['id']}/route-qmt", headers=h)
+    assert routed.status_code == 200, routed.text
+    assert routed.json()["channel"] == "qmt"
+    assert routed.json()["external_ref"].startswith("QMT-")
+
+    events = client.get(f"{BASE}/execution/paper/orders/{order['id']}/events", headers=h).json()
+    assert any(e["event_type"] == "routed" for e in events)

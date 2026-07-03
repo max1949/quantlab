@@ -30,7 +30,8 @@ from backend.app.schemas.organization import (
     OrgSsoDomainsIn,
     OrgSsoDomainsOut,
 )
-from backend.app.services import audit_service, org_billing_service, org_service
+from backend.app.schemas.execution import OrgPaperOrderOut
+from backend.app.services import audit_service, execution_service as exs, org_billing_service, org_service
 
 router = APIRouter()
 
@@ -529,3 +530,21 @@ def set_org_sso_domains(
     except org_service.OrgAccessDeniedError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     return OrgSsoDomainsOut(domains=domains)
+
+
+@router.get(
+    "/{org_id}/execution/orders",
+    response_model=list[OrgPaperOrderOut],
+    summary="机构团队执行订单 (管理员)",
+)
+def list_org_execution_orders(
+    org_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+    limit: int = 50,
+) -> list[OrgPaperOrderOut]:
+    try:
+        rows = exs.list_org_execution_orders(db, uuid.UUID(org_id), current_user.id, limit=limit)
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    return [OrgPaperOrderOut(**r) for r in rows]

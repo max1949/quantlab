@@ -15,7 +15,9 @@ from backend.app.models.user import User
 from backend.app.schemas.execution import (
     ExecutionConfigOut,
     GatewayWebhookIn,
+    OrgPaperOrderOut,
     PaperOrderCreate,
+    PaperOrderEventOut,
     PaperOrderOut,
     RiskCheckIn,
     RiskCheckOut,
@@ -122,6 +124,31 @@ def route_order_vnpy(
     return PaperOrderOut(**exs.order_to_dict(order))
 
 
+@router.post(
+    "/paper/orders/{order_id}/route-qmt",
+    response_model=PaperOrderOut,
+    summary="将纸面订单路由到 QMT 网关",
+)
+def route_order_qmt(
+    order_id: str,
+    current_user: Annotated[User, Depends(require_feature("paper_trading"))],
+    db: Annotated[Session, Depends(get_db)],
+) -> PaperOrderOut:
+    try:
+        order = exs.route_existing_to_qmt(db, current_user.id, uuid.UUID(order_id))
+    except exs.ExecutionError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    audit_service.log(
+        db,
+        actor_id=current_user.id,
+        action="execution.qmt.route",
+        resource_type="paper_order",
+        resource_id=str(order.id),
+        detail={"external_ref": order.external_ref},
+    )
+    return PaperOrderOut(**exs.order_to_dict(order))
+
+
 @router.get("/paper/orders", response_model=list[PaperOrderOut], summary="我的模拟订单")
 def list_paper_orders(
     current_user: Annotated[User, Depends(require_feature("paper_trading"))],
@@ -142,6 +169,22 @@ def get_paper_order(
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="订单不存在")
     return PaperOrderOut(**exs.order_to_dict(row))
+
+
+@router.get(
+    "/paper/orders/{order_id}/events",
+    response_model=list[PaperOrderEventOut],
+    summary="订单状态事件时间线",
+)
+def list_order_events(
+    order_id: str,
+    current_user: Annotated[User, Depends(require_feature("paper_trading"))],
+    db: Annotated[Session, Depends(get_db)],
+) -> list[PaperOrderEventOut]:
+    rows = exs.list_order_events(db, current_user.id, uuid.UUID(order_id))
+    if not rows and exs.get_paper_order(db, current_user.id, uuid.UUID(order_id)) is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="订单不存在")
+    return [PaperOrderEventOut(**exs.event_to_dict(r)) for r in rows]
 
 
 @router.post("/webhook/gateway", summary="执行网关状态回调", include_in_schema=False)

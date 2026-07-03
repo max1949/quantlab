@@ -15,6 +15,7 @@ import {
   orgBillingRedeem,
   getOrgSsoDomains,
   setOrgSsoDomains,
+  listOrgExecutionOrders,
   removeOrgMember,
   revokeOrgInvite,
   shareFactorToOrg,
@@ -70,6 +71,11 @@ export default function OrgDetail() {
     queryKey: ["org-sso-domains", id],
     queryFn: () => getOrgSsoDomains(id),
     enabled: Boolean(id) && org.data?.my_role === "owner",
+  });
+  const execOrders = useQuery({
+    queryKey: ["org-exec-orders", id],
+    queryFn: () => listOrgExecutionOrders(id),
+    enabled: Boolean(id) && (org.data?.my_role === "owner" || org.data?.my_role === "admin"),
   });
 
   const isOwner = org.data?.my_role === "owner";
@@ -434,6 +440,45 @@ export default function OrgDetail() {
           </>
         )}
       </div>
+
+      {canAdmin && (
+        <div className="mb-6 card">
+          <h2 className="mb-3 font-semibold">{o.execDeskTitle}</h2>
+          {execOrders.isLoading ? (
+            <Spinner />
+          ) : (execOrders.data ?? []).length === 0 ? (
+            <p className="text-sm text-slate-500">{o.execDeskEmpty}</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 text-xs text-slate-500 dark:border-slate-700">
+                    <th className="py-2 pr-2">{o.execDeskColUser}</th>
+                    <th className="py-2 pr-2">{o.execDeskColSymbol}</th>
+                    <th className="py-2 pr-2">{o.execDeskColChannel}</th>
+                    <th className="py-2">{o.execDeskColStatus}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {execOrders.data?.slice(0, 10).map((row) => (
+                    <tr key={row.id} className="border-b border-slate-100 dark:border-slate-800">
+                      <td className="py-2 pr-2 font-medium">{row.username}</td>
+                      <td className="py-2 pr-2 font-mono text-xs">
+                        {row.symbol} {row.side} ¥{row.notional_cny.toLocaleString()}
+                      </td>
+                      <td className="py-2 pr-2">{row.channel}</td>
+                      <td className="py-2 text-xs">
+                        {row.status}
+                        {row.gateway_status ? ` (${row.gateway_status})` : ""}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="mb-6 card">
         <h2 className="mb-3 font-semibold">{o.memberList}</h2>

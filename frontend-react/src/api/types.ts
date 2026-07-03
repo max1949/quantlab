@@ -624,6 +624,21 @@ export interface PaperOrder {
   created_at: string;
 }
 
+export interface PaperOrderEvent {
+  id: string;
+  order_id: string;
+  event_type: string;
+  from_status: string | null;
+  to_status: string | null;
+  gateway_status: string | null;
+  detail: string;
+  created_at: string;
+}
+
+export interface OrgPaperOrder extends PaperOrder {
+  username: string;
+}
+
 export interface ReportSummary {
   id: string;
   owner_id: string;

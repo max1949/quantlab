@@ -39,6 +39,8 @@ import type {
   OverfitCheck,
   PaperSimulate,
   PaperOrder,
+  PaperOrderEvent,
+  OrgPaperOrder,
   PortfolioOptimize,
   Project,
   Referral,
@@ -953,6 +955,16 @@ export async function submitPaperOrder(body: {
 
 export async function listPaperOrders(limit = 20): Promise<PaperOrder[]> {
   const { data } = await api.get<PaperOrder[]>("/execution/paper/orders", { params: { limit } });
+  return data;
+}
+
+export async function listPaperOrderEvents(orderId: string): Promise<PaperOrderEvent[]> {
+  const { data } = await api.get<PaperOrderEvent[]>(`/execution/paper/orders/${orderId}/events`);
+  return data;
+}
+
+export async function listOrgExecutionOrders(orgId: string, limit = 20): Promise<OrgPaperOrder[]> {
+  const { data } = await api.get<OrgPaperOrder[]>(`/orgs/${orgId}/execution/orders`, { params: { limit } });
   return data;
 }
 
