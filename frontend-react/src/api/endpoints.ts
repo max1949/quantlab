@@ -8,6 +8,8 @@ import type {
   CostSensitivity,
   CrossSectionBacktest,
   DataQuality,
+  FactorCatalog,
+  VolRegime,
   Entitlements,
   Factor,
   FactorPreview,
@@ -452,6 +454,28 @@ export async function getDataQuality(
 ): Promise<DataQuality> {
   const { data } = await api.get<DataQuality>("/datasets/quality", {
     params: { symbol, timeframe },
+  });
+  return data;
+}
+
+export async function getVolRegime(symbol: string, timeframe: string): Promise<VolRegime> {
+  const { data } = await api.get<VolRegime>("/datasets/regime", {
+    params: { symbol, timeframe },
+  });
+  return data;
+}
+
+export async function getFactorCatalog(params: {
+  projectId?: string;
+  symbol?: string;
+  timeframe?: string;
+}): Promise<FactorCatalog> {
+  const { data } = await api.get<FactorCatalog>("/factors/catalog", {
+    params: {
+      project_id: params.projectId,
+      symbol: params.symbol,
+      timeframe: params.timeframe ?? "1d",
+    },
   });
   return data;
 }

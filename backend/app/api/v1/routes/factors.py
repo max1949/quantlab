@@ -76,6 +76,26 @@ def list_my_factors(
     ]
 
 
+@router.get("/catalog", summary="因子资产库 (绩效元数据 + 冗余度)")
+def factor_catalog(
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+    project_id: str | None = None,
+    symbol: str | None = None,
+    timeframe: str = "1d",
+) -> dict:
+    from backend.app.services import factor_catalog_service as fcs
+
+    pid = uuid.UUID(project_id) if project_id else None
+    return fcs.catalog_for_user(
+        db,
+        current_user.id,
+        project_id=pid,
+        symbol=symbol,
+        timeframe=timeframe,
+    )
+
+
 @router.post(
     "/template",
     response_model=FactorOut,

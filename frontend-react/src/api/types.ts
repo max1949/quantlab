@@ -452,6 +452,50 @@ export interface DataQuality {
   stats: Record<string, number>;
 }
 
+export interface VolRegime {
+  symbol: string;
+  timeframe: string;
+  regime: "low" | "mid" | "high";
+  label: string;
+  volatility_ann: number;
+  percentile: number;
+  vol_window: number;
+  as_of: string;
+  hint: string;
+}
+
+export interface FactorCatalogEntry {
+  factor_id: string;
+  name: string;
+  kind: string;
+  template_type: string | null;
+  project_id: string | null;
+  version: number;
+  sharpe: number | null;
+  oos_sharpe: number | null;
+  robustness_score: number | null;
+  symbol: string | null;
+  timeframe: string;
+}
+
+export interface FactorCatalogRedundancy {
+  factor_a: string;
+  factor_b: string;
+  name_a: string;
+  name_b: string;
+  r_squared: number | null;
+  verdict: string | null;
+  high_overlap: boolean;
+}
+
+export interface FactorCatalog {
+  symbol: string | null;
+  timeframe: string;
+  factors: FactorCatalogEntry[];
+  redundancy_pairs: FactorCatalogRedundancy[];
+  high_overlap_count: number;
+}
+
 export interface ReportSummary {
   id: string;
   owner_id: string;

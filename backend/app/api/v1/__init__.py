@@ -9,6 +9,7 @@ from fastapi import APIRouter
 
 from backend.app.api.v1.routes import (
     admin_billing,
+    admin_ops,
     ai,
     auth,
     backtests,
@@ -63,6 +64,7 @@ api_router.include_router(public_feed.router, prefix="/public", tags=["public"])
 # 商业化 (Sprint 10)
 api_router.include_router(billing.router, prefix="/billing", tags=["billing"])
 api_router.include_router(admin_billing.router, prefix="/admin/billing", tags=["admin"])
+api_router.include_router(admin_ops.router, prefix="/admin/ops", tags=["admin"])
 api_router.include_router(portfolio.router, prefix="/portfolio", tags=["portfolio"])
 
 # 后续 Sprint 继续在此挂载: execution-adapter (vn.py/QMT, Phase 3) / ...

@@ -123,6 +123,21 @@ def execute(db: Session, backtest_id) -> Backtest | None:
             from backend.app.services import academy_hooks
 
             bt.academy_rewards = academy_hooks.on_backtest_success(db, owner)
+        from backend.app.services import audit_service
+
+        audit_service.log(
+            db,
+            actor_id=bt.owner_id,
+            action="backtest.success",
+            resource_type="backtest",
+            resource_id=bt.id,
+            detail={
+                "factor_id": str(bt.factor_id),
+                "symbol": bt.symbol,
+                "sharpe": (bt.metrics or {}).get("sharpe"),
+            },
+            commit=False,
+        )
     except Exception as exc:  # noqa: BLE001 - 落库失败原因, 不让 worker 崩
         bt.status = BacktestStatus.FAILED.value
         bt.error = f"{type(exc).__name__}: {exc}"

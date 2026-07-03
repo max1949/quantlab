@@ -164,6 +164,21 @@ def execute(db: Session, validation_id) -> Validation | None:
         v.robustness = robustness
         v.status = ValidationStatus.SUCCESS.value
         v.error = None
+        from backend.app.services import audit_service
+
+        audit_service.log(
+            db,
+            actor_id=v.owner_id,
+            action="validation.success",
+            resource_type="validation",
+            resource_id=v.id,
+            detail={
+                "factor_id": str(v.factor_id),
+                "symbol": v.symbol,
+                "robustness_score": (v.robustness or {}).get("score"),
+            },
+            commit=False,
+        )
     except Exception as exc:  # noqa: BLE001
         v.status = ValidationStatus.FAILED.value
         v.error = f"{type(exc).__name__}: {exc}"

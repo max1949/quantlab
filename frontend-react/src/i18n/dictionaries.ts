@@ -537,6 +537,20 @@ const en = {
     dataQualityChecking: "Checking data quality…",
     dataQualityPass: (grade: string) => `Data quality: ${grade} — no major gaps or halt bars detected`,
     dataQualityWarn: (grade: string) => `Data quality: ${grade} — review before trusting backtests`,
+    regimeChecking: "Detecting volatility regime…",
+    regimeTitle: (label: string, vol: number, pct: number) =>
+      `Market regime: ${label} · ann. vol ${vol.toFixed(2)} · ${pct}th percentile`,
+    catalogTitle: "Factor asset catalog",
+    catalogSubtitle: (n: number, overlap: number) =>
+      `${n} factors tracked${overlap > 0 ? ` · ${overlap} high-overlap pair(s)` : ""}`,
+    catalogLoading: "Loading factor catalog…",
+    catalogColName: "Name",
+    catalogColKind: "Kind",
+    catalogColSharpe: "Sharpe",
+    catalogColOos: "OOS Sharpe",
+    catalogOverlap: "Redundancy (top pairs)",
+    catalogPair: (a: string, b: string, r2: number | null) =>
+      `${a} ↔ ${b}: R² ${r2 != null ? r2.toFixed(2) : "—"}`,
     qualityHintsTitle: "Publish tips (non-blocking)",
     orthogonalTitle: "Factor overlap check",
     orthogonalVerdict: (v: string) => v,
@@ -1289,6 +1303,20 @@ const zh = {
     dataQualityChecking: "正在检查数据质量…",
     dataQualityPass: (grade: string) => `数据质量：${grade} — 未发现明显缺口或停牌棒`,
     dataQualityWarn: (grade: string) => `数据质量：${grade} — 回测前请先留意以下问题`,
+    regimeChecking: "正在识别波动率制度…",
+    regimeTitle: (label: string, vol: number, pct: number) =>
+      `市场制度：${label} · 年化波动 ${vol.toFixed(2)} · 历史分位 ${pct}%`,
+    catalogTitle: "因子资产库",
+    catalogSubtitle: (n: number, overlap: number) =>
+      `已跟踪 ${n} 个因子${overlap > 0 ? ` · ${overlap} 对高重叠` : ""}`,
+    catalogLoading: "正在加载因子资产库…",
+    catalogColName: "名称",
+    catalogColKind: "类型",
+    catalogColSharpe: "夏普",
+    catalogColOos: "样本外夏普",
+    catalogOverlap: "冗余度（前几对）",
+    catalogPair: (a: string, b: string, r2: number | null) =>
+      `${a} ↔ ${b}：R² ${r2 != null ? r2.toFixed(2) : "—"}`,
     qualityHintsTitle: "发布建议（不阻断发布）",
     orthogonalTitle: "因子重叠度检查",
     orthogonalVerdict: (v: string) => v,

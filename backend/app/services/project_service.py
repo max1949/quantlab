@@ -120,11 +120,19 @@ def publish_project(db: Session, owner_id: uuid.UUID, project_id: uuid.UUID) -> 
     db.commit()
     db.refresh(p)
     from backend.app.models.user import User
-    from backend.app.services import academy_hooks
+    from backend.app.services import academy_hooks, audit_service
 
     owner = db.get(User, owner_id)
     if owner is not None:
         p.academy_rewards = academy_hooks.on_project_published(db, owner)
+    audit_service.log(
+        db,
+        actor_id=owner_id,
+        action="project.publish",
+        resource_type="project",
+        resource_id=project_id,
+        detail={"title": p.title, "status": p.status},
+    )
     return p
 
 

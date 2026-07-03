@@ -6,12 +6,17 @@
 
 from pathlib import Path
 
-from fastapi import FastAPI, Request
+from typing import Annotated
+
+from fastapi import Depends, FastAPI, Request, status
 from fastapi.responses import FileResponse, PlainTextResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy.orm import Session
 
 from backend.app.api.v1 import api_router
 from backend.app.core.config import get_settings
+from backend.app.core.database import get_db
+from backend.app.services import health_service
 from backend.app.web import report_preview, share_preview
 
 settings = get_settings()
@@ -77,6 +82,17 @@ def health() -> dict:
     return {"status": "ok", "env": settings.app_env}
 
 
+@app.get("/health/ready", tags=["system"])
+def health_ready(db: Annotated[Session, Depends(get_db)]) -> dict:
+    """就绪探针 — DB / Redis (Celery 仅作参考, 不阻塞 ready)。"""
+    body = health_service.readiness(db)
+    if body["status"] != "ready":
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=body)
+    return body
+
+
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _REACT_DIST = _REPO_ROOT / "frontend-react" / "dist"
 _LEGACY_FRONTEND_DIR = _REPO_ROOT / "frontend"
@@ -103,6 +119,7 @@ async def spa_path_shortcuts(request: Request, call_next):
         skip = (
             path.startswith(("/api/", "/app", "/app-legacy", "/docs", "/openapi.json"))
             or path == "/health"
+            or path.startswith("/health/")
         )
         if not skip:
             if path == "/":

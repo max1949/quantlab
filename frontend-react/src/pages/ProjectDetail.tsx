@@ -30,6 +30,8 @@ import ValidationResultsPanel from "../components/ValidationResultsPanel";
 import BacktestResultsPanel from "../components/BacktestResultsPanel";
 import QualityCoach from "../components/QualityCoach";
 import DataQualityBanner from "../components/DataQualityBanner";
+import VolRegimeBanner from "../components/VolRegimeBanner";
+import FactorCatalogPanel from "../components/FactorCatalogPanel";
 import type { Graph } from "../api/types";
 
 type StepKey = "factor" | "backtest" | "validation" | "report" | "publish";
@@ -331,7 +333,19 @@ export default function ProjectDetail() {
       )}
 
       {symbol && activeTimeframe && (
-        <DataQualityBanner symbol={symbol} timeframe={activeTimeframe} />
+        <>
+          <DataQualityBanner symbol={symbol} timeframe={activeTimeframe} />
+          <VolRegimeBanner symbol={symbol} timeframe={activeTimeframe} />
+        </>
+      )}
+
+      {id && (
+        <FactorCatalogPanel
+          projectId={id}
+          symbol={symbol}
+          timeframe={activeTimeframe}
+          enabled={Boolean(factors.data && factors.data.length > 0)}
+        />
       )}
 
       <div className="mb-6 card">

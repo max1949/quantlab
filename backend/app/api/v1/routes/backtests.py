@@ -46,6 +46,37 @@ def list_datasets(
 
 
 @router.get(
+    "/datasets/regime",
+    tags=["data"],
+    summary="波动率制度识别 (low/mid/high)",
+)
+def dataset_regime(
+    symbol: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+    timeframe: str = "1d",
+) -> dict:
+    from engine.regime import detect_vol_regime
+
+    if market_data.get_dataset(db, symbol, timeframe) is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="行情数据集不存在",
+        )
+    try:
+        df = mdp.load_for_user(db, current_user, symbol, timeframe)
+    except mdp.MarketDataAccessError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
+    try:
+        out = detect_vol_regime(df)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+        )
+    return {"symbol": symbol.upper(), "timeframe": timeframe, **out}
+
+
+@router.get(
     "/datasets/quality",
     response_model=DataQualityOut,
     tags=["data"],
