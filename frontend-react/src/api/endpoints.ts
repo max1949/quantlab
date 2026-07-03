@@ -472,9 +472,13 @@ export async function getDataQuality(
   return data;
 }
 
-export async function getVolRegime(symbol: string, timeframe: string): Promise<VolRegime> {
+export async function getVolRegime(
+  symbol: string,
+  timeframe: string,
+  factorId?: string,
+): Promise<VolRegime> {
   const { data } = await api.get<VolRegime>("/datasets/regime", {
-    params: { symbol, timeframe },
+    params: { symbol, timeframe, factor_id: factorId },
   });
   return data;
 }

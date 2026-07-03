@@ -468,6 +468,11 @@ export interface VolRegime {
   vol_window: number;
   as_of: string;
   hint: string;
+  strategy_style?: string;
+  strategy_label?: string;
+  fit_score?: number;
+  fit_verdict?: string;
+  fit_hint?: string;
 }
 
 export interface FactorCatalogEntry {
@@ -569,6 +574,9 @@ export interface OrgInvitePreview {
 export interface OrgCatalogEntry extends FactorCatalogEntry {
   owner_username: string | null;
   share_note: string;
+  regime_fit_score?: number | null;
+  regime_fit_verdict?: string | null;
+  strategy_label?: string | null;
 }
 
 export interface OrgCatalogRedundancy extends FactorCatalogRedundancy {
@@ -580,6 +588,7 @@ export interface OrgCatalog {
   org_id: string;
   symbol: string | null;
   timeframe: string;
+  market_regime?: VolRegime | null;
   factors: OrgCatalogEntry[];
   redundancy_pairs: OrgCatalogRedundancy[];
   high_overlap_count: number;

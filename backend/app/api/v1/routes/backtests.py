@@ -55,25 +55,28 @@ def dataset_regime(
     current_user: CurrentUser,
     db: Annotated[Session, Depends(get_db)],
     timeframe: str = "1d",
+    factor_id: str | None = None,
 ) -> dict:
-    from engine.regime import detect_vol_regime
-
     if market_data.get_dataset(db, symbol, timeframe) is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="行情数据集不存在",
         )
-    try:
-        df = mdp.load_for_user(db, current_user, symbol, timeframe)
-    except mdp.MarketDataAccessError as exc:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
-    try:
-        out = detect_vol_regime(df)
-    except ValueError as exc:
+    if factor_id:
+        try:
+            regime = regime_advisory.market_regime_for_factor(
+                db, current_user, uuid.UUID(factor_id), symbol, timeframe
+            )
+            if regime:
+                return {"symbol": symbol.upper(), "timeframe": timeframe, **regime}
+        except ValueError:
+            pass
+    regime = regime_advisory.market_regime_for_symbol(db, current_user, symbol, timeframe)
+    if regime is None:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="无法识别波动制度"
         )
-    return {"symbol": symbol.upper(), "timeframe": timeframe, **out}
+    return {"symbol": symbol.upper(), "timeframe": timeframe, **regime}
 
 
 @router.get(
@@ -140,8 +143,8 @@ def create_backtest(
     except mdp.MarketDataAccessError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
     detail = BacktestDetail.model_validate(bt)
-    regime = regime_advisory.market_regime_for_symbol(
-        db, current_user, payload.symbol, payload.timeframe
+    regime = regime_advisory.market_regime_for_factor(
+        db, current_user, payload.factor_id, payload.symbol, payload.timeframe
     )
     return detail.model_copy(
         update={
@@ -269,5 +272,10 @@ def get_backtest(
         s = db.get(DataSnapshot, bt.snapshot_id)
         if s:
             tf = s.timeframe
-    regime = regime_advisory.market_regime_for_symbol(db, current_user, bt.symbol, tf)
+    from backend.app.models.factor import Factor
+
+    factor = db.get(Factor, bt.factor_id) if bt.factor_id else None
+    regime = regime_advisory.market_regime_for_symbol(
+        db, current_user, bt.symbol, tf, factor=factor
+    )
     return detail.model_copy(update={"market_regime": regime})

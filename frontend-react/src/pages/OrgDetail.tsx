@@ -331,6 +331,11 @@ export default function OrgDetail() {
           <p className="text-sm text-slate-500">{o.catalogEmpty}</p>
         ) : (
           <>
+            {cat.market_regime && (
+              <p className="mb-3 text-xs text-slate-500">
+                {o.regimeCatalogHint(cat.market_regime.label, cat.market_regime.hint)}
+              </p>
+            )}
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
@@ -338,7 +343,8 @@ export default function OrgDetail() {
                     <th className="py-2 pr-2">{o.colName}</th>
                     <th className="py-2 pr-2">{o.colOwner}</th>
                     <th className="py-2 pr-2">{o.colSharpe}</th>
-                    <th className="py-2">{o.colOos}</th>
+                    <th className="py-2 pr-2">{o.colOos}</th>
+                    <th className="py-2">{o.colRegimeFit}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -347,7 +353,12 @@ export default function OrgDetail() {
                       <td className="py-2 pr-2 font-medium">{f.name}</td>
                       <td className="py-2 pr-2 text-slate-500">{f.owner_username ?? "—"}</td>
                       <td className="py-2 pr-2">{fmt(f.sharpe)}</td>
-                      <td className="py-2">{fmt(f.oos_sharpe)}</td>
+                      <td className="py-2 pr-2">{fmt(f.oos_sharpe)}</td>
+                      <td className="py-2 text-xs">
+                        {f.regime_fit_verdict
+                          ? `${f.strategy_label ?? ""} · ${f.regime_fit_verdict} (${f.regime_fit_score})`
+                          : "—"}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

@@ -17,6 +17,7 @@ from backend.app.api.v1.routes import (
     challenges,
     competition,
     events,
+    execution,
     factors,
     leaderboards,
     me,
@@ -68,5 +69,6 @@ api_router.include_router(billing.router, prefix="/billing", tags=["billing"])
 api_router.include_router(admin_billing.router, prefix="/admin/billing", tags=["admin"])
 api_router.include_router(admin_ops.router, prefix="/admin/ops", tags=["admin"])
 api_router.include_router(portfolio.router, prefix="/portfolio", tags=["portfolio"])
+api_router.include_router(execution.router, prefix="/execution", tags=["execution"])
 
 # 后续 Sprint 继续在此挂载: execution-adapter (vn.py/QMT, Phase 3) / ...

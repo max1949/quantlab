@@ -104,6 +104,15 @@ export default function BacktestResultsPanel({ factorId, enabled }: Props) {
             {v.regimeHintTitle}: {detail.data.market_regime.label}
           </p>
           <p className="mt-1 text-xs opacity-90">{detail.data.market_regime.hint}</p>
+          {detail.data.market_regime.fit_score != null && (
+            <p className="mt-2 text-xs">
+              {v.regimeFit(
+                detail.data.market_regime.strategy_label ?? "—",
+                detail.data.market_regime.fit_verdict ?? "—",
+                detail.data.market_regime.fit_score,
+              )}
+            </p>
+          )}
         </div>
       )}
 

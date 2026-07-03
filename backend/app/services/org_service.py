@@ -503,11 +503,17 @@ def org_catalog(
 
     ohlcv = None
     sym = (symbol or "").upper()
+    regime_base: dict | None = None
     if sym and viewer is not None:
         try:
             ohlcv = mdp.load_for_user(db, viewer, sym, timeframe)
-        except mdp.MarketDataAccessError:
+            if ohlcv is not None and not ohlcv.empty:
+                from engine.regime import detect_vol_regime
+
+                regime_base = detect_vol_regime(ohlcv)
+        except (mdp.MarketDataAccessError, ValueError):
             ohlcv = None
+            regime_base = None
 
     entries: list[dict] = []
     series_map: dict[uuid.UUID, pd.Series] = {}
@@ -528,6 +534,14 @@ def org_catalog(
             except factor_service.FactorValidationError:
                 pass
         sh = share_by_factor.get(f.id)
+        regime_fit = None
+        if regime_base:
+            from engine.regime_strategy import infer_strategy_style, score_regime_fit
+
+            style = infer_strategy_style(
+                kind=f.kind, template_type=f.template_type, name=f.name
+            )
+            regime_fit = score_regime_fit(regime_base["regime"], style)
         entries.append(
             {
                 "factor_id": str(f.id),
@@ -542,6 +556,9 @@ def org_catalog(
                 "symbol": bt.symbol if bt else sym or None,
                 "timeframe": timeframe,
                 "share_note": sh.note if sh else "",
+                "regime_fit_score": regime_fit["fit_score"] if regime_fit else None,
+                "regime_fit_verdict": regime_fit["fit_verdict"] if regime_fit else None,
+                "strategy_label": regime_fit["strategy_label"] if regime_fit else None,
             }
         )
 
@@ -574,6 +591,7 @@ def org_catalog(
         "org_id": str(org_id),
         "symbol": sym or None,
         "timeframe": timeframe,
+        "market_regime": regime_base,
         "factors": entries,
         "redundancy_pairs": redundancy[:30],
         "high_overlap_count": sum(1 for r in redundancy if r.get("high_overlap")),

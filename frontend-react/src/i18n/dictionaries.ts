@@ -158,10 +158,12 @@ const en = {
     shareFail: "Failed to share factor",
     catalogTitle: "Org factor catalog",
     catalogEmpty: "No shared factors yet.",
+    regimeCatalogHint: (label: string, hint: string) => `${label} · ${hint}`,
     colName: "Factor",
     colOwner: "Owner",
     colSharpe: "Sharpe",
     colOos: "OOS Sharpe",
+    colRegimeFit: "Regime fit",
     overlapPairs: "Cross-member redundancy",
     pairLine: (a: string, b: string, oa: string | null, ob: string | null, r2: number | null) =>
       `${a} (${oa ?? "?"}) ↔ ${b} (${ob ?? "?"}): R² ${r2 != null ? r2.toFixed(2) : "—"}`,
@@ -359,6 +361,8 @@ const en = {
     lowSharpeWarning:
       "Sharpe looks weak on full history — tweak the factor in Factor Lab before spending time on validation.",
     regimeHintTitle: "Market regime context",
+    regimeFit: (style: string, verdict: string, score: number) =>
+      `Strategy fit (${style}): ${verdict} · score ${score}`,
   },
   aiReview: {
     validationBtn: "AI review",
@@ -1059,10 +1063,12 @@ const zh = {
     shareFail: "共享失败",
     catalogTitle: "机构因子资产库",
     catalogEmpty: "暂无共享因子。",
+    regimeCatalogHint: (label: string, hint: string) => `${label} · ${hint}`,
     colName: "因子",
     colOwner: "所有者",
     colSharpe: "夏普",
     colOos: "样本外夏普",
+    colRegimeFit: "制度适配",
     overlapPairs: "跨成员冗余度",
     pairLine: (a: string, b: string, oa: string | null, ob: string | null, r2: number | null) =>
       `${a}（${oa ?? "?"}）↔ ${b}（${ob ?? "?"}）：R² ${r2 != null ? r2.toFixed(2) : "—"}`,
@@ -1260,6 +1266,8 @@ const zh = {
     lowSharpeWarning:
       "全样本夏普偏弱 — 建议先在因子实验室调整公式/参数，再花时间做验证。",
     regimeHintTitle: "市场制度背景",
+    regimeFit: (style: string, verdict: string, score: number) =>
+      `制度×策略适配（${style}）：${verdict} · 评分 ${score}`,
   },
   aiReview: {
     validationBtn: "AI 复盘",
