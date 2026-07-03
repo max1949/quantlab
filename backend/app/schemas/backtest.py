@@ -59,6 +59,7 @@ class BacktestDetail(BacktestSummary):
     report: dict | None
     error: str | None
     academy_rewards: list = Field(default_factory=list)
+    market_regime: dict | None = None
 
 
 class CrossSectionBacktestCreate(BaseModel):

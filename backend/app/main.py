@@ -108,6 +108,7 @@ _SPA_SHORTCUTS = frozenset({
     "/onboarding",
     "/challenges",
     "/me",
+  "/admin/ops",
 })
 
 

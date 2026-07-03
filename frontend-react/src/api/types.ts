@@ -336,6 +336,7 @@ export interface BacktestDetail extends Backtest {
   equity_curve?: { date: string; equity: number | null }[] | null;
   report?: Record<string, unknown> | null;
   error?: string | null;
+  market_regime?: VolRegime | null;
 }
 
 export interface Insight {

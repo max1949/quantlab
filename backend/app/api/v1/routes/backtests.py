@@ -27,7 +27,7 @@ from backend.app.schemas.backtest import (
 from backend.app.models.user import User
 from backend.app.services import backtest_service, factor_service, market_data
 from backend.app.services import market_data_policy as mdp
-from backend.app.services import rate_limit
+from backend.app.services import rate_limit, regime_advisory
 
 router = APIRouter()
 
@@ -140,7 +140,15 @@ def create_backtest(
     except mdp.MarketDataAccessError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=exc.message)
     detail = BacktestDetail.model_validate(bt)
-    return detail.model_copy(update={"academy_rewards": getattr(bt, "academy_rewards", [])})
+    regime = regime_advisory.market_regime_for_symbol(
+        db, current_user, payload.symbol, payload.timeframe
+    )
+    return detail.model_copy(
+        update={
+            "academy_rewards": getattr(bt, "academy_rewards", []),
+            "market_regime": regime,
+        }
+    )
 
 
 @router.post(
@@ -253,4 +261,13 @@ def get_backtest(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="回测不存在"
         )
-    return BacktestDetail.model_validate(bt)
+    detail = BacktestDetail.model_validate(bt)
+    tf = "1d"
+    if bt.snapshot_id:
+        from backend.app.models.market import DataSnapshot
+
+        s = db.get(DataSnapshot, bt.snapshot_id)
+        if s:
+            tf = s.timeframe
+    regime = regime_advisory.market_regime_for_symbol(db, current_user, bt.symbol, tf)
+    return detail.model_copy(update={"market_regime": regime})

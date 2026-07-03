@@ -52,6 +52,7 @@ def test_create_backtest_runs_and_reports(client, db_session):
     body = resp.json()
     assert body["status"] == "success"
     assert body["snapshot_id"]  # 绑定了数据快照
+    assert body.get("market_regime", {}).get("regime") in ("low", "mid", "high")
     # 指标齐全
     assert set(body["metrics"]) >= {"sharpe", "max_drawdown", "annual_return", "trade_count"}
     # 研究报告: 假设/方法/结果/结论 + markdown

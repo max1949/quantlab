@@ -27,6 +27,7 @@ import Experiments from "./pages/Experiments";
 import Leaderboards from "./pages/Leaderboards";
 import Challenges from "./pages/Challenges";
 import Pricing from "./pages/Pricing";
+import AdminOps from "./pages/AdminOps";
 import NotFound from "./pages/NotFound";
 
 export default function App() {
@@ -65,6 +66,7 @@ export default function App() {
           <Route path="/u/:userId" element={<Researcher />} />
           <Route path="/leaderboards" element={<Leaderboards />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/admin/ops" element={<AdminOps />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/onboarding" element={<Onboarding />} />

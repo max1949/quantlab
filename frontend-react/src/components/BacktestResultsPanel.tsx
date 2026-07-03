@@ -98,6 +98,15 @@ export default function BacktestResultsPanel({ factorId, enabled }: Props) {
         </p>
       )}
 
+      {detail.data.market_regime && (
+        <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-100">
+          <p className="font-medium">
+            {v.regimeHintTitle}: {detail.data.market_regime.label}
+          </p>
+          <p className="mt-1 text-xs opacity-90">{detail.data.market_regime.hint}</p>
+        </div>
+      )}
+
       <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <Metric label={v.sharpe} value={fmtNum(sharpe)} highlight={lowSharpe} />
         <Metric label={v.annualReturn} value={fmtPct(m.annual_return as number)} />
