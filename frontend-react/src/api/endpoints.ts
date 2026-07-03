@@ -1093,6 +1093,32 @@ export async function dispatchOrgSlaAlerts(
   return data;
 }
 
+export interface OrgSlaAlertDelivery {
+  id: string;
+  scope: string;
+  org_id: string | null;
+  status: string;
+  trigger: string;
+  alert_count: number;
+  skipped_reason: string | null;
+  http_status: number | null;
+  error_message: string | null;
+  webhook_url: string;
+  signed: boolean;
+  created_at: string;
+}
+
+export async function fetchOrgAlertDeliveries(
+  orgId: string,
+  limit = 20,
+): Promise<OrgSlaAlertDelivery[]> {
+  const { data } = await api.get<OrgSlaAlertDelivery[]>(
+    `/orgs/${orgId}/execution/alert-deliveries`,
+    { params: { limit } },
+  );
+  return data;
+}
+
 // ---- events (埋点, 允许匿名) ----
 export async function trackEvent(
   event: string,

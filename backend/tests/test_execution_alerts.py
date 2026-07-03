@@ -164,6 +164,13 @@ def test_org_alert_webhook_config_and_dispatch(client, db_session):
         payload = json.loads(body_bytes.decode())
         assert payload["scope"] == "org"
         assert payload["org_id"] == org_id
+
+        deliveries = client.get(f"{BASE}/orgs/{org_id}/execution/alert-deliveries", headers=h)
+        assert deliveries.status_code == 200, deliveries.text
+        rows = deliveries.json()
+        assert len(rows) >= 1
+        assert rows[0]["scope"] == "org"
+        assert rows[0]["status"] == "sent"
     finally:
         settings.execution_kill_switch = prev_kill
 

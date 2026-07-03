@@ -23,6 +23,7 @@ import {
   getOrgAlertWebhook,
   setOrgAlertWebhook,
   dispatchOrgSlaAlerts,
+  fetchOrgAlertDeliveries,
   refreshOrgExecutionOrders,
   removeOrgMember,
   revokeOrgInvite,
@@ -101,6 +102,11 @@ export default function OrgDetail() {
   const alertWebhookQuery = useQuery({
     queryKey: ["org-alert-webhook", id],
     queryFn: () => getOrgAlertWebhook(id),
+    enabled: Boolean(id) && (org.data?.my_role === "owner" || org.data?.my_role === "admin"),
+  });
+  const alertDeliveries = useQuery({
+    queryKey: ["org-alert-deliveries", id],
+    queryFn: () => fetchOrgAlertDeliveries(id),
     enabled: Boolean(id) && (org.data?.my_role === "owner" || org.data?.my_role === "admin"),
   });
 
@@ -239,6 +245,7 @@ export default function OrgDetail() {
   const dispatchOrgAlerts = useMutation({
     mutationFn: () => dispatchOrgSlaAlerts(id, true),
     onSuccess: (r) => {
+      void qc.invalidateQueries({ queryKey: ["org-alert-deliveries", id] });
       if (r.sent > 0) notify(o.alertWebhookDispatchDone(r.sent), "success");
       else notify(o.alertWebhookDispatchSkipped(r.reason ?? "none"), "info");
     },
@@ -630,6 +637,34 @@ export default function OrgDetail() {
                     {dispatchOrgAlerts.isPending ? o.alertWebhookDispatching : o.alertWebhookDispatch}
                   </button>
                 </div>
+              </div>
+              <div className="mt-4 border-t border-slate-200 pt-3 dark:border-slate-700">
+                <p className="mb-2 text-sm font-medium">{o.alertDeliveryTitle}</p>
+                {alertDeliveries.isLoading ? (
+                  <Spinner />
+                ) : alertDeliveries.data && alertDeliveries.data.length === 0 ? (
+                  <p className="text-xs text-slate-500">{o.alertDeliveryEmpty}</p>
+                ) : alertDeliveries.data ? (
+                  <ul className="space-y-1 text-xs text-slate-600 dark:text-slate-300">
+                    {alertDeliveries.data.slice(0, 10).map((row) => (
+                      <li
+                        key={row.id}
+                        className={
+                          row.status === "failed"
+                            ? "text-rose-600 dark:text-rose-400"
+                            : row.status === "sent"
+                              ? "text-emerald-700 dark:text-emerald-300"
+                              : ""
+                        }
+                      >
+                        {new Date(row.created_at).toLocaleString()} · {row.status} · {row.trigger} ·{" "}
+                        {row.alert_count} alerts
+                        {row.signed ? ` · ${o.alertDeliverySigned}` : ""}
+                        {row.error_message ? ` · ${row.error_message}` : ""}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
               </div>
             </>
           ) : null}
