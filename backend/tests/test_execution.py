@@ -335,3 +335,50 @@ def test_route_paper_to_qmt(client, db_session):
 
     events = client.get(f"{BASE}/execution/paper/orders/{order['id']}/events", headers=h).json()
     assert any(e["event_type"] == "routed" for e in events)
+
+
+def test_refresh_gateway_order_poll(client, db_session, monkeypatch):
+    monkeypatch.setattr(
+        "backend.app.services.execution_service.fetch_gateway_order_status",
+        lambda **_: "filled",
+    )
+
+    h = _pro_headers(client, db_session)
+    order = client.post(
+        f"{BASE}/execution/paper/orders",
+        headers=h,
+        json={
+            "symbol": "RB",
+            "side": "buy",
+            "notional_cny": 16000,
+            "channel": "qmt",
+            "acknowledge_risk": True,
+        },
+    ).json()
+
+    refreshed = client.post(f"{BASE}/execution/paper/orders/{order['id']}/refresh", headers=h)
+    assert refreshed.status_code == 200, refreshed.text
+    assert refreshed.json()["status"] == "filled"
+    assert refreshed.json()["gateway_status"] == "filled"
+
+    events = client.get(f"{BASE}/execution/paper/orders/{order['id']}/events", headers=h).json()
+    assert any(e["event_type"] == "gateway_poll" for e in events)
+
+
+def test_refresh_stub_gateway_422(client, db_session):
+    h = _pro_headers(client, db_session)
+    order = client.post(
+        f"{BASE}/execution/paper/orders",
+        headers=h,
+        json={
+            "symbol": "RB",
+            "side": "buy",
+            "notional_cny": 9000,
+            "channel": "qmt",
+            "acknowledge_risk": True,
+        },
+    ).json()
+
+    resp = client.post(f"{BASE}/execution/paper/orders/{order['id']}/refresh", headers=h)
+    assert resp.status_code == 422
+    assert "网关未配置" in resp.json()["detail"]

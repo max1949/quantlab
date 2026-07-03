@@ -221,6 +221,10 @@ const en = {
     execDeskColSymbol: "Symbol",
     execDeskColChannel: "Channel",
     execDeskColStatus: "Status",
+    execDeskSync: "Sync gateway status",
+    execDeskSyncing: "Syncing…",
+    execDeskSynced: (n: number) => `Updated ${n} order(s) from gateway`,
+    execDeskSyncFail: "Sync failed",
     ssoDomainsTitle: "SSO email domains",
     ssoDomainsHint: "Only users with these email domains can join (leave empty to allow all).",
     ssoDomainsPlaceholder: "corp.com, quantlab.ai",
@@ -937,6 +941,10 @@ const en = {
     execSubmitted: (ch: string, st: string) => `Order submitted (${ch} · ${st})`,
     execKillSwitch: "Execution kill switch is ON — contact ops.",
     execRecent: "Recent orders",
+    execRefresh: "Refresh",
+    execRefreshing: "Refreshing…",
+    execRefreshed: "Status updated from gateway",
+    execRefreshFail: "Refresh failed",
   },
 } as const;
 
@@ -1159,6 +1167,10 @@ const zh = {
     execDeskColSymbol: "标的",
     execDeskColChannel: "通道",
     execDeskColStatus: "状态",
+    execDeskSync: "同步网关状态",
+    execDeskSyncing: "同步中…",
+    execDeskSynced: (n: number) => `已从网关更新 ${n} 笔订单`,
+    execDeskSyncFail: "同步失败",
     ssoDomainsTitle: "SSO 邮箱域",
     ssoDomainsHint: "仅允许这些邮箱域的用户加入（留空表示不限制）。",
     ssoDomainsPlaceholder: "corp.com, quantlab.ai",
@@ -1867,6 +1879,10 @@ const zh = {
     execSubmitted: (ch: string, st: string) => `订单已提交（${ch} · ${st}）`,
     execKillSwitch: "执行总闸已关闭，请联系运营。",
     execRecent: "最近订单",
+    execRefresh: "刷新状态",
+    execRefreshing: "刷新中…",
+    execRefreshed: "已从网关更新状态",
+    execRefreshFail: "刷新失败",
   },
 };
 

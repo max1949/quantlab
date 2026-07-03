@@ -30,7 +30,7 @@ from backend.app.schemas.organization import (
     OrgSsoDomainsIn,
     OrgSsoDomainsOut,
 )
-from backend.app.schemas.execution import OrgPaperOrderOut
+from backend.app.schemas.execution import GatewayRefreshOut, OrgPaperOrderOut
 from backend.app.services import audit_service, execution_service as exs, org_billing_service, org_service
 
 router = APIRouter()
@@ -548,3 +548,31 @@ def list_org_execution_orders(
     except org_service.OrgAccessDeniedError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     return [OrgPaperOrderOut(**r) for r in rows]
+
+
+@router.post(
+    "/{org_id}/execution/refresh",
+    response_model=GatewayRefreshOut,
+    summary="批量轮询机构待成交网关订单",
+)
+def refresh_org_execution_orders(
+    org_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+    limit: int = 30,
+) -> GatewayRefreshOut:
+    try:
+        result = exs.refresh_org_gateway_orders(
+            db, uuid.UUID(org_id), current_user.id, limit=limit
+        )
+        audit_service.log(
+            db,
+            actor_id=current_user.id,
+            action="org.execution.refresh",
+            resource_type="org",
+            resource_id=org_id,
+            detail=result,
+        )
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    return GatewayRefreshOut(**result)

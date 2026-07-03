@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import urllib.parse
 import uuid
 from typing import Any
 
@@ -103,6 +104,44 @@ def _route_gateway(
         "mode": "gateway",
         "gateway_status": body.get("status", "accepted"),
     }
+
+
+def _gateway_credentials(channel: str) -> tuple[str, str]:
+    s = get_settings()
+    if channel == CHANNEL_VNPY:
+        return s.vnpy_gateway_url, s.vnpy_gateway_token
+    if channel == CHANNEL_QMT:
+        return s.qmt_gateway_url, s.qmt_gateway_token
+    raise AdapterError("非网关通道")
+
+
+def fetch_gateway_order_status(*, channel: str, external_ref: str) -> str:
+    """主动轮询网关订单状态 (GET /orders/{ref})。"""
+    base_url, token = _gateway_credentials(channel)
+    base = base_url.strip()
+    ref = (external_ref or "").strip()
+    if not base:
+        raise AdapterError("网关未配置, 无法轮询状态")
+    if not ref:
+        raise AdapterError("缺少 external_ref")
+
+    url = base.rstrip("/") + "/orders/" + urllib.parse.quote(ref, safe="")
+    headers: dict[str, str] = {}
+    if token.strip():
+        headers["Authorization"] = f"Bearer {token.strip()}"
+
+    with httpx.Client(timeout=30.0) as client:
+        resp = client.get(url, headers=headers)
+    if resp.status_code == 404:
+        raise AdapterError("网关中找不到该订单")
+    if resp.status_code not in (200, 201):
+        raise AdapterError(f"网关查询失败: HTTP {resp.status_code}")
+
+    body = resp.json() if resp.content else {}
+    status = body.get("status") or body.get("gateway_status")
+    if not status:
+        raise AdapterError("网关响应缺少 status")
+    return str(status)
 
 
 def route_vnpy_order(

@@ -83,3 +83,8 @@ class PaperOrderEventOut(BaseModel):
     gateway_status: str | None
     detail: str
     created_at: datetime
+
+
+class GatewayRefreshOut(BaseModel):
+    checked: int
+    updated: int

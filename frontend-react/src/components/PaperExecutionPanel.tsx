@@ -4,17 +4,19 @@ import {
   checkExecutionRisk,
   getExecutionConfig,
   listPaperOrders,
+  refreshPaperOrder,
   submitPaperOrder,
 } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
 import { useUi } from "../store/ui";
 import { useLocale } from "../store/locale";
 import type { Dictionary } from "../i18n/dictionaries";
+import type { PaperOrder } from "../api/types";
 
 const SYMBOLS = ["RB", "AU", "IF"];
 type ExecChannel = "paper" | "vnpy" | "qmt";
 
-function isGatewayChannel(channel: ExecChannel): boolean {
+function isGatewayChannel(channel: string): boolean {
   return channel === "vnpy" || channel === "qmt";
 }
 
@@ -61,6 +63,15 @@ export default function PaperExecutionPanel() {
       void qc.invalidateQueries({ queryKey: ["paper-orders"] });
     },
     onError: (e) => notify(apiErrorMessage(e, l4.execSubmitFail), "error"),
+  });
+
+  const refresh = useMutation({
+    mutationFn: (orderId: string) => refreshPaperOrder(orderId),
+    onSuccess: () => {
+      notify(l4.execRefreshed, "success");
+      void qc.invalidateQueries({ queryKey: ["paper-orders"] });
+    },
+    onError: (e) => notify(apiErrorMessage(e, l4.execRefreshFail), "error"),
   });
 
   if (config.data?.kill_switch) {
@@ -129,22 +140,44 @@ export default function PaperExecutionPanel() {
       {riskMsg && <p className="mb-3 text-xs text-slate-500">{riskMsg}</p>}
 
       {orders.data && orders.data.length > 0 && (
-        <OrderList rows={orders.data} l4={l4} />
+        <OrderList rows={orders.data} l4={l4} onRefresh={(id) => refresh.mutate(id)} refreshing={refresh.isPending} />
       )}
     </div>
   );
 }
 
-function OrderList({ rows, l4 }: { rows: import("../api/types").PaperOrder[]; l4: Dictionary["l4Tools"] }) {
+function OrderList({
+  rows,
+  l4,
+  onRefresh,
+  refreshing,
+}: {
+  rows: PaperOrder[];
+  l4: Dictionary["l4Tools"];
+  onRefresh: (id: string) => void;
+  refreshing: boolean;
+}) {
   return (
     <div className="text-xs text-slate-600 dark:text-slate-300">
       <p className="mb-1 font-medium">{l4.execRecent}</p>
       <ul className="space-y-1">
         {rows.slice(0, 5).map((o) => (
-          <li key={o.id} className="font-mono">
-            {o.symbol} {o.side} ¥{o.notional_cny.toLocaleString()} · {o.channel} · {o.status}
-            {o.gateway_status ? ` (${o.gateway_status})` : ""}
-            {o.external_ref ? ` · ${o.external_ref}` : ""}
+          <li key={o.id} className="flex flex-wrap items-center gap-2 font-mono">
+            <span>
+              {o.symbol} {o.side} ¥{o.notional_cny.toLocaleString()} · {o.channel} · {o.status}
+              {o.gateway_status ? ` (${o.gateway_status})` : ""}
+              {o.external_ref ? ` · ${o.external_ref}` : ""}
+            </span>
+            {isGatewayChannel(o.channel) && o.status === "routed" && (
+              <button
+                type="button"
+                className="btn px-2 py-0.5 text-[10px]"
+                disabled={refreshing}
+                onClick={() => onRefresh(o.id)}
+              >
+                {refreshing ? l4.execRefreshing : l4.execRefresh}
+              </button>
+            )}
           </li>
         ))}
       </ul>

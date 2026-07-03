@@ -17,6 +17,8 @@ from engine.execution_adapter import (
     CHANNEL_PAPER,
     CHANNEL_QMT,
     CHANNEL_VNPY,
+    AdapterError,
+    fetch_gateway_order_status,
     route_qmt_order,
     route_vnpy_order,
 )
@@ -223,8 +225,9 @@ def apply_gateway_status(
     *,
     external_ref: str,
     gateway_status: str,
+    event_type: str = "gateway_update",
 ) -> PaperOrder | None:
-    """网关 Webhook 回传 — 按 external_ref 更新订单状态。"""
+    """网关 Webhook / 轮询 — 按 external_ref 更新订单状态。"""
     ref = (external_ref or "").strip()
     if not ref:
         return None
@@ -233,32 +236,136 @@ def apply_gateway_status(
     ).scalar_one_or_none()
     if order is None:
         return None
+    return _apply_status_to_order(db, order, gateway_status, event_type=event_type, detail=f"external_ref={ref}")
 
+
+def _apply_status_to_order(
+    db: Session,
+    order: PaperOrder,
+    gateway_status: str,
+    *,
+    event_type: str = "gateway_update",
+    detail: str = "",
+) -> PaperOrder:
     gs = (gateway_status or "").lower()
     prev_status = order.status
+    prev_gs = (order.gateway_status or "").lower()
+    new_status = _status_for_gateway(gs, prev_status)
+    if gs == prev_gs and new_status == prev_status:
+        return order
+
     order.gateway_status = gs
-    if gs in ("filled", "complete", "completed"):
-        order.status = OrderStatus.FILLED.value
+    order.status = new_status
+    if order.status == OrderStatus.FILLED.value and order.filled_at is None:
         order.filled_at = _now()
-    elif gs in ("rejected", "failed", "error"):
-        order.status = OrderStatus.REJECTED.value
-    elif gs in ("cancelled", "canceled"):
-        order.status = OrderStatus.CANCELLED.value
-    elif gs in ("routed", "accepted", "pending"):
-        order.status = OrderStatus.ROUTED.value
 
     log_order_event(
         db,
         order,
-        event_type="gateway_update",
+        event_type=event_type,
         from_status=prev_status,
         to_status=order.status,
         gateway_status=gs,
-        detail=f"external_ref={ref}",
+        detail=detail[:500],
     )
     db.commit()
     db.refresh(order)
     return order
+
+
+def _status_for_gateway(gs: str, prev_status: str) -> str:
+    if gs in ("filled", "complete", "completed"):
+        return OrderStatus.FILLED.value
+    if gs in ("rejected", "failed", "error"):
+        return OrderStatus.REJECTED.value
+    if gs in ("cancelled", "canceled"):
+        return OrderStatus.CANCELLED.value
+    if gs in ("routed", "accepted", "pending"):
+        return OrderStatus.ROUTED.value
+    return prev_status
+
+
+def refresh_order_from_gateway(
+    db: Session, user_id: uuid.UUID, order_id: uuid.UUID
+) -> PaperOrder:
+    order = get_paper_order(db, user_id, order_id)
+    if order is None:
+        raise ExecutionError("订单不存在")
+    return _refresh_gateway_order(db, order)
+
+
+def _refresh_gateway_order(db: Session, order: PaperOrder) -> PaperOrder:
+    if order.channel not in (CHANNEL_VNPY, CHANNEL_QMT):
+        raise ExecutionError("仅网关订单可刷新状态")
+    if not order.external_ref:
+        raise ExecutionError("订单无外部引用")
+    if order.status in (
+        OrderStatus.FILLED.value,
+        OrderStatus.CANCELLED.value,
+        OrderStatus.REJECTED.value,
+    ):
+        return order
+
+    try:
+        gs = fetch_gateway_order_status(channel=order.channel, external_ref=order.external_ref)
+    except AdapterError as exc:
+        raise ExecutionError(str(exc)) from exc
+
+    return _apply_status_to_order(
+        db,
+        order,
+        gs,
+        event_type="gateway_poll",
+        detail=f"poll channel={order.channel}; ref={order.external_ref}",
+    )
+
+
+def refresh_org_gateway_orders(
+    db: Session, org_id: uuid.UUID, actor_id: uuid.UUID, *, limit: int = 30
+) -> dict:
+    from backend.app.models.organization import OrgMember
+    from backend.app.services.org_service import require_admin
+
+    require_admin(db, org_id, actor_id)
+    member_ids = list(
+        db.execute(select(OrgMember.user_id).where(OrgMember.org_id == org_id)).scalars().all()
+    )
+    if not member_ids:
+        return {"checked": 0, "updated": 0}
+
+    pending = list(
+        db.execute(
+            select(PaperOrder)
+            .where(
+                PaperOrder.user_id.in_(member_ids),
+                PaperOrder.channel.in_((CHANNEL_VNPY, CHANNEL_QMT)),
+                PaperOrder.status == OrderStatus.ROUTED.value,
+                PaperOrder.external_ref.is_not(None),
+            )
+            .order_by(PaperOrder.created_at.desc())
+            .limit(min(limit, 100))
+        ).scalars().all()
+    )
+
+    updated = 0
+    for order in pending:
+        prev_status = order.status
+        prev_gs = (order.gateway_status or "").lower()
+        try:
+            gs = fetch_gateway_order_status(channel=order.channel, external_ref=order.external_ref or "")
+        except AdapterError:
+            continue
+        refreshed = _apply_status_to_order(
+            db,
+            order,
+            gs,
+            event_type="gateway_poll",
+            detail=f"org_batch poll ref={order.external_ref}",
+        )
+        if refreshed.status != prev_status or (refreshed.gateway_status or "").lower() != prev_gs:
+            updated += 1
+
+    return {"checked": len(pending), "updated": updated}
 
 
 def risk_check_preview(

@@ -16,6 +16,7 @@ import {
   getOrgSsoDomains,
   setOrgSsoDomains,
   listOrgExecutionOrders,
+  refreshOrgExecutionOrders,
   removeOrgMember,
   revokeOrgInvite,
   shareFactorToOrg,
@@ -184,6 +185,16 @@ export default function OrgDetail() {
       notify(o.ssoDomainsSaved, "success");
     },
     onError: (e) => notify(apiErrorMessage(e, o.ssoDomainsFail), "error"),
+  });
+
+  const syncExec = useMutation({
+    mutationFn: () => refreshOrgExecutionOrders(id),
+    onSuccess: (r) => {
+      void qc.invalidateQueries({ queryKey: ["org-exec-orders", id] });
+      void qc.invalidateQueries({ queryKey: ["org-activity", id] });
+      notify(o.execDeskSynced(r.updated), "success");
+    },
+    onError: (e) => notify(apiErrorMessage(e, o.execDeskSyncFail), "error"),
   });
 
   function canManageMember(userId: string, role: string) {
@@ -443,7 +454,17 @@ export default function OrgDetail() {
 
       {canAdmin && (
         <div className="mb-6 card">
-          <h2 className="mb-3 font-semibold">{o.execDeskTitle}</h2>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="font-semibold">{o.execDeskTitle}</h2>
+            <button
+              type="button"
+              className="btn text-sm"
+              disabled={syncExec.isPending}
+              onClick={() => syncExec.mutate()}
+            >
+              {syncExec.isPending ? o.execDeskSyncing : o.execDeskSync}
+            </button>
+          </div>
           {execOrders.isLoading ? (
             <Spinner />
           ) : (execOrders.data ?? []).length === 0 ? (

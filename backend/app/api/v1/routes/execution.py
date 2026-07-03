@@ -14,6 +14,7 @@ from backend.app.core.database import get_db
 from backend.app.models.user import User
 from backend.app.schemas.execution import (
     ExecutionConfigOut,
+    GatewayRefreshOut,
     GatewayWebhookIn,
     OrgPaperOrderOut,
     PaperOrderCreate,
@@ -185,6 +186,31 @@ def list_order_events(
     if not rows and exs.get_paper_order(db, current_user.id, uuid.UUID(order_id)) is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="订单不存在")
     return [PaperOrderEventOut(**exs.event_to_dict(r)) for r in rows]
+
+
+@router.post(
+    "/paper/orders/{order_id}/refresh",
+    response_model=PaperOrderOut,
+    summary="从网关轮询并刷新订单状态",
+)
+def refresh_paper_order(
+    order_id: str,
+    current_user: Annotated[User, Depends(require_feature("paper_trading"))],
+    db: Annotated[Session, Depends(get_db)],
+) -> PaperOrderOut:
+    try:
+        order = exs.refresh_order_from_gateway(db, current_user.id, uuid.UUID(order_id))
+    except exs.ExecutionError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    audit_service.log(
+        db,
+        actor_id=current_user.id,
+        action="execution.gateway.poll",
+        resource_type="paper_order",
+        resource_id=str(order.id),
+        detail={"status": order.status, "gateway_status": order.gateway_status},
+    )
+    return PaperOrderOut(**exs.order_to_dict(order))
 
 
 @router.post("/webhook/gateway", summary="执行网关状态回调", include_in_schema=False)

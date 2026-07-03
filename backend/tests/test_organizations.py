@@ -261,3 +261,46 @@ def test_org_execution_orders_admin_view(client, db_session):
 
     denied = client.get(f"{BASE}/orgs/{org_id}/execution/orders", headers=h_trader)
     assert denied.status_code == 403
+
+
+def test_org_execution_batch_refresh(client, db_session, monkeypatch):
+    from backend.app.models.user import User, UserLevel
+    from backend.app.services import membership_service as ms
+    from sqlalchemy import select
+
+    monkeypatch.setattr(
+        "backend.app.services.execution_service.fetch_gateway_order_status",
+        lambda **_: "filled",
+    )
+
+    h_owner = _auth(client, OWNER)
+    trader = {"email": "trader2@quantlab.ai", "username": "orgtrader2", "password": "s3cret-pass"}
+    h_trader = _auth(client, trader)
+
+    org_id = client.post(f"{BASE}/orgs", headers=h_owner, json={"name": "Poll Desk"}).json()["id"]
+    client.post(
+        f"{BASE}/orgs/{org_id}/members",
+        headers=h_owner,
+        json={"username": trader["username"], "role": "member"},
+    )
+
+    user = db_session.execute(select(User).where(User.username == trader["username"])).scalar_one()
+    user.level = UserLevel.L4
+    db_session.add(user)
+    db_session.commit()
+    ms.grant(db_session, user, ms.TIER_PRO, 30, "pro_monthly")
+
+    client.post(
+        f"{BASE}/execution/paper/orders",
+        headers=h_trader,
+        json={"symbol": "RB", "side": "buy", "notional_cny": 11000, "channel": "qmt", "acknowledge_risk": True},
+    )
+
+    result = client.post(f"{BASE}/orgs/{org_id}/execution/refresh", headers=h_owner)
+    assert result.status_code == 200, result.text
+    body = result.json()
+    assert body["checked"] >= 1
+    assert body["updated"] >= 1
+
+    listed = client.get(f"{BASE}/orgs/{org_id}/execution/orders", headers=h_owner).json()
+    assert listed[0]["status"] == "filled"

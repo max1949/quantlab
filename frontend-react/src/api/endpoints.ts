@@ -968,6 +968,16 @@ export async function listOrgExecutionOrders(orgId: string, limit = 20): Promise
   return data;
 }
 
+export async function refreshPaperOrder(orderId: string): Promise<PaperOrder> {
+  const { data } = await api.post<PaperOrder>(`/execution/paper/orders/${orderId}/refresh`);
+  return data;
+}
+
+export async function refreshOrgExecutionOrders(orgId: string): Promise<{ checked: number; updated: number }> {
+  const { data } = await api.post(`/orgs/${orgId}/execution/refresh`);
+  return data;
+}
+
 // ---- events (埋点, 允许匿名) ----
 export async function trackEvent(
   event: string,
