@@ -451,6 +451,21 @@ export async function checkout(plan_code: string): Promise<{
   return data;
 }
 
+export async function getBillingHistory(limit = 20): Promise<OrgBillingLedgerEntry[]> {
+  const { data } = await api.get<OrgBillingLedgerEntry[]>("/billing/history", { params: { limit } });
+  return data;
+}
+
+export async function downloadBillingHistoryCsv(): Promise<void> {
+  const { data } = await api.get<Blob>("/billing/history/export", { responseType: "blob" });
+  const url = URL.createObjectURL(data);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "billing-history.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 // ---- backtest / validation ----
 export interface MarketDataset {
   symbol: string;

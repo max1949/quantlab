@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   checkout,
+  downloadBillingHistoryCsv,
+  getBillingHistory,
   getEntitlements,
   getPlans,
   getSubscription,
@@ -31,8 +33,14 @@ export default function Pricing() {
     queryFn: getEntitlements,
     enabled: !!user,
   });
+  const billingHistory = useQuery({
+    queryKey: ["billing-history"],
+    queryFn: () => getBillingHistory(),
+    enabled: !!user,
+  });
 
   const [code, setCode] = useState("");
+  const [billingExporting, setBillingExporting] = useState(false);
 
   const doRedeem = useMutation({
     mutationFn: () => redeemCode(code.trim()),
@@ -41,6 +49,7 @@ export default function Pricing() {
       setCode("");
       void qc.invalidateQueries({ queryKey: ["subscription"] });
       void qc.invalidateQueries({ queryKey: ["entitlements"] });
+      void qc.invalidateQueries({ queryKey: ["billing-history"] });
     },
     onError: (e) => notify(apiErrorMessage(e, p.redeemFailed), "error"),
   });
@@ -188,6 +197,43 @@ export default function Pricing() {
               {doRedeem.isPending ? p.redeeming : p.redeem}
             </button>
           </div>
+        </div>
+      )}
+
+      {user && billingHistory.data && billingHistory.data.length > 0 && (
+        <div className="mt-8 card max-w-2xl">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h3 className="font-semibold">{p.billingHistoryTitle}</h3>
+            <button
+              type="button"
+              className="btn text-xs"
+              disabled={billingExporting}
+              onClick={() => {
+                setBillingExporting(true);
+                void downloadBillingHistoryCsv()
+                  .catch((e) => notify(apiErrorMessage(e, p.billingExportFail), "error"))
+                  .finally(() => setBillingExporting(false));
+              }}
+            >
+              {billingExporting ? p.billingExporting : p.billingExportCsv}
+            </button>
+          </div>
+          <ul className="space-y-2 text-sm">
+            {billingHistory.data.slice(0, 10).map((row) => (
+              <li
+                key={row.id}
+                className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 py-2 dark:border-slate-800"
+              >
+                <span>
+                  {row.plan_name} · {row.tier_name}
+                </span>
+                <span className="text-slate-400">
+                  ¥{row.amount_cny.toLocaleString()} · {row.source} ·{" "}
+                  {new Date(row.created_at).toLocaleDateString()}
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 

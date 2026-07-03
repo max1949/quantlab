@@ -89,6 +89,10 @@ const en = {
     teamTitle: "Team plans (institutional)",
     teamHint: "Purchase on your organization page — all members inherit the tier.",
     teamCta: "Manage in team library",
+    billingHistoryTitle: "Billing history",
+    billingExportCsv: "Export CSV",
+    billingExporting: "Exporting…",
+    billingExportFail: "CSV export failed",
   },
   adminOps: {
     title: "Ops console",
@@ -1076,6 +1080,10 @@ const zh = {
     teamTitle: "团队套餐（机构级）",
     teamHint: "在「团队因子库」机构详情页购买或兑换，全员继承档位。",
     teamCta: "前往团队因子库",
+    billingHistoryTitle: "计费流水",
+    billingExportCsv: "导出 CSV",
+    billingExporting: "导出中…",
+    billingExportFail: "CSV 导出失败",
   },
   adminOps: {
     title: "运营控制台",
