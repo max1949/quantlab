@@ -33,7 +33,7 @@ from backend.app.schemas.organization import (
     OrgSsoDomainsIn,
     OrgSsoDomainsOut,
 )
-from backend.app.schemas.execution import ExecutionComplianceOut, GatewayRefreshOut, OrgPaperOrderOut
+from backend.app.schemas.execution import ExecutionComplianceOut, GatewayRefreshOut, OrgPaperOrderOut, SlaAlertDeliveryOut
 from backend.app.services import audit_service, execution_compliance_service as ecs, execution_alert_service as eas, execution_service as exs, org_billing_service, org_service
 from backend.app.services import billing_ledger_service as bls
 
@@ -738,7 +738,7 @@ def org_execution_alerts_dispatch(
         result = eas.dispatch_org_sla_webhook(
             db, uuid.UUID(org_id), actor_id=current_user.id, force=force
         )
-        if result.get("sent", 0) > 0:
+        if result.get("sent", 0) > 0 or result.get("failed"):
             audit_service.log(
                 db,
                 actor_id=current_user.id,
@@ -750,3 +750,25 @@ def org_execution_alerts_dispatch(
     except org_service.OrgAccessDeniedError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     return result
+
+
+@router.get(
+    "/{org_id}/execution/alert-deliveries",
+    response_model=list[SlaAlertDeliveryOut],
+    summary="机构 SLA 告警投递审计 (管理员)",
+)
+def org_execution_alert_deliveries(
+    org_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+    status: str | None = None,
+    limit: int = 30,
+) -> list[SlaAlertDeliveryOut]:
+    try:
+        org_service.require_admin(db, uuid.UUID(org_id), current_user.id)
+        rows = eas.list_deliveries(
+            db, scope="org", org_id=uuid.UUID(org_id), status=status, limit=limit
+        )
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    return [SlaAlertDeliveryOut(**r) for r in rows]

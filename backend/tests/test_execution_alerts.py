@@ -166,3 +166,91 @@ def test_org_alert_webhook_config_and_dispatch(client, db_session):
         assert payload["org_id"] == org_id
     finally:
         settings.execution_kill_switch = prev_kill
+
+
+def test_delivery_audit_on_dispatch(client, db_session):
+    settings = get_settings()
+    prev_url = settings.execution_sla_webhook_url
+    prev_kill = settings.execution_kill_switch
+    settings.execution_sla_webhook_url = "https://hooks.example.com/sla"
+    settings.execution_kill_switch = True
+
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.raise_for_status = MagicMock()
+
+    with patch("backend.app.services.execution_alert_service.httpx.Client") as mock_client_cls:
+        mock_client = MagicMock()
+        mock_client.__enter__ = MagicMock(return_value=mock_client)
+        mock_client.__exit__ = MagicMock(return_value=False)
+        mock_client.post.return_value = mock_resp
+        mock_client_cls.return_value = mock_client
+
+        with patch("backend.app.services.execution_alert_service.filter_new_alerts") as mock_filter:
+            mock_filter.return_value = [{"code": "kill_switch_on", "severity": "critical", "message": "x"}]
+            resp = client.post(
+                f"{BASE}/admin/ops/execution/alerts/dispatch",
+                headers=_admin_headers(),
+                params={"force": True},
+            )
+
+    try:
+        assert resp.status_code == 200
+        assert "delivery_id" in resp.json()
+        deliveries = client.get(f"{BASE}/admin/ops/execution/alert-deliveries", headers=_admin_headers())
+        assert deliveries.status_code == 200
+        rows = deliveries.json()
+        assert len(rows) >= 1
+        assert rows[0]["status"] == "sent"
+        assert rows[0]["trigger"] == "manual"
+    finally:
+        settings.execution_sla_webhook_url = prev_url
+        settings.execution_kill_switch = prev_kill
+
+
+def test_retry_failed_delivery(client, db_session):
+    from backend.app.models.sla_alert_delivery import SlaAlertDelivery
+
+    settings = get_settings()
+    prev_url = settings.execution_sla_webhook_url
+    prev_kill = settings.execution_kill_switch
+    settings.execution_sla_webhook_url = "https://hooks.example.com/sla"
+    settings.execution_kill_switch = True
+
+    row = SlaAlertDelivery(
+        scope="global",
+        status="failed",
+        trigger="scheduled",
+        alert_count=1,
+        error_message="timeout",
+        webhook_url="https://hooks.example.com/sla",
+    )
+    db_session.add(row)
+    db_session.commit()
+
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.raise_for_status = MagicMock()
+
+    with patch("backend.app.services.execution_alert_service.httpx.Client") as mock_client_cls:
+        mock_client = MagicMock()
+        mock_client.__enter__ = MagicMock(return_value=mock_client)
+        mock_client.__exit__ = MagicMock(return_value=False)
+        mock_client.post.return_value = mock_resp
+        mock_client_cls.return_value = mock_client
+
+        with patch("backend.app.services.execution_alert_service.filter_new_alerts") as mock_filter:
+            mock_filter.return_value = [{"code": "kill_switch_on", "severity": "critical", "message": "x"}]
+            resp = client.post(
+                f"{BASE}/admin/ops/execution/alert-deliveries/retry",
+                headers=_admin_headers(),
+            )
+
+    try:
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["retried"] >= 1
+        assert body["results"][0]["sent"] == 1
+    finally:
+        settings.execution_sla_webhook_url = prev_url
+        settings.execution_kill_switch = prev_kill

@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from backend.app.api.v1.routes.admin_billing import require_admin
 from backend.app.core.database import get_db
-from backend.app.schemas.execution import ExecutionComplianceOut, GatewayRefreshOut
+from backend.app.schemas.execution import ExecutionComplianceOut, GatewayRefreshOut, SlaAlertDeliveryOut
 from backend.app.services import audit_service, execution_compliance_service as ecs, execution_alert_service as eas, health_service, ops_metrics_service, execution_service as exs
 
 router = APIRouter()
@@ -97,8 +97,8 @@ def ops_execution_alerts_dispatch(
     _: Annotated[None, Depends(require_admin)],
     force: bool = False,
 ) -> dict:
-    result = eas.dispatch_sla_webhook(db, force=force)
-    if result.get("sent", 0) > 0:
+    result = eas.dispatch_sla_webhook(db, force=force, trigger="manual")
+    if result.get("sent", 0) > 0 or result.get("failed"):
         audit_service.log(
             db,
             actor_id=None,
@@ -107,4 +107,38 @@ def ops_execution_alerts_dispatch(
             resource_id="global",
             detail=result,
         )
+    return result
+
+
+@router.get(
+    "/execution/alert-deliveries",
+    response_model=list[SlaAlertDeliveryOut],
+    summary="SLA 告警投递审计 (X-Admin-Key)",
+)
+def ops_execution_alert_deliveries(
+    db: Annotated[Session, Depends(get_db)],
+    _: Annotated[None, Depends(require_admin)],
+    status: str | None = None,
+    limit: int = 50,
+) -> list[SlaAlertDeliveryOut]:
+    rows = eas.list_deliveries(db, status=status, limit=limit)
+    return [SlaAlertDeliveryOut(**r) for r in rows]
+
+
+@router.post("/execution/alert-deliveries/retry", summary="重试失败 SLA 投递 (X-Admin-Key)")
+def ops_execution_alert_retry(
+    db: Annotated[Session, Depends(get_db)],
+    _: Annotated[None, Depends(require_admin)],
+    hours: int = 24,
+    limit: int = 20,
+) -> dict:
+    result = eas.retry_failed_deliveries(db, hours=hours, limit=limit)
+    audit_service.log(
+        db,
+        actor_id=None,
+        action="admin.execution.alerts.retry",
+        resource_type="execution",
+        resource_id="global",
+        detail=result,
+    )
     return result

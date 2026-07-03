@@ -129,3 +129,20 @@ class ExecutionComplianceOut(BaseModel):
     stale_orders: list[dict]
     sla_alerts: list[SlaAlertOut]
     alert_count: int
+
+
+class SlaAlertDeliveryOut(BaseModel):
+    id: uuid.UUID
+    scope: str
+    org_id: uuid.UUID | None = None
+    status: str
+    trigger: str
+    alert_count: int
+    skipped_reason: str | None = None
+    http_status: int | None = None
+    error_message: str | None = None
+    webhook_url: str
+    signed: bool
+    detail: dict
+    retry_of_id: uuid.UUID | None = None
+    created_at: datetime

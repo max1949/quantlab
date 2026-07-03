@@ -93,8 +93,39 @@ export async function dispatchSlaAlerts(force = false): Promise<{
   skipped: boolean;
   reason?: string;
   total_alerts?: number;
+  delivery_id?: string;
 }> {
   const { data } = await adminApi.post("/execution/alerts/dispatch", null, { params: { force } });
+  return data;
+}
+
+export interface SlaAlertDeliveryRow {
+  id: string;
+  scope: string;
+  org_id: string | null;
+  status: string;
+  trigger: string;
+  alert_count: number;
+  skipped_reason: string | null;
+  http_status: number | null;
+  error_message: string | null;
+  webhook_url: string;
+  signed: boolean;
+  created_at: string;
+}
+
+export async function fetchOpsAlertDeliveries(
+  status?: string,
+  limit = 30,
+): Promise<SlaAlertDeliveryRow[]> {
+  const { data } = await adminApi.get<SlaAlertDeliveryRow[]>("/execution/alert-deliveries", {
+    params: { status: status || undefined, limit },
+  });
+  return data;
+}
+
+export async function retryFailedAlertDeliveries(): Promise<{ retried: number }> {
+  const { data } = await adminApi.post("/execution/alert-deliveries/retry");
   return data;
 }
 

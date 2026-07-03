@@ -4,6 +4,8 @@ import {
   fetchOpsAudit,
   fetchOpsExecutionCompliance,
   dispatchSlaAlerts,
+  fetchOpsAlertDeliveries,
+  retryFailedAlertDeliveries,
   fetchOpsHealth,
   fetchOpsMetrics,
   isAdminForbidden,
@@ -51,6 +53,13 @@ export default function AdminOps() {
     retry: false,
   });
 
+  const alertDeliveries = useQuery({
+    queryKey: ["admin-ops-alert-deliveries"],
+    queryFn: () => fetchOpsAlertDeliveries(undefined, 20),
+    enabled: unlocked,
+    retry: false,
+  });
+
   const authError =
     (metrics.isError && isAdminForbidden(metrics.error)) ||
     (health.isError && isAdminForbidden(health.error));
@@ -69,8 +78,18 @@ export default function AdminOps() {
     onSuccess: (r) => {
       if (r.sent > 0) notify(a.slaDispatchDone(r.sent), "success");
       else notify(a.slaDispatchSkipped(r.reason ?? "none"), "info");
+      void qc.invalidateQueries({ queryKey: ["admin-ops-alert-deliveries"] });
     },
     onError: (e) => notify(apiErrorMessage(e, a.slaDispatchFail), "error"),
+  });
+
+  const slaRetry = useMutation({
+    mutationFn: retryFailedAlertDeliveries,
+    onSuccess: (r) => {
+      notify(a.slaRetryDone(r.retried), r.retried > 0 ? "success" : "info");
+      void qc.invalidateQueries({ queryKey: ["admin-ops-alert-deliveries"] });
+    },
+    onError: (e) => notify(apiErrorMessage(e, a.slaRetryFail), "error"),
   });
 
   function unlock() {
@@ -227,6 +246,44 @@ export default function AdminOps() {
             <p className="text-xs text-slate-500">
               {a.complianceStale}: {compliance.data.stale_orders.length}
             </p>
+          )}
+        </div>
+      )}
+
+      {alertDeliveries.data && (
+        <div className="mb-6 card">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="font-semibold text-slate-800 dark:text-slate-100">{a.deliveryTitle}</h2>
+            <button
+              type="button"
+              className="btn text-sm"
+              disabled={slaRetry.isPending}
+              onClick={() => slaRetry.mutate()}
+            >
+              {slaRetry.isPending ? a.slaRetrying : a.slaRetry}
+            </button>
+          </div>
+          {alertDeliveries.data.length === 0 ? (
+            <p className="text-sm text-slate-500">{a.deliveryEmpty}</p>
+          ) : (
+            <ul className="space-y-1 text-xs text-slate-600 dark:text-slate-300">
+              {alertDeliveries.data.slice(0, 12).map((row) => (
+                <li
+                  key={row.id}
+                  className={
+                    row.status === "failed"
+                      ? "text-rose-600 dark:text-rose-400"
+                      : row.status === "sent"
+                        ? "text-emerald-700 dark:text-emerald-300"
+                        : ""
+                  }
+                >
+                  {new Date(row.created_at).toLocaleString()} · {row.scope} · {row.status} ·{" "}
+                  {row.trigger} · {row.alert_count} alerts
+                  {row.error_message ? ` · ${row.error_message}` : ""}
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       )}
