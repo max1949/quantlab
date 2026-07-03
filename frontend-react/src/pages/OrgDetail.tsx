@@ -19,6 +19,9 @@ import {
   setOrgSsoDomains,
   listOrgExecutionOrders,
   fetchOrgExecutionCompliance,
+  getOrgAlertWebhook,
+  setOrgAlertWebhook,
+  dispatchOrgSlaAlerts,
   refreshOrgExecutionOrders,
   removeOrgMember,
   revokeOrgInvite,
@@ -44,6 +47,7 @@ export default function OrgDetail() {
   const [teamCode, setTeamCode] = useState("");
   const [ssoDomains, setSsoDomains] = useState("");
   const [billingExporting, setBillingExporting] = useState(false);
+  const [alertWebhook, setAlertWebhook] = useState("");
 
   const org = useQuery({ queryKey: ["org", id], queryFn: () => getOrg(id), enabled: Boolean(id) });
   const members = useQuery({
@@ -90,6 +94,11 @@ export default function OrgDetail() {
   const execCompliance = useQuery({
     queryKey: ["org-exec-compliance", id],
     queryFn: () => fetchOrgExecutionCompliance(id),
+    enabled: Boolean(id) && (org.data?.my_role === "owner" || org.data?.my_role === "admin"),
+  });
+  const alertWebhookQuery = useQuery({
+    queryKey: ["org-alert-webhook", id],
+    queryFn: () => getOrgAlertWebhook(id),
     enabled: Boolean(id) && (org.data?.my_role === "owner" || org.data?.my_role === "admin"),
   });
 
@@ -212,6 +221,26 @@ export default function OrgDetail() {
     onError: (e) => notify(apiErrorMessage(e, o.execDeskSyncFail), "error"),
   });
 
+  const saveAlertWebhook = useMutation({
+    mutationFn: () => setOrgAlertWebhook(id, alertWebhook.trim()),
+    onSuccess: (r) => {
+      setAlertWebhook(r.webhook_url);
+      void qc.invalidateQueries({ queryKey: ["org-alert-webhook", id] });
+      void qc.invalidateQueries({ queryKey: ["org-activity", id] });
+      notify(o.alertWebhookSaved, "success");
+    },
+    onError: (e) => notify(apiErrorMessage(e, o.alertWebhookFail), "error"),
+  });
+
+  const dispatchOrgAlerts = useMutation({
+    mutationFn: () => dispatchOrgSlaAlerts(id, true),
+    onSuccess: (r) => {
+      if (r.sent > 0) notify(o.alertWebhookDispatchDone(r.sent), "success");
+      else notify(o.alertWebhookDispatchSkipped(r.reason ?? "none"), "info");
+    },
+    onError: (e) => notify(apiErrorMessage(e, o.alertWebhookDispatchFail), "error"),
+  });
+
   function canManageMember(userId: string, role: string) {
     if (role === "owner") return false;
     if (!canAdmin) return me?.id === userId;
@@ -230,6 +259,12 @@ export default function OrgDetail() {
       setSsoDomains(ssoDomainQuery.data.domains.join(", "));
     }
   }, [ssoDomainQuery.data]);
+
+  useEffect(() => {
+    if (alertWebhookQuery.data) {
+      setAlertWebhook(alertWebhookQuery.data.webhook_url);
+    }
+  }, [alertWebhookQuery.data]);
 
   if (org.isLoading) return <Spinner />;
   if (org.isError || !org.data) {
@@ -543,6 +578,34 @@ export default function OrgDetail() {
                   {o.execComplianceStale}: {execCompliance.data.stale_orders.length}
                 </p>
               )}
+              <div className="mt-4 border-t border-slate-200 pt-3 dark:border-slate-700">
+                <p className="mb-2 text-sm font-medium">{o.alertWebhookTitle}</p>
+                <p className="mb-2 text-xs text-slate-500">{o.alertWebhookHint}</p>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <input
+                    className="input flex-1 font-mono text-xs"
+                    placeholder={o.alertWebhookPlaceholder}
+                    value={alertWebhook}
+                    onChange={(e) => setAlertWebhook(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="btn text-xs"
+                    disabled={saveAlertWebhook.isPending || alertWebhookQuery.isLoading}
+                    onClick={() => saveAlertWebhook.mutate()}
+                  >
+                    {saveAlertWebhook.isPending ? o.alertWebhookSaving : o.alertWebhookSave}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn text-xs"
+                    disabled={dispatchOrgAlerts.isPending || !alertWebhook.trim()}
+                    onClick={() => dispatchOrgAlerts.mutate()}
+                  >
+                    {dispatchOrgAlerts.isPending ? o.alertWebhookDispatching : o.alertWebhookDispatch}
+                  </button>
+                </div>
+              </div>
             </>
           ) : null}
         </div>

@@ -80,3 +80,61 @@ def test_alert_fingerprint_stable():
     a = {"code": "gateway_down", "channel": "qmt", "order_id": None}
     b = {"code": "gateway_down", "channel": "qmt"}
     assert eas.alert_fingerprint(a) == eas.alert_fingerprint(b)
+
+
+def test_org_alert_webhook_config_and_dispatch(client, db_session):
+    settings = get_settings()
+    prev_kill = settings.execution_kill_switch
+    settings.execution_kill_switch = True
+
+    owner = {"email": "orgwh@x.com", "username": "orgwhowner", "password": "s3cret-pass"}
+    client.post(f"{BASE}/auth/register", json=owner)
+    tok = client.post(
+        f"{BASE}/auth/login",
+        json={"identifier": owner["username"], "password": owner["password"]},
+    ).json()["access_token"]
+    h = {"Authorization": f"Bearer {tok}"}
+    org_id = client.post(f"{BASE}/orgs", headers=h, json={"name": "Webhook Desk"}).json()["id"]
+
+    get_empty = client.get(f"{BASE}/orgs/{org_id}/execution/alert-webhook", headers=h)
+    assert get_empty.status_code == 200
+    assert get_empty.json()["webhook_url"] == ""
+
+    put = client.put(
+        f"{BASE}/orgs/{org_id}/execution/alert-webhook",
+        headers=h,
+        json={"webhook_url": "https://hooks.example.com/org-sla"},
+    )
+    assert put.status_code == 200, put.text
+
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.raise_for_status = MagicMock()
+
+    with patch("backend.app.services.execution_alert_service.httpx.Client") as mock_client_cls:
+        mock_client = MagicMock()
+        mock_client.__enter__ = MagicMock(return_value=mock_client)
+        mock_client.__exit__ = MagicMock(return_value=False)
+        mock_client.post.return_value = mock_resp
+        mock_client_cls.return_value = mock_client
+
+        with patch("backend.app.services.execution_alert_service.filter_new_alerts") as mock_filter:
+            mock_filter.return_value = [
+                {"code": "kill_switch_on", "severity": "critical", "message": "kill switch"}
+            ]
+            resp = client.post(
+                f"{BASE}/orgs/{org_id}/execution/alerts/dispatch",
+                headers=h,
+                params={"force": True},
+            )
+
+    try:
+        assert resp.status_code == 200, resp.text
+        body = resp.json()
+        assert body["sent"] == 1
+        assert body["scope"] == "org"
+        payload = mock_client.post.call_args.kwargs["json"]
+        assert payload["scope"] == "org"
+        assert payload["org_id"] == org_id
+    finally:
+        settings.execution_kill_switch = prev_kill

@@ -1021,6 +1021,28 @@ export async function fetchOrgExecutionCompliance(orgId: string): Promise<OrgExe
   return data;
 }
 
+export async function getOrgAlertWebhook(orgId: string): Promise<{ webhook_url: string }> {
+  const { data } = await api.get<{ webhook_url: string }>(`/orgs/${orgId}/execution/alert-webhook`);
+  return data;
+}
+
+export async function setOrgAlertWebhook(orgId: string, webhookUrl: string): Promise<{ webhook_url: string }> {
+  const { data } = await api.put<{ webhook_url: string }>(`/orgs/${orgId}/execution/alert-webhook`, {
+    webhook_url: webhookUrl,
+  });
+  return data;
+}
+
+export async function dispatchOrgSlaAlerts(
+  orgId: string,
+  force = false,
+): Promise<{ sent: number; skipped: boolean; reason?: string }> {
+  const { data } = await api.post(`/orgs/${orgId}/execution/alerts/dispatch`, null, {
+    params: { force },
+  });
+  return data;
+}
+
 // ---- events (埋点, 允许匿名) ----
 export async function trackEvent(
   event: string,

@@ -148,3 +148,11 @@ class OrgSsoDomainsIn(BaseModel):
 
 class OrgSsoDomainsOut(BaseModel):
     domains: list[str]
+
+
+class OrgAlertWebhookIn(BaseModel):
+    webhook_url: str = Field(default="", max_length=500)
+
+
+class OrgAlertWebhookOut(BaseModel):
+    webhook_url: str

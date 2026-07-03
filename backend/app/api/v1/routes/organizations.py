@@ -28,11 +28,13 @@ from backend.app.schemas.organization import (
     OrgMemberOut,
     OrgMemberUpdate,
     OrgOut,
+    OrgAlertWebhookIn,
+    OrgAlertWebhookOut,
     OrgSsoDomainsIn,
     OrgSsoDomainsOut,
 )
 from backend.app.schemas.execution import ExecutionComplianceOut, GatewayRefreshOut, OrgPaperOrderOut
-from backend.app.services import audit_service, execution_compliance_service as ecs, execution_service as exs, org_billing_service, org_service
+from backend.app.services import audit_service, execution_compliance_service as ecs, execution_alert_service as eas, execution_service as exs, org_billing_service, org_service
 from backend.app.services import billing_ledger_service as bls
 
 router = APIRouter()
@@ -639,3 +641,80 @@ def org_execution_compliance(
     except org_service.OrgAccessDeniedError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     return ExecutionComplianceOut(**report)
+
+
+@router.get(
+    "/{org_id}/execution/alert-webhook",
+    response_model=OrgAlertWebhookOut,
+    summary="机构 SLA 告警 Webhook (管理员)",
+)
+def get_org_alert_webhook(
+    org_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> OrgAlertWebhookOut:
+    try:
+        url = org_service.get_alert_webhook(db, uuid.UUID(org_id), current_user.id)
+    except org_service.OrgNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="机构不存在")
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    return OrgAlertWebhookOut(webhook_url=url)
+
+
+@router.put(
+    "/{org_id}/execution/alert-webhook",
+    response_model=OrgAlertWebhookOut,
+    summary="配置机构 SLA 告警 Webhook (管理员)",
+)
+def set_org_alert_webhook(
+    org_id: str,
+    payload: OrgAlertWebhookIn,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> OrgAlertWebhookOut:
+    try:
+        url = org_service.set_alert_webhook(
+            db, uuid.UUID(org_id), current_user.id, payload.webhook_url
+        )
+        audit_service.log(
+            db,
+            actor_id=current_user.id,
+            action="org.execution.alert_webhook",
+            resource_type="org",
+            resource_id=org_id,
+            detail={"configured": bool(url)},
+        )
+    except org_service.OrgNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="机构不存在")
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    return OrgAlertWebhookOut(webhook_url=url)
+
+
+@router.post(
+    "/{org_id}/execution/alerts/dispatch",
+    summary="推送机构 SLA 告警 Webhook (管理员)",
+)
+def org_execution_alerts_dispatch(
+    org_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+    force: bool = False,
+) -> dict:
+    try:
+        result = eas.dispatch_org_sla_webhook(
+            db, uuid.UUID(org_id), actor_id=current_user.id, force=force
+        )
+        if result.get("sent", 0) > 0:
+            audit_service.log(
+                db,
+                actor_id=current_user.id,
+                action="org.execution.alerts.dispatch",
+                resource_type="org",
+                resource_id=org_id,
+                detail=result,
+            )
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    return result

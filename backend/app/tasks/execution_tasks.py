@@ -23,6 +23,8 @@ def check_execution_sla_alerts_task() -> dict:
 
     db = SessionLocal()
     try:
-        return eas.dispatch_sla_webhook(db, force=False)
+        global_result = eas.dispatch_sla_webhook(db, force=False)
+        org_results = eas.dispatch_all_org_sla_webhooks(db)
+        return {"global": global_result, "orgs": org_results}
     finally:
         db.close()
