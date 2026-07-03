@@ -17,6 +17,12 @@ class OrgMemberAdd(BaseModel):
     role: str = Field(default="member", pattern=r"^(admin|member|viewer)$")
 
 
+class OrgInviteCreate(BaseModel):
+    role: str = Field(default="member", pattern=r"^(admin|member|viewer)$")
+    expires_in_days: int = Field(default=7, ge=1, le=90)
+    max_uses: int = Field(default=1, ge=1, le=200)
+
+
 class OrgFactorShareIn(BaseModel):
     note: str = Field(default="", max_length=500)
 
@@ -48,3 +54,26 @@ class OrgFactorShareOut(BaseModel):
     kind: str
     note: str
     shared_at: datetime
+
+
+class OrgInviteOut(BaseModel):
+    id: uuid.UUID
+    org_id: uuid.UUID
+    org_name: str
+    token: str
+    role: str
+    max_uses: int
+    used_count: int
+    expires_at: datetime
+    created_at: datetime
+    invite_path: str
+
+
+class OrgInvitePreviewOut(BaseModel):
+    org_id: uuid.UUID
+    org_name: str
+    role: str
+    expires_at: datetime
+    used_count: int
+    max_uses: int
+    already_member: bool

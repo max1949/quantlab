@@ -14,6 +14,9 @@ from backend.app.schemas.organization import (
     OrgCreate,
     OrgFactorShareIn,
     OrgFactorShareOut,
+    OrgInviteCreate,
+    OrgInviteOut,
+    OrgInvitePreviewOut,
     OrgMemberAdd,
     OrgMemberOut,
     OrgOut,
@@ -49,6 +52,49 @@ def list_my_orgs(
     return [OrgOut(**o) for o in org_service.list_orgs_for_user(db, current_user.id)]
 
 
+@router.get(
+    "/invites/{token}",
+    response_model=OrgInvitePreviewOut,
+    summary="预览机构邀请",
+)
+def preview_invite(
+    token: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> OrgInvitePreviewOut:
+    try:
+        return OrgInvitePreviewOut(
+            **org_service.preview_invite(db, token, current_user.id)
+        )
+    except org_service.OrgInviteInvalidError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+
+@router.post(
+    "/invites/{token}/accept",
+    response_model=OrgOut,
+    summary="接受机构邀请",
+)
+def accept_invite(
+    token: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> OrgOut:
+    try:
+        out = org_service.accept_invite(db, token, current_user.id)
+        audit_service.log(
+            db,
+            actor_id=current_user.id,
+            action="org.invite.accept",
+            resource_type="org",
+            resource_id=out["id"],
+            detail={"role": out["my_role"]},
+        )
+        return OrgOut(**out)
+    except org_service.OrgInviteInvalidError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+
 @router.get("/{org_id}", response_model=OrgOut, summary="机构详情")
 def get_org(
     org_id: str,
@@ -62,6 +108,44 @@ def get_org(
     except org_service.OrgAccessDeniedError:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="无权访问该机构")
     return OrgOut(**out)
+
+
+@router.post(
+    "/{org_id}/invites",
+    response_model=OrgInviteOut,
+    status_code=status.HTTP_201_CREATED,
+    summary="创建机构邀请链接 (管理员)",
+)
+def create_invite(
+    org_id: str,
+    payload: OrgInviteCreate,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> OrgInviteOut:
+    try:
+        out = org_service.create_invite(
+            db,
+            uuid.UUID(org_id),
+            current_user.id,
+            role=payload.role,
+            expires_in_days=payload.expires_in_days,
+            max_uses=payload.max_uses,
+        )
+        audit_service.log(
+            db,
+            actor_id=current_user.id,
+            action="org.invite.create",
+            resource_type="org",
+            resource_id=org_id,
+            detail={
+                "role": payload.role,
+                "expires_in_days": payload.expires_in_days,
+                "max_uses": payload.max_uses,
+            },
+        )
+        return OrgInviteOut(**out)
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
 
 
 @router.get("/{org_id}/members", response_model=list[OrgMemberOut], summary="机构成员")

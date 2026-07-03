@@ -69,3 +69,23 @@ class OrgFactorShare(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+
+
+class OrgInvite(Base):
+    __tablename__ = "org_invites"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    org_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("research_orgs.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    token: Mapped[str] = mapped_column(String(96), unique=True, index=True, nullable=False)
+    role: Mapped[str] = mapped_column(String(16), nullable=False, default=OrgRole.MEMBER.value)
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    max_uses: Mapped[int] = mapped_column(nullable=False, default=1)
+    used_count: Mapped[int] = mapped_column(nullable=False, default=0)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )

@@ -524,6 +524,29 @@ export interface OrgFactorShare {
   shared_at: string;
 }
 
+export interface OrgInvite {
+  id: string;
+  org_id: string;
+  org_name: string;
+  token: string;
+  role: string;
+  max_uses: number;
+  used_count: number;
+  expires_at: string;
+  created_at: string;
+  invite_path: string;
+}
+
+export interface OrgInvitePreview {
+  org_id: string;
+  org_name: string;
+  role: string;
+  expires_at: string;
+  used_count: number;
+  max_uses: number;
+  already_member: boolean;
+}
+
 export interface OrgCatalogEntry extends FactorCatalogEntry {
   owner_username: string | null;
   share_note: string;

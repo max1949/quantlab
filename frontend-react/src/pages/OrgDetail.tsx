@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addOrgMember,
+  createOrgInvite,
   getOrg,
   getOrgCatalog,
   listFactors,
@@ -22,6 +23,7 @@ export default function OrgDetail() {
   const [username, setUsername] = useState("");
   const [factorId, setFactorId] = useState("");
   const [symbol, setSymbol] = useState("RB");
+  const [inviteUrl, setInviteUrl] = useState("");
 
   const org = useQuery({ queryKey: ["org", id], queryFn: () => getOrg(id), enabled: Boolean(id) });
   const members = useQuery({
@@ -60,6 +62,16 @@ export default function OrgDetail() {
     onError: (e) => notify(apiErrorMessage(e, o.shareFail), "error"),
   });
 
+  const invite = useMutation({
+    mutationFn: () => createOrgInvite(id, { role: "member", expires_in_days: 14, max_uses: 20 }),
+    onSuccess: (res) => {
+      const origin = window.location.origin;
+      setInviteUrl(`${origin}${res.invite_path}`);
+      notify(o.inviteCreated, "success");
+    },
+    onError: (e) => notify(apiErrorMessage(e, o.inviteFail), "error"),
+  });
+
   if (org.isLoading) return <Spinner />;
   if (org.isError || !org.data) {
     return <ErrorBox message={apiErrorMessage(org.error, o.loadFail)} />;
@@ -81,23 +93,53 @@ export default function OrgDetail() {
       </div>
 
       {canAdmin && (
-        <div className="mb-6 card">
-          <h2 className="mb-2 font-semibold">{o.addMember}</h2>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <input
-              className="input flex-1"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder={o.usernamePlaceholder}
-            />
+        <div className="mb-6 grid gap-4 lg:grid-cols-2">
+          <div className="card">
+            <h2 className="mb-2 font-semibold">{o.inviteTitle}</h2>
+            <p className="mb-3 text-sm text-slate-500">{o.inviteHint}</p>
             <button
               type="button"
               className="btn"
-              disabled={!username.trim() || addMember.isPending}
-              onClick={() => addMember.mutate()}
+              disabled={invite.isPending}
+              onClick={() => invite.mutate()}
             >
-              {o.addMemberBtn}
+              {invite.isPending ? o.inviteCreating : o.inviteBtn}
             </button>
+            {inviteUrl && (
+              <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm dark:border-slate-700 dark:bg-slate-900/50">
+                <p className="break-all font-mono text-xs text-slate-700 dark:text-slate-200">{inviteUrl}</p>
+                <button
+                  type="button"
+                  className="btn mt-2 text-xs"
+                  onClick={() => {
+                    void navigator.clipboard?.writeText(inviteUrl);
+                    notify(o.inviteCopied, "success");
+                  }}
+                >
+                  {o.copyInvite}
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="card">
+            <h2 className="mb-2 font-semibold">{o.addMember}</h2>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <input
+                className="input flex-1"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder={o.usernamePlaceholder}
+              />
+              <button
+                type="button"
+                className="btn"
+                disabled={!username.trim() || addMember.isPending}
+                onClick={() => addMember.mutate()}
+              >
+                {o.addMemberBtn}
+              </button>
+            </div>
           </div>
         </div>
       )}

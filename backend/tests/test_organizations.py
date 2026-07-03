@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from backend.app.core.config import get_settings
 from backend.app.services.market_data import seed_sample_market_data
 
 BASE = "/api/v1"
@@ -88,4 +87,53 @@ def test_non_member_denied(client, db_session):
     h_stranger = _auth(client, {"email": "x@y.com", "username": "stranger", "password": "s3cret-pass"})
     org_id = client.post(f"{BASE}/orgs", headers=h_owner, json={"name": "Private Desk"}).json()["id"]
     resp = client.get(f"{BASE}/orgs/{org_id}", headers=h_stranger)
+    assert resp.status_code == 403
+
+
+def test_org_invite_preview_and_accept(client, db_session):
+    h_owner = _auth(client, OWNER)
+    h_member = _auth(client, MEMBER)
+    org_id = client.post(f"{BASE}/orgs", headers=h_owner, json={"name": "Invite Desk"}).json()["id"]
+
+    created = client.post(
+        f"{BASE}/orgs/{org_id}/invites",
+        headers=h_owner,
+        json={"role": "member", "expires_in_days": 7, "max_uses": 2},
+    )
+    assert created.status_code == 201, created.text
+    token = created.json()["token"]
+    assert created.json()["invite_path"].endswith(token)
+
+    preview = client.get(f"{BASE}/orgs/invites/{token}", headers=h_member)
+    assert preview.status_code == 200, preview.text
+    assert preview.json()["org_name"] == "Invite Desk"
+    assert preview.json()["already_member"] is False
+
+    accepted = client.post(f"{BASE}/orgs/invites/{token}/accept", headers=h_member)
+    assert accepted.status_code == 200, accepted.text
+    assert accepted.json()["my_role"] == "member"
+
+    detail = client.get(f"{BASE}/orgs/{org_id}", headers=h_member)
+    assert detail.status_code == 200
+    assert detail.json()["member_count"] == 2
+
+    preview_again = client.get(f"{BASE}/orgs/invites/{token}", headers=h_member)
+    assert preview_again.status_code == 200
+    assert preview_again.json()["already_member"] is True
+
+
+def test_non_admin_cannot_create_invite(client, db_session):
+    h_owner = _auth(client, OWNER)
+    h_member = _auth(client, MEMBER)
+    org_id = client.post(f"{BASE}/orgs", headers=h_owner, json={"name": "Admin Only"}).json()["id"]
+    client.post(
+        f"{BASE}/orgs/{org_id}/members",
+        headers=h_owner,
+        json={"username": MEMBER["username"], "role": "member"},
+    )
+    resp = client.post(
+        f"{BASE}/orgs/{org_id}/invites",
+        headers=h_member,
+        json={"role": "member", "expires_in_days": 7, "max_uses": 1},
+    )
     assert resp.status_code == 403

@@ -2,6 +2,7 @@
 # 模型需在此导入, 以便 Alembic autogenerate 能发现 (env.py 会 import 本包)。
 from backend.app.models.organization import (  # noqa: F401
     OrgFactorShare,
+    OrgInvite,
     OrgMember,
     OrgRole,
     ResearchOrg,
@@ -92,5 +93,6 @@ __all__ = [
     "ResearchOrg",
     "OrgMember",
     "OrgFactorShare",
+    "OrgInvite",
     "OrgRole",
 ]

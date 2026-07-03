@@ -110,6 +110,7 @@ _SPA_SHORTCUTS = frozenset({
     "/me",
   "/admin/ops",
   "/orgs",
+  "/org-invite",
 })
 
 

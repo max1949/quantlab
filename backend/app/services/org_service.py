@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import re
+import secrets
 import uuid
+from datetime import datetime, timedelta, timezone
 
 import pandas as pd
 from sqlalchemy import func, select
@@ -11,7 +13,13 @@ from sqlalchemy.orm import Session
 
 from backend.app.models.backtest import Backtest, BacktestStatus
 from backend.app.models.factor import Factor
-from backend.app.models.organization import OrgFactorShare, OrgMember, OrgRole, ResearchOrg
+from backend.app.models.organization import (
+    OrgFactorShare,
+    OrgInvite,
+    OrgMember,
+    OrgRole,
+    ResearchOrg,
+)
 from backend.app.models.user import User
 from backend.app.models.validation import Validation, ValidationStatus
 from backend.app.services import factor_service, market_data_policy as mdp
@@ -30,6 +38,10 @@ class OrgAccessDeniedError(Exception):
 
 
 class OrgMemberNotFoundError(Exception):
+    pass
+
+
+class OrgInviteInvalidError(Exception):
     pass
 
 
@@ -149,6 +161,93 @@ def add_member(
     db.commit()
     db.refresh(row)
     return row
+
+
+def _invite_to_dict(db: Session, invite: OrgInvite) -> dict:
+    org = db.get(ResearchOrg, invite.org_id)
+    if org is None:
+        raise OrgInviteInvalidError("机构不存在")
+    return {
+        "id": invite.id,
+        "org_id": invite.org_id,
+        "org_name": org.name,
+        "token": invite.token,
+        "role": invite.role,
+        "max_uses": invite.max_uses,
+        "used_count": invite.used_count,
+        "expires_at": invite.expires_at,
+        "created_at": invite.created_at,
+        "invite_path": f"/app/org-invite/{invite.token}",
+    }
+
+
+def create_invite(
+    db: Session,
+    org_id: uuid.UUID,
+    actor_id: uuid.UUID,
+    *,
+    role: str = OrgRole.MEMBER.value,
+    expires_in_days: int = 7,
+    max_uses: int = 1,
+) -> dict:
+    require_admin(db, org_id, actor_id)
+    token = secrets.token_urlsafe(32)
+    invite = OrgInvite(
+        org_id=org_id,
+        token=token,
+        role=role,
+        created_by=actor_id,
+        max_uses=max(1, int(max_uses)),
+        used_count=0,
+        expires_at=datetime.now(timezone.utc) + timedelta(days=max(1, int(expires_in_days))),
+    )
+    db.add(invite)
+    db.commit()
+    db.refresh(invite)
+    return _invite_to_dict(db, invite)
+
+
+def _load_valid_invite(db: Session, token: str) -> OrgInvite:
+    invite = db.execute(select(OrgInvite).where(OrgInvite.token == token)).scalar_one_or_none()
+    if invite is None:
+        raise OrgInviteInvalidError("邀请链接不存在")
+    now = datetime.now(timezone.utc)
+    expires_at = invite.expires_at
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    if expires_at <= now:
+        raise OrgInviteInvalidError("邀请链接已过期")
+    if invite.used_count >= invite.max_uses:
+        raise OrgInviteInvalidError("邀请次数已用尽")
+    if db.get(ResearchOrg, invite.org_id) is None:
+        raise OrgInviteInvalidError("机构不存在")
+    return invite
+
+
+def preview_invite(db: Session, token: str, user_id: uuid.UUID) -> dict:
+    invite = _load_valid_invite(db, token)
+    org = db.get(ResearchOrg, invite.org_id)
+    return {
+        "org_id": invite.org_id,
+        "org_name": org.name if org else "",
+        "role": invite.role,
+        "expires_at": invite.expires_at,
+        "used_count": invite.used_count,
+        "max_uses": invite.max_uses,
+        "already_member": _member_row(db, invite.org_id, user_id) is not None,
+    }
+
+
+def accept_invite(db: Session, token: str, user_id: uuid.UUID) -> dict:
+    invite = _load_valid_invite(db, token)
+    existing = _member_row(db, invite.org_id, user_id)
+    if existing is None:
+        db.add(OrgMember(org_id=invite.org_id, user_id=user_id, role=invite.role))
+        invite.used_count += 1
+        db.commit()
+    else:
+        db.commit()
+    return get_org(db, invite.org_id, user_id)
 
 
 def list_members(db: Session, org_id: uuid.UUID, user_id: uuid.UUID) -> list[dict]:

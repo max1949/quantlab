@@ -29,6 +29,8 @@ import type {
   NextStep,
   OrgCatalog,
   OrgFactorShare,
+  OrgInvite,
+  OrgInvitePreview,
   OrgMember,
   OrthogonalizeResult,
   ResearchOrg,
@@ -774,6 +776,24 @@ export async function addOrgMember(
   body: { username: string; role: string },
 ): Promise<OrgMember> {
   const { data } = await api.post<OrgMember>(`/orgs/${orgId}/members`, body);
+  return data;
+}
+
+export async function createOrgInvite(
+  orgId: string,
+  body: { role?: string; expires_in_days?: number; max_uses?: number },
+): Promise<OrgInvite> {
+  const { data } = await api.post<OrgInvite>(`/orgs/${orgId}/invites`, body);
+  return data;
+}
+
+export async function previewOrgInvite(token: string): Promise<OrgInvitePreview> {
+  const { data } = await api.get<OrgInvitePreview>(`/orgs/invites/${token}`);
+  return data;
+}
+
+export async function acceptOrgInvite(token: string): Promise<ResearchOrg> {
+  const { data } = await api.post<ResearchOrg>(`/orgs/invites/${token}/accept`);
   return data;
 }
 
