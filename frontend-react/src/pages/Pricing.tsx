@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   checkout,
   downloadBillingHistoryCsv,
+  downloadBillingInvoicePdf,
   getBillingHistory,
   getEntitlements,
   getPlans,
@@ -231,6 +232,17 @@ export default function Pricing() {
                   ¥{row.amount_cny.toLocaleString()} · {row.source} ·{" "}
                   {new Date(row.created_at).toLocaleDateString()}
                 </span>
+                <button
+                  type="button"
+                  className="btn text-xs"
+                  onClick={() =>
+                    void downloadBillingInvoicePdf(row.id).catch((e) =>
+                      notify(apiErrorMessage(e, p.invoiceDownloadFail), "error"),
+                    )
+                  }
+                >
+                  {p.invoicePdf}
+                </button>
               </li>
             ))}
           </ul>

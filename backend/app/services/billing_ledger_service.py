@@ -153,6 +153,30 @@ def list_user_billing_history(db: Session, user_id: uuid.UUID, *, limit: int = 5
     return [ledger_to_dict(r) for r in rows]
 
 
+def get_user_ledger_entry(db: Session, user_id: uuid.UUID, ledger_id: uuid.UUID) -> dict | None:
+    row = db.execute(
+        select(BillingLedger).where(
+            BillingLedger.id == ledger_id,
+            BillingLedger.user_id == user_id,
+            BillingLedger.scope == "personal",
+        )
+    ).scalar_one_or_none()
+    return ledger_to_dict(row) if row else None
+
+
+def get_org_ledger_entry(
+    db: Session, org_id: uuid.UUID, actor_id: uuid.UUID, ledger_id: uuid.UUID
+) -> dict | None:
+    require_admin(db, org_id, actor_id)
+    row = db.execute(
+        select(BillingLedger).where(
+            BillingLedger.id == ledger_id,
+            BillingLedger.org_id == org_id,
+        )
+    ).scalar_one_or_none()
+    return ledger_to_dict(row) if row else None
+
+
 def _fmt_dt(dt: datetime | None) -> str:
     if dt is None:
         return ""
@@ -189,3 +213,65 @@ def export_org_billing_csv(
 def export_user_billing_csv(db: Session, user_id: uuid.UUID, *, limit: int = 500) -> str:
     rows = list_user_billing_history(db, user_id, limit=limit)
     return rows_to_csv(rows)
+
+
+def _pdf_escape(text: object) -> str:
+    return str(text).replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+
+
+def _pdf_text_lines(lines: list[str]) -> bytes:
+    stream_lines = ["BT", "/F1 12 Tf", "72 760 Td"]
+    for idx, line in enumerate(lines):
+        if idx:
+            stream_lines.append("0 -22 Td")
+        stream_lines.append(f"({_pdf_escape(line)}) Tj")
+    stream_lines.append("ET")
+    stream = "\n".join(stream_lines).encode("utf-8")
+
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] "
+        b"/Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+        b"<< /Length " + str(len(stream)).encode("ascii") + b" >>\nstream\n" + stream + b"\nendstream",
+    ]
+    out = io.BytesIO()
+    out.write(b"%PDF-1.4\n")
+    offsets: list[int] = [0]
+    for i, obj in enumerate(objects, start=1):
+        offsets.append(out.tell())
+        out.write(f"{i} 0 obj\n".encode("ascii"))
+        out.write(obj)
+        out.write(b"\nendobj\n")
+    xref = out.tell()
+    out.write(f"xref\n0 {len(objects) + 1}\n".encode("ascii"))
+    out.write(b"0000000000 65535 f \n")
+    for offset in offsets[1:]:
+        out.write(f"{offset:010d} 00000 n \n".encode("ascii"))
+    out.write(
+        f"trailer << /Size {len(objects) + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n".encode(
+            "ascii"
+        )
+    )
+    return out.getvalue()
+
+
+def render_invoice_pdf(row: dict) -> bytes:
+    created = row.get("created_at")
+    expires = row.get("expires_at")
+    lines = [
+        "QuantLab Billing Receipt",
+        f"Receipt ID: {row.get('id')}",
+        f"Scope: {row.get('scope')}",
+        f"Event: {row.get('event')}",
+        f"Plan: {row.get('plan_name')} ({row.get('plan_code')})",
+        f"Tier: {row.get('tier_name')}",
+        f"Amount: {row.get('currency', 'CNY')} {row.get('amount_cny')}",
+        f"Source: {row.get('source')}",
+        f"Stripe Session: {row.get('stripe_session_id') or '-'}",
+        f"Created At: {_fmt_dt(created) if isinstance(created, datetime) else created}",
+        f"Expires At: {_fmt_dt(expires) if isinstance(expires, datetime) else (expires or '-')}",
+        f"Detail: {row.get('detail') or '-'}",
+    ]
+    return _pdf_text_lines(lines)

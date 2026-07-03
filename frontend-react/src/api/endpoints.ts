@@ -466,6 +466,22 @@ export async function downloadBillingHistoryCsv(): Promise<void> {
   URL.revokeObjectURL(url);
 }
 
+function downloadBlob(data: Blob, filename: string): void {
+  const url = URL.createObjectURL(data);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export async function downloadBillingInvoicePdf(ledgerId: string): Promise<void> {
+  const { data } = await api.get<Blob>(`/billing/history/${ledgerId}/invoice.pdf`, {
+    responseType: "blob",
+  });
+  downloadBlob(data, `billing-${ledgerId}.pdf`);
+}
+
 // ---- backtest / validation ----
 export interface MarketDataset {
   symbol: string;
@@ -915,6 +931,13 @@ export async function downloadOrgBillingHistoryCsv(orgId: string): Promise<void>
   a.download = `org-${orgId}-billing.csv`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+export async function downloadOrgBillingInvoicePdf(orgId: string, ledgerId: string): Promise<void> {
+  const { data } = await api.get<Blob>(`/orgs/${orgId}/billing/history/${ledgerId}/invoice.pdf`, {
+    responseType: "blob",
+  });
+  downloadBlob(data, `org-${orgId}-billing-${ledgerId}.pdf`);
 }
 
 export async function orgBillingCheckout(

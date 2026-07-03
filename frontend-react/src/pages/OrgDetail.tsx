@@ -9,6 +9,7 @@ import {
   getOrgBilling,
   getOrgBillingHistory,
   downloadOrgBillingHistoryCsv,
+  downloadOrgBillingInvoicePdf,
   getOrgCatalog,
   listFactors,
   listOrgInvites,
@@ -367,6 +368,17 @@ export default function OrgDetail() {
                       ¥{row.amount_cny.toLocaleString()} · {row.source} ·{" "}
                       {new Date(row.created_at).toLocaleDateString()}
                     </span>
+                    <button
+                      type="button"
+                      className="btn text-xs"
+                      onClick={() =>
+                        void downloadOrgBillingInvoicePdf(id, row.id).catch((e) =>
+                          notify(apiErrorMessage(e, o.billingInvoiceFail), "error"),
+                        )
+                      }
+                    >
+                      {o.billingInvoicePdf}
+                    </button>
                   </li>
                 ))}
               </ul>

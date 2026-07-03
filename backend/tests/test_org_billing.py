@@ -237,6 +237,17 @@ def test_personal_billing_csv_export(client, db_session):
     assert "plus_monthly" in body
 
 
+def test_personal_billing_invoice_pdf(client, db_session):
+    h = _auth(client)
+    rc = ms.create_redeem_code(db_session, tier=ms.TIER_PLUS, plan_code="plus_monthly")
+    client.post(f"{BASE}/billing/redeem", headers=h, json={"code": rc.code})
+    rows = client.get(f"{BASE}/billing/history", headers=h).json()
+    resp = client.get(f"{BASE}/billing/history/{rows[0]['id']}/invoice.pdf", headers=h)
+    assert resp.status_code == 200, resp.text
+    assert resp.headers["content-type"] == "application/pdf"
+    assert resp.content.startswith(b"%PDF")
+
+
 def test_org_billing_csv_export(client, db_session):
     h_owner = _auth(client, OWNER)
     org_id = client.post(f"{BASE}/orgs", headers=h_owner, json={"name": "CSV Org"}).json()["id"]
@@ -257,3 +268,28 @@ def test_org_billing_csv_export(client, db_session):
     assert "text/csv" in resp.headers.get("content-type", "")
     body = resp.text.lstrip("\ufeff")
     assert "org_plus_monthly" in body
+
+
+def test_org_billing_invoice_pdf(client, db_session):
+    h_owner = _auth(client, OWNER)
+    org_id = client.post(f"{BASE}/orgs", headers=h_owner, json={"name": "PDF Org"}).json()["id"]
+    rc = ms.create_redeem_code(
+        db_session,
+        tier=ms.TIER_PLUS,
+        plan_code="org_plus_monthly",
+        kind="org",
+        seats=5,
+    )
+    client.post(
+        f"{BASE}/orgs/{org_id}/billing/redeem",
+        headers=h_owner,
+        json={"code": rc.code},
+    )
+    rows = client.get(f"{BASE}/orgs/{org_id}/billing/history", headers=h_owner).json()
+    resp = client.get(
+        f"{BASE}/orgs/{org_id}/billing/history/{rows[0]['id']}/invoice.pdf",
+        headers=h_owner,
+    )
+    assert resp.status_code == 200, resp.text
+    assert resp.headers["content-type"] == "application/pdf"
+    assert resp.content.startswith(b"%PDF")

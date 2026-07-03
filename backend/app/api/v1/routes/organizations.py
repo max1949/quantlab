@@ -479,6 +479,31 @@ def org_billing_history_export(
     )
 
 
+@router.get(
+    "/{org_id}/billing/history/{ledger_id}/invoice.pdf",
+    summary="下载机构计费凭证 PDF (管理员)",
+)
+def org_billing_invoice_pdf(
+    org_id: str,
+    ledger_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> Response:
+    try:
+        row = bls.get_org_ledger_entry(
+            db, uuid.UUID(org_id), current_user.id, uuid.UUID(ledger_id)
+        )
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    if row is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="计费流水不存在")
+    return Response(
+        content=bls.render_invoice_pdf(row),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="org-{org_id}-billing-{ledger_id}.pdf"'},
+    )
+
+
 @router.post("/{org_id}/billing/checkout", response_model=CheckoutOut, summary="机构团队套餐下单")
 def org_billing_checkout(
     org_id: str,

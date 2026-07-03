@@ -9,6 +9,7 @@
 
 from __future__ import annotations
 
+import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -78,6 +79,22 @@ def export_my_billing_history(
         content="\ufeff" + csv_text,
         media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": 'attachment; filename="billing-history.csv"'},
+    )
+
+
+@router.get("/history/{ledger_id}/invoice.pdf", summary="下载我的计费凭证 PDF")
+def my_billing_invoice_pdf(
+    ledger_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> Response:
+    row = bls.get_user_ledger_entry(db, current_user.id, uuid.UUID(ledger_id))
+    if row is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="计费流水不存在")
+    return Response(
+        content=bls.render_invoice_pdf(row),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="billing-{ledger_id}.pdf"'},
     )
 
 
