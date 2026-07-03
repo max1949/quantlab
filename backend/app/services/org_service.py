@@ -39,6 +39,60 @@ class OrgAccessDeniedError(Exception):
     pass
 
 
+class OrgEmailDomainError(Exception):
+    pass
+
+
+def _parse_sso_domains(raw: str) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for d in (raw or "").split(","):
+        cleaned = d.strip().lower().lstrip("@")
+        if cleaned and cleaned not in seen:
+            seen.add(cleaned)
+            out.append(cleaned)
+    return out
+
+
+def _email_domain(email: str) -> str:
+    return email.split("@")[-1].lower() if "@" in email else ""
+
+
+def assert_email_allowed_for_org(db: Session, org_id: uuid.UUID, email: str) -> None:
+    org = db.get(ResearchOrg, org_id)
+    if org is None:
+        return
+    allowed = _parse_sso_domains(org.sso_email_domains)
+    if not allowed:
+        return
+    if _email_domain(email) not in allowed:
+        raise OrgEmailDomainError(f"邮箱域名须为: {', '.join(allowed)}")
+
+
+def get_sso_domains(db: Session, org_id: uuid.UUID, actor_id: uuid.UUID) -> list[str]:
+    require_admin(db, org_id, actor_id)
+    org = db.get(ResearchOrg, org_id)
+    if org is None:
+        raise OrgNotFoundError(str(org_id))
+    return _parse_sso_domains(org.sso_email_domains)
+
+
+def set_sso_domains(
+    db: Session, org_id: uuid.UUID, actor_id: uuid.UUID, domains: list[str]
+) -> list[str]:
+    member = require_admin(db, org_id, actor_id)
+    if member.role != OrgRole.OWNER.value:
+        raise OrgAccessDeniedError("仅所有者可配置 SSO 邮箱域")
+    org = db.get(ResearchOrg, org_id)
+    if org is None:
+        raise OrgNotFoundError(str(org_id))
+    cleaned = _parse_sso_domains(",".join(domains))
+    org.sso_email_domains = ",".join(cleaned)
+    db.commit()
+    db.refresh(org)
+    return cleaned
+
+
 class OrgMemberNotFoundError(Exception):
     pass
 
@@ -156,6 +210,7 @@ def add_member(
     user = db.execute(select(User).where(User.username == username)).scalar_one_or_none()
     if user is None:
         raise OrgMemberNotFoundError(username)
+    assert_email_allowed_for_org(db, org_id, user.email)
     if _member_row(db, org_id, user.id):
         return _member_row(db, org_id, user.id)  # type: ignore[return-value]
     from backend.app.services import org_billing_service as obs
@@ -356,6 +411,10 @@ def accept_invite(db: Session, token: str, user_id: uuid.UUID) -> dict:
     if existing is None:
         from backend.app.services import org_billing_service as obs
 
+        user = db.get(User, user_id)
+        if user is None:
+            raise OrgInviteInvalidError("用户不存在")
+        assert_email_allowed_for_org(db, invite.org_id, user.email)
         obs.ensure_seat_available(db, invite.org_id, adding=1)
         db.add(OrgMember(org_id=invite.org_id, user_id=user_id, role=invite.role))
         invite.used_count += 1

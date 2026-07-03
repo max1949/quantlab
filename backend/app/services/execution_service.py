@@ -13,7 +13,13 @@ from backend.app.models.factor import Factor
 from backend.app.models.user import User
 from backend.app.services import regime_advisory
 from backend.app.services.execution_risk import RiskBlockedError, preflight
-from engine.execution_adapter import CHANNEL_PAPER, CHANNEL_VNPY, route_vnpy_order
+from engine.execution_adapter import (
+    CHANNEL_PAPER,
+    CHANNEL_QMT,
+    CHANNEL_VNPY,
+    route_qmt_order,
+    route_vnpy_order,
+)
 
 
 class ExecutionError(Exception):
@@ -45,7 +51,7 @@ def submit_paper_order(
         raise ExecutionError("方向必须是 buy 或 sell")
     if notional_cny <= 0:
         raise ExecutionError("名义金额必须大于 0")
-    if channel not in (CHANNEL_PAPER, CHANNEL_VNPY):
+    if channel not in (CHANNEL_PAPER, CHANNEL_VNPY, CHANNEL_QMT):
         raise ExecutionError("无效的执行通道")
 
     factor = db.get(Factor, factor_id) if factor_id else None
@@ -73,6 +79,8 @@ def submit_paper_order(
     routed_at = None
     order_id = uuid.uuid4()
 
+    gateway_status = None
+
     if channel == CHANNEL_VNPY:
         status = OrderStatus.ROUTED.value
         routed = route_vnpy_order(
@@ -83,6 +91,19 @@ def submit_paper_order(
             signal_value=signal_value,
         )
         external_ref = routed["external_ref"]
+        gateway_status = routed.get("gateway_status")
+        routed_at = _now()
+    elif channel == CHANNEL_QMT:
+        status = OrderStatus.ROUTED.value
+        routed = route_qmt_order(
+            order_id=order_id,
+            symbol=sym,
+            side=side,
+            notional_cny=notional_cny,
+            signal_value=signal_value,
+        )
+        external_ref = routed["external_ref"]
+        gateway_status = routed.get("gateway_status")
         routed_at = _now()
 
     order = PaperOrder(
@@ -98,6 +119,7 @@ def submit_paper_order(
         regime_fit_score=fit_score,
         channel=channel,
         external_ref=external_ref,
+        gateway_status=gateway_status,
         risk_verdict=risk["verdict"],
         risk_detail=risk.get("detail", ""),
         routed_at=routed_at,
@@ -137,8 +159,42 @@ def route_existing_to_vnpy(db: Session, user_id: uuid.UUID, order_id: uuid.UUID)
     )
     order.channel = CHANNEL_VNPY
     order.external_ref = routed["external_ref"]
+    order.gateway_status = routed.get("gateway_status")
     order.status = OrderStatus.ROUTED.value
     order.routed_at = _now()
+    db.commit()
+    db.refresh(order)
+    return order
+
+
+def apply_gateway_status(
+    db: Session,
+    *,
+    external_ref: str,
+    gateway_status: str,
+) -> PaperOrder | None:
+    """网关 Webhook 回传 — 按 external_ref 更新订单状态。"""
+    ref = (external_ref or "").strip()
+    if not ref:
+        return None
+    order = db.execute(
+        select(PaperOrder).where(PaperOrder.external_ref == ref)
+    ).scalar_one_or_none()
+    if order is None:
+        return None
+
+    gs = (gateway_status or "").lower()
+    order.gateway_status = gs
+    if gs in ("filled", "complete", "completed"):
+        order.status = OrderStatus.FILLED.value
+        order.filled_at = _now()
+    elif gs in ("rejected", "failed", "error"):
+        order.status = OrderStatus.REJECTED.value
+    elif gs in ("cancelled", "canceled"):
+        order.status = OrderStatus.CANCELLED.value
+    elif gs in ("routed", "accepted", "pending"):
+        order.status = OrderStatus.ROUTED.value
+
     db.commit()
     db.refresh(order)
     return order
@@ -218,6 +274,8 @@ def order_to_dict(row: PaperOrder) -> dict:
         "external_ref": row.external_ref,
         "risk_verdict": row.risk_verdict,
         "risk_detail": row.risk_detail,
+        "gateway_status": row.gateway_status,
+        "filled_at": row.filled_at,
         "routed_at": row.routed_at,
         "note": row.note,
         "created_at": row.created_at,

@@ -599,6 +599,7 @@ export interface ExecutionConfig {
   max_notional_cny: number;
   min_regime_fit_vnpy: number;
   vnpy_configured: boolean;
+  qmt_configured?: boolean;
   channels: { code: string; label: string; available: boolean; stub_mode?: boolean }[];
 }
 
@@ -616,6 +617,8 @@ export interface PaperOrder {
   external_ref: string | null;
   risk_verdict: string;
   risk_detail: string;
+  gateway_status?: string | null;
+  filled_at?: string | null;
   routed_at: string | null;
   note: string;
   created_at: string;

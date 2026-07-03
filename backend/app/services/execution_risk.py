@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from backend.app.core.config import get_settings
-from engine.execution_adapter import CHANNEL_VNPY
+from engine.execution_adapter import CHANNEL_QMT, CHANNEL_VNPY
 
 
 class RiskBlockedError(Exception):
@@ -32,7 +32,7 @@ def preflight(
             f"名义金额 {notional_cny:.0f} 超过单笔上限 {s.execution_max_notional_cny:.0f}"
         )
 
-    if channel == CHANNEL_VNPY:
+    if channel in (CHANNEL_VNPY, CHANNEL_QMT):
         min_fit = s.execution_min_regime_fit_vnpy
         if regime_fit_score is not None and regime_fit_score < min_fit and not acknowledge_risk:
             reasons.append(

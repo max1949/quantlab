@@ -22,6 +22,7 @@ class OrderStatus(str, enum.Enum):
     FILLED = "filled"
     PENDING = "pending"
     ROUTED = "routed"
+    REJECTED = "rejected"
     CANCELLED = "cancelled"
 
 
@@ -46,7 +47,9 @@ class PaperOrder(Base):
     external_ref: Mapped[str | None] = mapped_column(String(120), nullable=True)
     risk_verdict: Mapped[str] = mapped_column(String(16), nullable=False, default="passed")
     risk_detail: Mapped[str] = mapped_column(String(300), nullable=False, default="")
+    gateway_status: Mapped[str | None] = mapped_column(String(32), nullable=True)
     routed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    filled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     note: Mapped[str] = mapped_column(String(200), nullable=False, default="")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

@@ -41,6 +41,7 @@ export interface OpsMetrics {
     shared_org_factors: number;
     paper_orders?: number;
     vnpy_orders?: number;
+    qmt_orders?: number;
   };
 }
 

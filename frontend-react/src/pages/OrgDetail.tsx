@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -13,6 +13,8 @@ import {
   listOrgMembers,
   orgBillingCheckout,
   orgBillingRedeem,
+  getOrgSsoDomains,
+  setOrgSsoDomains,
   removeOrgMember,
   revokeOrgInvite,
   shareFactorToOrg,
@@ -35,6 +37,7 @@ export default function OrgDetail() {
   const [symbol, setSymbol] = useState("RB");
   const [inviteUrl, setInviteUrl] = useState("");
   const [teamCode, setTeamCode] = useState("");
+  const [ssoDomains, setSsoDomains] = useState("");
 
   const org = useQuery({ queryKey: ["org", id], queryFn: () => getOrg(id), enabled: Boolean(id) });
   const members = useQuery({
@@ -61,6 +64,11 @@ export default function OrgDetail() {
   const billing = useQuery({
     queryKey: ["org-billing", id],
     queryFn: () => getOrgBilling(id),
+    enabled: Boolean(id) && org.data?.my_role === "owner",
+  });
+  const ssoDomainQuery = useQuery({
+    queryKey: ["org-sso-domains", id],
+    queryFn: () => getOrgSsoDomains(id),
     enabled: Boolean(id) && org.data?.my_role === "owner",
   });
 
@@ -154,6 +162,24 @@ export default function OrgDetail() {
     onError: (e) => notify(apiErrorMessage(e, o.billingCheckoutFail), "error"),
   });
 
+  const saveSsoDomains = useMutation({
+    mutationFn: () =>
+      setOrgSsoDomains(
+        id,
+        ssoDomains
+          .split(/[,;\s]+/)
+          .map((d) => d.trim().toLowerCase())
+          .filter(Boolean),
+      ),
+    onSuccess: (r) => {
+      setSsoDomains(r.domains.join(", "));
+      void qc.invalidateQueries({ queryKey: ["org-sso-domains", id] });
+      void qc.invalidateQueries({ queryKey: ["org-activity", id] });
+      notify(o.ssoDomainsSaved, "success");
+    },
+    onError: (e) => notify(apiErrorMessage(e, o.ssoDomainsFail), "error"),
+  });
+
   function canManageMember(userId: string, role: string) {
     if (role === "owner") return false;
     if (!canAdmin) return me?.id === userId;
@@ -166,6 +192,12 @@ export default function OrgDetail() {
     if (role === "admin") return ["admin"];
     return ["member", "viewer"];
   }
+
+  useEffect(() => {
+    if (ssoDomainQuery.data) {
+      setSsoDomains(ssoDomainQuery.data.domains.join(", "));
+    }
+  }, [ssoDomainQuery.data]);
 
   if (org.isLoading) return <Spinner />;
   if (org.isError || !org.data) {
@@ -231,6 +263,29 @@ export default function OrgDetail() {
               onClick={() => teamRedeem.mutate()}
             >
               {teamRedeem.isPending ? o.billingRedeeming : o.billingRedeemBtn}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isOwner && (
+        <div className="mb-6 card">
+          <h2 className="mb-2 font-semibold">{o.ssoDomainsTitle}</h2>
+          <p className="mb-3 text-sm text-slate-500">{o.ssoDomainsHint}</p>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              className="input flex-1 font-mono text-sm"
+              placeholder={o.ssoDomainsPlaceholder}
+              value={ssoDomains}
+              onChange={(e) => setSsoDomains(e.target.value)}
+            />
+            <button
+              type="button"
+              className="btn"
+              disabled={saveSsoDomains.isPending || ssoDomainQuery.isLoading}
+              onClick={() => saveSsoDomains.mutate()}
+            >
+              {saveSsoDomains.isPending ? o.ssoDomainsSaving : o.ssoDomainsSave}
             </button>
           </div>
         </div>

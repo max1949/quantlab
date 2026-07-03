@@ -167,3 +167,56 @@ def test_update_member_role_and_remove(client, db_session):
     assert removed.status_code == 204
     members_after = client.get(f"{BASE}/orgs/{org_id}/members", headers=h_owner).json()
     assert all(m["username"] != MEMBER["username"] for m in members_after)
+
+
+def test_org_sso_email_domains(client, db_session):
+    h_owner = _auth(client, OWNER)
+    outsider = {"email": "outsider@gmail.com", "username": "gmailuser", "password": "s3cret-pass"}
+    corp_user = {"email": "alice@corp.com", "username": "corpuser", "password": "s3cret-pass"}
+    h_outsider = _auth(client, outsider)
+    h_corp = _auth(client, corp_user)
+
+    org_id = client.post(f"{BASE}/orgs", headers=h_owner, json={"name": "Corp Desk"}).json()["id"]
+
+    get_empty = client.get(f"{BASE}/orgs/{org_id}/sso-domains", headers=h_owner)
+    assert get_empty.status_code == 200
+    assert get_empty.json()["domains"] == []
+
+    set_domains = client.put(
+        f"{BASE}/orgs/{org_id}/sso-domains",
+        headers=h_owner,
+        json={"domains": ["corp.com", "CORP.COM", ""]},
+    )
+    assert set_domains.status_code == 200
+    assert set_domains.json()["domains"] == ["corp.com"]
+
+    denied_add = client.post(
+        f"{BASE}/orgs/{org_id}/members",
+        headers=h_owner,
+        json={"username": outsider["username"], "role": "member"},
+    )
+    assert denied_add.status_code == 422
+
+    invite = client.post(
+        f"{BASE}/orgs/{org_id}/invites",
+        headers=h_owner,
+        json={"role": "member", "expires_in_days": 3, "max_uses": 5},
+    ).json()
+    denied_accept = client.post(
+        f"{BASE}/orgs/invites/{invite['token']}/accept",
+        headers=h_outsider,
+    )
+    assert denied_accept.status_code == 422
+
+    accepted = client.post(
+        f"{BASE}/orgs/invites/{invite['token']}/accept",
+        headers=h_corp,
+    )
+    assert accepted.status_code == 200
+
+    ok_add = client.post(
+        f"{BASE}/orgs/{org_id}/members",
+        headers=h_owner,
+        json={"username": corp_user["username"], "role": "member"},
+    )
+    assert ok_add.status_code == 200, ok_add.text

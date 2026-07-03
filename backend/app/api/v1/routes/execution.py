@@ -5,21 +5,23 @@ from __future__ import annotations
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from backend.app.auth.deps import require_feature
+from backend.app.core.config import get_settings
 from backend.app.core.database import get_db
 from backend.app.models.user import User
 from backend.app.schemas.execution import (
     ExecutionConfigOut,
+    GatewayWebhookIn,
     PaperOrderCreate,
     PaperOrderOut,
     RiskCheckIn,
     RiskCheckOut,
 )
 from backend.app.services import audit_service, execution_service as exs
-from engine.execution_adapter import execution_config_payload
+from engine.execution_adapter import execution_config_payload, verify_gateway_webhook
 
 router = APIRouter()
 
@@ -140,3 +142,36 @@ def get_paper_order(
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="订单不存在")
     return PaperOrderOut(**exs.order_to_dict(row))
+
+
+@router.post("/webhook/gateway", summary="执行网关状态回调", include_in_schema=False)
+async def gateway_webhook(
+    payload: GatewayWebhookIn,
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+    x_gateway_signature: Annotated[str | None, Header(alias="X-Gateway-Signature")] = None,
+) -> dict:
+    settings = get_settings()
+    secret = settings.execution_webhook_secret.strip()
+    body = await request.body()
+    if not secret or not verify_gateway_webhook(body, x_gateway_signature or "", secret):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="invalid signature")
+
+    order = exs.apply_gateway_status(
+        db, external_ref=payload.external_ref, gateway_status=payload.status
+    )
+    if order is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="订单不存在")
+    audit_service.log(
+        db,
+        actor_id=None,
+        action="execution.gateway.status",
+        resource_type="paper_order",
+        resource_id=str(order.id),
+        detail={
+            "external_ref": payload.external_ref,
+            "status": payload.status,
+            "channel": order.channel,
+        },
+    )
+    return {"ok": True, "order_id": str(order.id), "status": order.status}

@@ -79,6 +79,9 @@ def compute_pmf_metrics(db: Session, *, exclude_test: bool = True) -> dict:
     vnpy_orders = db.execute(
         select(func.count()).select_from(PaperOrder).where(PaperOrder.channel == "vnpy")
     ).scalar_one()
+    qmt_orders = db.execute(
+        select(func.count()).select_from(PaperOrder).where(PaperOrder.channel == "qmt")
+    ).scalar_one()
 
     return {
         "registered_users": registered,
@@ -106,5 +109,6 @@ def compute_pmf_metrics(db: Session, *, exclude_test: bool = True) -> dict:
             "shared_org_factors": int(shared_org_factors or 0),
             "paper_orders": int(paper_orders or 0),
             "vnpy_orders": int(vnpy_orders or 0),
+            "qmt_orders": int(qmt_orders or 0),
         },
     }

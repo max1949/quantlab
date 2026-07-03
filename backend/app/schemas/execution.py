@@ -15,14 +15,14 @@ class PaperOrderCreate(BaseModel):
     factor_id: uuid.UUID | None = None
     signal_value: float | None = None
     note: str = Field(default="", max_length=200)
-    channel: str = Field(default="paper", pattern=r"^(paper|vnpy)$")
+    channel: str = Field(default="paper", pattern=r"^(paper|vnpy|qmt)$")
     acknowledge_risk: bool = False
 
 
 class RiskCheckIn(BaseModel):
     symbol: str = Field(min_length=1, max_length=16)
     notional_cny: float = Field(gt=0, le=50_000_000)
-    channel: str = Field(default="paper", pattern=r"^(paper|vnpy)$")
+    channel: str = Field(default="paper", pattern=r"^(paper|vnpy|qmt)$")
     factor_id: uuid.UUID | None = None
     acknowledge_risk: bool = False
 
@@ -32,7 +32,13 @@ class ExecutionConfigOut(BaseModel):
     max_notional_cny: float
     min_regime_fit_vnpy: int
     vnpy_configured: bool
+    qmt_configured: bool = False
     channels: list[dict]
+
+
+class GatewayWebhookIn(BaseModel):
+    external_ref: str
+    status: str
 
 
 class RiskCheckOut(BaseModel):
@@ -57,6 +63,8 @@ class PaperOrderOut(BaseModel):
     external_ref: str | None
     risk_verdict: str
     risk_detail: str
+    gateway_status: str | None
+    filled_at: datetime | None
     routed_at: datetime | None
     note: str
     created_at: datetime

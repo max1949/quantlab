@@ -910,7 +910,17 @@ export async function orgBillingRedeem(
   return data;
 }
 
-// ---- execution (institutional paper / vn.py) ----
+export async function getOrgSsoDomains(orgId: string): Promise<{ domains: string[] }> {
+  const { data } = await api.get(`/orgs/${orgId}/sso-domains`);
+  return data;
+}
+
+export async function setOrgSsoDomains(orgId: string, domains: string[]): Promise<{ domains: string[] }> {
+  const { data } = await api.put(`/orgs/${orgId}/sso-domains`, { domains });
+  return data;
+}
+
+// ---- execution (institutional paper / vn.py / QMT) ----
 export async function getExecutionConfig(): Promise<ExecutionConfig> {
   const { data } = await api.get<ExecutionConfig>("/execution/config");
   return data;

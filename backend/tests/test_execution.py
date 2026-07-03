@@ -199,3 +199,100 @@ def test_route_paper_to_vnpy(client, db_session):
     assert routed.status_code == 200, routed.text
     assert routed.json()["channel"] == "vnpy"
     assert routed.json()["external_ref"]
+
+
+def test_qmt_channel_stub_order(client, db_session):
+    from backend.app.services.market_data import seed_sample_market_data
+
+    h = _pro_headers(client, db_session)
+    seed_sample_market_data(db_session)
+
+    created = client.post(
+        f"{BASE}/execution/paper/orders",
+        headers=h,
+        json={
+            "symbol": "RB",
+            "side": "buy",
+            "notional_cny": 30000,
+            "channel": "qmt",
+            "acknowledge_risk": True,
+        },
+    )
+    assert created.status_code == 201, created.text
+    body = created.json()
+    assert body["channel"] == "qmt"
+    assert body["status"] == "routed"
+    assert body["external_ref"] and body["external_ref"].startswith("QMT-")
+
+
+def test_gateway_webhook_updates_order(client, db_session):
+    import hashlib
+    import hmac
+    import json
+
+    from backend.app.core.config import get_settings
+
+    h = _pro_headers(client, db_session)
+    order = client.post(
+        f"{BASE}/execution/paper/orders",
+        headers=h,
+        json={
+            "symbol": "RB",
+            "side": "buy",
+            "notional_cny": 12000,
+            "channel": "qmt",
+            "acknowledge_risk": True,
+        },
+    ).json()
+    ref = order["external_ref"]
+    assert ref
+
+    settings = get_settings()
+    prev = settings.execution_webhook_secret
+    secret = "whsec-test-56"
+    settings.execution_webhook_secret = secret
+    try:
+        payload = {"external_ref": ref, "status": "filled"}
+        body = json.dumps(payload, separators=(",", ":")).encode()
+        sig = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+        resp = client.post(
+            f"{BASE}/execution/webhook/gateway",
+            content=body,
+            headers={"Content-Type": "application/json", "X-Gateway-Signature": sig},
+        )
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["status"] == "filled"
+
+        detail = client.get(f"{BASE}/execution/paper/orders/{order['id']}", headers=h).json()
+        assert detail["status"] == "filled"
+        assert detail["gateway_status"] == "filled"
+        assert detail["filled_at"] is not None
+
+        body2 = json.dumps({"external_ref": ref, "status": "rejected"}, separators=(",", ":")).encode()
+        sig2 = hmac.new(secret.encode(), body2, hashlib.sha256).hexdigest()
+        bad = client.post(
+            f"{BASE}/execution/webhook/gateway",
+            content=body2,
+            headers={"Content-Type": "application/json", "X-Gateway-Signature": sig2},
+        )
+        assert bad.status_code == 200
+        assert bad.json()["status"] == "rejected"
+    finally:
+        settings.execution_webhook_secret = prev
+
+
+def test_gateway_webhook_rejects_bad_signature(client, db_session):
+    from backend.app.core.config import get_settings
+
+    settings = get_settings()
+    prev = settings.execution_webhook_secret
+    settings.execution_webhook_secret = "secret"
+    try:
+        resp = client.post(
+            f"{BASE}/execution/webhook/gateway",
+            json={"external_ref": "NOPE", "status": "filled"},
+            headers={"X-Gateway-Signature": "invalid"},
+        )
+        assert resp.status_code == 400
+    finally:
+        settings.execution_webhook_secret = prev

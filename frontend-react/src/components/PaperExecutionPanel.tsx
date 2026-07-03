@@ -12,6 +12,11 @@ import { useLocale } from "../store/locale";
 import type { Dictionary } from "../i18n/dictionaries";
 
 const SYMBOLS = ["RB", "AU", "IF"];
+type ExecChannel = "paper" | "vnpy" | "qmt";
+
+function isGatewayChannel(channel: ExecChannel): boolean {
+  return channel === "vnpy" || channel === "qmt";
+}
 
 export default function PaperExecutionPanel() {
   const l4 = useLocale((s) => s.dict.l4Tools);
@@ -21,7 +26,7 @@ export default function PaperExecutionPanel() {
   const [symbol, setSymbol] = useState("RB");
   const [side, setSide] = useState<"buy" | "sell">("buy");
   const [notional, setNotional] = useState("50000");
-  const [channel, setChannel] = useState<"paper" | "vnpy">("paper");
+  const [channel, setChannel] = useState<ExecChannel>("paper");
   const [riskMsg, setRiskMsg] = useState("");
 
   const config = useQuery({ queryKey: ["execution-config"], queryFn: getExecutionConfig });
@@ -33,7 +38,7 @@ export default function PaperExecutionPanel() {
         symbol,
         notional_cny: Number(notional),
         channel,
-        acknowledge_risk: channel === "vnpy",
+        acknowledge_risk: isGatewayChannel(channel),
       }),
     onSuccess: (r) => {
       setRiskMsg(r.message);
@@ -49,7 +54,7 @@ export default function PaperExecutionPanel() {
         side,
         notional_cny: Number(notional),
         channel,
-        acknowledge_risk: channel === "vnpy",
+        acknowledge_risk: isGatewayChannel(channel),
       }),
     onSuccess: (o) => {
       notify(l4.execSubmitted(o.channel, o.status), "success");
@@ -86,10 +91,11 @@ export default function PaperExecutionPanel() {
         <select
           className="input text-sm"
           value={channel}
-          onChange={(e) => setChannel(e.target.value as "paper" | "vnpy")}
+          onChange={(e) => setChannel(e.target.value as ExecChannel)}
         >
           <option value="paper">{l4.execChannelPaper}</option>
           <option value="vnpy">{l4.execChannelVnpy}</option>
+          <option value="qmt">{l4.execChannelQmt}</option>
         </select>
         <input
           className="input w-32 text-sm"
@@ -137,6 +143,7 @@ function OrderList({ rows, l4 }: { rows: import("../api/types").PaperOrder[]; l4
         {rows.slice(0, 5).map((o) => (
           <li key={o.id} className="font-mono">
             {o.symbol} {o.side} ¥{o.notional_cny.toLocaleString()} · {o.channel} · {o.status}
+            {o.gateway_status ? ` (${o.gateway_status})` : ""}
             {o.external_ref ? ` · ${o.external_ref}` : ""}
           </li>
         ))}

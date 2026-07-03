@@ -121,3 +121,11 @@ class OrgBillingRedeemOut(BaseModel):
     expires_at: datetime | None
     seats: int
     message: str
+
+
+class OrgSsoDomainsIn(BaseModel):
+    domains: list[str] = Field(default_factory=list, max_length=20)
+
+
+class OrgSsoDomainsOut(BaseModel):
+    domains: list[str]

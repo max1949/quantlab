@@ -27,6 +27,8 @@ from backend.app.schemas.organization import (
     OrgMemberOut,
     OrgMemberUpdate,
     OrgOut,
+    OrgSsoDomainsIn,
+    OrgSsoDomainsOut,
 )
 from backend.app.services import audit_service, org_billing_service, org_service
 
@@ -101,6 +103,8 @@ def accept_invite(
     except org_service.OrgInviteInvalidError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except org_billing_service.OrgSeatLimitError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    except org_service.OrgEmailDomainError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
 
 
@@ -329,6 +333,8 @@ def add_member(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="用户不存在")
     except org_billing_service.OrgSeatLimitError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    except org_service.OrgEmailDomainError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
 
 
 @router.get("/{org_id}/factors", response_model=list[OrgFactorShareOut], summary="已共享因子")
@@ -474,3 +480,52 @@ def org_billing_redeem(
         seats=sub.seats,
         message=f"机构已开通「{ms.TIER_NAMES.get(sub.tier, '免费')}」团队套餐",
     )
+
+
+@router.get(
+    "/{org_id}/sso-domains",
+    response_model=OrgSsoDomainsOut,
+    summary="机构 SSO 邮箱域 (管理员可读)",
+)
+def get_org_sso_domains(
+    org_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> OrgSsoDomainsOut:
+    try:
+        domains = org_service.get_sso_domains(db, uuid.UUID(org_id), current_user.id)
+    except org_service.OrgNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="机构不存在")
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    return OrgSsoDomainsOut(domains=domains)
+
+
+@router.put(
+    "/{org_id}/sso-domains",
+    response_model=OrgSsoDomainsOut,
+    summary="配置机构 SSO 邮箱域 (仅所有者)",
+)
+def set_org_sso_domains(
+    org_id: str,
+    payload: OrgSsoDomainsIn,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> OrgSsoDomainsOut:
+    try:
+        domains = org_service.set_sso_domains(
+            db, uuid.UUID(org_id), current_user.id, payload.domains
+        )
+        audit_service.log(
+            db,
+            actor_id=current_user.id,
+            action="org.sso.domains",
+            resource_type="org",
+            resource_id=org_id,
+            detail={"domains": domains},
+        )
+    except org_service.OrgNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="机构不存在")
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    return OrgSsoDomainsOut(domains=domains)

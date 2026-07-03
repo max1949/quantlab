@@ -75,6 +75,9 @@ class Settings(BaseSettings):
     execution_min_regime_fit_vnpy: int = 40
     vnpy_gateway_url: str = ""       # 留空则 vnpy 通道走本地 stub
     vnpy_gateway_token: str = ""
+    qmt_gateway_url: str = ""
+    qmt_gateway_token: str = ""
+    execution_webhook_secret: str = ""  # 网关状态回调 HMAC 密钥
 
     # 研究质量闸门 (发布/分享)
     research_gate_enabled: bool = True
