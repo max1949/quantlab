@@ -27,7 +27,27 @@ TEMPLATE_GATES: dict[str, dict[str, int]] = {
     "rsi-study": {"min_level": 0, "min_tier": 0},
     "sma-cross": {"min_level": 1, "min_tier": 0},
     "multi-momentum": {"min_level": 2, "min_tier": 1},
+    "cost-stress-rb": {"min_level": 1, "min_tier": 0},
+    "regime-trend-if": {"min_level": 2, "min_tier": 1},
+    "master-oos-gold": {"min_level": 2, "min_tier": 2},
 }
+
+TEMPLATE_TRACK: dict[str, str] = {
+    "gold-trend": "beginner",
+    "commodity-momentum": "beginner",
+    "vol-regime": "beginner",
+    "mean-reversion": "beginner",
+    "rsi-study": "beginner",
+    "sma-cross": "beginner",
+    "multi-momentum": "advanced",
+    "cost-stress-rb": "advanced",
+    "regime-trend-if": "advanced",
+    "master-oos-gold": "master",
+}
+
+
+def template_track(code: str) -> str:
+    return TEMPLATE_TRACK.get(code, "beginner")
 
 DEFAULT_TEMPLATES = [
     {
@@ -78,6 +98,27 @@ DEFAULT_TEMPLATES = [
         "hypothesis": "长周期动量在黄金上是否更稳健?",
         "description": "研究员会员专属 — 长窗口动量研究模板。",
         "tags": ["动量", "进阶"],
+    },
+    {
+        "code": "cost-stress-rb", "title": "成本压力测试", "symbol": "RB",
+        "factor_template": "momentum", "default_params": {"window": 8},
+        "hypothesis": "短周期动量能否在扣成本后仍有效?",
+        "description": "进阶 Playbook — 用短窗口动量学习换手与成本敏感性。",
+        "tags": ["进阶", "成本", "动量"],
+    },
+    {
+        "code": "regime-trend-if", "title": "制度感知趋势", "symbol": "IF",
+        "factor_template": "momentum", "default_params": {"window": 40},
+        "hypothesis": "在中低波动制度下趋势因子是否更稳健?",
+        "description": "结合波动制度与长周期动量，学习 regime 适配。",
+        "tags": ["进阶", "regime", "股指"],
+    },
+    {
+        "code": "master-oos-gold", "title": "大师级 OOS 路径", "symbol": "AU",
+        "factor_template": "sma_ratio", "default_params": {"window": 30},
+        "hypothesis": "长周期均线偏离能否通过严格样本外检验?",
+        "description": "大师 Playbook — 完整走过验证→毕业→Paper 全流程。",
+        "tags": ["大师", "OOS", "贵金属"],
     },
 ]
 
@@ -143,7 +184,7 @@ def list_templates_for_user(db: Session, user: User, tier: int, locale: Locale =
                 "tags": list(t.tags or []),
             },
         )
-        out.append({**acc, "template": t, "localized": loc})
+        out.append({**acc, "template": t, "localized": loc, "track": template_track(t.code)})
     return out
 
 

@@ -56,6 +56,12 @@ export default function Templates() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {templates.data?.map((tpl) => {
             const locked = tpl.allowed === false;
+            const trackLabel =
+              tpl.track === "master"
+                ? t.trackMaster
+                : tpl.track === "advanced"
+                  ? t.trackAdvanced
+                  : t.trackBeginner;
             return (
               <div
                 key={tpl.code}
@@ -72,7 +78,20 @@ export default function Templates() {
                   <h3 className="font-semibold text-slate-800 dark:text-slate-100">
                     {tpl.title}
                   </h3>
-                  <span className="badge shrink-0">{tpl.symbol}</span>
+                  <div className="flex shrink-0 gap-1">
+                    <span
+                      className={`badge ${
+                        tpl.track === "master"
+                          ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                          : tpl.track === "advanced"
+                            ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+                            : ""
+                      }`}
+                    >
+                      {trackLabel}
+                    </span>
+                    <span className="badge">{tpl.symbol}</span>
+                  </div>
                 </div>
                 {tpl.suitable_for && (
                   <p className="mt-2 text-xs font-medium text-brand-600 dark:text-brand-400">

@@ -61,6 +61,7 @@ class TemplateOut(BaseModel):
     min_tier: int = 0
     allowed: bool = True
     lock_hint: str | None = None
+    track: str = "beginner"
     suitable_for: str = ""
     factor_template_label: str = ""
     factor_note: str = ""

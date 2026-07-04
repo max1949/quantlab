@@ -175,6 +175,20 @@ export interface ProjectQuality {
   reasons: string[];
   scorecard: Record<string, number | string | null>;
   hints?: string[];
+  paper_ready?: boolean;
+  paper_reasons?: string[];
+  paper_scorecard?: Record<string, number | string | null>;
+  paper_thresholds?: Record<string, number | string | null>;
+  factor_id?: string | null;
+  symbol?: string | null;
+  regime?: Record<string, unknown> | null;
+  mastery?: {
+    stage: string;
+    stage_index: number;
+    total_stages: number;
+    next_action: string;
+    progress_pct: number;
+  };
   orthogonal?: {
     target_factor: string;
     control_factors: string[];

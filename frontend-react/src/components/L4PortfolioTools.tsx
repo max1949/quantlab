@@ -15,7 +15,15 @@ import type { FeatureState, PaperSimulate, PortfolioOptimize } from "../api/type
 
 const SYMBOLS = ["RB", "AU", "IF"];
 
-export default function L4PortfolioTools({ projectId }: { projectId: string }) {
+export default function L4PortfolioTools({
+  projectId,
+  paperFactorId,
+  paperSymbol,
+}: {
+  projectId: string;
+  paperFactorId?: string | null;
+  paperSymbol?: string;
+}) {
   const notify = useUi((s) => s.notify);
   const l4 = useLocale((s) => s.dict.l4Tools);
   const c = useLocale((s) => s.dict.common);
@@ -84,7 +92,9 @@ export default function L4PortfolioTools({ projectId }: { projectId: string }) {
           </div>
         </div>
       )}
-      {!locked && <PaperExecutionPanel />}
+      {!locked && (
+        <PaperExecutionPanel factorId={paperFactorId} symbol={paperSymbol} />
+      )}
     </div>
   );
 }

@@ -60,6 +60,7 @@ def list_research_templates(
                 min_tier=item["min_tier"],
                 allowed=item["allowed"],
                 lock_hint=item["lock_hint"],
+                track=item.get("track", "beginner"),
                 **teach,
             )
         )

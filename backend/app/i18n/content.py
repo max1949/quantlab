@@ -117,6 +117,96 @@ RESEARCH_TEMPLATES: dict[str, dict[Locale, dict]] = {
             "suitable_for": "L2 + 会员 · 长周期动量",
         },
     },
+    "cost-stress-rb": {
+        "en": {
+            "title": "Cost Stress Test",
+            "hypothesis": "Can short-window momentum survive realistic trading costs?",
+            "description": "Advanced playbook — learn turnover and cost sensitivity with fast momentum.",
+            "tags": ["advanced", "costs", "momentum"],
+            "suitable_for": "L1+ · cost / turnover awareness",
+            "learning_steps": [
+                "Start with short-window momentum on RB",
+                "Run parameter scan — watch turnover column",
+                "Run validation — check cost sensitivity",
+                "Pass quality gate before paper trading",
+                "Submit a small paper order and track decay",
+            ],
+        },
+        "zh": {
+            "title": "成本压力测试",
+            "hypothesis": "短周期动量能否在扣成本后仍有效?",
+            "description": "进阶 Playbook — 用短窗口动量学习换手与成本敏感性。",
+            "tags": ["进阶", "成本", "动量"],
+            "suitable_for": "L1+ · 成本与换手意识",
+            "learning_steps": [
+                "短窗口动量开局（螺纹钢 RB）",
+                "参数扫描 — 重点看换手率",
+                "科学验证 — 打开成本敏感性",
+                "通过质量闸门后再上 Paper",
+                "小额 Paper 下单并开启衰减跟踪",
+            ],
+        },
+    },
+    "regime-trend-if": {
+        "en": {
+            "title": "Regime-Aware Trend",
+            "hypothesis": "Is trend momentum more robust in low/mid volatility regimes?",
+            "description": "Advanced playbook — combine vol regime context with long momentum.",
+            "tags": ["advanced", "regime", "index"],
+            "suitable_for": "L2 + membership · regime fit",
+            "learning_steps": [
+                "Long-window momentum on IF",
+                "Read vol regime banner on project page",
+                "Validation — check regime fit score",
+                "Graduate to paper when regime fit ≥ 35",
+                "Track paper NAV and decay alerts",
+            ],
+        },
+        "zh": {
+            "title": "制度感知趋势",
+            "hypothesis": "在中低波动制度下趋势因子是否更稳健?",
+            "description": "结合波动制度与长周期动量，学习 regime 适配。",
+            "tags": ["进阶", "regime", "股指"],
+            "suitable_for": "L2 + 会员 · 市况适配",
+            "learning_steps": [
+                "长周期动量开局（股指 IF）",
+                "阅读项目页波动制度提示",
+                "验证后查看 regime 适配分",
+                "适配分 ≥ 35 再进 Paper",
+                "跟踪 Paper 净值与衰减预警",
+            ],
+        },
+    },
+    "master-oos-gold": {
+        "en": {
+            "title": "Master OOS Path",
+            "hypothesis": "Can SMA deviation pass strict out-of-sample tests on gold?",
+            "description": "Master playbook — full path from validation to paper graduation.",
+            "tags": ["master", "OOS", "precious metals"],
+            "suitable_for": "L2 + Pro · full professional workflow",
+            "learning_steps": [
+                "SMA deviation starter on AU",
+                "Backtest + full scientific validation",
+                "Pass publish gate then paper graduation bar",
+                "One-click paper order with factor linked",
+                "Publish report when tracking stays healthy",
+            ],
+        },
+        "zh": {
+            "title": "大师级 OOS 路径",
+            "hypothesis": "长周期均线偏离能否通过严格样本外检验?",
+            "description": "大师 Playbook — 完整走过验证→毕业→Paper 全流程。",
+            "tags": ["大师", "OOS", "贵金属"],
+            "suitable_for": "L2 + 专业版 · 准职业全流程",
+            "learning_steps": [
+                "均线偏离开局（黄金 AU）",
+                "回测 + 完整科学验证",
+                "通过发布线后再冲 Paper 毕业线",
+                "一键 Paper 下单（绑定因子）",
+                "跟踪健康后发布研究报告",
+            ],
+        },
+    },
 }
 
 LEARNING_STEPS_DEFAULT: dict[Locale, list[str]] = {

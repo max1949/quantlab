@@ -19,8 +19,66 @@ def test_project_quality_endpoint(client, db_session):
         q = client.get(f"{BASE}/projects/{proj['id']}/quality", headers=h).json()
         assert q["passed"] is False
         assert q["reasons"]
+        assert "paper_ready" in q
+        assert "mastery" in q
+        assert q["mastery"]["stage"] == "start"
     finally:
         settings.research_gate_enabled = False
+
+
+def test_paper_readiness_stricter_than_publish():
+    from engine.research_quality import assess_paper_readiness, assess_publish_readiness
+
+    metrics = {"sharpe": 0.2, "turnover": 70.0}
+    oos = {"out_of_sample": {"sharpe": 0.3}}
+    rob = {
+        "score": 56.0,
+        "grade": "中等",
+        "factor_ic": {"ic_mean": 0.03},
+        "sealed_holdout": {"metrics": {"sharpe": 0.1}},
+    }
+    pub = assess_publish_readiness(
+        backtest_metrics=metrics,
+        validation_status="success",
+        validation_oos=oos,
+        validation_robustness=rob,
+    )
+    paper = assess_paper_readiness(
+        backtest_metrics=metrics,
+        validation_status="success",
+        validation_oos=oos,
+        validation_robustness=rob,
+        regime_fit_score=30,
+    )
+    assert pub.passed is True
+    assert paper.passed is False
+    assert any("换手" in r or "turnover" in r.lower() or "适配" in r for r in paper.reasons)
+
+
+def test_mastery_stage_progression():
+    from backend.app.services.research_quality_service import compute_mastery_stage
+
+    s0 = compute_mastery_stage(
+        has_factor=True,
+        has_backtest=False,
+        has_validation=False,
+        publish_passed=False,
+        paper_passed=False,
+        is_published=False,
+    )
+    assert s0["stage"] == "start"
+    assert s0["next_action"] == "backtest"
+
+    s3 = compute_mastery_stage(
+        has_factor=True,
+        has_backtest=True,
+        has_validation=True,
+        publish_passed=True,
+        paper_passed=False,
+        is_published=False,
+    )
+    assert s3["stage"] == "graduate"
+    assert s3["next_action"] == "paper"
 
 
 def test_vnpy_import_roundtrip(db_session, tmp_path):

@@ -20,16 +20,24 @@ function isGatewayChannel(channel: string): boolean {
   return channel === "vnpy" || channel === "qmt";
 }
 
-export default function PaperExecutionPanel() {
+export default function PaperExecutionPanel({
+  factorId,
+  symbol: symbolProp,
+}: {
+  factorId?: string | null;
+  symbol?: string;
+} = {}) {
   const l4 = useLocale((s) => s.dict.l4Tools);
   const notify = useUi((s) => s.notify);
   const qc = useQueryClient();
 
-  const [symbol, setSymbol] = useState("RB");
+  const [symbol, setSymbol] = useState(symbolProp || "RB");
   const [side, setSide] = useState<"buy" | "sell">("buy");
   const [notional, setNotional] = useState("50000");
   const [channel, setChannel] = useState<ExecChannel>("paper");
   const [riskMsg, setRiskMsg] = useState("");
+
+  const effectiveSymbol = symbolProp || symbol;
 
   const config = useQuery({ queryKey: ["execution-config"], queryFn: getExecutionConfig });
   const orders = useQuery({ queryKey: ["paper-orders"], queryFn: () => listPaperOrders(10) });
@@ -37,7 +45,7 @@ export default function PaperExecutionPanel() {
   const riskCheck = useMutation({
     mutationFn: () =>
       checkExecutionRisk({
-        symbol,
+        symbol: effectiveSymbol,
         notional_cny: Number(notional),
         channel,
         acknowledge_risk: isGatewayChannel(channel),
@@ -52,11 +60,13 @@ export default function PaperExecutionPanel() {
   const submit = useMutation({
     mutationFn: () =>
       submitPaperOrder({
-        symbol,
+        symbol: effectiveSymbol,
         side,
         notional_cny: Number(notional),
         channel,
+        factor_id: factorId || undefined,
         acknowledge_risk: isGatewayChannel(channel),
+        note: factorId ? "mastery-path" : "",
       }),
     onSuccess: (o) => {
       notify(l4.execSubmitted(o.channel, o.status), "success");
@@ -85,11 +95,18 @@ export default function PaperExecutionPanel() {
   return (
     <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900/40">
       <h4 className="font-medium">{l4.execTitle}</h4>
-      <p className="mb-3 text-sm text-slate-500">{l4.execDesc}</p>
+      <p className="mb-3 text-sm text-slate-500">
+        {factorId ? l4.execDescLinked : l4.execDesc}
+      </p>
 
       <div className="mb-3 flex flex-wrap gap-2">
-        <select className="input text-sm" value={symbol} onChange={(e) => setSymbol(e.target.value)}>
-          {SYMBOLS.map((s) => (
+        <select
+          className="input text-sm"
+          value={effectiveSymbol}
+          onChange={(e) => setSymbol(e.target.value)}
+          disabled={Boolean(symbolProp)}
+        >
+          {(symbolProp ? [symbolProp] : SYMBOLS).map((s) => (
             <option key={s} value={s}>
               {s}
             </option>

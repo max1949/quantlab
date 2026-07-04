@@ -90,6 +90,7 @@ export interface Template {
   factor_note?: string;
   how_it_works?: string;
   learning_steps?: string[];
+  track?: string;
 }
 
 export interface StartTemplateResult {

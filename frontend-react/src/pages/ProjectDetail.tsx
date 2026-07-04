@@ -29,6 +29,7 @@ import L4PortfolioTools from "../components/L4PortfolioTools";
 import ValidationResultsPanel from "../components/ValidationResultsPanel";
 import BacktestResultsPanel from "../components/BacktestResultsPanel";
 import QualityCoach from "../components/QualityCoach";
+import MasteryPathPanel from "../components/MasteryPathPanel";
 import DataQualityBanner from "../components/DataQualityBanner";
 import VolRegimeBanner from "../components/VolRegimeBanner";
 import FactorCatalogPanel from "../components/FactorCatalogPanel";
@@ -181,6 +182,48 @@ export default function ProjectDetail() {
 
   function scrollToFactorLab() {
     document.getElementById("factor-lab")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function scrollToPaperExecution() {
+    document.getElementById("paper-execution")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function scrollToPaperTracking() {
+    document.getElementById("paper-tracking")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function handleMasteryAction(action: string) {
+    if (action === "backtest" && projectFactor && !done.backtest) {
+      runBacktest.mutate();
+      return;
+    }
+    if (
+      (action === "validate" || action === "validation") &&
+      projectFactor &&
+      done.backtest &&
+      !done.validation
+    ) {
+      runValidation.mutate();
+      return;
+    }
+    if (action === "graduate") {
+      document.getElementById("mastery-quality")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    if (action === "paper") {
+      scrollToPaperExecution();
+      return;
+    }
+    if (action === "track") {
+      scrollToPaperTracking();
+      return;
+    }
+    if (action === "share" || action === "publish") {
+      if (quality.data?.passed && !done.publish) publish.mutate();
+      else scrollToFactorLab();
+      return;
+    }
+    scrollToFactorLab();
   }
 
   const proj = project.data!;
@@ -368,7 +411,12 @@ export default function ProjectDetail() {
       )}
 
       {quality.data && (
+        <MasteryPathPanel quality={quality.data} onAction={handleMasteryAction} />
+      )}
+
+      {quality.data && (
         <div
+          id="mastery-quality"
           className={`mb-6 card border ${
             quality.data.passed
               ? "border-emerald-200 bg-emerald-50/40 dark:border-emerald-900 dark:bg-emerald-950/30"
@@ -541,15 +589,19 @@ export default function ProjectDetail() {
         />
       </div>
 
-      <div className="mt-4">
+      <div className="mt-4" id="paper-tracking">
         <PaperTrackingPanel
           factorId={projectFactor?.id ?? null}
           enabled={done.validation}
         />
       </div>
 
-      <div className="mt-4">
-        <L4PortfolioTools projectId={id} />
+      <div className="mt-4" id="paper-execution">
+        <L4PortfolioTools
+          projectId={id}
+          paperFactorId={quality.data?.paper_ready ? quality.data.factor_id ?? projectFactor?.id : projectFactor?.id}
+          paperSymbol={quality.data?.symbol ?? symbol}
+        />
       </div>
 
       <p className="mt-6 text-sm text-slate-400">

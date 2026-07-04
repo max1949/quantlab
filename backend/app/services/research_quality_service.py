@@ -10,8 +10,16 @@ from sqlalchemy.orm import Session
 from backend.app.core.config import get_settings
 from backend.app.models.backtest import Backtest, BacktestStatus
 from backend.app.models.factor import Factor
+from backend.app.models.project import ProjectStatus, ResearchProject
+from backend.app.models.user import User
 from backend.app.models.validation import Validation, ValidationStatus
-from engine.research_quality import QualityThresholds, QualityVerdict, assess_publish_readiness
+from engine.research_quality import (
+    PaperThresholds,
+    QualityThresholds,
+    QualityVerdict,
+    assess_paper_readiness,
+    assess_publish_readiness,
+)
 
 
 class ResearchQualityError(Exception):
@@ -63,6 +71,116 @@ def _representative_factor_id(db: Session, project_id: uuid.UUID) -> uuid.UUID |
         if _latest_success_backtest(db, f.id):
             return f.id
     return factors[0].id
+
+
+def _paper_thresholds() -> PaperThresholds:
+    s = get_settings()
+    if not s.research_gate_enabled:
+        return PaperThresholds(
+            min_oos_sharpe=-999.0,
+            min_robustness_score=-999.0,
+            min_backtest_sharpe=-999.0,
+            require_sealed_holdout_positive=False,
+            min_sealed_holdout_sharpe=-999.0,
+            max_turnover=None,
+            min_abs_ic=None,
+            min_regime_fit_score=-999,
+            allowed_robustness_grades=frozenset({"稳健", "中等", "偏弱", "脆弱"}),
+        )
+    grades = frozenset(
+        g.strip() for g in s.publish_min_robustness_grades.split(",") if g.strip()
+    ) or frozenset({"稳健", "中等"})
+    return PaperThresholds(
+        min_oos_sharpe=max(s.publish_min_oos_sharpe, 0.25),
+        min_robustness_score=max(s.publish_min_robustness_score, 55.0),
+        min_backtest_sharpe=max(s.publish_min_backtest_sharpe, 0.1),
+        require_sealed_holdout_positive=s.publish_require_sealed_holdout,
+        min_sealed_holdout_sharpe=s.publish_min_sealed_holdout_sharpe,
+        max_turnover=60.0 if s.publish_max_turnover <= 0 else min(s.publish_max_turnover, 60.0),
+        min_abs_ic=s.publish_min_abs_ic if s.publish_min_abs_ic > 0 else 0.02,
+        allowed_robustness_grades=grades,
+        min_regime_fit_score=35,
+    )
+
+
+def paper_thresholds_payload() -> dict:
+    th = _paper_thresholds()
+    return {
+        "min_oos_sharpe": th.min_oos_sharpe,
+        "min_robustness_score": th.min_robustness_score,
+        "min_backtest_sharpe": th.min_backtest_sharpe,
+        "min_sealed_holdout_sharpe": th.min_sealed_holdout_sharpe,
+        "max_turnover": th.max_turnover,
+        "min_abs_ic": th.min_abs_ic,
+        "min_regime_fit_score": th.min_regime_fit_score,
+        "allowed_robustness_grades": sorted(th.allowed_robustness_grades),
+    }
+
+
+def assess_factor_paper(db: Session, factor_id: uuid.UUID, *, regime_fit_score: int | None = None) -> QualityVerdict:
+    bt = _latest_success_backtest(db, factor_id)
+    val = _latest_success_validation(db, factor_id)
+    return assess_paper_readiness(
+        backtest_metrics=bt.metrics if bt else None,
+        validation_status=val.status if val else None,
+        validation_oos=val.oos if val else None,
+        validation_robustness=val.robustness if val else None,
+        regime_fit_score=regime_fit_score,
+        thresholds=_paper_thresholds(),
+    )
+
+
+def compute_mastery_stage(
+    *,
+    has_factor: bool,
+    has_backtest: bool,
+    has_validation: bool,
+    publish_passed: bool,
+    paper_passed: bool,
+    is_published: bool,
+) -> dict:
+    """研究大师路径 — 告诉用户当前阶段与下一步。"""
+    stages = [
+        ("start", "start", 0),
+        ("backtest", "backtest", 1),
+        ("validate", "validation", 2),
+        ("graduate", "graduate", 3),
+        ("paper", "paper", 4),
+        ("track", "track", 5),
+        ("share", "publish", 6),
+    ]
+    if is_published:
+        current = "share"
+    elif paper_passed:
+        current = "paper"
+    elif publish_passed:
+        current = "graduate"
+    elif has_validation:
+        current = "validate"
+    elif has_backtest:
+        current = "backtest"
+    elif has_factor:
+        current = "start"
+    else:
+        current = "start"
+
+    next_map = {
+        "start": "backtest",
+        "backtest": "validate",
+        "validate": "graduate",
+        "graduate": "paper",
+        "paper": "track",
+        "track": "share",
+        "share": "share",
+    }
+    idx = next(i for i, (k, _, _) in enumerate(stages) if k == current)
+    return {
+        "stage": current,
+        "stage_index": idx,
+        "total_stages": len(stages),
+        "next_action": next_map[current],
+        "progress_pct": round((idx + (1 if current == "share" else 0)) / len(stages) * 100),
+    }
 
 
 def thresholds_payload() -> dict:
@@ -186,11 +304,63 @@ def project_quality_payload(db: Session, project_id: uuid.UUID) -> dict:
     orth = orthogonal_preview(db, project_id)
     if orth and orth.get("hint"):
         hints.append(orth["hint"])
+
+    project = db.get(ResearchProject, project_id)
+    factor_id = _representative_factor_id(db, project_id)
+    regime = None
+    regime_fit_score = None
+    if project and factor_id and project.owner_id:
+        owner = db.get(User, project.owner_id)
+        factor = db.get(Factor, factor_id)
+        if owner and factor:
+            from backend.app.services import regime_advisory
+
+            regime = regime_advisory.market_regime_for_symbol(
+                db, owner, project.symbol or "RB", "1d", factor=factor
+            )
+            if regime:
+                regime_fit_score = regime.get("fit_score")
+
+    paper_verdict = (
+        assess_factor_paper(db, factor_id, regime_fit_score=regime_fit_score)
+        if factor_id
+        else QualityVerdict(passed=False, reasons=["项目下还没有因子"], scorecard={})
+    )
+    if paper_verdict.passed:
+        hints.append("已通过模拟盘毕业线 — 可一键提交 Paper 订单并开启真实跟踪。")
+    elif paper_verdict.reasons and verdict.passed:
+        hints.append("发布线已通过，但模拟盘毕业线更严 — 请按下方 Paper 清单继续优化。")
+
+    factors = list(
+        db.execute(select(Factor.id).where(Factor.project_id == project_id)).scalars().all()
+    )
+    has_factor = bool(factors)
+    has_backtest = factor_id is not None and _latest_success_backtest(db, factor_id) is not None
+    has_validation = factor_id is not None and _latest_success_validation(db, factor_id) is not None
+    is_published = project is not None and project.status == ProjectStatus.PUBLISHED.value
+
+    mastery = compute_mastery_stage(
+        has_factor=has_factor,
+        has_backtest=has_backtest,
+        has_validation=has_validation,
+        publish_passed=verdict.passed,
+        paper_passed=paper_verdict.passed,
+        is_published=is_published,
+    )
+
     return {
         "passed": verdict.passed,
         "reasons": verdict.reasons,
         "scorecard": verdict.scorecard,
         "thresholds": thresholds_payload(),
+        "paper_ready": paper_verdict.passed,
+        "paper_reasons": paper_verdict.reasons,
+        "paper_scorecard": paper_verdict.scorecard,
+        "paper_thresholds": paper_thresholds_payload(),
+        "factor_id": str(factor_id) if factor_id else None,
+        "symbol": project.symbol if project else None,
+        "regime": regime,
+        "mastery": mastery,
         "hints": hints,
         "orthogonal": orth,
     }

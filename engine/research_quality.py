@@ -185,3 +185,46 @@ def assess_publish_readiness(
         "ic_mean": ic_mean,
     }
     return QualityVerdict(passed=len(reasons) == 0, reasons=reasons, scorecard=scorecard)
+
+
+@dataclass(frozen=True)
+class PaperThresholds(QualityThresholds):
+    """模拟实盘毕业线 — 略高于发布线, 强调成本与市况适配。"""
+
+    min_oos_sharpe: float = 0.25
+    min_robustness_score: float = 55.0
+    min_backtest_sharpe: float = 0.1
+    require_sealed_holdout_positive: bool = True
+    min_sealed_holdout_sharpe: float = 0.0
+    max_turnover: float = 60.0
+    min_abs_ic: float | None = 0.02
+    allowed_robustness_grades: frozenset[str] = frozenset({"稳健", "中等"})
+    min_regime_fit_score: int = 35
+
+
+def assess_paper_readiness(
+    *,
+    backtest_metrics: dict | None,
+    validation_status: str | None,
+    validation_oos: dict | None,
+    validation_robustness: dict | None,
+    regime_fit_score: int | None = None,
+    thresholds: PaperThresholds | None = None,
+) -> QualityVerdict:
+    """判断因子是否达到「可上模拟盘」标准。"""
+    th = thresholds or PaperThresholds()
+    verdict = assess_publish_readiness(
+        backtest_metrics=backtest_metrics,
+        validation_status=validation_status,
+        validation_oos=validation_oos,
+        validation_robustness=validation_robustness,
+        thresholds=th,
+    )
+    reasons = list(verdict.reasons)
+    if regime_fit_score is not None and int(regime_fit_score) < th.min_regime_fit_score:
+        reasons.append(
+            f"当前市况适配分 {int(regime_fit_score)} 低于模拟盘建议线 "
+            f"{th.min_regime_fit_score}（策略与波动制度可能不匹配）"
+        )
+    scorecard = {**verdict.scorecard, "regime_fit_score": regime_fit_score}
+    return QualityVerdict(passed=len(reasons) == 0, reasons=reasons, scorecard=scorecard)
