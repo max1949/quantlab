@@ -59,7 +59,14 @@ export default function MasteryPathPanel({ quality, onAction }: Props) {
         </p>
       )}
 
-      {quality.paper_ready ? (
+      {quality.paper_ready && mastery.stage === "track" ? (
+        <div className="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900 dark:border-brand-800 dark:bg-brand-950/40 dark:text-brand-100">
+          <p className="font-medium">{m.trackReady}</p>
+          <button type="button" className="btn mt-2 text-xs" onClick={() => onAction("track")}>
+            {m.trackCta}
+          </button>
+        </div>
+      ) : quality.paper_ready ? (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100">
           <p className="font-medium">{m.paperReady}</p>
           <button type="button" className="btn-primary mt-2 text-xs" onClick={() => onAction("paper")}>

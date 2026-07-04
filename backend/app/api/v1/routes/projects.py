@@ -79,12 +79,13 @@ def get_project(
 def project_quality(
     project_id: str,
     current_user: CurrentUser,
+    locale: RequestLocale,
     db: Annotated[Session, Depends(get_db)],
 ) -> dict:
     from backend.app.services import research_quality_service as rq
 
     project_service.get_owned_project(db, current_user.id, uuid.UUID(project_id))
-    return rq.project_quality_payload(db, uuid.UUID(project_id))
+    return rq.project_quality_payload(db, uuid.UUID(project_id), locale=locale)
 
 
 @router.post("/{project_id}/publish", response_model=PublishProjectOut, summary="发布项目到研究 Feed")

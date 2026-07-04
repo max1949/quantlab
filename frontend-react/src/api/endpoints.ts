@@ -189,6 +189,7 @@ export interface ProjectQuality {
     next_action: string;
     progress_pct: number;
   };
+  coaching_tips?: Array<{ title: string; tip: string; action: string }>;
   orthogonal?: {
     target_factor: string;
     control_factors: string[];

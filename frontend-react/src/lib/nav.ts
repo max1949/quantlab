@@ -14,6 +14,7 @@ export function stageToRoute(
     case "create_factor":
     case "run_backtest":
     case "run_validation":
+    case "run_paper":
     case "generate_report":
     case "publish_share":
       return activeProjectId ? `/projects/${activeProjectId}` : "/projects";

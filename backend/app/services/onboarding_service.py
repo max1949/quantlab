@@ -6,6 +6,8 @@
 
 from __future__ import annotations
 
+import uuid
+
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -73,6 +75,22 @@ def _stage(db: Session, user: User) -> str:
     )
     if val == 0:
         return "run_validation"
+    active_id = _active_project_id(db, user)
+    if active_id:
+        from backend.app.services import research_quality_service as rqs
+
+        q = rqs.project_quality_payload(db, active_id)
+        if q.get("paper_ready") and q.get("factor_id"):
+            from backend.app.models.execution import PaperOrder
+
+            fid = uuid.UUID(q["factor_id"])
+            has_po = db.execute(
+                select(PaperOrder.id).where(
+                    PaperOrder.user_id == uid, PaperOrder.factor_id == fid
+                ).limit(1)
+            ).first()
+            if not has_po:
+                return "run_paper"
     reports = _count(db, select(func.count(ResearchReport.id)).where(ResearchReport.owner_id == uid))
     if reports == 0:
         return "generate_report"
@@ -97,6 +115,7 @@ def next_step(db: Session, user: User, locale: Locale = "en") -> dict:
         "create_factor",
         "run_backtest",
         "run_validation",
+        "run_paper",
         "generate_report",
         "publish_share",
     }
@@ -108,6 +127,7 @@ def next_step(db: Session, user: User, locale: Locale = "en") -> dict:
             "create_factor": "/projects",
             "run_backtest": "/projects",
             "run_validation": "/projects",
+            "run_paper": "/projects",
             "generate_report": "/dashboard",
             "publish_share": "/dashboard",
             "keep_going": "/feed",

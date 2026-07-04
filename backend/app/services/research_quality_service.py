@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from backend.app.core.config import get_settings
 from backend.app.models.backtest import Backtest, BacktestStatus
 from backend.app.models.factor import Factor
+from backend.app.models.execution import PaperOrder
 from backend.app.models.project import ProjectStatus, ResearchProject
 from backend.app.models.user import User
 from backend.app.models.validation import Validation, ValidationStatus
@@ -137,6 +138,7 @@ def compute_mastery_stage(
     has_validation: bool,
     publish_passed: bool,
     paper_passed: bool,
+    has_paper_order: bool,
     is_published: bool,
 ) -> dict:
     """研究大师路径 — 告诉用户当前阶段与下一步。"""
@@ -151,6 +153,8 @@ def compute_mastery_stage(
     ]
     if is_published:
         current = "share"
+    elif paper_passed and has_paper_order:
+        current = "track"
     elif paper_passed:
         current = "paper"
     elif publish_passed:
@@ -298,7 +302,21 @@ def orthogonal_preview(db: Session, project_id: uuid.UUID) -> dict | None:
     }
 
 
-def project_quality_payload(db: Session, project_id: uuid.UUID) -> dict:
+def _has_paper_order(db: Session, user_id: uuid.UUID, factor_id: uuid.UUID | None) -> bool:
+    if factor_id is None:
+        return False
+    return (
+        db.execute(
+            select(PaperOrder.id).where(
+                PaperOrder.user_id == user_id,
+                PaperOrder.factor_id == factor_id,
+            ).limit(1)
+        ).first()
+        is not None
+    )
+
+
+def project_quality_payload(db: Session, project_id: uuid.UUID, *, locale: str = "zh") -> dict:
     verdict = assess_project(db, project_id)
     hints: list[str] = []
     orth = orthogonal_preview(db, project_id)
@@ -338,6 +356,9 @@ def project_quality_payload(db: Session, project_id: uuid.UUID) -> dict:
     has_backtest = factor_id is not None and _latest_success_backtest(db, factor_id) is not None
     has_validation = factor_id is not None and _latest_success_validation(db, factor_id) is not None
     is_published = project is not None and project.status == ProjectStatus.PUBLISHED.value
+    has_paper_order = (
+        _has_paper_order(db, project.owner_id, factor_id) if project and factor_id else False
+    )
 
     mastery = compute_mastery_stage(
         has_factor=has_factor,
@@ -345,8 +366,14 @@ def project_quality_payload(db: Session, project_id: uuid.UUID) -> dict:
         has_validation=has_validation,
         publish_passed=verdict.passed,
         paper_passed=paper_verdict.passed,
+        has_paper_order=has_paper_order,
         is_published=is_published,
     )
+
+    from backend.app.services import failure_coach_service as fcs
+
+    coach_reasons = list(dict.fromkeys(verdict.reasons + paper_verdict.reasons))
+    coaching_tips = fcs.coach_from_reasons(coach_reasons, locale)  # type: ignore[arg-type]
 
     return {
         "passed": verdict.passed,
@@ -361,6 +388,7 @@ def project_quality_payload(db: Session, project_id: uuid.UUID) -> dict:
         "symbol": project.symbol if project else None,
         "regime": regime,
         "mastery": mastery,
+        "coaching_tips": coaching_tips,
         "hints": hints,
         "orthogonal": orth,
     }

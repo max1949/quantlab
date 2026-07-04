@@ -64,6 +64,7 @@ def test_mastery_stage_progression():
         has_validation=False,
         publish_passed=False,
         paper_passed=False,
+        has_paper_order=False,
         is_published=False,
     )
     assert s0["stage"] == "start"
@@ -75,10 +76,39 @@ def test_mastery_stage_progression():
         has_validation=True,
         publish_passed=True,
         paper_passed=False,
+        has_paper_order=False,
         is_published=False,
     )
     assert s3["stage"] == "graduate"
     assert s3["next_action"] == "paper"
+
+    s4 = compute_mastery_stage(
+        has_factor=True,
+        has_backtest=True,
+        has_validation=True,
+        publish_passed=True,
+        paper_passed=True,
+        has_paper_order=True,
+        is_published=False,
+    )
+    assert s4["stage"] == "track"
+
+
+def test_failure_coach_from_reasons():
+    from backend.app.services.failure_coach_service import coach_from_reasons
+
+    tips = coach_from_reasons(["样本外夏普 0.10 低于门槛 0.25", "换手率 75 超过发布门槛"], "zh")
+    assert len(tips) >= 1
+    assert any("样本外" in t["title"] or "换手" in t["title"] for t in tips)
+
+
+def test_advanced_templates_auto_seed(db_session):
+    from backend.app.services.template_service import list_templates, DEFAULT_TEMPLATES
+
+    rows = list_templates(db_session)
+    codes = {t.code for t in rows}
+    assert "cost-stress-rb" in codes
+    assert len(codes) >= len(DEFAULT_TEMPLATES)
 
 
 def test_vnpy_import_roundtrip(db_session, tmp_path):

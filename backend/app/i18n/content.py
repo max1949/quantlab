@@ -460,6 +460,16 @@ STEP_DETAIL: dict[str, dict[Locale, dict[str, str]]] = {
             "action": "用样本外 + Walk-Forward 检验因子是不是过拟合",
         },
     },
+    "run_paper": {
+        "en": {
+            "title": "Submit your first paper order",
+            "action": "You passed the paper graduation bar — link your factor and start live tracking",
+        },
+        "zh": {
+            "title": "提交第一笔 Paper 模拟单",
+            "action": "已通过 Paper 毕业线 — 绑定因子下单，开启真实跟踪",
+        },
+    },
     "generate_report": {
         "en": {
             "title": "Generate research report",

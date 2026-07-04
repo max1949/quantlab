@@ -148,9 +148,15 @@ def seed_default_templates(db: Session) -> dict:
 
 
 def list_templates(db: Session) -> list[ResearchTemplate]:
-    return list(
+    rows = list(
         db.execute(select(ResearchTemplate).order_by(ResearchTemplate.created_at.asc())).scalars().all()
     )
+    if len(rows) < len(DEFAULT_TEMPLATES):
+        seed_default_templates(db)
+        rows = list(
+            db.execute(select(ResearchTemplate).order_by(ResearchTemplate.created_at.asc())).scalars().all()
+        )
+    return rows
 
 
 def access_for(user: User, code: str, tier: int, locale: Locale = "en") -> dict:

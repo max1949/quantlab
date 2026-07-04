@@ -30,6 +30,7 @@ import ValidationResultsPanel from "../components/ValidationResultsPanel";
 import BacktestResultsPanel from "../components/BacktestResultsPanel";
 import QualityCoach from "../components/QualityCoach";
 import MasteryPathPanel from "../components/MasteryPathPanel";
+import FailureCoachPanel from "../components/FailureCoachPanel";
 import DataQualityBanner from "../components/DataQualityBanner";
 import VolRegimeBanner from "../components/VolRegimeBanner";
 import FactorCatalogPanel from "../components/FactorCatalogPanel";
@@ -414,6 +415,10 @@ export default function ProjectDetail() {
         <MasteryPathPanel quality={quality.data} onAction={handleMasteryAction} />
       )}
 
+      {quality.data && quality.data.coaching_tips && quality.data.coaching_tips.length > 0 && (
+        <FailureCoachPanel tips={quality.data.coaching_tips} onAction={handleMasteryAction} />
+      )}
+
       {quality.data && (
         <div
           id="mastery-quality"
@@ -599,8 +604,8 @@ export default function ProjectDetail() {
       <div className="mt-4" id="paper-execution">
         <L4PortfolioTools
           projectId={id}
-          paperFactorId={quality.data?.paper_ready ? quality.data.factor_id ?? projectFactor?.id : projectFactor?.id}
-          paperSymbol={quality.data?.symbol ?? symbol}
+          paperFactorId={quality.data?.paper_ready ? (quality.data.factor_id ?? projectFactor?.id) : undefined}
+          paperSymbol={quality.data?.paper_ready ? (quality.data.symbol ?? symbol) : undefined}
         />
       </div>
 
