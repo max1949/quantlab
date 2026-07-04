@@ -54,6 +54,7 @@ import type {
   ShareCardPublic,
   ShareOut,
   Template,
+  TemplateRegimePicks,
   Token,
   User,
   UserType,
@@ -131,6 +132,13 @@ export async function getMentor(): Promise<Mentor> {
 // ---- templates ----
 export async function listTemplates(): Promise<Template[]> {
   const { data } = await api.get<Template[]>("/research/templates");
+  return data;
+}
+
+export async function getTemplateRegimePicks(symbol = "RB"): Promise<TemplateRegimePicks> {
+  const { data } = await api.get<TemplateRegimePicks>("/research/templates/regime-picks", {
+    params: { symbol },
+  });
   return data;
 }
 

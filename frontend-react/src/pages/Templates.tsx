@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { listTemplates, startTemplate, trackEvent } from "../api/endpoints";
+import { listTemplates, getTemplateRegimePicks, startTemplate, trackEvent } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
 import { useUi } from "../store/ui";
 import { useFlow } from "../store/flow";
@@ -20,6 +20,13 @@ export default function Templates() {
   const [starting, setStarting] = useState<string | null>(null);
 
   const templates = useQuery({ queryKey: ["templates"], queryFn: listTemplates });
+  const regimePicks = useQuery({
+    queryKey: ["template-regime-picks"],
+    queryFn: () => getTemplateRegimePicks("RB"),
+  });
+
+  const recommendedCodes = new Set(regimePicks.data?.picks.map((p) => p.code) ?? []);
+  const pickByCode = Object.fromEntries((regimePicks.data?.picks ?? []).map((p) => [p.code, p]));
 
   const start = useMutation({
     mutationFn: (code: string) => startTemplate(code, true),
@@ -48,6 +55,38 @@ export default function Templates() {
         </ol>
       </div>
 
+      {regimePicks.data && (regimePicks.data.picks.length > 0 || regimePicks.data.coach_hint) && (
+        <div className="mb-6 rounded-xl border border-violet-200 bg-violet-50/50 p-4 dark:border-violet-900 dark:bg-violet-950/30">
+          <p className="font-medium text-violet-900 dark:text-violet-100">
+            {regimePicks.data.regime_label
+              ? t.regimePickTitle(regimePicks.data.regime_label, regimePicks.data.symbol)
+              : t.regimePickFallback}
+          </p>
+          <p className="mt-1 text-sm text-violet-800/90 dark:text-violet-200/90">
+            {regimePicks.data.coach_hint}
+          </p>
+          {regimePicks.data.picks.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {regimePicks.data.picks.map((pick) => (
+                <button
+                  key={pick.code}
+                  type="button"
+                  className="rounded-lg border border-violet-300 bg-white px-3 py-2 text-left text-xs transition hover:border-brand-400 dark:border-violet-800 dark:bg-slate-900"
+                  onClick={() => {
+                    document.getElementById(`tpl-${pick.code}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  }}
+                >
+                  <span className="font-semibold text-slate-800 dark:text-slate-100">{pick.title}</span>
+                  <span className="ml-2 text-violet-700 dark:text-violet-300">
+                    {t.regimeFit(pick.fit_verdict, pick.fit_score)}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {templates.isLoading ? (
         <Spinner />
       ) : templates.isError ? (
@@ -65,10 +104,18 @@ export default function Templates() {
             return (
               <div
                 key={tpl.code}
+                id={`tpl-${tpl.code}`}
                 className={`card relative flex flex-col ${
                   focus === tpl.code ? "ring-2 ring-brand-400" : ""
-                } ${locked ? "opacity-90" : ""}`}
+                } ${locked ? "opacity-90" : ""} ${
+                  recommendedCodes.has(tpl.code) ? "ring-2 ring-violet-300 dark:ring-violet-800" : ""
+                }`}
               >
+                {recommendedCodes.has(tpl.code) && (
+                  <span className="absolute left-3 top-3 rounded-full bg-violet-600 px-2 py-0.5 text-[10px] font-medium text-white">
+                    {t.regimeRecommended}
+                  </span>
+                )}
                 {locked && (
                   <span className="absolute right-3 top-3 rounded-full bg-slate-800 px-2 py-0.5 text-xs text-white dark:bg-slate-700">
                     🔒 {c.locked}
@@ -96,6 +143,13 @@ export default function Templates() {
                 {tpl.suitable_for && (
                   <p className="mt-2 text-xs font-medium text-brand-600 dark:text-brand-400">
                     {t.suitableFor}: {tpl.suitable_for}
+                  </p>
+                )}
+                {pickByCode[tpl.code] && (
+                  <p className="mt-1 text-xs text-violet-700 dark:text-violet-300">
+                    {t.regimeFit(pickByCode[tpl.code].fit_verdict, pickByCode[tpl.code].fit_score)}
+                    {" · "}
+                    {pickByCode[tpl.code].fit_hint}
                   </p>
                 )}
                 <p className="mt-2 flex-1 text-sm text-slate-500">{tpl.description}</p>

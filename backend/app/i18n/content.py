@@ -502,6 +502,31 @@ MASTERY_GOAL_HINT: dict[Locale, dict[str, str]] = {
     },
 }
 
+REGIME_LABEL: dict[Locale, dict[str, str]] = {
+    "en": {"low": "Low volatility", "mid": "Mid volatility", "high": "High volatility"},
+    "zh": {"low": "低波动", "mid": "中等波动", "high": "高波动"},
+}
+
+REGIME_COACH: dict[Locale, dict[str, str]] = {
+    "en": {
+        "high": "High-vol regime — mean-reversion / RSI templates often fit better; trend plays need tighter risk control.",
+        "low": "Low-vol regime — momentum may lag; volatility or patience for regime shifts can help.",
+        "mid": "Mid-vol regime — most starter templates are fair game; still run OOS validation.",
+        "unavailable": "Market data not ready — pick any beginner template to start your mastery path.",
+    },
+    "zh": {
+        "high": "高波动制度 — 均值回归 / RSI 类模板往往更合拍；趋势策略注意回撤与成本。",
+        "low": "低波动制度 — 突破动量信号偏弱，可关注波动率模板或等待制度切换。",
+        "mid": "中等波动 — 大部分入门模板都值得一试，仍建议做样本外验证。",
+        "unavailable": "行情数据暂不可用 — 任选入门模板即可开始大师路径。",
+    },
+}
+
+FIT_VERDICT_LABEL: dict[Locale, dict[str, str]] = {
+    "en": {"适合": "Good fit", "一般": "Moderate", "谨慎": "Caution"},
+    "zh": {"适合": "适合", "一般": "一般", "谨慎": "谨慎"},
+}
+
 JOURNEY_STEPS: dict[Locale, dict[str, str]] = {
     "en": {
         "template": "Pick template",

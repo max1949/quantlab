@@ -20,6 +20,7 @@ from backend.app.schemas.growth import (
     StartTemplateRequest,
     StartTemplateResult,
     TemplateOut,
+    TemplateRegimePicksOut,
 )
 from backend.app.schemas.research import (
     GenerateReportRequest,
@@ -65,6 +66,23 @@ def list_research_templates(
             )
         )
     return out
+
+
+@router.get(
+    "/templates/regime-picks",
+    response_model=TemplateRegimePicksOut,
+    summary="按波动制度推荐研究模板",
+)
+def template_regime_picks(
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+    locale: RequestLocale,
+    symbol: str = Query("RB", min_length=1, max_length=16),
+) -> TemplateRegimePicksOut:
+    tier = ms.current_tier(db, current_user)
+    return TemplateRegimePicksOut(
+        **template_service.regime_template_picks(db, current_user, tier, locale, symbol=symbol)
+    )
 
 
 @router.post(

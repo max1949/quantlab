@@ -51,6 +51,75 @@ TEMPLATE_TRACK: dict[str, str] = {
 def template_track(code: str) -> str:
     return TEMPLATE_TRACK.get(code, "beginner")
 
+
+def regime_template_picks(
+    db: Session,
+    user: User,
+    tier: int,
+    locale: Locale = "en",
+    *,
+    symbol: str = "RB",
+) -> dict:
+    """按当前波动制度为已解锁模板打分, 返回 Top 3 推荐 (孵化指引)。"""
+    from engine.regime_strategy import infer_strategy_style, score_regime_fit
+
+    from backend.app.services import regime_advisory
+
+    regime_data = regime_advisory.market_regime_for_symbol(db, user, symbol, "1d")
+    labels = i18n.REGIME_LABEL.get(locale) or i18n.REGIME_LABEL["en"]
+    coach_pack = i18n.REGIME_COACH.get(locale) or i18n.REGIME_COACH["en"]
+    verdict_map = i18n.FIT_VERDICT_LABEL.get(locale) or i18n.FIT_VERDICT_LABEL["en"]
+
+    if regime_data is None:
+        return {
+            "symbol": symbol,
+            "regime": None,
+            "regime_label": None,
+            "coach_hint": coach_pack["unavailable"],
+            "picks": [],
+        }
+
+    regime = str(regime_data.get("regime") or "mid")
+    coach_hint = coach_pack.get(regime) or coach_pack["mid"]
+
+    scored: list[dict] = []
+    for item in list_templates_for_user(db, user, tier, locale):
+        if not item["allowed"]:
+            continue
+        t = item["template"]
+        style = infer_strategy_style(template_type=t.factor_template)
+        fit = score_regime_fit(regime, style)
+        loc = item["localized"]
+        verdict_zh = fit.get("fit_verdict") or "一般"
+        scored.append(
+            {
+                "code": t.code,
+                "title": loc["title"],
+                "symbol": t.symbol,
+                "fit_score": int(fit.get("fit_score") or 0),
+                "fit_verdict": verdict_map.get(verdict_zh, verdict_zh),
+                "fit_hint": fit.get("fit_hint") or "",
+                "allowed": True,
+                "track": item["track"],
+            }
+        )
+
+    scored.sort(key=lambda x: (-x["fit_score"], 0 if x["track"] == "beginner" else 1))
+    picks = []
+    for row in scored[:3]:
+        hint = row["fit_hint"]
+        if locale == "en":
+            hint = f"{row['fit_verdict']} · score {row['fit_score']}/100"
+        picks.append({**row, "fit_hint": hint})
+    return {
+        "symbol": symbol,
+        "regime": regime,
+        "regime_label": labels.get(regime, regime),
+        "coach_hint": coach_hint,
+        "picks": picks,
+    }
+
+
 DEFAULT_TEMPLATES = [
     {
         "code": "gold-trend", "title": "黄金趋势研究", "symbol": "AU",

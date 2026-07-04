@@ -89,6 +89,25 @@ class TemplateOut(BaseModel):
     learning_steps: list[str] = Field(default_factory=list)
 
 
+class TemplateRegimePickOut(BaseModel):
+    code: str
+    title: str
+    symbol: str
+    fit_score: int
+    fit_verdict: str
+    fit_hint: str
+    allowed: bool
+    track: str = "beginner"
+
+
+class TemplateRegimePicksOut(BaseModel):
+    symbol: str
+    regime: str | None = None
+    regime_label: str | None = None
+    coach_hint: str = ""
+    picks: list[TemplateRegimePickOut] = Field(default_factory=list)
+
+
 class StartTemplateRequest(BaseModel):
     with_factor: bool = True
 

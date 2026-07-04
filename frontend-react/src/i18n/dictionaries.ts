@@ -334,6 +334,11 @@ const en = {
     trackBeginner: "Beginner",
     trackAdvanced: "Advanced",
     trackMaster: "Master",
+    regimePickTitle: (regime: string, symbol: string) =>
+      `Regime pick · ${symbol} is in ${regime} — templates that fit today`,
+    regimePickFallback: "Regime-based template picks",
+    regimeRecommended: "Regime pick",
+    regimeFit: (verdict: string, score: number) => `${verdict} · ${score}`,
   },
   masteryPath: {
     title: "Mastery path",
@@ -1466,6 +1471,11 @@ const zh = {
     trackBeginner: "入门",
     trackAdvanced: "进阶",
     trackMaster: "大师",
+    regimePickTitle: (regime: string, symbol: string) =>
+      `制度推荐 · ${symbol} 当前${regime}，以下模板更合拍`,
+    regimePickFallback: "按行情制度推荐模板",
+    regimeRecommended: "制度推荐",
+    regimeFit: (verdict: string, score: number) => `${verdict} · ${score}分`,
   },
   masteryPath: {
     title: "大师成长路径",

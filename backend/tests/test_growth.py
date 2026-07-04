@@ -181,6 +181,26 @@ def test_template_unknown_404(client, db_session):
     assert client.post(f"{BASE}/research/templates/nope/start", headers=h, json={}).status_code == 404
 
 
+def test_template_regime_picks(client, db_session):
+    from backend.app.services.market_data import seed_sample_market_data
+    from backend.app.services.template_service import seed_default_templates
+
+    seed_sample_market_data(db_session)
+    seed_default_templates(db_session)
+    h = _register(client, "regpick")
+    picks = client.get(f"{BASE}/research/templates/regime-picks", headers=h).json()
+    assert picks["symbol"] == "RB"
+    assert "coach_hint" in picks
+    assert isinstance(picks["picks"], list)
+    if picks["regime"]:
+        assert picks["regime_label"]
+        assert len(picks["picks"]) <= 3
+        if picks["picks"]:
+            first = picks["picks"][0]
+            assert "fit_score" in first
+            assert "code" in first
+
+
 # ---------------- 分享卡片 ----------------
 
 def test_share_card_public(client, db_session):

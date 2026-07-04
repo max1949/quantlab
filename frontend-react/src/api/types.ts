@@ -122,6 +122,25 @@ export interface Template {
   track?: string;
 }
 
+export interface TemplateRegimePick {
+  code: string;
+  title: string;
+  symbol: string;
+  fit_score: number;
+  fit_verdict: string;
+  fit_hint: string;
+  allowed: boolean;
+  track: string;
+}
+
+export interface TemplateRegimePicks {
+  symbol: string;
+  regime: string | null;
+  regime_label: string | null;
+  coach_hint: string;
+  picks: TemplateRegimePick[];
+}
+
 export interface StartTemplateResult {
   project_id: string;
   factor_id: string | null;
