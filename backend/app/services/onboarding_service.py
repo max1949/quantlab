@@ -224,6 +224,28 @@ def _mastery_goal_payload(db: Session, user: User, locale: Locale) -> dict:
         progress_pct=mastery_progress_pct,
     )
 
+    challenge_paper: list[dict] = []
+    from backend.app.services import challenge_service
+
+    ch_prog = challenge_service.progress_if_enrolled(db, user)
+    if ch_prog:
+        for m in ch_prog["milestones"]:
+            if m["code"] in ("first_paper_order", "paper_graduated"):
+                titles = i18n.MILESTONE_TITLES.get(m["code"], {})
+                title = titles.get(locale) or m["title"]
+                ms = m.get("mastery_stage") or i18n.MILESTONE_MASTERY_STAGES.get(m["code"])
+                stage_labels = i18n.MASTERY_STAGE_LABEL.get(locale) or i18n.MASTERY_STAGE_LABEL["en"]
+                challenge_paper.append(
+                    {
+                        "code": m["code"],
+                        "day": m["day"],
+                        "title": title,
+                        "completed": m["completed"],
+                        "mastery_stage": ms,
+                        "mastery_stage_label": stage_labels.get(ms, ms) if ms else None,
+                    }
+                )
+
     return {
         "paper_graduated_count": graduated,
         "paper_tracking_count": tracking,
@@ -235,6 +257,7 @@ def _mastery_goal_payload(db: Session, user: User, locale: Locale) -> dict:
         "paper_ready": paper_ready,
         "publish_ready": publish_ready,
         "hint": hint,
+        "challenge_paper_milestones": challenge_paper,
     }
 
 

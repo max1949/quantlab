@@ -62,6 +62,16 @@ export interface MasteryGoal {
   paper_ready: boolean;
   publish_ready: boolean;
   hint: string;
+  challenge_paper_milestones: ChallengePaperMilestone[];
+}
+
+export interface ChallengePaperMilestone {
+  code: string;
+  day: number;
+  title: string;
+  completed: boolean;
+  mastery_stage: string | null;
+  mastery_stage_label?: string | null;
 }
 
 export interface ResearchJourney {
@@ -780,6 +790,8 @@ export interface Milestone {
   reward_points: number;
   journey_key?: string | null;
   journey_label?: string | null;
+  mastery_stage?: string | null;
+  mastery_stage_label?: string | null;
 }
 
 export interface ChallengeProgress {

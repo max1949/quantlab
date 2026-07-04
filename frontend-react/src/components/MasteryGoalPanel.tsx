@@ -53,6 +53,22 @@ export default function MasteryGoalPanel() {
         </div>
       )}
 
+      {g.challenge_paper_milestones?.some((m) => !m.completed) && (
+        <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50/60 px-3 py-2 text-xs text-amber-900 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
+          <p className="font-medium">{d.challengePaperTitle}</p>
+          {g.challenge_paper_milestones
+            .filter((m) => !m.completed)
+            .map((m) => (
+              <p key={m.code} className="mt-1">
+                🏅 {d.challengePaperItem(m.title, m.mastery_stage_label ?? m.mastery_stage ?? "")}
+              </p>
+            ))}
+          <Link to="/challenges" className="mt-2 inline-block font-medium text-brand-600 hover:underline">
+            {d.challengePaperCta}
+          </Link>
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-2">
         {g.on_leaderboard ? (
           <Link to="/leaderboards?kind=paper_mastery" className="btn-primary text-xs">

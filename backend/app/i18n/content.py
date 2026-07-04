@@ -717,7 +717,14 @@ MILESTONE_JOURNEY_KEYS: dict[str, str] = {
     "first_factor": "factor",
     "first_oos": "validation",
     "stack_factor": "factor",
+    "first_paper_order": "publish",
+    "paper_graduated": "publish",
     "first_report": "report",
+}
+
+MILESTONE_MASTERY_STAGES: dict[str, str] = {
+    "first_paper_order": "paper",
+    "paper_graduated": "graduate",
 }
 
 MILESTONE_TITLES: dict[str, dict[Locale, str]] = {
@@ -732,6 +739,14 @@ MILESTONE_TITLES: dict[str, dict[Locale, str]] = {
     "stack_factor": {
         "en": "Create your first stack factor",
         "zh": "创建第一个组合因子",
+    },
+    "first_paper_order": {
+        "en": "Submit your first paper order",
+        "zh": "下第一笔 Paper 模拟单",
+    },
+    "paper_graduated": {
+        "en": "Pass the paper quality gate",
+        "zh": "因子通过 Paper 毕业线",
     },
     "first_report": {
         "en": "Publish your first research report",
@@ -820,6 +835,11 @@ def localize_progress(progress: dict, locale: Locale) -> dict:
             m2["journey_key"] = jk
             labels = JOURNEY_STEPS.get(locale) or JOURNEY_STEPS["en"]
             m2["journey_label"] = labels.get(jk, jk)
+        ms = m.get("mastery_stage") or MILESTONE_MASTERY_STAGES.get(mc or "")
+        if ms:
+            m2["mastery_stage"] = ms
+            stage_labels = MASTERY_STAGE_LABEL.get(locale) or MASTERY_STAGE_LABEL["en"]
+            m2["mastery_stage_label"] = stage_labels.get(ms, ms)
         loc_ms.append(m2)
     out["milestones"] = loc_ms
     return out

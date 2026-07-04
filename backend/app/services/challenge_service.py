@@ -13,11 +13,12 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from backend.app.models.challenge import Challenge, ChallengeProgress
+from backend.app.models.execution import PaperOrder
 from backend.app.models.factor import Factor, FactorKind
 from backend.app.models.research import ResearchReport
 from backend.app.models.user import User
 from backend.app.models.validation import Validation, ValidationStatus
-from backend.app.i18n.content import MILESTONE_JOURNEY_KEYS
+from backend.app.i18n.content import MILESTONE_JOURNEY_KEYS, MILESTONE_MASTERY_STAGES
 from backend.app.services import growth_service
 
 DEFAULT_CODE = "30d-research"
@@ -25,6 +26,8 @@ DEFAULT_MILESTONES = [
     {"day": 1, "code": "first_factor", "title": "创建第一个因子", "check": "factor", "reward_points": 20},
     {"day": 7, "code": "first_oos", "title": "完成第一次科学验证 (OOS)", "check": "validation_success", "reward_points": 40},
     {"day": 15, "code": "stack_factor", "title": "创建第一个组合因子", "check": "stack_factor", "reward_points": 40},
+    {"day": 22, "code": "first_paper_order", "title": "下第一笔 Paper 模拟单", "check": "paper_order", "reward_points": 50},
+    {"day": 28, "code": "paper_graduated", "title": "因子通过 Paper 毕业线", "check": "paper_graduated", "reward_points": 80},
     {"day": 30, "code": "first_report", "title": "产出第一份研究报告", "check": "report", "reward_points": 100},
 ]
 CHALLENGE_COMPLETE_BONUS = 200  # 全部完成额外奖励
@@ -38,11 +41,27 @@ class ChallengeNotCompletedError(Exception):
     pass
 
 
+def _merge_default_milestones(db: Session, ch: Challenge) -> None:
+    """已有挑战补全 Paper 大师路径里程碑 (幂等)。"""
+    existing = {m["code"] for m in ch.milestones}
+    merged = list(ch.milestones)
+    changed = False
+    for m in DEFAULT_MILESTONES:
+        if m["code"] not in existing:
+            merged.append(dict(m))
+            changed = True
+    if changed:
+        merged.sort(key=lambda x: int(x.get("day", 0)))
+        ch.milestones = merged
+        db.commit()
+
+
 def seed_default_challenge(db: Session) -> dict:
     existing = db.execute(
         select(Challenge).where(Challenge.code == DEFAULT_CODE)
     ).scalar_one_or_none()
     if existing:
+        _merge_default_milestones(db, existing)
         return {"created": False, "code": DEFAULT_CODE, "id": str(existing.id)}
     ch = Challenge(
         code=DEFAULT_CODE,
@@ -62,6 +81,10 @@ def list_challenges(db: Session) -> list[Challenge]:
     if not rows:
         seed_default_challenge(db)
         rows = list(db.execute(select(Challenge).order_by(Challenge.created_at.asc())).scalars().all())
+    else:
+        for ch in rows:
+            if ch.code == DEFAULT_CODE:
+                _merge_default_milestones(db, ch)
     return rows
 
 
@@ -77,6 +100,8 @@ def _count(db: Session, stmt) -> int:
 
 
 def _user_stats(db: Session, uid: uuid.UUID) -> dict:
+    from backend.app.services import research_quality_service as rqs
+
     return {
         "factor": _count(db, select(func.count(Factor.id)).where(Factor.owner_id == uid)),
         "stack_factor": _count(
@@ -95,6 +120,10 @@ def _user_stats(db: Session, uid: uuid.UUID) -> dict:
         "report": _count(
             db, select(func.count(ResearchReport.id)).where(ResearchReport.owner_id == uid)
         ),
+        "paper_order": _count(
+            db, select(func.count(PaperOrder.id)).where(PaperOrder.user_id == uid)
+        ),
+        "paper_graduated": rqs.user_paper_mastery_counts(db, uid)["paper_graduated_count"],
     }
 
 
@@ -163,6 +192,7 @@ def evaluate(db: Session, user: User, code: str) -> dict:
                 "completed": done,
                 "reward_points": int(m.get("reward_points", 0)),
                 "journey_key": MILESTONE_JOURNEY_KEYS.get(m["code"]),
+                "mastery_stage": MILESTONE_MASTERY_STAGES.get(m["code"]),
             }
         )
 

@@ -417,6 +417,10 @@ const en = {
     paperCta: "Submit paper order →",
     goProject: (next: string) => `Continue: ${next} →`,
     fromTemplate: "Start from template →",
+    challengePaperTitle: "30-day challenge · Paper milestones pending",
+    challengePaperItem: (title: string, stage: string) =>
+      stage ? `${title} (mastery · ${stage})` : title,
+    challengePaperCta: "View challenge →",
   },
   stages: {
     create_project: "Start from template →",
@@ -983,6 +987,7 @@ const en = {
     claimCertLocked: "Complete all to unlock certificate",
     day: (d: number) => `Day ${d}`,
     journeyStep: (label: string) => `Research path · ${label}`,
+    masteryStep: (stage: string) => `Mastery path · ${stage}`,
   },
   profile: {
     myTitle: "My research profile",
@@ -1519,6 +1524,10 @@ const zh = {
     paperCta: "去下 Paper 单 →",
     goProject: (next: string) => `继续：${next} →`,
     fromTemplate: "从模板开局 →",
+    challengePaperTitle: "30 天挑战 · Paper 里程碑待完成",
+    challengePaperItem: (title: string, stage: string) =>
+      stage ? `${title}（大师路径 · ${stage}）` : title,
+    challengePaperCta: "查看挑战 →",
   },
   stages: {
     create_project: "从模板开始 →",
@@ -2078,6 +2087,7 @@ const zh = {
     claimCertLocked: "完成全部解锁证书",
     day: (d: number) => `第 ${d} 天`,
     journeyStep: (label: string) => `研究闭环 · ${label}`,
+    masteryStep: (stage: string) => `大师路径 · ${stage}`,
   },
   profile: {
     myTitle: "我的研究主页",

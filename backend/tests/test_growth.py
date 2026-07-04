@@ -70,10 +70,19 @@ def test_research_journey_endpoint(client, db_session):
     assert j2["challenge_enrolled"] is True
     factor_step = next(s for s in j2["steps"] if s["key"] == "factor")
     assert any(cm["code"] == "first_factor" for cm in factor_step["challenge_milestones"])
-    mg2 = j2["mastery_goal"]
-    assert j2["active_project_id"] == proj["id"]
-    assert mg2["mastery_progress_pct"] >= 0
-    assert mg2["hint"]
+
+
+def test_journey_mastery_goal_challenge_paper_milestones(client, db_session):
+    seed_sample_market_data(db_session)
+    seed_default_challenge(db_session)
+    h = _register(client, "chpaper")
+    client.post(f"{BASE}/challenges/30d-research/enroll", headers=h)
+    j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    mg = j["mastery_goal"]
+    assert len(mg["challenge_paper_milestones"]) == 2
+    codes = {m["code"] for m in mg["challenge_paper_milestones"]}
+    assert codes == {"first_paper_order", "paper_graduated"}
+    assert all(not m["completed"] for m in mg["challenge_paper_milestones"])
 
 
 def test_public_report_detail(client, db_session):

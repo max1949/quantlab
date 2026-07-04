@@ -168,6 +168,11 @@ function ProgressView({
                   {t.journeyStep(m.journey_label)}
                 </p>
               )}
+              {m.mastery_stage_label && (
+                <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                  {t.masteryStep(m.mastery_stage_label)}
+                </p>
+              )}
               <p className="text-xs text-slate-400">{t.day(m.day)}</p>
             </div>
             <span className="badge">+{m.reward_points}</span>

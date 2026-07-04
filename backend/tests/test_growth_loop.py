@@ -137,8 +137,22 @@ def test_challenge_full_completion_issues_certificate(client, db_session):
     client.post(f"{BASE}/validations", headers=h, json={"factor_id": fid, "symbol": "RB", "oos_ratio": 0.3, "n_splits": 4})
     client.post(f"{BASE}/research/reports/generate", headers=h, json={"project_id": proj["id"]})
 
+    from backend.app.models.user import User
+    from backend.app.services import membership_service as ms
+
+    user = db_session.query(User).filter(User.username == "danr").one()
+    user.level = UserLevel.L4.value
+    db_session.commit()
+    ms.grant(db_session, user, ms.TIER_PRO, 30, "pro_monthly")
+
+    client.post(
+        f"{BASE}/execution/paper/orders",
+        headers=h,
+        json={"symbol": "RB", "side": "buy", "notional_cny": 50000, "factor_id": fid},
+    )
+
     prog = client.get(f"{BASE}/challenges/30d-research/progress", headers=h).json()
-    assert prog["completed_count"] == 4
+    assert prog["completed_count"] == 6
     assert prog["certificate_code"] is not None
     # 证书可领取
     cert = client.get(f"{BASE}/challenges/30d-research/certificate", headers=h).json()

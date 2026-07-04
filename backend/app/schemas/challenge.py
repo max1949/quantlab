@@ -27,6 +27,8 @@ class MilestoneStatus(BaseModel):
     reward_points: int = 0
     journey_key: str | None = None
     journey_label: str | None = None
+    mastery_stage: str | None = None
+    mastery_stage_label: str | None = None
 
 
 class ProgressOut(BaseModel):

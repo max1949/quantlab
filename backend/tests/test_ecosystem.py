@@ -72,7 +72,7 @@ def test_challenge_progress_auto(client, db_session):
 
     # 报名时还没产物 -> 0 完成
     prog = client.post(f"{BASE}/challenges/30d-research/enroll", headers=h).json()
-    assert prog["total"] == 4
+    assert prog["total"] == 6
     assert prog["completed_count"] == 0
 
     # 造因子 -> first_factor 自动完成
@@ -88,6 +88,48 @@ def test_challenge_progress_auto(client, db_session):
     first_ms = next(m for m in prog["milestones"] if m["code"] == "first_factor")
     assert first_ms.get("journey_key") == "factor"
     assert first_ms.get("journey_label")
+
+
+def test_challenge_paper_milestones_auto(client, db_session):
+    from backend.app.models.user import User, UserLevel
+    from backend.app.services import membership_service as ms
+    from sqlalchemy import select
+
+    seed_sample_market_data(db_session)
+    seed_default_challenge(db_session)
+    h = _register(client, "paperch")
+    user = db_session.execute(select(User).where(User.username == "paperch")).scalar_one()
+    user.level = UserLevel.L4.value
+    db_session.commit()
+    ms.grant(db_session, user, ms.TIER_PRO, 30, "pro_monthly")
+
+    client.post(f"{BASE}/challenges/30d-research/enroll", headers=h)
+    proj = client.post(f"{BASE}/projects", headers=h, json={"title": "p", "symbol": "RB"}).json()
+    fid = client.post(
+        f"{BASE}/factors/template",
+        headers=h,
+        json={"name": "m", "template_type": "momentum", "params": {"window": 20}, "project_id": proj["id"]},
+    ).json()["id"]
+    client.post(f"{BASE}/backtests", headers=h, json={"factor_id": fid, "symbol": "RB"})
+    client.post(f"{BASE}/validations", headers=h, json={"factor_id": fid, "symbol": "RB", "oos_ratio": 0.3, "n_splits": 4})
+
+    prog = client.get(f"{BASE}/challenges/30d-research/progress", headers=h).json()
+    done_before = {m["code"] for m in prog["milestones"] if m["completed"]}
+    assert "paper_graduated" in done_before
+
+    created = client.post(
+        f"{BASE}/execution/paper/orders",
+        headers=h,
+        json={"symbol": "RB", "side": "buy", "notional_cny": 50000, "factor_id": fid},
+    )
+    assert created.status_code == 201, created.text
+
+    prog2 = client.get(f"{BASE}/challenges/30d-research/progress", headers=h).json()
+    done = {m["code"] for m in prog2["milestones"] if m["completed"]}
+    assert "first_paper_order" in done
+    paper_ms = next(m for m in prog2["milestones"] if m["code"] == "first_paper_order")
+    assert paper_ms.get("mastery_stage") == "paper"
+    assert paper_ms.get("mastery_stage_label")
 
 
 def test_challenge_list_and_unknown(client, db_session):

@@ -45,6 +45,7 @@ class MasteryGoalOut(BaseModel):
     paper_ready: bool = False
     publish_ready: bool = False
     hint: str = ""
+    challenge_paper_milestones: list[dict] = Field(default_factory=list)
 
 
 class ResearchJourneyOut(BaseModel):
