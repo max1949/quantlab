@@ -198,4 +198,5 @@ class MentorOut(BaseModel):
     message: str
     recommended_template: str | None = None
     regime_pick: dict | None = None
+    attention_alerts: list[AttentionAlertOut] = Field(default_factory=list)
     disclaimer: str

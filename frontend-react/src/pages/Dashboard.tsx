@@ -115,6 +115,16 @@ export default function Dashboard() {
                     )}
                   </p>
                 )}
+                {mentor.data.attention_alerts && mentor.data.attention_alerts.length > 0 && (
+                  <div className="mt-2 rounded-lg border border-rose-200 bg-rose-50/60 px-2.5 py-1.5 text-xs text-rose-900 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-100">
+                    <p className="font-medium">{d.mentorAttentionTitle}</p>
+                    {mentor.data.attention_alerts.slice(0, 2).map((a) => (
+                      <p key={`${a.kind}-${a.title}`} className="mt-1 opacity-90">
+                        {a.title} — {a.message}
+                      </p>
+                    ))}
+                  </div>
+                )}
                 <p className="mt-2 text-xs text-slate-400">{mentor.data.disclaimer}</p>
               </div>
             </div>

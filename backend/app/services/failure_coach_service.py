@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from backend.app.core.locale import Locale
+from backend.app.i18n import content as i18n
 
 _PLAYBOOK: list[dict] = [
     {
@@ -138,3 +139,52 @@ def coach_from_decay(decay: dict | None, locale: Locale = "en") -> list[dict]:
     if reasons:
         tip = {**tip, loc: f"{tip[loc]} ({reasons[0]})"}
     return [{"title": title[loc], "tip": tip[loc], "action": "revalidate"}]
+
+
+def coach_from_joint_attention(ctx: dict, locale: Locale = "en") -> list[dict]:
+    """制度切换 × 弱适配 × Paper 衰减 — 多信号联合教练 (项目页 / 导师联动)。"""
+    loc = locale if locale in ("en", "zh") else "en"
+    pack = i18n.JOINT_ATTENTION_COACH.get(loc) or i18n.JOINT_ATTENTION_COACH["en"]
+    regime_labels = i18n.REGIME_LABEL.get(loc) or i18n.REGIME_LABEL["en"]
+
+    shift = ctx.get("regime_shift")
+    weak = bool(ctx.get("weak_regime_fit"))
+    decay = ctx.get("paper_decay")
+    symbol = ctx.get("symbol") or "RB"
+
+    if not shift and not (weak and decay):
+        return []
+
+    from_l = ""
+    to_l = ""
+    if shift:
+        from_l = regime_labels.get(shift.get("from_regime", ""), shift.get("from_label", ""))
+        to_l = regime_labels.get(shift.get("to_regime", ""), shift.get("to_label", ""))
+
+    fit_score = ctx.get("fit_score")
+    fit_verdict = ctx.get("fit_verdict") or ""
+    decay_status = (decay or {}).get("status", "watch")
+
+    key: str | None = None
+    if shift and decay:
+        key = "shift_decay"
+    elif shift and weak:
+        key = "shift_weak_fit"
+    elif shift:
+        key = "shift_only"
+    elif weak and decay:
+        key = "weak_decay"
+
+    if not key or key not in pack:
+        return []
+
+    item = pack[key]
+    tip = item["tip"].format(
+        symbol=symbol,
+        from_label=from_l,
+        to_label=to_l,
+        fit_score=fit_score or 0,
+        fit_verdict=fit_verdict,
+        decay_status=decay_status,
+    )
+    return [{"title": item["title"].format(symbol=symbol), "tip": tip, "action": item["action"]}]

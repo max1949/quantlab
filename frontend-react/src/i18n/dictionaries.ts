@@ -425,6 +425,13 @@ const en = {
       `${regime} · 「${title}」 ${verdict} ${score}`,
     mentorRegime: (symbol: string, regime: string, title: string, verdict: string, score: number) =>
       `${symbol} · ${regime} → 「${title}」 ${verdict} ${score}`,
+    mentorAttentionTitle: "Needs your attention",
+  },
+  jointAttentionCoach: {
+    title: "Joint coaching · regime × paper",
+    subtitle: "When regime shifts overlap with weak fit or paper drift — act before edge erodes.",
+    ctaRevalidate: "Re-validate now →",
+    ctaTemplates: "Pick regime template →",
   },
   masteryGoal: {
     title: "Paper Masters goal",
@@ -1587,6 +1594,13 @@ const zh = {
       `${regime} · 推荐「${title}」${verdict} ${score}分`,
     mentorRegime: (symbol: string, regime: string, title: string, verdict: string, score: number) =>
       `${symbol} · ${regime} → 推荐「${title}」${verdict} ${score}分`,
+    mentorAttentionTitle: "需要你关注",
+  },
+  jointAttentionCoach: {
+    title: "联合教练 · 制度 × Paper",
+    subtitle: "制度切换叠加弱适配或 Paper 走弱时 — 趁早调整，保住优势。",
+    ctaRevalidate: "立即重验 →",
+    ctaTemplates: "换制度模板 →",
   },
   masteryGoal: {
     title: "距 Paper 大师榜",

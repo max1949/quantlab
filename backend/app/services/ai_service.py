@@ -228,6 +228,15 @@ def mentor_next(db: Session, user: User, locale: str = "en") -> dict:
             verdict=regime_pick.get("fit_verdict") or "",
             score=regime_pick.get("fit_score") or 0,
         )
+
+    from backend.app.services import regime_alert_service
+
+    attention_alerts = regime_alert_service.list_attention_alerts(db, user, loc, max_projects=3)
+    if attention_alerts:
+        summary = "；".join(a["title"] for a in attention_alerts[:2])
+        append_fmt = i18n.MENTOR_ATTENTION_APPEND.get(loc) or i18n.MENTOR_ATTENTION_APPEND["en"]
+        message += append_fmt.format(summary=summary)
+
     return {
         "stage": step["stage"],
         "title": step["title"],
@@ -236,6 +245,7 @@ def mentor_next(db: Session, user: User, locale: str = "en") -> dict:
         "message": message,
         "recommended_template": step.get("recommended_template"),
         "regime_pick": regime_pick,
+        "attention_alerts": attention_alerts,
         "disclaimer": i18n.DISCLAIMER[loc],
     }
 

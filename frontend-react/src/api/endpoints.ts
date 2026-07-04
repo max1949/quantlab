@@ -207,6 +207,7 @@ export interface ProjectQuality {
     paper_sharpe?: number | null;
   } | null;
   coaching_tips?: Array<{ title: string; tip: string; action: string }>;
+  attention_coaching?: Array<{ title: string; tip: string; action: string }>;
   feed_preview?: {
     publish_ready: boolean;
     paper_graduated: boolean;

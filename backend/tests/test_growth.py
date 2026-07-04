@@ -407,6 +407,8 @@ def test_ai_mentor_includes_regime_pick(client, db_session, monkeypatch):
     assert m["regime_pick"]["template_code"] == m["recommended_template"]
     assert m["regime_pick"]["coach_hint"]
     assert m["regime_pick"]["template_title"] in m["message"]
+    assert "attention_alerts" in m
+    assert isinstance(m["attention_alerts"], list)
 
 
 def test_event_tracking_anonymous_allowed(client, db_session):

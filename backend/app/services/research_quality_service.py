@@ -450,6 +450,22 @@ def project_quality_payload(db: Session, project_id: uuid.UUID, *, locale: str =
                 coaching_tips = [tip, *coaching_tips]
                 break
 
+    attention_coaching: list[dict] = []
+    if project and project.owner_id:
+        owner = db.get(User, project.owner_id)
+        if owner:
+            from backend.app.services import regime_alert_service as ras
+
+            attn_ctx = ras.project_attention_context(
+                db,
+                owner,
+                project,
+                factor_id=factor_id,
+                regime=regime,
+                paper_decay=paper_decay,
+            )
+            attention_coaching = fcs.coach_from_joint_attention(attn_ctx, locale)  # type: ignore[arg-type]
+
     from backend.app.services import task_service as ts
 
     academy_milestones = (
@@ -485,6 +501,7 @@ def project_quality_payload(db: Session, project_id: uuid.UUID, *, locale: str =
         "academy_stage_tasks": stage_tasks,
         "academy_next_tasks": next_tasks,
         "coaching_tips": coaching_tips,
+        "attention_coaching": attention_coaching,
         "feed_preview": {
             "publish_ready": verdict.passed,
             "paper_graduated": paper_verdict.passed,

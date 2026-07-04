@@ -570,6 +570,58 @@ ATTENTION_ALERT: dict[Locale, dict[str, str]] = {
     },
 }
 
+JOINT_ATTENTION_COACH: dict[Locale, dict[str, dict[str, str]]] = {
+    "en": {
+        "shift_decay": {
+            "title": "Double risk · {symbol}",
+            "tip": "Regime shifted ({from_label} → {to_label}) while paper is {decay_status}. Re-validate or switch to a regime-matched template before tracking further.",
+            "action": "revalidate",
+        },
+        "shift_weak_fit": {
+            "title": "Regime shift + weak fit · {symbol}",
+            "tip": "Market moved to {to_label} and your factor scores {fit_score} ({fit_verdict}). Pick a better-matched template, then re-run OOS validation.",
+            "action": "templates",
+        },
+        "shift_only": {
+            "title": "Regime shift · {symbol}",
+            "tip": "Volatility regime changed ({from_label} → {to_label}). Re-check factor fit and run a fresh validation pass.",
+            "action": "revalidate",
+        },
+        "weak_decay": {
+            "title": "Weak fit + paper drift · {symbol}",
+            "tip": "Factor fit is {fit_score} ({fit_verdict}) and paper is {decay_status}. Consider a regime-aligned template and re-validate.",
+            "action": "templates",
+        },
+    },
+    "zh": {
+        "shift_decay": {
+            "title": "双重风险 · {symbol}",
+            "tip": "制度已切换（{from_label} → {to_label}）且 Paper 呈 {decay_status} 态。继续跟踪前请先重验，或换更合拍的制度模板。",
+            "action": "revalidate",
+        },
+        "shift_weak_fit": {
+            "title": "制度切换 + 弱适配 · {symbol}",
+            "tip": "市况变为 {to_label}，当前因子仅 {fit_score} 分（{fit_verdict}）。建议换制度推荐模板后重跑样本外验证。",
+            "action": "templates",
+        },
+        "shift_only": {
+            "title": "制度切换 · {symbol}",
+            "tip": "波动制度变化（{from_label} → {to_label}）。请复查因子适配并补跑一次验证。",
+            "action": "revalidate",
+        },
+        "weak_decay": {
+            "title": "弱适配 + Paper 走弱 · {symbol}",
+            "tip": "适配 {fit_score} 分（{fit_verdict}）且 Paper 呈 {decay_status} 态。建议换制度合拍模板后重验。",
+            "action": "templates",
+        },
+    },
+}
+
+MENTOR_ATTENTION_APPEND: dict[Locale, str] = {
+    "en": " · Needs attention: {summary}",
+    "zh": " · 另需关注：{summary}",
+}
+
 JOURNEY_STEPS: dict[Locale, dict[str, str]] = {
     "en": {
         "template": "Pick template",

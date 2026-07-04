@@ -196,3 +196,37 @@ def _regime_fit(db: Session, user: User, symbol: str, factor: Factor) -> dict | 
     from backend.app.services import regime_advisory
 
     return regime_advisory.market_regime_for_symbol(db, user, symbol, "1d", factor=factor)
+
+
+def project_attention_context(
+    db: Session,
+    user: User,
+    project: ResearchProject,
+    *,
+    factor_id: uuid.UUID | None = None,
+    regime: dict | None = None,
+    paper_decay: dict | None = None,
+) -> dict:
+    """单项目关注上下文 — 供联合教练与导师联动。"""
+    symbol = project.symbol or "RB"
+    fid = factor_id or _representative_factor_id(db, project.id)
+    factor = db.get(Factor, fid) if fid else None
+
+    shift_raw = _detect_shift_for_symbol(db, user, symbol)
+    regime_shift = shift_raw if shift_raw and shift_raw.get("shifted") else None
+
+    if regime is None and factor:
+        regime = _regime_fit(db, user, symbol, factor)
+    fit_score = regime.get("fit_score") if regime else None
+    weak_regime_fit = fit_score is not None and fit_score < _WEAK_FIT_THRESHOLD
+
+    decay_active = bool(paper_decay and paper_decay.get("status") in ("watch", "alert"))
+
+    return {
+        "regime_shift": regime_shift,
+        "weak_regime_fit": weak_regime_fit,
+        "fit_score": fit_score,
+        "fit_verdict": regime.get("fit_verdict") if regime else None,
+        "paper_decay": paper_decay if decay_active else None,
+        "symbol": symbol,
+    }

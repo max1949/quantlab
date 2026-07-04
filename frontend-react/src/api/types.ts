@@ -121,6 +121,7 @@ export interface Mentor {
   message: string;
   recommended_template: string | null;
   regime_pick?: NextStep["regime_pick"];
+  attention_alerts?: AttentionAlert[];
   disclaimer: string;
 }
 

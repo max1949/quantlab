@@ -124,7 +124,11 @@ def test_mastery_stage_progression():
 
 
 def test_failure_coach_from_reasons():
-    from backend.app.services.failure_coach_service import coach_from_decay, coach_from_reasons
+    from backend.app.services.failure_coach_service import (
+        coach_from_decay,
+        coach_from_joint_attention,
+        coach_from_reasons,
+    )
 
     tips = coach_from_reasons(["样本外夏普 0.10 低于门槛 0.25", "换手率 75 超过发布门槛"], "zh")
     assert len(tips) >= 1
@@ -136,6 +140,30 @@ def test_failure_coach_from_reasons():
     )
     assert len(decay_tips) == 1
     assert decay_tips[0]["action"] == "revalidate"
+
+    joint = coach_from_joint_attention(
+        {
+            "regime_shift": {"from_regime": "low", "to_regime": "high", "from_label": "低波动", "to_label": "高波动"},
+            "weak_regime_fit": True,
+            "fit_score": 42,
+            "fit_verdict": "谨慎",
+            "paper_decay": None,
+            "symbol": "RB",
+        },
+        "zh",
+    )
+    assert len(joint) == 1
+    assert joint[0]["action"] == "templates"
+    assert "RB" in joint[0]["title"]
+
+
+def test_project_quality_includes_attention_coaching(client, db_session):
+    seed_sample_market_data(db_session)
+    h = _register(client, "jointco")
+    proj, _ = _full_research(client, h, db_session)
+    q = client.get(f"{BASE}/projects/{proj['id']}/quality", headers=h).json()
+    assert "attention_coaching" in q
+    assert isinstance(q["attention_coaching"], list)
 
 
 def test_advanced_templates_auto_seed(db_session):
