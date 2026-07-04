@@ -219,6 +219,13 @@ export default function ProjectDetail() {
       scrollToPaperTracking();
       return;
     }
+    if (action === "revalidate") {
+      scrollToFactorLab();
+      if (projectFactor && done.backtest) {
+        setTimeout(() => runValidation.mutate(), 400);
+      }
+      return;
+    }
     if (action === "share" || action === "publish") {
       if (quality.data?.passed && !done.publish) publish.mutate();
       else scrollToFactorLab();
@@ -598,6 +605,8 @@ export default function ProjectDetail() {
         <PaperTrackingPanel
           factorId={projectFactor?.id ?? null}
           enabled={done.validation}
+          projectId={id}
+          onRevalidate={() => handleMasteryAction("revalidate")}
         />
       </div>
 

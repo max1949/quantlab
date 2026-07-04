@@ -77,6 +77,15 @@ _PLAYBOOK: list[dict] = [
         },
         "action": "backtest",
     },
+    {
+        "keys": ["衰减", "走弱", "回撤", "decay", "drawdown"],
+        "title": {"en": "Paper performance decaying", "zh": "纸面表现衰减"},
+        "tip": {
+            "en": "Live paper metrics diverged from validation. Tweak the factor in the lab, then re-run OOS validation.",
+            "zh": "模拟盘指标已偏离验证期基准。回因子实验室调参，再跑一次样本外验证。",
+        },
+        "action": "revalidate",
+    },
 ]
 
 
@@ -105,3 +114,27 @@ def coach_from_reasons(reasons: list[str], locale: Locale = "en") -> list[dict]:
         if len(out) >= 4:
             break
     return out
+
+
+def coach_from_decay(decay: dict | None, locale: Locale = "en") -> list[dict]:
+    """纸面衰减告警 → 回到实验室重新验证的教练卡片。"""
+    if not decay or decay.get("status") not in ("watch", "alert"):
+        return []
+    loc = locale if locale in ("en", "zh") else "en"
+    status = decay["status"]
+    reasons = decay.get("reasons") or []
+    if status == "alert":
+        title = {"en": "Paper decay alert", "zh": "纸面衰减告警"}
+        tip = {
+            "en": "Paper Sharpe or drawdown diverged sharply from validation. Re-validate before trusting this factor.",
+            "zh": "纸面夏普或回撤明显偏离验证期。请回实验室调参并重新验证，再决定是否继续跟踪。",
+        }
+    else:
+        title = {"en": "Paper performance weakening", "zh": "纸面表现走弱"}
+        tip = {
+            "en": "Early warning — review factor logic and run a fresh validation pass.",
+            "zh": "早期预警信号 — 建议复查因子逻辑并补跑一次验证。",
+        }
+    if reasons:
+        tip = {**tip, loc: f"{tip[loc]} ({reasons[0]})"}
+    return [{"title": title[loc], "tip": tip[loc], "action": "revalidate"}]

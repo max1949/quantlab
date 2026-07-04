@@ -11,9 +11,13 @@ import { Spinner } from "./ui";
 export default function PaperTrackingPanel({
   factorId,
   enabled,
+  projectId,
+  onRevalidate,
 }: {
   factorId: string | null;
   enabled: boolean;
+  projectId?: string;
+  onRevalidate?: () => void;
 }) {
   const notify = useUi((s) => s.notify);
   const pt = useLocale((s) => s.dict.paperTracking);
@@ -31,6 +35,9 @@ export default function PaperTrackingPanel({
     onSuccess: () => {
       notify(pt.refreshed, "success");
       void qc.invalidateQueries({ queryKey: ["paper-history", factorId] });
+      if (projectId) {
+        void qc.invalidateQueries({ queryKey: ["project-quality", projectId] });
+      }
     },
     onError: (e) => notify(apiErrorMessage(e, pt.refreshFail), "error"),
   });
@@ -85,6 +92,11 @@ export default function PaperTrackingPanel({
                 <li key={r}>{r}</li>
               ))}
             </ul>
+          )}
+          {onRevalidate && (
+            <button type="button" className="btn mt-2 text-xs" onClick={onRevalidate}>
+              {pt.revalidateCta}
+            </button>
           )}
         </div>
       )}

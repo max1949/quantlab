@@ -470,6 +470,16 @@ STEP_DETAIL: dict[str, dict[Locale, dict[str, str]]] = {
             "action": "已通过 Paper 毕业线 — 绑定因子下单，开启真实跟踪",
         },
     },
+    "revalidate_decay": {
+        "en": {
+            "title": "Paper decay detected — back to the lab",
+            "action": "Paper metrics diverged from validation. Tweak your factor and re-run OOS before continuing.",
+        },
+        "zh": {
+            "title": "纸面衰减告警 — 回实验室复查",
+            "action": "模拟盘表现偏离验证期基准。请调参并重新跑样本外验证，再继续跟踪。",
+        },
+    },
     "generate_report": {
         "en": {
             "title": "Generate research report",

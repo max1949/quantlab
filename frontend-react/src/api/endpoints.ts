@@ -188,7 +188,15 @@ export interface ProjectQuality {
     total_stages: number;
     next_action: string;
     progress_pct: number;
+    decay_attention?: boolean;
+    decay_status?: string | null;
   };
+  paper_decay?: {
+    status: string;
+    reasons: string[];
+    baseline_sharpe?: number | null;
+    paper_sharpe?: number | null;
+  } | null;
   coaching_tips?: Array<{ title: string; tip: string; action: string }>;
   orthogonal?: {
     target_factor: string;

@@ -91,6 +91,9 @@ def _stage(db: Session, user: User) -> str:
             ).first()
             if not has_po:
                 return "run_paper"
+            decay = q.get("paper_decay") or {}
+            if decay.get("status") in ("watch", "alert"):
+                return "revalidate_decay"
     reports = _count(db, select(func.count(ResearchReport.id)).where(ResearchReport.owner_id == uid))
     if reports == 0:
         return "generate_report"
@@ -116,6 +119,7 @@ def next_step(db: Session, user: User, locale: Locale = "en") -> dict:
         "run_backtest",
         "run_validation",
         "run_paper",
+        "revalidate_decay",
         "generate_report",
         "publish_share",
     }
@@ -128,6 +132,7 @@ def next_step(db: Session, user: User, locale: Locale = "en") -> dict:
             "run_backtest": "/projects",
             "run_validation": "/projects",
             "run_paper": "/projects",
+            "revalidate_decay": "/projects",
             "generate_report": "/dashboard",
             "publish_share": "/dashboard",
             "keep_going": "/feed",

@@ -93,13 +93,34 @@ def test_mastery_stage_progression():
     )
     assert s4["stage"] == "track"
 
+    s_decay = compute_mastery_stage(
+        has_factor=True,
+        has_backtest=True,
+        has_validation=True,
+        publish_passed=True,
+        paper_passed=True,
+        has_paper_order=True,
+        is_published=False,
+        decay_status="alert",
+    )
+    assert s_decay["stage"] == "track"
+    assert s_decay["next_action"] == "revalidate"
+    assert s_decay["decay_attention"] is True
+
 
 def test_failure_coach_from_reasons():
-    from backend.app.services.failure_coach_service import coach_from_reasons
+    from backend.app.services.failure_coach_service import coach_from_decay, coach_from_reasons
 
     tips = coach_from_reasons(["样本外夏普 0.10 低于门槛 0.25", "换手率 75 超过发布门槛"], "zh")
     assert len(tips) >= 1
     assert any("样本外" in t["title"] or "换手" in t["title"] for t in tips)
+
+    decay_tips = coach_from_decay(
+        {"status": "alert", "reasons": ["纸面夏普较验证样本外下降 0.40"]},
+        "zh",
+    )
+    assert len(decay_tips) == 1
+    assert decay_tips[0]["action"] == "revalidate"
 
 
 def test_advanced_templates_auto_seed(db_session):

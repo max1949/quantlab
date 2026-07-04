@@ -59,7 +59,29 @@ export default function MasteryPathPanel({ quality, onAction }: Props) {
         </p>
       )}
 
-      {quality.paper_ready && mastery.stage === "track" ? (
+      {quality.paper_ready && mastery.stage === "track" && mastery.decay_attention ? (
+        <div
+          className={`rounded-lg border px-3 py-2 text-sm ${
+            mastery.decay_status === "alert"
+              ? "border-rose-200 bg-rose-50 text-rose-900 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-100"
+              : "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100"
+          }`}
+        >
+          <p className="font-medium">
+            {mastery.decay_status === "alert" ? m.decayAlert : m.decayWatch}
+          </p>
+          {quality.paper_decay?.reasons && quality.paper_decay.reasons.length > 0 && (
+            <ul className="mt-1 list-inside list-disc text-xs opacity-90">
+              {quality.paper_decay.reasons.slice(0, 2).map((r) => (
+                <li key={r}>{r}</li>
+              ))}
+            </ul>
+          )}
+          <button type="button" className="btn mt-2 text-xs" onClick={() => onAction("revalidate")}>
+            {m.decayCta}
+          </button>
+        </div>
+      ) : quality.paper_ready && mastery.stage === "track" ? (
         <div className="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900 dark:border-brand-800 dark:bg-brand-950/40 dark:text-brand-100">
           <p className="font-medium">{m.trackReady}</p>
           <button type="button" className="btn mt-2 text-xs" onClick={() => onAction("track")}>

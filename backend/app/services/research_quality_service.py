@@ -140,6 +140,7 @@ def compute_mastery_stage(
     paper_passed: bool,
     has_paper_order: bool,
     is_published: bool,
+    decay_status: str | None = None,
 ) -> dict:
     """研究大师路径 — 告诉用户当前阶段与下一步。"""
     stages = [
@@ -178,12 +179,19 @@ def compute_mastery_stage(
         "share": "share",
     }
     idx = next(i for i, (k, _, _) in enumerate(stages) if k == current)
+    next_action = next_map[current]
+    decay_attention = False
+    if current == "track" and decay_status in ("watch", "alert"):
+        next_action = "revalidate"
+        decay_attention = True
     return {
         "stage": current,
         "stage_index": idx,
         "total_stages": len(stages),
-        "next_action": next_map[current],
+        "next_action": next_action,
         "progress_pct": round((idx + (1 if current == "share" else 0)) / len(stages) * 100),
+        "decay_attention": decay_attention,
+        "decay_status": decay_status,
     }
 
 
@@ -360,6 +368,12 @@ def project_quality_payload(db: Session, project_id: uuid.UUID, *, locale: str =
         _has_paper_order(db, project.owner_id, factor_id) if project and factor_id else False
     )
 
+    paper_decay = None
+    if has_paper_order and factor_id and project and project.owner_id:
+        from backend.app.services import paper_tracking_service as pts
+
+        paper_decay = pts.assess_factor_decay(db, factor_id, project.owner_id)
+
     mastery = compute_mastery_stage(
         has_factor=has_factor,
         has_backtest=has_backtest,
@@ -368,12 +382,20 @@ def project_quality_payload(db: Session, project_id: uuid.UUID, *, locale: str =
         paper_passed=paper_verdict.passed,
         has_paper_order=has_paper_order,
         is_published=is_published,
+        decay_status=paper_decay.get("status") if paper_decay else None,
     )
 
     from backend.app.services import failure_coach_service as fcs
 
     coach_reasons = list(dict.fromkeys(verdict.reasons + paper_verdict.reasons))
     coaching_tips = fcs.coach_from_reasons(coach_reasons, locale)  # type: ignore[arg-type]
+    decay_tips = fcs.coach_from_decay(paper_decay, locale)  # type: ignore[arg-type]
+    if decay_tips:
+        seen = {t["action"] for t in coaching_tips}
+        for tip in decay_tips:
+            if tip["action"] not in seen:
+                coaching_tips = [tip, *coaching_tips]
+                break
 
     return {
         "passed": verdict.passed,
@@ -388,6 +410,7 @@ def project_quality_payload(db: Session, project_id: uuid.UUID, *, locale: str =
         "symbol": project.symbol if project else None,
         "regime": regime,
         "mastery": mastery,
+        "paper_decay": paper_decay,
         "coaching_tips": coaching_tips,
         "hints": hints,
         "orthogonal": orth,
