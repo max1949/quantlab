@@ -339,6 +339,10 @@ const en = {
     regimePickFallback: "Regime-based template picks",
     regimeRecommended: "Regime pick",
     regimeFit: (verdict: string, score: number) => `${verdict} · ${score}`,
+    regimeSymbolHint: "Switch symbol to see regime picks for each market",
+    regimeSymbol: (sym: string) =>
+      ({ RB: "Rebar RB", AU: "Gold AU", IF: "Index IF" })[sym] ?? sym,
+    regimeSymbolMatch: "This symbol",
   },
   masteryPath: {
     title: "Mastery path",
@@ -1478,6 +1482,10 @@ const zh = {
     regimePickFallback: "按行情制度推荐模板",
     regimeRecommended: "制度推荐",
     regimeFit: (verdict: string, score: number) => `${verdict} · ${score}分`,
+    regimeSymbolHint: "切换标的，查看不同市场的制度推荐",
+    regimeSymbol: (sym: string) =>
+      ({ RB: "螺纹钢 RB", AU: "黄金 AU", IF: "股指 IF" })[sym] ?? sym,
+    regimeSymbolMatch: "本标的",
   },
   masteryPath: {
     title: "大师成长路径",

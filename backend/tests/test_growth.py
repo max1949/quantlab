@@ -216,6 +216,19 @@ def test_template_regime_picks(client, db_session):
             assert "code" in first
 
 
+def test_template_regime_picks_multi_symbol(client, db_session):
+    from backend.app.services.market_data import seed_sample_market_data
+    from backend.app.services.template_service import seed_default_templates
+
+    seed_sample_market_data(db_session)
+    seed_default_templates(db_session)
+    h = _register(client, "regmulti")
+    for sym in ("RB", "AU", "IF"):
+        picks = client.get(f"{BASE}/research/templates/regime-picks", headers=h, params={"symbol": sym}).json()
+        assert picks["symbol"] == sym
+        assert "coach_hint" in picks
+
+
 # ---------------- 分享卡片 ----------------
 
 def test_share_card_public(client, db_session):

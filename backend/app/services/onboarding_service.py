@@ -153,7 +153,8 @@ def next_step(db: Session, user: User, locale: Locale = "en") -> dict:
         from backend.app.services import membership_service as ms, template_service
 
         tier = ms.current_tier(db, user)
-        picks_data = template_service.regime_template_picks(db, user, tier, locale)
+        regime_symbol = {"trader": "IF", "python": "RB", "newbie": "AU"}.get(user_type, "RB")
+        picks_data = template_service.regime_template_picks(db, user, tier, locale, symbol=regime_symbol)
         top = picks_data["picks"][0] if picks_data.get("picks") else None
         if top:
             out["recommended_template"] = top["code"]

@@ -8,6 +8,9 @@ import { useFlow } from "../store/flow";
 import { useLocale } from "../store/locale";
 import { ErrorBox, PageTitle, Spinner } from "../components/ui";
 
+const REGIME_SYMBOLS = ["RB", "AU", "IF"] as const;
+type RegimeSymbol = (typeof REGIME_SYMBOLS)[number];
+
 export default function Templates() {
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -15,14 +18,28 @@ export default function Templates() {
   const setProject = useFlow((s) => s.setProject);
   const t = useLocale((s) => s.dict.templates);
   const c = useLocale((s) => s.dict.common);
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const focus = params.get("focus");
+  const symbolParam = params.get("symbol");
+  const initialSymbol: RegimeSymbol =
+    symbolParam && REGIME_SYMBOLS.includes(symbolParam as RegimeSymbol)
+      ? (symbolParam as RegimeSymbol)
+      : "RB";
+  const [regimeSymbol, setRegimeSymbol] = useState<RegimeSymbol>(initialSymbol);
   const [starting, setStarting] = useState<string | null>(null);
+
+  const setSymbol = (sym: RegimeSymbol) => {
+    setRegimeSymbol(sym);
+    const next = new URLSearchParams(params);
+    if (sym === "RB") next.delete("symbol");
+    else next.set("symbol", sym);
+    setParams(next, { replace: true });
+  };
 
   const templates = useQuery({ queryKey: ["templates"], queryFn: listTemplates });
   const regimePicks = useQuery({
-    queryKey: ["template-regime-picks"],
-    queryFn: () => getTemplateRegimePicks("RB"),
+    queryKey: ["template-regime-picks", regimeSymbol],
+    queryFn: () => getTemplateRegimePicks(regimeSymbol),
   });
 
   const recommendedCodes = new Set(regimePicks.data?.picks.map((p) => p.code) ?? []);
@@ -57,6 +74,25 @@ export default function Templates() {
 
       {regimePicks.data && (regimePicks.data.picks.length > 0 || regimePicks.data.coach_hint) && (
         <div className="mb-6 rounded-xl border border-violet-200 bg-violet-50/50 p-4 dark:border-violet-900 dark:bg-violet-950/30">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs text-violet-800/80 dark:text-violet-200/80">{t.regimeSymbolHint}</p>
+            <div className="flex flex-wrap gap-1">
+              {REGIME_SYMBOLS.map((sym) => (
+                <button
+                  key={sym}
+                  type="button"
+                  onClick={() => setSymbol(sym)}
+                  className={`rounded-lg px-3 py-1 text-xs font-medium transition ${
+                    regimeSymbol === sym
+                      ? "bg-violet-600 text-white"
+                      : "bg-white text-violet-800 ring-1 ring-violet-200 hover:bg-violet-100 dark:bg-slate-900 dark:text-violet-200 dark:ring-violet-800"
+                  }`}
+                >
+                  {t.regimeSymbol(sym)}
+                </button>
+              ))}
+            </div>
+          </div>
           <p className="font-medium text-violet-900 dark:text-violet-100">
             {regimePicks.data.regime_label
               ? t.regimePickTitle(regimePicks.data.regime_label, regimePicks.data.symbol)
@@ -93,7 +129,15 @@ export default function Templates() {
         <ErrorBox message={apiErrorMessage(templates.error)} />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {templates.data?.map((tpl) => {
+          {[...(templates.data ?? [])]
+            .sort((a, b) => {
+              const aSym = a.symbol === regimeSymbol ? 0 : 1;
+              const bSym = b.symbol === regimeSymbol ? 0 : 1;
+              const aRec = recommendedCodes.has(a.code) ? 0 : 1;
+              const bRec = recommendedCodes.has(b.code) ? 0 : 1;
+              return aSym - bSym || aRec - bRec;
+            })
+            .map((tpl) => {
             const locked = tpl.allowed === false;
             const trackLabel =
               tpl.track === "master"
@@ -114,6 +158,11 @@ export default function Templates() {
                 {recommendedCodes.has(tpl.code) && (
                   <span className="absolute left-3 top-3 rounded-full bg-violet-600 px-2 py-0.5 text-[10px] font-medium text-white">
                     {t.regimeRecommended}
+                  </span>
+                )}
+                {tpl.symbol === regimeSymbol && !recommendedCodes.has(tpl.code) && (
+                  <span className="absolute left-3 top-3 rounded-full bg-slate-600 px-2 py-0.5 text-[10px] font-medium text-white dark:bg-slate-700">
+                    {t.regimeSymbolMatch}
                   </span>
                 )}
                 {locked && (

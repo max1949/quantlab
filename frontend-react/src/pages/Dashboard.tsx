@@ -70,6 +70,7 @@ export default function Dashboard() {
                     nextStep.data!.stage,
                     nextStep.data!.recommended_template,
                     nextStep.data!.active_project_id,
+                    nextStep.data!.regime_pick?.symbol,
                   ),
                 )
               }
