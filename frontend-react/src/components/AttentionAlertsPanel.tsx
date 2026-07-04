@@ -39,6 +39,11 @@ function AlertRow({
             {d.severityBadge(alert.severity)} {alert.title}
           </p>
           <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">{alert.message}</p>
+          {alert.challenge_hint && (
+            <p className="mt-1.5 rounded-md bg-amber-100/70 px-2 py-1 text-[11px] text-amber-900 dark:bg-amber-900/40 dark:text-amber-100">
+              🏅 {alert.challenge_hint}
+            </p>
+          )}
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
           <Link to={alert.cta_path} className="btn whitespace-nowrap text-xs">

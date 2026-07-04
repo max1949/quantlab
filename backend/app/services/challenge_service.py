@@ -18,7 +18,9 @@ from backend.app.models.factor import Factor, FactorKind
 from backend.app.models.research import ResearchReport
 from backend.app.models.user import User
 from backend.app.models.validation import Validation, ValidationStatus
-from backend.app.i18n.content import MILESTONE_JOURNEY_KEYS, MILESTONE_MASTERY_STAGES
+from backend.app.i18n.content import MILESTONE_JOURNEY_KEYS, MILESTONE_MASTERY_STAGES, MILESTONE_TITLES
+from backend.app.core.locale import Locale
+from backend.app.i18n import content as i18n
 from backend.app.services import growth_service
 
 DEFAULT_CODE = "30d-research"
@@ -237,4 +239,125 @@ def get_certificate(db: Session, user: User, code: str) -> dict:
         "challenge_title": res["title"],
         "username": user.username,
         "completed_at": res["completed_at"],
+    }
+
+
+_PAPER_MILESTONE_CODES = ("first_paper_order", "paper_graduated")
+
+
+def _pending_paper_milestones(prog: dict) -> list[dict]:
+    return [
+        m
+        for m in prog["milestones"]
+        if m["code"] in _PAPER_MILESTONE_CODES and not m["completed"]
+    ]
+
+
+def alert_challenge_hints(db: Session, user: User, locale: Locale = "en") -> dict[str, str]:
+    """主动提醒 kind → 30 天挑战 Paper 里程碑联动文案。"""
+    prog = progress_if_enrolled(db, user)
+    if not prog:
+        return {}
+    pending_codes = {m["code"] for m in _pending_paper_milestones(prog)}
+    if not pending_codes:
+        return {}
+    labels = i18n.ALERT_CHALLENGE_HINT.get(locale) or i18n.ALERT_CHALLENGE_HINT["en"]
+    hints: dict[str, str] = {}
+    if "first_paper_order" in pending_codes:
+        hints["regime_shift"] = labels["regime_shift_d22"]
+        hints["weak_regime_fit"] = labels["weak_fit_d22"]
+    if "paper_graduated" in pending_codes:
+        hints["paper_decay"] = labels["paper_decay_d28"]
+        if "regime_shift" not in hints:
+            hints["regime_shift"] = labels["regime_shift_d28"]
+    return hints
+
+
+def enrich_attention_alerts(
+    db: Session,
+    user: User,
+    locale: Locale,
+    alerts: list[dict],
+) -> list[dict]:
+    hints = alert_challenge_hints(db, user, locale)
+    if not hints:
+        return alerts
+    out: list[dict] = []
+    for alert in alerts:
+        hint = hints.get(alert.get("kind", ""))
+        if hint:
+            out.append({**alert, "challenge_hint": hint})
+        else:
+            out.append(alert)
+    return out
+
+
+def challenge_paper_coaching_payload(
+    db: Session,
+    user: User,
+    locale: Locale,
+    *,
+    attention_alerts: list[dict],
+    active_project_id: uuid.UUID | None,
+    paper_ready: bool = False,
+    mastery_next_action: str | None = None,
+) -> dict | None:
+    """30 天挑战 Paper 里程碑 × 主动提醒联合教练。"""
+    prog = progress_if_enrolled(db, user)
+    if not prog:
+        return None
+    pending = _pending_paper_milestones(prog)
+    if not pending:
+        return None
+
+    next_m = pending[0]
+    code = next_m["code"]
+    titles = MILESTONE_TITLES.get(code, {})
+    title = titles.get(locale) or next_m["title"]
+    alert_kinds = {a.get("kind") for a in attention_alerts}
+    has_attention = bool(attention_alerts)
+    labels = i18n.CHALLENGE_PAPER_COACH.get(locale) or i18n.CHALLENGE_PAPER_COACH["en"]
+
+    if code == "first_paper_order":
+        if has_attention:
+            message_key = "d22_with_attention"
+        elif paper_ready:
+            message_key = "d22_ready"
+        else:
+            message_key = "d22_not_ready"
+        cta_action = "run_paper" if paper_ready else (mastery_next_action or "run_validation")
+    else:
+        if "paper_decay" in alert_kinds:
+            message_key = "d28_decay"
+        elif paper_ready:
+            message_key = "d28_ready"
+        else:
+            message_key = "d28_not_ready"
+        cta_action = (
+            "revalidate_decay"
+            if "paper_decay" in alert_kinds
+            else (mastery_next_action or "run_validation")
+        )
+
+    if code == "first_paper_order" and not paper_ready and not has_attention:
+        return None
+
+    if code == "paper_graduated" and not has_attention and not paper_ready:
+        return None
+
+    cta_path = f"/projects/{active_project_id}" if active_project_id else "/challenges"
+    return {
+        "enrolled": True,
+        "next_code": code,
+        "next_day": next_m["day"],
+        "next_title": title,
+        "message": labels[message_key].format(
+            day=next_m["day"],
+            title=title,
+            attention_count=len(attention_alerts),
+        ),
+        "cta_path": cta_path,
+        "cta_action": cta_action,
+        "attention_linked": has_attention,
+        "linked_alert_kinds": sorted(alert_kinds),
     }

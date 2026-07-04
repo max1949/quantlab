@@ -377,17 +377,34 @@ def research_journey(db: Session, user: User, locale: Locale = "en") -> dict:
             }
         )
     done_count = sum(1 for s in steps if s["done"])
-    from backend.app.services import regime_alert_service
+    from backend.app.services import challenge_service, regime_alert_service
+
+    active_id = _active_project_id(db, user)
+    mastery_goal = _mastery_goal_payload(db, user, locale)
+    attention_alerts = regime_alert_service.list_attention_alerts(db, user, locale)
+    attention_alerts = challenge_service.enrich_attention_alerts(
+        db, user, locale, attention_alerts
+    )
+    challenge_paper_coaching = challenge_service.challenge_paper_coaching_payload(
+        db,
+        user,
+        locale,
+        attention_alerts=attention_alerts,
+        active_project_id=active_id,
+        paper_ready=bool(mastery_goal.get("paper_ready")),
+        mastery_next_action=mastery_goal.get("mastery_next_action"),
+    )
 
     return {
         "done_count": done_count,
         "total": len(steps),
         "steps": steps,
-        "active_project_id": _active_project_id(db, user),
+        "active_project_id": active_id,
         "challenge_enrolled": challenge_enrolled,
         "challenge_code": challenge_code,
         "challenge_completed_count": challenge_completed_count,
         "challenge_total": challenge_total,
-        "mastery_goal": _mastery_goal_payload(db, user, locale),
-        "attention_alerts": regime_alert_service.list_attention_alerts(db, user, locale),
+        "mastery_goal": mastery_goal,
+        "attention_alerts": attention_alerts,
+        "challenge_paper_coaching": challenge_paper_coaching,
     }

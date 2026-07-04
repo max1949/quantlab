@@ -467,6 +467,12 @@ const en = {
     dismissDone: (days: number) => `Dismissed — won't show again for ${days} days`,
     cooldownHint: "Dismiss hides a reminder for 7 days if the issue persists.",
   },
+  challengePaperCoach: {
+    badge: (day: number, title: string) => `30-day challenge · D${day} · ${title}`,
+    linkedHint: "Linked to your attention alerts — fix these to unlock the milestone faster.",
+    viewChallenge: "Challenge progress →",
+    ctaDefault: "Continue →",
+  },
   stages: {
     create_project: "Start from template →",
     create_factor: "Build factor →",
@@ -1638,6 +1644,12 @@ const zh = {
     dismiss: "知道了",
     dismissDone: (days: number) => `已忽略 — ${days} 天内不再重复提醒`,
     cooldownHint: "点「知道了」可隐藏 7 天；若问题仍在，到期后会再次提示。",
+  },
+  challengePaperCoach: {
+    badge: (day: number, title: string) => `30 天挑战 · D${day} · ${title}`,
+    linkedHint: "与上方提醒联动 — 处理好这些问题，里程碑会更快点亮。",
+    viewChallenge: "查看挑战进度 →",
+    ctaDefault: "继续 →",
   },
   stages: {
     create_project: "从模板开始 →",

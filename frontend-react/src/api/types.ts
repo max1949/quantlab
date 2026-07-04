@@ -99,6 +99,19 @@ export interface AttentionAlert {
   action: string;
   cta_path: string;
   severity: string;
+  challenge_hint?: string | null;
+}
+
+export interface ChallengePaperCoaching {
+  enrolled: boolean;
+  next_code: string;
+  next_day: number;
+  next_title: string;
+  message: string;
+  cta_path: string;
+  cta_action: string;
+  attention_linked: boolean;
+  linked_alert_kinds: string[];
 }
 
 export interface ResearchJourney {
@@ -112,6 +125,7 @@ export interface ResearchJourney {
   challenge_total: number;
   mastery_goal: MasteryGoal;
   attention_alerts: AttentionAlert[];
+  challenge_paper_coaching: ChallengePaperCoaching | null;
 }
 
 export interface Mentor {

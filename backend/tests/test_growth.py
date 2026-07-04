@@ -109,6 +109,7 @@ def test_journey_includes_attention_alerts(client, db_session):
     j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
     assert "attention_alerts" in j
     assert isinstance(j["attention_alerts"], list)
+    assert "challenge_paper_coaching" in j
 
     proj, _ = _full_research(client, h, db_session)
     j2 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
@@ -119,6 +120,25 @@ def test_journey_includes_attention_alerts(client, db_session):
         assert alert["title"]
         assert alert["cta_path"]
         assert alert["severity"] in ("info", "watch", "alert")
+
+
+def test_challenge_paper_coaching_when_enrolled(client, db_session):
+    seed_sample_market_data(db_session)
+    seed_default_templates(db_session)
+    seed_default_challenge(db_session)
+    h = _register(client, "chcoach")
+    client.post(f"{BASE}/challenges/30d-research/enroll", headers=h)
+    j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    coach = j.get("challenge_paper_coaching")
+    assert coach is None or coach["next_code"] in ("first_paper_order", "paper_graduated")
+
+    proj, _ = _full_research(client, h, db_session)
+    j2 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    coach2 = j2.get("challenge_paper_coaching")
+    if coach2:
+        assert coach2["next_day"] in (22, 28)
+        assert coach2["message"]
+        assert coach2["cta_path"]
 
 
 def test_dismiss_attention_alert_hides_from_journey(client, db_session):

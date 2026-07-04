@@ -622,6 +622,40 @@ MENTOR_ATTENTION_APPEND: dict[Locale, str] = {
     "zh": " · 另需关注：{summary}",
 }
 
+ALERT_CHALLENGE_HINT: dict[Locale, dict[str, str]] = {
+    "en": {
+        "regime_shift_d22": "30-day challenge D22 — re-validate fit, then submit your first paper order.",
+        "weak_fit_d22": "30-day challenge D22 — pick a regime-matched template before paper order.",
+        "paper_decay_d28": "30-day challenge D28 — fix paper drift to pass the graduation gate.",
+        "regime_shift_d28": "30-day challenge D28 — regime shifted; re-validate to graduate.",
+    },
+    "zh": {
+        "regime_shift_d22": "30 天挑战 D22 — 重验适配后下第一笔 Paper 单即可点亮里程碑。",
+        "weak_fit_d22": "30 天挑战 D22 — 换更合拍模板，达标后再下 Paper 单。",
+        "paper_decay_d28": "30 天挑战 D28 — 处理 Paper 衰减，通过毕业线即可点亮。",
+        "regime_shift_d28": "30 天挑战 D28 — 制度切换，重验通过即可毕业。",
+    },
+}
+
+CHALLENGE_PAPER_COACH: dict[Locale, dict[str, str]] = {
+    "en": {
+        "d22_ready": "Challenge D{day}: 「{title}」 — paper bar passed. Submit a paper order on your project to light this milestone.",
+        "d22_not_ready": "Challenge D{day}: 「{title}」 — optimize to the paper graduation line first, then submit your order.",
+        "d22_with_attention": "Challenge D{day}: 「{title}」 — {attention_count} alert(s) need action before paper order. Fix fit or decay, then submit.",
+        "d28_ready": "Challenge D{day}: 「{title}」 — you're close. Confirm paper tracking meets the graduation gate.",
+        "d28_not_ready": "Challenge D{day}: 「{title}」 — push your factor through the paper quality gate.",
+        "d28_decay": "Challenge D{day}: 「{title}」 — paper decay alert active. Re-validate, then pass graduation to complete D28.",
+    },
+    "zh": {
+        "d22_ready": "挑战 D{day}：「{title}」— 已过 Paper 毕业线，去项目页下模拟单即可点亮。",
+        "d22_not_ready": "挑战 D{day}：「{title}」— 先优化到 Paper 毕业线，再下模拟单。",
+        "d22_with_attention": "挑战 D{day}：「{title}」— 有 {attention_count} 条提醒待处理，修好适配/衰减后再下单。",
+        "d28_ready": "挑战 D{day}：「{title}」— 即将毕业，确认 Paper 跟踪达到毕业线。",
+        "d28_not_ready": "挑战 D{day}：「{title}」— 把因子推过 Paper 质量闸门。",
+        "d28_decay": "挑战 D{day}：「{title}」— Paper 衰减提醒中，重验通过毕业线即可点亮 D28。",
+    },
+}
+
 JOURNEY_STEPS: dict[Locale, dict[str, str]] = {
     "en": {
         "template": "Pick template",

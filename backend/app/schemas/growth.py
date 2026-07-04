@@ -64,6 +64,19 @@ class AttentionAlertOut(BaseModel):
     action: str
     cta_path: str
     severity: str = "info"
+    challenge_hint: str | None = None
+
+
+class ChallengePaperCoachingOut(BaseModel):
+    enrolled: bool = True
+    next_code: str
+    next_day: int
+    next_title: str
+    message: str
+    cta_path: str
+    cta_action: str
+    attention_linked: bool = False
+    linked_alert_kinds: list[str] = Field(default_factory=list)
 
 
 class DismissAttentionAlertRequest(BaseModel):
@@ -87,6 +100,7 @@ class ResearchJourneyOut(BaseModel):
     challenge_total: int = 0
     mastery_goal: MasteryGoalOut = Field(default_factory=MasteryGoalOut)
     attention_alerts: list[AttentionAlertOut] = Field(default_factory=list)
+    challenge_paper_coaching: ChallengePaperCoachingOut | None = None
 
 
 # ---- 研究模板 ----
