@@ -83,6 +83,7 @@ class PaperOrderOut(BaseModel):
     routed_at: datetime | None
     note: str
     created_at: datetime
+    academy_rewards: list = Field(default_factory=list)
 
 
 class OrgPaperOrderOut(PaperOrderOut):

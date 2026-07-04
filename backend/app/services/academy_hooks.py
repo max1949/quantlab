@@ -34,8 +34,26 @@ def on_backtest_success(db: Session, user: User) -> list[dict]:
     return _collect(db, user, ["first-observation", "first-backtest"])
 
 
-def on_validation_success(db: Session, user: User) -> list[dict]:
-    return _collect(db, user, ["first-validation"])
+def on_validation_success(db: Session, user: User, *, factor_id=None) -> list[dict]:
+    codes = ["first-validation"]
+    if factor_id is not None:
+        from sqlalchemy import select
+
+        from backend.app.models.execution import PaperOrder
+
+        has_po = db.execute(
+            select(PaperOrder.id).where(
+                PaperOrder.user_id == user.id,
+                PaperOrder.factor_id == factor_id,
+            ).limit(1)
+        ).first()
+        if has_po:
+            codes.append("paper-decay-review")
+    return _collect(db, user, codes)
+
+
+def on_paper_order(db: Session, user: User) -> list[dict]:
+    return _collect(db, user, ["first-paper-order"])
 
 
 def on_factor_scan(db: Session, user: User) -> list[dict]:

@@ -198,6 +198,27 @@ export interface ProjectQuality {
     paper_sharpe?: number | null;
   } | null;
   coaching_tips?: Array<{ title: string; tip: string; action: string }>;
+  academy_milestones?: Array<{
+    code: string;
+    title: string;
+    mastery_stage: string;
+    xp_reward: number;
+    completed: boolean;
+  }>;
+  academy_stage_tasks?: Array<{
+    code: string;
+    title: string;
+    mastery_stage: string;
+    xp_reward: number;
+    completed: boolean;
+  }>;
+  academy_next_tasks?: Array<{
+    code: string;
+    title: string;
+    mastery_stage: string;
+    xp_reward: number;
+    completed: boolean;
+  }>;
   orthogonal?: {
     target_factor: string;
     control_factors: string[];
@@ -749,6 +770,7 @@ export interface AcademyTask {
   completed: boolean;
   locked: boolean;
   completed_at: string | null;
+  mastery_stage?: string | null;
 }
 
 export async function listTasks(): Promise<AcademyTask[]> {

@@ -9,6 +9,7 @@ import { Spinner } from "./ui";
 
 export default function AcademyTasks() {
   const d = useLocale((s) => s.dict.dashboard);
+  const mp = useLocale((s) => s.dict.masteryPath);
   const setUser = useAuth((s) => s.setUser);
   const notify = useUi((s) => s.notify);
   const qc = useQueryClient();
@@ -59,6 +60,13 @@ export default function AcademyTasks() {
                   {t.completed && "✓ "}
                   {t.title}
                   <span className="ml-2 text-xs font-normal text-brand-600">{d.academyXp(t.xp_reward)}</span>
+                  {t.mastery_stage && (
+                    <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-normal text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                      {d.academyMasteryStage(
+                        mp.stages[t.mastery_stage as keyof typeof mp.stages] ?? t.mastery_stage,
+                      )}
+                    </span>
+                  )}
                 </p>
                 <p className="text-sm text-slate-500">{t.description}</p>
                 {t.locked && (

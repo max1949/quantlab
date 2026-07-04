@@ -93,7 +93,7 @@ export default function L4PortfolioTools({
         </div>
       )}
       {!locked && (
-        <PaperExecutionPanel factorId={paperFactorId} symbol={paperSymbol} />
+        <PaperExecutionPanel factorId={paperFactorId} symbol={paperSymbol} projectId={projectId} />
       )}
     </div>
   );

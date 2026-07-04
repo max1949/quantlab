@@ -37,6 +37,7 @@ def _with_progress(task, completed_ids, user_task_map, user_level) -> TaskWithPr
         completed=task.id in completed_ids,
         locked=user_level < task.min_level,
         completed_at=ut.completed_at if ut else None,
+        mastery_stage=task_service.mastery_stage_for_task(task.code),
     )
 
 

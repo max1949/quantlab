@@ -161,6 +161,9 @@ def submit_paper_order(
     )
     db.commit()
     db.refresh(order)
+    from backend.app.services import academy_hooks
+
+    order.academy_rewards = academy_hooks.on_paper_order(db, user)
     return order
 
 

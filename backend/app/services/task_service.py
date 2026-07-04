@@ -44,6 +44,14 @@ def try_auto_complete(db: Session, user: User, code: str) -> dict | None:
 
 
 def list_active_tasks(db: Session) -> list[Task]:
+    rows = _list_active_tasks_raw(db)
+    if len(rows) < len(DEFAULT_TASKS):
+        seed_default_tasks(db)
+        rows = _list_active_tasks_raw(db)
+    return rows
+
+
+def _list_active_tasks_raw(db: Session) -> list[Task]:
     stmt = (
         select(Task)
         .where(Task.is_active.is_(True))
@@ -217,6 +225,24 @@ DEFAULT_TASKS: list[dict] = [
         "order_index": 35,
     },
     {
+        "code": "first-paper-order",
+        "title": "第一笔 Paper 模拟单",
+        "description": "通过 Paper 毕业线后提交首笔模拟订单，开启真实跟踪后自动完成。",
+        "category": "research",
+        "min_level": UserLevel.L1.value,
+        "xp_reward": 125,
+        "order_index": 36,
+    },
+    {
+        "code": "paper-decay-review",
+        "title": "衰减后复查",
+        "description": "已有 Paper 单后重新跑科学验证 — 纸面衰减时系统会指引你完成此步。",
+        "category": "research",
+        "min_level": UserLevel.L1.value,
+        "xp_reward": 100,
+        "order_index": 37,
+    },
+    {
         "code": "write-formula-factor",
         "title": "编写公式因子",
         "description": "在因子实验室创建公式因子后自动完成 (L2 + 研究员会员)。",
@@ -244,6 +270,62 @@ DEFAULT_TASKS: list[dict] = [
         "order_index": 50,
     },
 ]
+
+
+# 学院任务 ↔ 大师路径阶段映射 (供 UI 联动高亮)。
+MASTERY_STAGE_BY_TASK_CODE: dict[str, str] = {
+    "welcome": "start",
+    "first-observation": "start",
+    "first-backtest": "backtest",
+    "first-validation": "validate",
+    "first-factor-scan": "validate",
+    "first-paper-order": "paper",
+    "paper-decay-review": "track",
+    "first-report": "share",
+    "first-publish": "share",
+    "first-share": "share",
+    "use-template-factor": "start",
+    "combine-factors": "graduate",
+    "write-formula-factor": "graduate",
+    "write-python-factor": "graduate",
+}
+
+MASTERY_STAGE_TASK_CODES: dict[str, list[str]] = {
+    "start": ["welcome", "first-observation", "use-template-factor"],
+    "backtest": ["first-backtest"],
+    "validate": ["first-validation", "first-factor-scan"],
+    "graduate": ["combine-factors", "write-formula-factor"],
+    "paper": ["first-paper-order"],
+    "track": ["paper-decay-review"],
+    "share": ["first-report", "first-publish", "first-share"],
+}
+
+
+def mastery_stage_for_task(code: str) -> str | None:
+    return MASTERY_STAGE_BY_TASK_CODE.get(code)
+
+
+def mastery_milestones_for_user(db: Session, user_id: uuid.UUID) -> list[dict]:
+    """大师路径各阶段关联的学院任务进度 (项目质量页 / 仪表盘联动)。"""
+    tasks = list_active_tasks(db)
+    by_code = {t.code: t for t in tasks}
+    completed_ids = completed_task_ids(db, user_id)
+    out: list[dict] = []
+    for stage, codes in MASTERY_STAGE_TASK_CODES.items():
+        for code in codes:
+            task = by_code.get(code)
+            if task is None:
+                continue
+            out.append(
+                {
+                    "code": code,
+                    "title": task.title,
+                    "mastery_stage": stage,
+                    "xp_reward": task.xp_reward,
+                    "completed": task.id in completed_ids,
+                }
+            )
+    return out
 
 
 def seed_default_tasks(db: Session) -> dict:

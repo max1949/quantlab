@@ -105,7 +105,8 @@ def create_paper_order(
             "regime_fit_score": order.regime_fit_score,
         },
     )
-    return PaperOrderOut(**exs.order_to_dict(order))
+    out = PaperOrderOut(**exs.order_to_dict(order))
+    return out.model_copy(update={"academy_rewards": getattr(order, "academy_rewards", [])})
 
 
 @router.post(

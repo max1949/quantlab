@@ -22,7 +22,10 @@ export const AUTO_ACADEMY_TASK_CODES = new Set([
   "first-publish",
   "first-share",
   "use-template-factor",
+  "first-factor-scan",
   "combine-factors",
   "write-formula-factor",
   "write-python-factor",
+  "first-paper-order",
+  "paper-decay-review",
 ]);

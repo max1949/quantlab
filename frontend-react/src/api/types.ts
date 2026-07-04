@@ -640,6 +640,7 @@ export interface PaperOrder {
   routed_at: string | null;
   note: string;
   created_at: string;
+  academy_rewards?: AcademyReward[];
 }
 
 export interface PaperOrderEvent {

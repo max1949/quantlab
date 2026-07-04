@@ -8,6 +8,7 @@ import {
   submitPaperOrder,
 } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
+import { academyRewardMessage } from "../lib/academy";
 import { useUi } from "../store/ui";
 import { useLocale } from "../store/locale";
 import type { Dictionary } from "../i18n/dictionaries";
@@ -23,11 +24,14 @@ function isGatewayChannel(channel: string): boolean {
 export default function PaperExecutionPanel({
   factorId,
   symbol: symbolProp,
+  projectId,
 }: {
   factorId?: string | null;
   symbol?: string;
+  projectId?: string;
 } = {}) {
   const l4 = useLocale((s) => s.dict.l4Tools);
+  const d = useLocale((s) => s.dict.dashboard);
   const notify = useUi((s) => s.notify);
   const qc = useQueryClient();
 
@@ -69,8 +73,14 @@ export default function PaperExecutionPanel({
         note: factorId ? "mastery-path" : "",
       }),
     onSuccess: (o) => {
-      notify(l4.execSubmitted(o.channel, o.status), "success");
+      const msg = academyRewardMessage(o.academy_rewards, d.academyXpEarned);
+      notify(msg ?? l4.execSubmitted(o.channel, o.status), "success");
       void qc.invalidateQueries({ queryKey: ["paper-orders"] });
+      if (projectId) {
+        void qc.invalidateQueries({ queryKey: ["project-quality", projectId] });
+      }
+      void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
+      void qc.invalidateQueries({ queryKey: ["next-step"] });
     },
     onError: (e) => notify(apiErrorMessage(e, l4.execSubmitFail), "error"),
   });

@@ -22,6 +22,8 @@ def test_project_quality_endpoint(client, db_session):
         assert "paper_ready" in q
         assert "mastery" in q
         assert q["mastery"]["stage"] == "start"
+        assert "academy_milestones" in q
+        assert isinstance(q["academy_milestones"], list)
     finally:
         settings.research_gate_enabled = False
 

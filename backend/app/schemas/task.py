@@ -37,6 +37,7 @@ class TaskWithProgress(TaskOut):
     completed: bool
     locked: bool  # 当前用户等级 < min_level
     completed_at: datetime | None = None
+    mastery_stage: str | None = None
 
 
 class CompleteTaskResult(BaseModel):

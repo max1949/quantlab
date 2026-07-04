@@ -397,6 +397,21 @@ def project_quality_payload(db: Session, project_id: uuid.UUID, *, locale: str =
                 coaching_tips = [tip, *coaching_tips]
                 break
 
+    from backend.app.services import task_service as ts
+
+    academy_milestones = (
+        ts.mastery_milestones_for_user(db, project.owner_id) if project and project.owner_id else []
+    )
+    stage_tasks = [
+        m for m in academy_milestones if m["mastery_stage"] == mastery.get("stage")
+    ]
+    next_stage = mastery.get("next_action")
+    if next_stage == "revalidate":
+        next_stage = "track"
+    next_tasks = [
+        m for m in academy_milestones if m["mastery_stage"] == next_stage
+    ]
+
     return {
         "passed": verdict.passed,
         "reasons": verdict.reasons,
@@ -411,6 +426,9 @@ def project_quality_payload(db: Session, project_id: uuid.UUID, *, locale: str =
         "regime": regime,
         "mastery": mastery,
         "paper_decay": paper_decay,
+        "academy_milestones": academy_milestones,
+        "academy_stage_tasks": stage_tasks,
+        "academy_next_tasks": next_tasks,
         "coaching_tips": coaching_tips,
         "hints": hints,
         "orthogonal": orth,

@@ -49,6 +49,19 @@ export default function MasteryPathPanel({ quality, onAction }: Props) {
         })}
       </ol>
 
+      {quality.academy_next_tasks && quality.academy_next_tasks.some((t) => !t.completed) && (
+        <div className="mb-3 rounded-lg border border-amber-100 bg-amber-50/60 px-3 py-2 text-xs text-amber-900 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
+          {quality.academy_next_tasks
+            .filter((t) => !t.completed)
+            .slice(0, 2)
+            .map((t) => (
+              <p key={t.code} className="mt-0.5 first:mt-0">
+                🏅 {m.academyStagePending(t.title, t.xp_reward)}
+              </p>
+            ))}
+        </div>
+      )}
+
       {quality.regime && (
         <p className="mb-3 text-xs text-slate-600 dark:text-slate-300">
           {m.regimeHint(

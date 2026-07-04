@@ -133,3 +133,43 @@ def test_first_share_auto_completes(client, db_session):
     again = client.post(f"{BASE}/research/reports/{rep['id']}/share", headers=h)
     assert again.status_code == 201, again.text
     assert not again.json().get("academy_rewards")
+
+
+def test_tasks_include_mastery_stage(client, db_session):
+    seed_default_tasks(db_session)
+    h = _register(client, "acad_ms")
+    tasks = client.get(f"{BASE}/tasks", headers=h).json()
+    by_code = {t["code"]: t for t in tasks}
+    assert by_code["first-backtest"]["mastery_stage"] == "backtest"
+    assert by_code["first-paper-order"]["mastery_stage"] == "paper"
+
+
+def test_first_paper_order_auto_completes_academy(client, db_session):
+    from backend.app.models.user import User, UserLevel
+    from backend.app.services import membership_service as ms
+    from backend.app.services.market_data import seed_sample_market_data
+    from sqlalchemy import select
+
+    seed_default_tasks(db_session)
+    seed_sample_market_data(db_session)
+    h = _register(client, "acad_po")
+    user = db_session.execute(select(User).where(User.username == "acad_po")).scalar_one()
+    user.level = UserLevel.L4
+    db_session.commit()
+    ms.grant(db_session, user, ms.TIER_PRO, 30, "pro_monthly")
+
+    fid = client.post(
+        f"{BASE}/factors/template",
+        headers=h,
+        json={"name": "po", "template_type": "momentum", "params": {"window": 10}},
+    ).json()["id"]
+    created = client.post(
+        f"{BASE}/execution/paper/orders",
+        headers=h,
+        json={"symbol": "RB", "side": "buy", "notional_cny": 50000, "factor_id": fid},
+    )
+    assert created.status_code == 201, created.text
+    body = created.json()
+    assert any(r["code"] == "first-paper-order" for r in body.get("academy_rewards", []))
+    tasks = {t["code"]: t for t in client.get(f"{BASE}/tasks", headers=h).json()}
+    assert tasks["first-paper-order"]["completed"] is True
