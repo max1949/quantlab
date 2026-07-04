@@ -6,6 +6,7 @@ from engine.regime_strategy import infer_strategy_style, score_regime_fit
 def test_infer_from_template_type():
     assert infer_strategy_style(template_type="momentum") == "trend"
     assert infer_strategy_style(template_type="mean_reversion") == "mean_reversion"
+    assert infer_strategy_style(template_type="volume_surge") == "trend"
 
 
 def test_score_regime_fit_high_vol_mean_reversion():

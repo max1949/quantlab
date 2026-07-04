@@ -58,6 +58,7 @@ FACTOR_TEMPLATE_GATES: dict[str, dict[str, int]] = {
     "mean_reversion": {"min_level": 0, "min_tier": 0},
     "rsi": {"min_level": 0, "min_tier": 1},
     "sma_ratio": {"min_level": 1, "min_tier": 0},
+    "volume_surge": {"min_level": 1, "min_tier": 0},
 }
 
 

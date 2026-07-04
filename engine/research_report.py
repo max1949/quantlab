@@ -20,6 +20,7 @@ TEMPLATE_LABELS = {
     "rsi": "强弱 (超买超卖)",
     "volatility": "波动率",
     "mean_reversion": "均值回归",
+    "volume_surge": "成交量异动 / 放量突破",
 }
 
 TEMPLATE_HYPOTHESES = {
@@ -28,6 +29,7 @@ TEMPLATE_HYPOTHESES = {
     "rsi": "超买超卖会反转: RSI 过高或过低后, 价格倾向于回摆。",
     "volatility": "波动率蕴含信息: 波动状态的变化预示未来收益分布的变化。",
     "mean_reversion": "价格围绕均值波动: 远离均值后倾向于回归。",
+    "volume_surge": "异常放量往往伴随信息冲击: 放量上涨倾向延续, 放量下跌倾向走弱。",
 }
 
 

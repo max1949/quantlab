@@ -30,6 +30,7 @@ TEMPLATE_GATES: dict[str, dict[str, int]] = {
     "cost-stress-rb": {"min_level": 1, "min_tier": 0},
     "regime-trend-if": {"min_level": 2, "min_tier": 1},
     "master-oos-gold": {"min_level": 2, "min_tier": 2},
+    "volume-surge-rb": {"min_level": 1, "min_tier": 0},
 }
 
 TEMPLATE_TRACK: dict[str, str] = {
@@ -43,6 +44,7 @@ TEMPLATE_TRACK: dict[str, str] = {
     "cost-stress-rb": "advanced",
     "regime-trend-if": "advanced",
     "master-oos-gold": "master",
+    "volume-surge-rb": "advanced",
 }
 
 
@@ -119,6 +121,13 @@ DEFAULT_TEMPLATES = [
         "hypothesis": "长周期均线偏离能否通过严格样本外检验?",
         "description": "大师 Playbook — 完整走过验证→毕业→Paper 全流程。",
         "tags": ["大师", "OOS", "贵金属"],
+    },
+    {
+        "code": "volume-surge-rb", "title": "成交量异动突破", "symbol": "RB",
+        "factor_template": "volume_surge", "default_params": {"window": 20},
+        "hypothesis": "异常放量配合价格方向能否预测短期延续?",
+        "description": "进阶 Playbook — 用成交量异动因子学习放量突破与资金流入信号。",
+        "tags": ["进阶", "成交量", "突破"],
     },
 ]
 

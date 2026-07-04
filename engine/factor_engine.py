@@ -57,6 +57,17 @@ def mean_reversion(df: pd.DataFrame, window: int = 20) -> pd.Series:
     return -(close - mean) / std.replace(0.0, np.nan)
 
 
+def volume_surge(df: pd.DataFrame, window: int = 20) -> pd.Series:
+    """成交量异动 × 价格方向: 放量上涨为正, 放量下跌为负 (捕捉突破/建仓信号)。"""
+    vol = df["volume"].astype(float)
+    min_p = max(2, window // 2)
+    vol_ma = vol.rolling(window, min_periods=min_p).mean()
+    vol_std = vol.rolling(window, min_periods=min_p).std()
+    z = (vol - vol_ma) / vol_std.replace(0.0, np.nan)
+    direction = np.sign(df["close"].pct_change(fill_method=None))
+    return (z * direction).clip(-5.0, 5.0)
+
+
 @dataclass(frozen=True)
 class ParamSpec:
     name: str
@@ -113,6 +124,14 @@ TEMPLATES: dict[str, FactorTemplate] = {
             "价格相对均值的负向 z-score, 预期向均值回归。",
             mean_reversion,
             (ParamSpec("window", 20, 2, 250, "回看窗口"),),
+        ),
+        FactorTemplate(
+            "volume_surge",
+            "成交量异动",
+            "放量方向因子: 成交量 z-score × 涨跌方向, 捕捉突破与资金流入。",
+            volume_surge,
+            (ParamSpec("window", 20, 5, 120, "量能窗口"),),
+            requires=("close", "volume"),
         ),
     )
 }

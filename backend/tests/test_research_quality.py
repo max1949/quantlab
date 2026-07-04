@@ -131,6 +131,7 @@ def test_advanced_templates_auto_seed(db_session):
     rows = list_templates(db_session)
     codes = {t.code for t in rows}
     assert "cost-stress-rb" in codes
+    assert "volume-surge-rb" in codes
     assert len(codes) >= len(DEFAULT_TEMPLATES)
 
 

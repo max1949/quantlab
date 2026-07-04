@@ -257,6 +257,11 @@ _PLAN_HYPOTHESES = [
         "factor_template": "volatility",
         "rationale": "若波动率变化预示收益分布变化, 用波动率因子作为状态/过滤信号。",
     },
+    {
+        "name": "成交量异动假设",
+        "factor_template": "volume_surge",
+        "rationale": "若异常放量伴随方向性价格运动, 用成交量异动因子捕捉突破与资金流入。",
+    },
 ]
 
 _PLAN_EXPERIMENTS = [

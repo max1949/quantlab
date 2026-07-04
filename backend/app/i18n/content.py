@@ -207,6 +207,36 @@ RESEARCH_TEMPLATES: dict[str, dict[Locale, dict]] = {
             ],
         },
     },
+    "volume-surge-rb": {
+        "en": {
+            "title": "Volume Surge Breakout",
+            "hypothesis": "Does abnormal volume with price direction predict short-term continuation?",
+            "description": "Advanced playbook — learn breakout signals with the volume surge factor.",
+            "tags": ["advanced", "volume", "breakout"],
+            "suitable_for": "L1+ · volume / flow awareness",
+            "learning_steps": [
+                "Start volume surge factor on RB (needs volume data)",
+                "Backtest — watch turnover vs momentum templates",
+                "Validation — compare OOS Sharpe with cost stress",
+                "Check regime fit on project mastery path",
+                "Paper track only after graduation bar passes",
+            ],
+        },
+        "zh": {
+            "title": "成交量异动突破",
+            "hypothesis": "异常放量配合价格方向能否预测短期延续?",
+            "description": "进阶 Playbook — 用成交量异动因子学习放量突破与资金流入。",
+            "tags": ["进阶", "成交量", "突破"],
+            "suitable_for": "L1+ · 量价/资金流意识",
+            "learning_steps": [
+                "成交量异动因子开局（螺纹钢 RB，需 volume 数据）",
+                "回测 — 对比动量类模板的换手率",
+                "科学验证 — 看样本外夏普与成本敏感性",
+                "在项目大师路径查看 regime 适配分",
+                "通过 Paper 毕业线后再上模拟跟踪",
+            ],
+        },
+    },
 }
 
 LEARNING_STEPS_DEFAULT: dict[Locale, list[str]] = {
@@ -371,6 +401,36 @@ FACTOR_TEMPLATES: dict[str, dict[Locale, dict]] = {
                     "low_hint": "窗口短：均值跟得紧，极端值出现更频繁。",
                     "high_hint": "窗口长：均值更慢，回归信号更少。",
                     "suggested": "日线常用 20，调参后一定要重新验证。",
+                }
+            },
+        },
+    },
+    "volume_surge": {
+        "en": {
+            "label": "Volume surge",
+            "description": "Volume z-score × price direction; captures breakout flow.",
+            "how_it_works": "High volume on up days → positive score; high volume on down days → negative. Needs OHLCV with volume.",
+            "params": {"window": "Volume window"},
+            "param_help": {
+                "window": {
+                    "tip": "Rolling window for average volume and std when detecting surges.",
+                    "low_hint": "Short window (10): catches sudden spikes, more noise.",
+                    "high_hint": "Long window (60+): stable baseline, misses fast breakouts.",
+                    "suggested": "Start with 20 on daily RB/IF; validate turnover carefully.",
+                }
+            },
+        },
+        "zh": {
+            "label": "成交量异动",
+            "description": "成交量 z-score × 涨跌方向, 捕捉放量突破与资金流入。",
+            "how_it_works": "上涨日放量 → 打分偏高；下跌日放量 → 打分偏低。需要带 volume 的行情数据。",
+            "params": {"window": "量能窗口"},
+            "param_help": {
+                "window": {
+                    "tip": "计算成交量均值和标准差用多少根 K 线。",
+                    "low_hint": "窗口短（10 左右）：对突发放量敏感，噪声也更多。",
+                    "high_hint": "窗口长（60+）：基准更稳，可能错过快速突破。",
+                    "suggested": "日线 RB/IF 可先试 20，务必关注换手率与成本。",
                 }
             },
         },

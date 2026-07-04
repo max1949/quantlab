@@ -27,6 +27,7 @@
 | `rsi` | 相对强弱指标 0–100 | `window` |
 | `volatility` | 收益率滚动标准差 | `window` |
 | `mean_reversion` | 价格对均值的负向 z-score | `window` |
+| `volume_surge` | 成交量 z-score × 涨跌方向 | `window` (需 `volume` 列) |
 
 核心函数:
 

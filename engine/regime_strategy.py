@@ -23,6 +23,7 @@ _TEMPLATE_MAP: dict[str, str] = {
     "mean_reversion": "mean_reversion",
     "rsi": "mean_reversion",
     "volatility": "volatility",
+    "volume_surge": "trend",
 }
 
 

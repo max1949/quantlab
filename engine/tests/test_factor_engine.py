@@ -64,6 +64,15 @@ def test_missing_required_column_raises():
         compute_template_factor(bad, "momentum", {})
 
 
+def test_volume_surge_requires_close_and_volume():
+    bad = pd.DataFrame({"close": [1.0, 2.0, 3.0]})
+    with pytest.raises(FactorError):
+        compute_template_factor(bad, "volume_surge", {})
+    ok = pd.DataFrame({"close": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0], "volume": [100, 120, 90, 200, 150, 180]})
+    s = compute_template_factor(ok, "volume_surge", {"window": 5})
+    assert len(s) == len(ok)
+
+
 def test_standardize_zero_mean_unit_std():
     s = pd.Series(np.arange(100, dtype=float))
     z = standardize(s)
