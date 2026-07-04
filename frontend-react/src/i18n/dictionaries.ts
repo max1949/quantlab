@@ -466,6 +466,20 @@ const en = {
     dismiss: "Dismiss",
     dismissDone: (days: number) => `Dismissed — won't show again for ${days} days`,
     cooldownHint: "Dismiss hides a reminder for 7 days if the issue persists.",
+    viewHistory: "Dismissed history →",
+  },
+  attentionHistory: {
+    title: "Dismissed alerts",
+    subtitle: (days: number) =>
+      `Reminders you snoozed — they stay hidden for ${days} days unless you restore them.`,
+    empty: "No snoozed alerts in the last 7 days.",
+    dismissedAt: (when: string) => `Dismissed ${when}`,
+    expiresIn: (days: number) =>
+      days === 1 ? "Reappears in about 1 day if still relevant" : `Reappears in ${days} days if still relevant`,
+    expiresSoon: "Reappears within 24 hours if still relevant",
+    restore: "Restore now →",
+    restoreDone: "Alert restored to your workspace",
+    backWorkspace: "← Back to workspace",
   },
   challengePaperCoach: {
     badge: (day: number, title: string) => `30-day challenge · D${day} · ${title}`,
@@ -1644,6 +1658,19 @@ const zh = {
     dismiss: "知道了",
     dismissDone: (days: number) => `已忽略 — ${days} 天内不再重复提醒`,
     cooldownHint: "点「知道了」可隐藏 7 天；若问题仍在，到期后会再次提示。",
+    viewHistory: "已忽略记录 →",
+  },
+  attentionHistory: {
+    title: "已忽略的提醒",
+    subtitle: (days: number) => `你点「知道了」的提醒 — ${days} 天内不会重复出现，也可提前恢复。`,
+    empty: "近 7 天没有已忽略的提醒。",
+    dismissedAt: (when: string) => `忽略于 ${when}`,
+    expiresIn: (days: number) =>
+      days === 1 ? "若问题仍在，约 1 天后会再次出现" : `若问题仍在，${days} 天后会再次出现`,
+    expiresSoon: "若问题仍在，24 小时内会再次出现",
+    restore: "提前恢复 →",
+    restoreDone: "已恢复到工作台提醒",
+    backWorkspace: "← 返回工作台",
   },
   challengePaperCoach: {
     badge: (day: number, title: string) => `30 天挑战 · D${day} · ${title}`,

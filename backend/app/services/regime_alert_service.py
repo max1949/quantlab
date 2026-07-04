@@ -61,8 +61,104 @@ def dismiss_attention_alert(db: Session, user_id: uuid.UUID, alert_key: str) -> 
     return {"alert_key": key, "cooldown_days": days, "dismissed_at": now.isoformat()}
 
 
+def restore_attention_alert(db: Session, user_id: uuid.UUID, alert_key: str) -> dict:
+    """提前恢复被忽略的提醒。"""
+    key = alert_key.strip()
+    if not key or len(key) > 128:
+        raise ValueError("无效的提醒标识")
+    row = db.execute(
+        select(AttentionAlertDismissal).where(
+            AttentionAlertDismissal.user_id == user_id,
+            AttentionAlertDismissal.alert_key == key,
+        )
+    ).scalar_one_or_none()
+    if row is None:
+        raise ValueError("未找到该忽略记录")
+    db.delete(row)
+    db.commit()
+    return {"alert_key": key, "restored": True}
+
+
+def _cooldown_days() -> int:
+    return max(1, get_settings().attention_alert_cooldown_days)
+
+
+def _parse_alert_key(alert_key: str) -> tuple[str, str | None]:
+    if ":" not in alert_key:
+        return alert_key, None
+    kind, ref = alert_key.split(":", 1)
+    return kind, ref or None
+
+
+def _ref_label(db: Session, user_id: uuid.UUID, alert_key: str) -> str | None:
+    kind, ref = _parse_alert_key(alert_key)
+    if not ref:
+        return None
+    if kind == "paper_decay":
+        try:
+            factor = db.get(Factor, uuid.UUID(ref))
+            if factor and factor.owner_id == user_id:
+                return factor.name
+        except ValueError:
+            return ref
+        return ref
+    try:
+        proj = db.get(ResearchProject, uuid.UUID(ref))
+        if proj and proj.owner_id == user_id:
+            return proj.title
+    except ValueError:
+        return ref
+    return ref
+
+
+def list_dismissed_history(db: Session, user: User, locale: Locale = "en") -> dict:
+    """冷却期内已忽略的提醒历史。"""
+    days = _cooldown_days()
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+    rows = list(
+        db.execute(
+            select(AttentionAlertDismissal)
+            .where(
+                AttentionAlertDismissal.user_id == user.id,
+                AttentionAlertDismissal.dismissed_at >= cutoff,
+            )
+            .order_by(AttentionAlertDismissal.dismissed_at.desc())
+        )
+        .scalars()
+        .all()
+    )
+    kind_labels = i18n.ATTENTION_HISTORY_KIND.get(locale) or i18n.ATTENTION_HISTORY_KIND["en"]
+    items: list[dict] = []
+    now = datetime.now(timezone.utc)
+    for row in rows:
+        kind, _ = _parse_alert_key(row.alert_key)
+        dismissed = row.dismissed_at
+        if dismissed.tzinfo is None:
+            dismissed = dismissed.replace(tzinfo=timezone.utc)
+        expires = dismissed + timedelta(days=days)
+        delta = expires - now
+        if delta.total_seconds() <= 0:
+            remaining = 0
+        elif delta.days == 0:
+            remaining = 1
+        else:
+            remaining = delta.days
+        items.append(
+            {
+                "alert_key": row.alert_key,
+                "kind": kind,
+                "kind_label": kind_labels.get(kind, kind),
+                "ref_label": _ref_label(db, user.id, row.alert_key),
+                "dismissed_at": dismissed.isoformat(),
+                "expires_at": expires.isoformat(),
+                "days_remaining": remaining,
+            }
+        )
+    return {"cooldown_days": days, "items": items}
+
+
 def _dismissed_keys(db: Session, user_id: uuid.UUID) -> set[str]:
-    days = max(1, get_settings().attention_alert_cooldown_days)
+    days = _cooldown_days()
     cutoff = datetime.now(timezone.utc) - timedelta(days=days)
     rows = db.execute(
         select(AttentionAlertDismissal.alert_key).where(

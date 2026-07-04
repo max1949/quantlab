@@ -83,10 +83,15 @@ export default function AttentionAlertsPanel() {
 
   return (
     <div className="card border border-amber-100 bg-gradient-to-r from-amber-50/40 to-white dark:border-amber-900 dark:from-amber-950/20 dark:to-slate-900">
-      <div className="mb-3">
-        <h3 className="font-semibold text-slate-800 dark:text-slate-100">{d.title}</h3>
-        <p className="text-xs text-slate-500">{d.subtitle}</p>
-        <p className="mt-1 text-[11px] text-slate-400">{d.cooldownHint}</p>
+      <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <h3 className="font-semibold text-slate-800 dark:text-slate-100">{d.title}</h3>
+          <p className="text-xs text-slate-500">{d.subtitle}</p>
+          <p className="mt-1 text-[11px] text-slate-400">{d.cooldownHint}</p>
+        </div>
+        <Link to="/app/alerts" className="text-xs font-medium text-brand-600 hover:underline">
+          {d.viewHistory}
+        </Link>
       </div>
       {journey.isLoading ? (
         <p className="text-sm text-slate-400">{d.loading}</p>

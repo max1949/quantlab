@@ -11,11 +11,14 @@ from backend.app.auth.deps import CurrentUser
 from backend.app.core.database import get_db
 from backend.app.core.locale import RequestLocale
 from backend.app.schemas.growth import (
+    AttentionAlertHistoryOut,
     ChooseTypeRequest,
     DismissAttentionAlertOut,
     DismissAttentionAlertRequest,
     NextStepOut,
     ResearchJourneyOut,
+    RestoreAttentionAlertOut,
+    RestoreAttentionAlertRequest,
 )
 from backend.app.schemas.user import UserOut
 from backend.app.services import growth_service, onboarding_service, regime_alert_service
@@ -76,3 +79,40 @@ def dismiss_attention_alert(
         db, "dismiss_attention_alert", current_user.id, {"alert_key": payload.alert_key}
     )
     return DismissAttentionAlertOut(**out)
+
+
+@router.get(
+    "/attention-alerts/history",
+    response_model=AttentionAlertHistoryOut,
+    summary="已忽略提醒历史 (冷却期内)",
+)
+def attention_alert_history(
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+    locale: RequestLocale,
+) -> AttentionAlertHistoryOut:
+    return AttentionAlertHistoryOut(
+        **regime_alert_service.list_dismissed_history(db, current_user, locale)
+    )
+
+
+@router.post(
+    "/attention-alerts/restore",
+    response_model=RestoreAttentionAlertOut,
+    summary="提前恢复被忽略的提醒",
+)
+def restore_attention_alert(
+    payload: RestoreAttentionAlertRequest,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> RestoreAttentionAlertOut:
+    try:
+        out = regime_alert_service.restore_attention_alert(
+            db, current_user.id, payload.alert_key
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    growth_service.log_event(
+        db, "restore_attention_alert", current_user.id, {"alert_key": payload.alert_key}
+    )
+    return RestoreAttentionAlertOut(**out)

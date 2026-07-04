@@ -172,6 +172,35 @@ def test_dismiss_attention_alert_hides_from_journey(client, db_session):
     assert len(j2["attention_alerts"]) <= before - 1
 
 
+def test_attention_alert_history_and_restore(client, db_session):
+    from backend.app.services.regime_alert_service import make_alert_key
+
+    seed_sample_market_data(db_session)
+    h = _register(client, "alhist")
+    proj, _ = _full_research(client, h, db_session)
+    key = make_alert_key("weak_regime_fit", project_id=proj["id"])
+    client.post(
+        f"{BASE}/onboarding/attention-alerts/dismiss",
+        headers=h,
+        json={"alert_key": key},
+    )
+    hist = client.get(f"{BASE}/onboarding/attention-alerts/history", headers=h).json()
+    assert hist["cooldown_days"] == 7
+    assert any(item["alert_key"] == key for item in hist["items"])
+    item = next(i for i in hist["items"] if i["alert_key"] == key)
+    assert item["kind"] == "weak_regime_fit"
+    assert item["days_remaining"] >= 0
+
+    restore = client.post(
+        f"{BASE}/onboarding/attention-alerts/restore",
+        headers=h,
+        json={"alert_key": key},
+    ).json()
+    assert restore["restored"] is True
+    hist2 = client.get(f"{BASE}/onboarding/attention-alerts/history", headers=h).json()
+    assert key not in {i["alert_key"] for i in hist2["items"]}
+
+
 def test_paper_mastery_board_context_unit(db_session):
     from backend.app.services.leaderboard_service import paper_mastery_board_context
     from backend.app.models.user import User

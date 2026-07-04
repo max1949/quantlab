@@ -133,6 +133,30 @@ export async function dismissAttentionAlert(alert_key: string): Promise<{
   return data;
 }
 
+export async function getAttentionAlertHistory(): Promise<{
+  cooldown_days: number;
+  items: Array<{
+    alert_key: string;
+    kind: string;
+    kind_label: string;
+    ref_label: string | null;
+    dismissed_at: string;
+    expires_at: string;
+    days_remaining: number;
+  }>;
+}> {
+  const { data } = await api.get("/onboarding/attention-alerts/history");
+  return data;
+}
+
+export async function restoreAttentionAlert(alert_key: string): Promise<{
+  alert_key: string;
+  restored: boolean;
+}> {
+  const { data } = await api.post("/onboarding/attention-alerts/restore", { alert_key });
+  return data;
+}
+
 export async function getMentor(): Promise<Mentor> {
   const { data } = await api.get<Mentor>("/ai/mentor/next");
   return data;

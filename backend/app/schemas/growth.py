@@ -89,6 +89,30 @@ class DismissAttentionAlertOut(BaseModel):
     dismissed_at: str
 
 
+class AttentionAlertHistoryItemOut(BaseModel):
+    alert_key: str
+    kind: str
+    kind_label: str
+    ref_label: str | None = None
+    dismissed_at: str
+    expires_at: str
+    days_remaining: int
+
+
+class AttentionAlertHistoryOut(BaseModel):
+    cooldown_days: int
+    items: list[AttentionAlertHistoryItemOut] = Field(default_factory=list)
+
+
+class RestoreAttentionAlertRequest(BaseModel):
+    alert_key: str = Field(min_length=1, max_length=128)
+
+
+class RestoreAttentionAlertOut(BaseModel):
+    alert_key: str
+    restored: bool = True
+
+
 class ResearchJourneyOut(BaseModel):
     done_count: int
     total: int

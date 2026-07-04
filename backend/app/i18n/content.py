@@ -637,6 +637,19 @@ ALERT_CHALLENGE_HINT: dict[Locale, dict[str, str]] = {
     },
 }
 
+ATTENTION_HISTORY_KIND: dict[Locale, dict[str, str]] = {
+    "en": {
+        "regime_shift": "Regime shift",
+        "weak_regime_fit": "Weak regime fit",
+        "paper_decay": "Paper decay",
+    },
+    "zh": {
+        "regime_shift": "制度切换",
+        "weak_regime_fit": "制度适配偏弱",
+        "paper_decay": "Paper 衰减",
+    },
+}
+
 CHALLENGE_PAPER_COACH: dict[Locale, dict[str, str]] = {
     "en": {
         "d22_ready": "Challenge D{day}: 「{title}」 — paper bar passed. Submit a paper order on your project to light this milestone.",
