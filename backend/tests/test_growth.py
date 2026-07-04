@@ -237,7 +237,7 @@ def test_leaderboards_kinds(client, db_session):
     seed_sample_market_data(db_session)
     h = _register(client, "wade")
     _full_research(client, h, db_session)
-    for kind in ("researcher", "contributor", "newcomer", "improved"):
+    for kind in ("researcher", "contributor", "newcomer", "improved", "paper_mastery"):
         rows = client.get(f"{BASE}/leaderboards/{kind}", headers=h)
         assert rows.status_code == 200, kind
         anon = client.get(f"{BASE}/leaderboards/{kind}")

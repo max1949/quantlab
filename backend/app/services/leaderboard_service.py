@@ -16,12 +16,13 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from backend.app.models.factor import Factor
 from backend.app.models.research import ResearchReport
 from backend.app.models.user import User
 from backend.app.models.validation import Validation, ValidationStatus
 from backend.app.services.growth_service import EFFECTIVE_GRADES
 
-KINDS = {"researcher", "contributor", "newcomer", "improved"}
+KINDS = {"researcher", "contributor", "newcomer", "improved", "paper_mastery"}
 
 NEWCOMER_DAYS = 30
 IMPROVED_DAYS = 14
@@ -64,6 +65,9 @@ def leaderboard(db: Session, kind: str, limit: int = 50) -> list[dict]:
         ).scalars().all()
         return [_row(i + 1, u, "新人研究信用", round(u.research_contribution_score, 2)) for i, u in enumerate(users)]
 
+    if kind == "paper_mastery":
+        return _paper_mastery_board(db, limit)
+
     # improved: 近 IMPROVED_DAYS 天有效验证 (稳健/中等) + 报告
     since = datetime.now(timezone.utc) - timedelta(days=IMPROVED_DAYS)
     val_rows = db.execute(
@@ -97,4 +101,28 @@ def leaderboard(db: Session, kind: str, limit: int = 50) -> list[dict]:
         if user is None:
             continue
         out.append(_row(i + 1, user, "近期产出", val))
+    return out
+
+
+def _paper_mastery_board(db: Session, limit: int) -> list[dict]:
+    from backend.app.services import research_quality_service as rqs
+
+    owner_ids = list(db.execute(select(Factor.owner_id).distinct()).scalars().all())
+    scores: dict = {}
+    for uid in owner_ids:
+        counts = rqs.user_paper_mastery_counts(db, uid)
+        graduated = counts["paper_graduated_count"]
+        if graduated <= 0:
+            continue
+        scores[uid] = (graduated, counts["paper_tracking_count"])
+
+    ranked = sorted(scores.items(), key=lambda kv: (kv[1][0], kv[1][1]), reverse=True)[:limit]
+    out: list[dict] = []
+    for i, (uid, (graduated, tracking)) in enumerate(ranked):
+        user = db.get(User, uid)
+        if user is None:
+            continue
+        label = "Paper毕业因子"
+        value = f"{graduated}" + (f" (+{tracking}跟踪)" if tracking else "")
+        out.append(_row(i + 1, user, label, value))
     return out

@@ -456,6 +456,11 @@ def project_quality_payload(db: Session, project_id: uuid.UUID, *, locale: str =
         "academy_stage_tasks": stage_tasks,
         "academy_next_tasks": next_tasks,
         "coaching_tips": coaching_tips,
+        "feed_preview": {
+            "publish_ready": verdict.passed,
+            "paper_graduated": paper_verdict.passed,
+            "paper_tracking": has_paper_order,
+        },
         "hints": hints,
         "orthogonal": orth,
     }

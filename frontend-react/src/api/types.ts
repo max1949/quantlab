@@ -803,4 +803,5 @@ export type LeaderboardKind =
   | "researcher"
   | "contributor"
   | "newcomer"
-  | "improved";
+  | "improved"
+  | "paper_mastery";

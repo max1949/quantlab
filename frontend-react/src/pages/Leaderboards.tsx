@@ -17,6 +17,7 @@ export default function Leaderboards() {
     { kind: "contributor", label: l.contributor },
     { kind: "newcomer", label: l.newcomer },
     { kind: "improved", label: l.improved },
+    { kind: "paper_mastery", label: l.paperMastery },
   ];
   const q = useQuery({
     queryKey: ["leaderboard", kind],

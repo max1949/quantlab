@@ -31,6 +31,7 @@ import BacktestResultsPanel from "../components/BacktestResultsPanel";
 import QualityCoach from "../components/QualityCoach";
 import MasteryPathPanel from "../components/MasteryPathPanel";
 import FailureCoachPanel from "../components/FailureCoachPanel";
+import PublishFeedPreview from "../components/PublishFeedPreview";
 import DataQualityBanner from "../components/DataQualityBanner";
 import VolRegimeBanner from "../components/VolRegimeBanner";
 import FactorCatalogPanel from "../components/FactorCatalogPanel";
@@ -416,6 +417,10 @@ export default function ProjectDetail() {
         <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
           {p.warnBacktestOnly}
         </div>
+      )}
+
+      {quality.data && (
+        <PublishFeedPreview quality={quality.data} published={proj.status === "published"} />
       )}
 
       {quality.data && (

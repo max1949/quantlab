@@ -198,6 +198,11 @@ export interface ProjectQuality {
     paper_sharpe?: number | null;
   } | null;
   coaching_tips?: Array<{ title: string; tip: string; action: string }>;
+  feed_preview?: {
+    publish_ready: boolean;
+    paper_graduated: boolean;
+    paper_tracking: boolean;
+  };
   academy_milestones?: Array<{
     code: string;
     title: string;
