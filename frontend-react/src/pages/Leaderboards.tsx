@@ -1,6 +1,6 @@
 import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getLeaderboard, getResearchJourney } from "../api/endpoints";
+import { getLeaderboard, getPaperMasteryMeta, getResearchJourney } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
@@ -46,6 +46,12 @@ export default function Leaderboards() {
     queryFn: () => getLeaderboard(kind),
   });
 
+  const paperMeta = useQuery({
+    queryKey: ["paper-mastery-meta"],
+    queryFn: getPaperMasteryMeta,
+    enabled: kind === "paper_mastery",
+  });
+
   const journey = useQuery({
     queryKey: ["research-journey"],
     queryFn: getResearchJourney,
@@ -55,6 +61,13 @@ export default function Leaderboards() {
   const masteryGoal = journey.data?.mastery_goal;
   const onBoard = masteryGoal?.on_leaderboard ?? false;
   const myRank = masteryGoal?.leaderboard_rank ?? null;
+  const cutoff = paperMeta.data?.cutoff;
+  const cutoffRank = cutoff?.rank ?? null;
+
+  const myGraduated = masteryGoal?.paper_graduated_count ?? 0;
+  const cutoffGraduated = cutoff?.graduated ?? 1;
+  const barPct =
+    cutoffGraduated > 0 ? Math.min(100, Math.round((myGraduated / cutoffGraduated) * 100)) : 0;
 
   return (
     <div>
@@ -103,6 +116,48 @@ export default function Leaderboards() {
         </div>
       )}
 
+      {kind === "paper_mastery" && cutoff && (
+        <div className="mb-4 card border border-amber-200 bg-amber-50/50 dark:border-amber-900 dark:bg-amber-950/20">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <p className="text-sm font-semibold text-amber-950 dark:text-amber-100">
+                {l.cutoffTitle(cutoff.rank, cutoff.graduated, cutoff.tracking, paperMeta.data?.board_limit ?? 50)}
+              </p>
+              {cutoff.username && (
+                <p className="mt-1 text-xs text-amber-800/90 dark:text-amber-200/90">
+                  {l.cutoffHolder(cutoff.username)}
+                </p>
+              )}
+              {paperMeta.data && (
+                <p className="mt-1 text-xs text-slate-500">
+                  {l.totalRanked(paperMeta.data.total_ranked, paperMeta.data.board_full)}
+                </p>
+              )}
+            </div>
+            <span className="rounded-full bg-amber-200/80 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-900 dark:bg-amber-900 dark:text-amber-100">
+              {l.cutoffBadge}
+            </span>
+          </div>
+          {user && masteryGoal && !onBoard && cutoffGraduated > 0 && (
+            <div className="mt-3">
+              <div className="mb-1 flex justify-between text-xs text-slate-600 dark:text-slate-300">
+                <span>{l.youProgress(myGraduated)}</span>
+                <span>{l.cutoffProgress(cutoffGraduated)}</span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                <div
+                  className="h-full rounded-full bg-amber-500 transition-all"
+                  style={{ width: `${barPct}%` }}
+                />
+              </div>
+              {barPct >= 100 && masteryGoal.needs_tracking_boost && (
+                <p className="mt-1 text-xs text-violet-700 dark:text-violet-300">{l.trackingBoostLine(myGraduated)}</p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {q.isLoading ? (
         <Spinner />
       ) : q.isError ? (
@@ -123,6 +178,11 @@ export default function Leaderboards() {
             <tbody className="divide-y divide-slate-100">
               {q.data?.map((row) => {
                 const isMe = user?.id === row.user_id;
+                const isCutoff =
+                  kind === "paper_mastery" &&
+                  cutoffRank != null &&
+                  row.rank === cutoffRank &&
+                  (paperMeta.data?.board_full ?? false);
                 return (
                   <tr
                     key={row.user_id}
@@ -130,7 +190,9 @@ export default function Leaderboards() {
                     className={
                       isMe
                         ? "bg-emerald-50/80 ring-1 ring-inset ring-emerald-200 dark:bg-emerald-950/30 dark:ring-emerald-900"
-                        : "hover:bg-slate-50"
+                        : isCutoff
+                          ? "bg-amber-50/60 dark:bg-amber-950/20"
+                          : "hover:bg-slate-50"
                     }
                   >
                     <td className="px-4 py-3 font-semibold">
@@ -138,6 +200,11 @@ export default function Leaderboards() {
                       {isMe && (
                         <span className="ml-1 text-[10px] font-normal text-emerald-700 dark:text-emerald-300">
                           {l.you}
+                        </span>
+                      )}
+                      {isCutoff && (
+                        <span className="ml-1 rounded bg-amber-200 px-1 py-0.5 text-[10px] font-medium text-amber-900 dark:bg-amber-900 dark:text-amber-100">
+                          {l.cutoffBadge}
                         </span>
                       )}
                     </td>

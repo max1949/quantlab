@@ -776,7 +776,22 @@ export interface LeaderRow {
   username: string;
   level: number;
   metric_label: string;
-  metric_value: number;
+  metric_value: number | string;
+}
+
+export interface PaperMasteryCutoff {
+  rank: number;
+  user_id: string;
+  username: string | null;
+  graduated: number;
+  tracking: number;
+}
+
+export interface PaperMasteryMeta {
+  board_limit: number;
+  total_ranked: number;
+  board_full: boolean;
+  cutoff: PaperMasteryCutoff | null;
 }
 
 export interface Referral {

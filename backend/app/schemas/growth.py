@@ -124,7 +124,22 @@ class LeaderRow(BaseModel):
     username: str
     level: int
     metric_label: str
-    metric_value: float | int
+    metric_value: float | int | str
+
+
+class PaperMasteryCutoffOut(BaseModel):
+    rank: int
+    user_id: str
+    username: str | None = None
+    graduated: int
+    tracking: int
+
+
+class PaperMasteryMetaOut(BaseModel):
+    board_limit: int
+    total_ranked: int
+    board_full: bool
+    cutoff: PaperMasteryCutoffOut | None = None
 
 
 # ---- 邀请 ----

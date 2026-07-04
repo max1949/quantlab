@@ -578,6 +578,15 @@ const en = {
       `${count} graduated — track more paper NAV to move up the board.`,
     goDashboard: "Go to dashboard →",
     you: "you",
+    cutoffBadge: "cutoff",
+    cutoffTitle: (rank: number, graduated: number, tracking: number, limit: number) =>
+      `Top-${limit} cutoff (#${rank}): ${graduated} graduated` +
+      (tracking > 0 ? ` · ${tracking} tracking` : ""),
+    cutoffHolder: (name: string) => `Held by ${name}`,
+    totalRanked: (total: number, full: boolean) =>
+      full ? `${total} ranked researchers — board is full` : `${total} on board — room to climb`,
+    youProgress: (n: number) => `You: ${n} graduated`,
+    cutoffProgress: (n: number) => `Cutoff: ${n}`,
     rank: "Rank",
     user: "Researcher",
     score: "Score",
@@ -1690,6 +1699,15 @@ const zh = {
       `已有 ${count} 个毕业因子 — 多跟踪 Paper 净值即可往前冲。`,
     goDashboard: "去工作台 →",
     you: "你",
+    cutoffBadge: "入榜线",
+    cutoffTitle: (rank: number, graduated: number, tracking: number, limit: number) =>
+      `前 ${limit} 入榜线（第 ${rank} 名）：${graduated} 个毕业` +
+      (tracking > 0 ? ` · ${tracking} 个跟踪` : ""),
+    cutoffHolder: (name: string) => `当前守门：${name}`,
+    totalRanked: (total: number, full: boolean) =>
+      full ? `共 ${total} 位有毕业因子 — 榜单已满` : `当前 ${total} 位上榜 — 仍有空位`,
+    youProgress: (n: number) => `你：${n} 个毕业`,
+    cutoffProgress: (n: number) => `入榜线：${n} 个`,
     rank: "排名",
     user: "研究员",
     score: "分数",

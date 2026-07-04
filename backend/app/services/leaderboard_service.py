@@ -171,6 +171,36 @@ def paper_mastery_board_context(
     }
 
 
+def paper_mastery_cutoff_meta(db: Session, *, board_limit: int = PAPER_MASTERY_BOARD_LIMIT) -> dict:
+    """Paper 大师榜入榜线 (公开, 用于榜页展示)。"""
+    from backend.app.models.user import User
+
+    ranked = _paper_mastery_ranked(db)
+    if not ranked:
+        return {
+            "board_limit": board_limit,
+            "total_ranked": 0,
+            "board_full": False,
+            "cutoff": None,
+        }
+
+    idx = min(board_limit - 1, len(ranked) - 1)
+    uid, graduated, tracking = ranked[idx]
+    holder = db.get(User, uid)
+    return {
+        "board_limit": board_limit,
+        "total_ranked": len(ranked),
+        "board_full": len(ranked) >= board_limit,
+        "cutoff": {
+            "rank": idx + 1,
+            "user_id": str(uid),
+            "username": holder.username if holder else None,
+            "graduated": graduated,
+            "tracking": tracking,
+        },
+    }
+
+
 def paper_mastery_rank_for_user(db: Session, user_id, *, board_limit: int = PAPER_MASTERY_BOARD_LIMIT) -> tuple[int | None, bool]:
     """用户在全站 Paper 大师榜的名次；on_board 表示是否出现在默认榜单页 (前 board_limit 名)。"""
     ctx = paper_mastery_board_context(db, user_id, board_limit=board_limit)

@@ -283,6 +283,23 @@ def test_leaderboards_kinds(client, db_session):
     assert client.get(f"{BASE}/leaderboards/bogus", headers=h).status_code == 404
 
 
+def test_paper_mastery_cutoff_meta(client, db_session):
+    seed_sample_market_data(db_session)
+    h = _register(client, "cutoffmeta")
+    meta = client.get(f"{BASE}/leaderboards/meta/paper-mastery").json()
+    assert meta["board_limit"] == 50
+    assert meta["total_ranked"] == 0
+    assert meta["cutoff"] is None
+    anon = client.get(f"{BASE}/leaderboards/meta/paper-mastery")
+    assert anon.status_code == 200
+
+    proj, _ = _full_research(client, h, db_session)
+    meta2 = client.get(f"{BASE}/leaderboards/meta/paper-mastery").json()
+    assert meta2["total_ranked"] >= 1
+    assert meta2["cutoff"] is not None
+    assert meta2["cutoff"]["graduated"] >= 1
+
+
 # ---------------- 邀请裂变 ----------------
 
 def test_referral_activation_rewards_referrer(client, db_session):

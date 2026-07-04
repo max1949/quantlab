@@ -23,6 +23,7 @@ import type {
   TemplateEvaluate,
   Graph,
   LeaderRow,
+  PaperMasteryMeta,
   Plan,
   SubscriptionStatus,
   LeaderboardKind,
@@ -829,6 +830,11 @@ export async function getReferral(): Promise<Referral> {
 // ---- leaderboards ----
 export async function getLeaderboard(kind: LeaderboardKind): Promise<LeaderRow[]> {
   const { data } = await api.get<LeaderRow[]>(`/leaderboards/${kind}`);
+  return data;
+}
+
+export async function getPaperMasteryMeta(): Promise<PaperMasteryMeta> {
+  const { data } = await api.get<PaperMasteryMeta>("/leaderboards/meta/paper-mastery");
   return data;
 }
 
