@@ -159,8 +159,12 @@ def research_feed(
     db: Annotated[Session, Depends(get_db)],
     sort: str = Query(default="latest", pattern="^(latest|top)$"),
     limit: int = Query(default=30, ge=1, le=50),
+    graduated_only: bool = Query(default=False, description="仅展示 Paper 毕业研究"),
 ) -> list[ReportSummary]:
-    return [ReportSummary(**r) for r in research_service.feed(db, sort, limit)]
+    return [
+        ReportSummary(**r)
+        for r in research_service.feed(db, sort, limit, graduated_only=graduated_only)
+    ]
 
 
 @router.get("/reports", response_model=list[ReportSummary], summary="我的研究报告列表")

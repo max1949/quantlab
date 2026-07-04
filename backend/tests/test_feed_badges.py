@@ -43,3 +43,33 @@ def test_feed_mastery_badges_defaults_without_validation(client, db_session):
     assert badges["paper_graduated"] is False
     assert badges["paper_tracking"] is False
     assert badges["mastery_badge"] is None
+
+
+def test_feed_graduated_only_filter(client, db_session):
+    from backend.app.services.market_data import seed_sample_market_data
+    from backend.app.services.research_service import feed
+    from backend.tests.test_growth import _full_research
+
+    seed_sample_market_data(db_session)
+    h = _register(client, "fgrad1")
+    proj, rep = _full_research(client, h, db_session)
+    client.post(f"{BASE}/projects/{proj['id']}/publish", headers=h)
+    client.post(f"{BASE}/research/reports/{rep['id']}/share", headers=h)
+
+    all_rows = feed(db_session, sort="latest", limit=50, graduated_only=False)
+    grad_rows = feed(db_session, sort="latest", limit=50, graduated_only=True)
+    assert len(grad_rows) <= len(all_rows)
+    assert all(r.get("paper_graduated") for r in grad_rows)
+
+    api_all = client.get(f"{BASE}/public/feed").json()
+    api_grad = client.get(f"{BASE}/public/feed", params={"graduated_only": True}).json()
+    assert isinstance(api_grad, list)
+    assert len(api_grad) <= len(api_all)
+
+
+def test_profile_includes_paper_mastery_counts(client, db_session):
+    h = _register(client, "fprof1")
+    prof = client.get(f"{BASE}/researchers/me", headers=h).json()
+    assert "paper_graduated_count" in prof
+    assert "paper_tracking_count" in prof
+    assert prof["paper_graduated_count"] >= 0

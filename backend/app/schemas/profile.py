@@ -21,6 +21,8 @@ class ResearcherProfile(BaseModel):
     validation_count: int
     effective_validation_count: int
     report_count: int
+    paper_graduated_count: int = 0
+    paper_tracking_count: int = 0
     followers: int
     following: int
     is_following: bool

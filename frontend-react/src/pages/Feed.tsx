@@ -17,10 +17,11 @@ export default function Feed() {
   const highlightId = params.get("highlight");
   const highlightRef = useRef<HTMLDivElement>(null);
   const [sort, setSort] = useState<"top" | "latest">(highlightId ? "latest" : "top");
+  const [graduatedOnly, setGraduatedOnly] = useState(false);
   useDocumentTitle(`${f.title} · QuantLab AI`);
   const feed = useQuery({
-    queryKey: ["public-feed", sort],
-    queryFn: () => getPublicFeed(sort),
+    queryKey: ["public-feed", sort, graduatedOnly],
+    queryFn: () => getPublicFeed(sort, graduatedOnly),
   });
 
   useEffect(() => {
@@ -35,7 +36,7 @@ export default function Feed() {
     <div>
       <PageTitle title={f.title} subtitle={f.subtitle} />
 
-      <div className="mb-4 flex gap-2">
+      <div className="mb-4 flex flex-wrap gap-2">
         <button
           type="button"
           className={sort === "top" ? "btn-primary" : "btn-ghost"}
@@ -49,6 +50,13 @@ export default function Feed() {
           onClick={() => setSort("latest")}
         >
           {f.sortLatest}
+        </button>
+        <button
+          type="button"
+          className={graduatedOnly ? "btn-primary" : "btn-ghost"}
+          onClick={() => setGraduatedOnly((v) => !v)}
+        >
+          {f.filterGraduated}
         </button>
       </div>
 
@@ -111,8 +119,8 @@ export default function Feed() {
         </div>
       ) : (
         <EmptyState
-          title={f.emptyTitle}
-          hint={f.emptyHint}
+          title={graduatedOnly ? f.emptyGraduatedTitle : f.emptyTitle}
+          hint={graduatedOnly ? f.emptyGraduatedHint : f.emptyHint}
           action={
             user ? (
               <Link to="/templates" className="btn-primary mt-2">

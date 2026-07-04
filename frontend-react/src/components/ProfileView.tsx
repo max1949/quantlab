@@ -92,6 +92,18 @@ export default function ProfileView({
         />
         <Stat label={t.reports} value={profile.report_count} />
       </div>
+
+      {((profile.paper_graduated_count ?? 0) > 0 || (profile.paper_tracking_count ?? 0) > 0) && (
+        <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/60 px-4 py-3 dark:border-emerald-900 dark:bg-emerald-950/30">
+          <p className="text-sm font-medium text-emerald-900 dark:text-emerald-100">
+            {t.masteryBanner(profile.paper_graduated_count ?? 0, profile.paper_tracking_count ?? 0)}
+          </p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            <Stat label={t.paperGraduated} value={profile.paper_graduated_count ?? 0} />
+            <Stat label={t.paperTracking} value={profile.paper_tracking_count ?? 0} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

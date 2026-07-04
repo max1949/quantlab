@@ -324,6 +324,32 @@ def _has_paper_order(db: Session, user_id: uuid.UUID, factor_id: uuid.UUID | Non
     )
 
 
+def user_paper_mastery_counts(db: Session, user_id: uuid.UUID) -> dict:
+    """用户维度 Paper 毕业 / 跟踪因子数 (研究员主页统计)。"""
+    factor_ids = list(
+        db.execute(select(Factor.id).where(Factor.owner_id == user_id)).scalars().all()
+    )
+    if not factor_ids:
+        return {"paper_graduated_count": 0, "paper_tracking_count": 0}
+
+    po_fids = set(
+        db.execute(
+            select(PaperOrder.factor_id).where(
+                PaperOrder.user_id == user_id,
+                PaperOrder.factor_id.isnot(None),
+            )
+        ).scalars().all()
+    )
+    graduated = 0
+    tracking = 0
+    for fid in factor_ids:
+        if assess_factor_paper(db, fid).passed:
+            graduated += 1
+        if fid in po_fids:
+            tracking += 1
+    return {"paper_graduated_count": graduated, "paper_tracking_count": tracking}
+
+
 def project_quality_payload(db: Session, project_id: uuid.UUID, *, locale: str = "zh") -> dict:
     verdict = assess_project(db, project_id)
     hints: list[str] = []

@@ -63,6 +63,9 @@ def build_profile(
     from backend.app.services import social_service
 
     follow_counts = social_service.counts(db, uid)
+    from backend.app.services import research_quality_service as rqs
+
+    mastery_counts = rqs.user_paper_mastery_counts(db, uid)
     out = {
         "user_id": str(uid),
         "username": user.username,
@@ -77,6 +80,8 @@ def build_profile(
         "validation_count": validation_count,
         "effective_validation_count": effective_validation_count,
         "report_count": report_count,
+        "paper_graduated_count": mastery_counts["paper_graduated_count"],
+        "paper_tracking_count": mastery_counts["paper_tracking_count"],
         "followers": follow_counts["followers"],
         "following": follow_counts["following"],
         "is_following": False,

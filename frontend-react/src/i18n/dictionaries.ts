@@ -448,6 +448,9 @@ const en = {
     badgeLegendTitle: "Mastery badges",
     badgeLegendPaper: "Paper graduated — passed stricter live-trading bar",
     badgeLegendTracking: "Paper live — author submitted a paper order & tracks NAV",
+    filterGraduated: "Paper graduated only",
+    emptyGraduatedTitle: "No paper-graduated research yet",
+    emptyGraduatedHint: "Pass the paper graduation bar in your project, publish, and you'll appear here.",
   },
   validationPanel: {
     title: "Scientific validation results",
@@ -963,6 +966,10 @@ const en = {
     factors: "Factors",
     validations: "Valid validations",
     reports: "Reports",
+    paperGraduated: "Paper graduated factors",
+    paperTracking: "Paper tracking",
+    masteryBanner: (graduated: number, tracking: number) =>
+      `${graduated} factor(s) passed the paper bar${tracking > 0 ? ` · ${tracking} live on paper` : ""}`,
     following: "Following",
     followers: "Followers",
     follow: "+ Follow",
@@ -1511,6 +1518,9 @@ const zh = {
     badgeLegendTitle: "大师化徽章说明",
     badgeLegendPaper: "Paper 毕业 — 通过更严的模拟实盘毕业线",
     badgeLegendTracking: "Paper 跟踪中 — 作者已下模拟单并跟踪净值",
+    filterGraduated: "仅看 Paper 毕业",
+    emptyGraduatedTitle: "还没有 Paper 毕业研究",
+    emptyGraduatedHint: "在项目里通过 Paper 毕业线并发布后，会出现在这里。",
   },
   validationPanel: {
     title: "科学验证结果",
@@ -2019,6 +2029,10 @@ const zh = {
     factors: "因子",
     validations: "有效验证",
     reports: "研究报告",
+    paperGraduated: "Paper 毕业因子",
+    paperTracking: "Paper 跟踪中",
+    masteryBanner: (graduated: number, tracking: number) =>
+      `${graduated} 个因子通过 Paper 毕业线${tracking > 0 ? ` · ${tracking} 个正在 Paper 跟踪` : ""}`,
     following: "关注",
     followers: "粉丝",
     follow: "+ 关注",

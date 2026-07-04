@@ -751,8 +751,13 @@ export async function getFeed(): Promise<ReportSummary[]> {
   return data;
 }
 
-export async function getPublicFeed(sort: "latest" | "top" = "top"): Promise<ReportSummary[]> {
-  const { data } = await api.get<ReportSummary[]>("/public/feed", { params: { sort } });
+export async function getPublicFeed(
+  sort: "latest" | "top" = "top",
+  graduatedOnly = false,
+): Promise<ReportSummary[]> {
+  const { data } = await api.get<ReportSummary[]>("/public/feed", {
+    params: { sort, graduated_only: graduatedOnly || undefined },
+  });
   return data;
 }
 

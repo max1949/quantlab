@@ -732,6 +732,8 @@ export interface ResearcherProfile {
   validation_count: number;
   effective_validation_count: number;
   report_count: number;
+  paper_graduated_count?: number;
+  paper_tracking_count?: number;
   followers: number;
   following: number;
   is_following: boolean;

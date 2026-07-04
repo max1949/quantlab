@@ -343,7 +343,7 @@ def feed_summary(
     }
 
 
-def feed(db: Session, sort: str = "latest", limit: int = 30) -> list[dict]:
+def feed(db: Session, sort: str = "latest", limit: int = 30, *, graduated_only: bool = False) -> list[dict]:
     """研究 Feed: 公开报告。sort=latest(最新) | top(高评分优先)。"""
     limit = max(1, min(int(limit), 50))
     rows = list(
@@ -380,6 +380,8 @@ def feed(db: Session, sort: str = "latest", limit: int = 30) -> list[dict]:
             val_id = None
         metrics_by_report[row.id] = _validation_metrics(validations.get(val_id)) if val_id else (None, None)
     badges_by_report = {r.id: _feed_mastery_badges(db, r) for r in rows}
+    if graduated_only:
+        rows = [r for r in rows if badges_by_report.get(r.id, {}).get("paper_graduated")]
     if sort == "top":
         rows.sort(
             key=lambda r: (
