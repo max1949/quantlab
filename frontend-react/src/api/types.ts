@@ -35,6 +35,16 @@ export interface NextStep {
   cta_path: string;
   recommended_template: string | null;
   active_project_id: string | null;
+  regime_pick?: {
+    symbol: string;
+    regime: string | null;
+    regime_label: string | null;
+    coach_hint: string;
+    template_code: string;
+    template_title: string;
+    fit_score: number;
+    fit_verdict: string;
+  } | null;
 }
 
 export interface JourneyStep {

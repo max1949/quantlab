@@ -50,6 +50,17 @@ export default function Dashboard() {
               <p className="text-xs uppercase tracking-wide text-brand-100">{d.nextStep}</p>
               <h2 className="mt-1 text-xl font-bold">{nextStep.data.title}</h2>
               <p className="mt-1 text-sm text-brand-50">{nextStep.data.action}</p>
+              {nextStep.data.regime_pick?.coach_hint && (
+                <p className="mt-2 rounded-lg bg-white/15 px-3 py-2 text-xs text-brand-50">
+                  {d.regimeCoach(
+                    nextStep.data.regime_pick.regime_label ?? "",
+                    nextStep.data.regime_pick.template_title,
+                    nextStep.data.regime_pick.fit_verdict,
+                    nextStep.data.regime_pick.fit_score,
+                  )}
+                  <span className="opacity-90"> — {nextStep.data.regime_pick.coach_hint}</span>
+                </p>
+              )}
             </div>
             <button
               className="btn whitespace-nowrap bg-white text-brand-700 hover:bg-brand-50"

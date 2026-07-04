@@ -48,6 +48,21 @@ def test_register_with_user_type_and_onboarding_next(client, db_session):
     assert nxt["recommended_template"] == "vol-regime"
 
 
+def test_next_step_regime_pick_on_create_project(client, db_session):
+    from backend.app.services.market_data import seed_sample_market_data
+    from backend.app.services.template_service import seed_default_templates
+
+    seed_sample_market_data(db_session)
+    seed_default_templates(db_session)
+    h = _register(client, "regnext")
+    nxt = client.get(f"{BASE}/onboarding/next", headers=h).json()
+    assert nxt["stage"] == "create_project"
+    assert nxt.get("regime_pick") is not None
+    assert nxt["recommended_template"] == nxt["regime_pick"]["template_code"]
+    assert nxt["regime_pick"]["fit_score"] >= 0
+    assert nxt["regime_pick"]["coach_hint"]
+
+
 def test_research_journey_endpoint(client, db_session):
     seed_sample_market_data(db_session)
     seed_default_challenge(db_session)

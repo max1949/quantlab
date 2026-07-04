@@ -410,6 +410,8 @@ const en = {
     journeyChallengeDay: (day: number) => `Challenge D${day}`,
     journeyChallengeHint: "Enroll in the 30-day challenge — milestones light up as you complete each step.",
     journeyEnrollChallenge: "Join challenge →",
+    regimeCoach: (regime: string, title: string, verdict: string, score: number) =>
+      `${regime} · 「${title}」 ${verdict} ${score}`,
   },
   masteryGoal: {
     title: "Paper Masters goal",
@@ -1547,6 +1549,8 @@ const zh = {
     journeyChallengeDay: (day: number) => `挑战 D${day}`,
     journeyChallengeHint: "报名 30 天挑战 — 每完成研究闭环一步，对应里程碑会自动点亮。",
     journeyEnrollChallenge: "去报名挑战 →",
+    regimeCoach: (regime: string, title: string, verdict: string, score: number) =>
+      `${regime} · 推荐「${title}」${verdict} ${score}分`,
   },
   masteryGoal: {
     title: "距 Paper 大师榜",

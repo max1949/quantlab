@@ -527,6 +527,11 @@ FIT_VERDICT_LABEL: dict[Locale, dict[str, str]] = {
     "zh": {"适合": "适合", "一般": "一般", "谨慎": "谨慎"},
 }
 
+REGIME_NEXT_ACTION: dict[Locale, str] = {
+    "en": " · {regime} regime → recommended 「{title}」 ({verdict} {score})",
+    "zh": " · 当前{regime}，推荐「{title}」（{verdict} {score}分）",
+}
+
 JOURNEY_STEPS: dict[Locale, dict[str, str]] = {
     "en": {
         "template": "Pick template",

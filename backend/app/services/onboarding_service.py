@@ -148,7 +148,33 @@ def next_step(db: Session, user: User, locale: Locale = "en") -> dict:
         "active_project_id": active_id,
     }
     if stage == "create_project":
-        out["recommended_template"] = TYPE_DEFAULT_TEMPLATE.get(user_type, "gold-trend")
+        default_tpl = TYPE_DEFAULT_TEMPLATE.get(user_type, "gold-trend")
+        out["recommended_template"] = default_tpl
+        from backend.app.services import membership_service as ms, template_service
+
+        tier = ms.current_tier(db, user)
+        picks_data = template_service.regime_template_picks(db, user, tier, locale)
+        top = picks_data["picks"][0] if picks_data.get("picks") else None
+        if top:
+            out["recommended_template"] = top["code"]
+            out["regime_pick"] = {
+                "symbol": picks_data["symbol"],
+                "regime": picks_data.get("regime"),
+                "regime_label": picks_data.get("regime_label"),
+                "coach_hint": picks_data.get("coach_hint", ""),
+                "template_code": top["code"],
+                "template_title": top["title"],
+                "fit_score": top["fit_score"],
+                "fit_verdict": top["fit_verdict"],
+            }
+            if picks_data.get("regime_label"):
+                fmt = i18n.REGIME_NEXT_ACTION.get(locale) or i18n.REGIME_NEXT_ACTION["en"]
+                out["action"] = detail["action"] + fmt.format(
+                    regime=picks_data["regime_label"],
+                    title=top["title"],
+                    verdict=top["fit_verdict"],
+                    score=top["fit_score"],
+                )
     return out
 
 
