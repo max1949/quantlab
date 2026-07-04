@@ -163,6 +163,81 @@ JOURNEY_STEP_KEYS = (
 )
 
 
+def _mastery_goal_hint(
+    locale: Locale,
+    *,
+    on_board: bool,
+    rank: int | None,
+    graduated: int,
+    paper_ready: bool,
+    mastery_next: str | None,
+    progress_pct: int,
+) -> str:
+    hints = i18n.MASTERY_GOAL_HINT.get(locale) or i18n.MASTERY_GOAL_HINT["en"]
+    labels = i18n.MASTERY_STAGE_LABEL.get(locale) or i18n.MASTERY_STAGE_LABEL["en"]
+    if on_board and rank:
+        return hints["on_board"].format(rank=rank, count=graduated)
+    if paper_ready:
+        return hints["paper_ready"]
+    if mastery_next:
+        next_label = labels.get(mastery_next, mastery_next)
+        return hints["in_progress"].format(next=next_label, pct=progress_pct)
+    return hints["start"]
+
+
+def _mastery_goal_payload(db: Session, user: User, locale: Locale) -> dict:
+    from backend.app.services import leaderboard_service, research_quality_service as rqs
+
+    counts = rqs.user_paper_mastery_counts(db, user.id)
+    graduated = counts["paper_graduated_count"]
+    tracking = counts["paper_tracking_count"]
+    rank, on_board = (
+        leaderboard_service.paper_mastery_rank_for_user(db, user.id)
+        if graduated > 0
+        else (None, False)
+    )
+
+    active_id = _active_project_id(db, user)
+    mastery_stage = None
+    mastery_next_action = None
+    mastery_progress_pct = 0
+    paper_ready = False
+    publish_ready = False
+
+    if active_id:
+        q = rqs.project_quality_payload(db, active_id, locale=locale)
+        m = q.get("mastery") or {}
+        mastery_stage = m.get("stage")
+        mastery_next_action = m.get("next_action")
+        mastery_progress_pct = int(m.get("progress_pct") or 0)
+        paper_ready = bool(q.get("paper_ready"))
+        feed = q.get("feed_preview") or {}
+        publish_ready = bool(feed.get("publish_ready"))
+
+    hint = _mastery_goal_hint(
+        locale,
+        on_board=on_board,
+        rank=rank,
+        graduated=graduated,
+        paper_ready=paper_ready,
+        mastery_next=mastery_next_action,
+        progress_pct=mastery_progress_pct,
+    )
+
+    return {
+        "paper_graduated_count": graduated,
+        "paper_tracking_count": tracking,
+        "on_leaderboard": on_board,
+        "leaderboard_rank": rank,
+        "mastery_stage": mastery_stage,
+        "mastery_next_action": mastery_next_action,
+        "mastery_progress_pct": mastery_progress_pct,
+        "paper_ready": paper_ready,
+        "publish_ready": publish_ready,
+        "hint": hint,
+    }
+
+
 def research_journey(db: Session, user: User, locale: Locale = "en") -> dict:
     """七步研究闭环进度 (工作台进度环)。"""
     from backend.app.models.growth import ResearchShare
@@ -243,4 +318,5 @@ def research_journey(db: Session, user: User, locale: Locale = "en") -> dict:
         "challenge_code": challenge_code,
         "challenge_completed_count": challenge_completed_count,
         "challenge_total": challenge_total,
+        "mastery_goal": _mastery_goal_payload(db, user, locale),
     }

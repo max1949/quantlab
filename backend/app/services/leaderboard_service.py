@@ -104,6 +104,25 @@ def leaderboard(db: Session, kind: str, limit: int = 50) -> list[dict]:
     return out
 
 
+def paper_mastery_rank_for_user(db: Session, user_id, *, board_limit: int = 50) -> tuple[int | None, bool]:
+    """用户在全站 Paper 大师榜的名次；on_board 表示是否出现在默认榜单页 (前 board_limit 名)。"""
+    from backend.app.services import research_quality_service as rqs
+
+    owner_ids = list(db.execute(select(Factor.owner_id).distinct()).scalars().all())
+    scores: dict = {}
+    for uid in owner_ids:
+        counts = rqs.user_paper_mastery_counts(db, uid)
+        if counts["paper_graduated_count"] > 0:
+            scores[uid] = (counts["paper_graduated_count"], counts["paper_tracking_count"])
+
+    ranked = sorted(scores.items(), key=lambda kv: (kv[1][0], kv[1][1]), reverse=True)
+    for i, (uid, _) in enumerate(ranked):
+        if uid == user_id:
+            rank = i + 1
+            return rank, rank <= board_limit
+    return None, False
+
+
 def _paper_mastery_board(db: Session, limit: int) -> list[dict]:
     from backend.app.services import research_quality_service as rqs
 

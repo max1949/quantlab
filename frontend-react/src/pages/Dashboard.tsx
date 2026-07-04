@@ -13,6 +13,7 @@ import { stageToCtaLabel, stageToRoute } from "../lib/nav";
 import { GradeBadge, PageTitle, Spinner, Stat } from "../components/ui";
 import AcademyTasks from "../components/AcademyTasks";
 import ResearchJourneyRing from "../components/ResearchJourneyRing";
+import MasteryGoalPanel from "../components/MasteryGoalPanel";
 
 export default function Dashboard() {
   const user = useAuth((s) => s.user)!;
@@ -66,6 +67,10 @@ export default function Dashboard() {
             </button>
           </div>
         ) : null}
+      </div>
+
+      <div className="mt-6">
+        <MasteryGoalPanel />
       </div>
 
       <div className="mt-6">

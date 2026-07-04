@@ -458,6 +458,44 @@ TYPE_INTRO: dict[str, dict[Locale, str]] = {
     },
 }
 
+MASTERY_STAGE_LABEL: dict[Locale, dict[str, str]] = {
+    "en": {
+        "start": "build factor",
+        "backtest": "run backtest",
+        "validate": "run validation",
+        "graduate": "pass publish gate",
+        "paper": "submit paper order",
+        "track": "monitor paper NAV",
+        "share": "publish & share",
+        "revalidate": "re-validate after decay",
+    },
+    "zh": {
+        "start": "建因子",
+        "backtest": "跑回测",
+        "validate": "做验证",
+        "graduate": "过发布线",
+        "paper": "下 Paper 单",
+        "track": "跟踪 Paper",
+        "share": "发布分享",
+        "revalidate": "衰减后重验",
+    },
+}
+
+MASTERY_GOAL_HINT: dict[Locale, dict[str, str]] = {
+    "en": {
+        "on_board": "You are on the Paper Masters board (#{rank}) with {count} graduated factor(s).",
+        "paper_ready": "Paper bar passed — submit a paper order to climb the masters board.",
+        "in_progress": "Next toward Paper Masters: {next} ({pct}% on mastery path).",
+        "start": "Start a project from a template — the mastery path leads to the Paper Masters board.",
+    },
+    "zh": {
+        "on_board": "你已在 Paper 大师榜第 {rank} 名（{count} 个毕业因子）。",
+        "paper_ready": "已通过 Paper 毕业线 — 下模拟单即可冲击大师榜。",
+        "in_progress": "距 Paper 大师榜：下一步 {next}（大师路径 {pct}%）。",
+        "start": "从模板开局 — 跟着大师路径就能冲上 Paper 大师榜。",
+    },
+}
+
 JOURNEY_STEPS: dict[Locale, dict[str, str]] = {
     "en": {
         "template": "Pick template",

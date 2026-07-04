@@ -51,6 +51,19 @@ export interface ChallengeMilestoneLink {
   completed: boolean;
 }
 
+export interface MasteryGoal {
+  paper_graduated_count: number;
+  paper_tracking_count: number;
+  on_leaderboard: boolean;
+  leaderboard_rank: number | null;
+  mastery_stage: string | null;
+  mastery_next_action: string | null;
+  mastery_progress_pct: number;
+  paper_ready: boolean;
+  publish_ready: boolean;
+  hint: string;
+}
+
 export interface ResearchJourney {
   done_count: number;
   total: number;
@@ -60,6 +73,7 @@ export interface ResearchJourney {
   challenge_code: string | null;
   challenge_completed_count: number;
   challenge_total: number;
+  mastery_goal: MasteryGoal;
 }
 
 export interface Mentor {

@@ -58,6 +58,10 @@ def test_research_journey_endpoint(client, db_session):
     assert len(j["steps"]) == 7
     assert j["steps"][0]["key"] == "template"
     assert j["challenge_enrolled"] is False
+    mg = j["mastery_goal"]
+    assert mg["paper_graduated_count"] == 0
+    assert mg["on_leaderboard"] is False
+    assert mg["hint"]
     proj, _ = _full_research(client, h, db_session)
     client.post(f"{BASE}/challenges/30d-research/enroll", headers=h)
     j2 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
@@ -66,6 +70,10 @@ def test_research_journey_endpoint(client, db_session):
     assert j2["challenge_enrolled"] is True
     factor_step = next(s for s in j2["steps"] if s["key"] == "factor")
     assert any(cm["code"] == "first_factor" for cm in factor_step["challenge_milestones"])
+    mg2 = j2["mastery_goal"]
+    assert j2["active_project_id"] == proj["id"]
+    assert mg2["mastery_progress_pct"] >= 0
+    assert mg2["hint"]
 
 
 def test_public_report_detail(client, db_session):

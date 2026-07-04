@@ -406,6 +406,18 @@ const en = {
     journeyChallengeHint: "Enroll in the 30-day challenge — milestones light up as you complete each step.",
     journeyEnrollChallenge: "Join challenge →",
   },
+  masteryGoal: {
+    title: "Paper Masters goal",
+    subtitle: "Graduate factors, track paper NAV, climb the masters board",
+    onBoard: (rank: number) => `#${rank} on board`,
+    graduatedCount: (graduated: number, tracking: number) =>
+      tracking > 0 ? `${graduated} graduated · ${tracking} tracking` : `${graduated} graduated`,
+    masteryPath: "Mastery path",
+    viewBoard: "Paper Masters board →",
+    paperCta: "Submit paper order →",
+    goProject: (next: string) => `Continue: ${next} →`,
+    fromTemplate: "Start from template →",
+  },
   stages: {
     create_project: "Start from template →",
     create_factor: "Build factor →",
@@ -1482,6 +1494,18 @@ const zh = {
     journeyChallengeDay: (day: number) => `挑战 D${day}`,
     journeyChallengeHint: "报名 30 天挑战 — 每完成研究闭环一步，对应里程碑会自动点亮。",
     journeyEnrollChallenge: "去报名挑战 →",
+  },
+  masteryGoal: {
+    title: "距 Paper 大师榜",
+    subtitle: "毕业因子、跟踪模拟盘、冲上大师榜",
+    onBoard: (rank: number) => `榜内第 ${rank} 名`,
+    graduatedCount: (graduated: number, tracking: number) =>
+      tracking > 0 ? `${graduated} 个毕业 · ${tracking} 个跟踪` : `${graduated} 个毕业因子`,
+    masteryPath: "大师路径进度",
+    viewBoard: "查看 Paper 大师榜 →",
+    paperCta: "去下 Paper 单 →",
+    goProject: (next: string) => `继续：${next} →`,
+    fromTemplate: "从模板开局 →",
   },
   stages: {
     create_project: "从模板开始 →",

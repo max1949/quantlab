@@ -34,6 +34,19 @@ class JourneyStepOut(BaseModel):
     challenge_milestones: list[dict] = Field(default_factory=list)
 
 
+class MasteryGoalOut(BaseModel):
+    paper_graduated_count: int = 0
+    paper_tracking_count: int = 0
+    on_leaderboard: bool = False
+    leaderboard_rank: int | None = None
+    mastery_stage: str | None = None
+    mastery_next_action: str | None = None
+    mastery_progress_pct: int = 0
+    paper_ready: bool = False
+    publish_ready: bool = False
+    hint: str = ""
+
+
 class ResearchJourneyOut(BaseModel):
     done_count: int
     total: int
@@ -43,6 +56,7 @@ class ResearchJourneyOut(BaseModel):
     challenge_code: str | None = None
     challenge_completed_count: int = 0
     challenge_total: int = 0
+    mastery_goal: MasteryGoalOut = Field(default_factory=MasteryGoalOut)
 
 
 # ---- 研究模板 ----
