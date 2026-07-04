@@ -29,6 +29,33 @@ class ResearchQualityError(Exception):
         super().__init__("; ".join(reasons))
 
 
+def _localize_regime_payload(regime: dict | None, locale: str) -> dict | None:
+    if not regime:
+        return None
+    from backend.app.i18n import content as i18n
+
+    loc = "zh" if locale == "zh" else "en"
+    out = dict(regime)
+    rkey = str(out.get("regime") or "mid")
+    labels = i18n.REGIME_LABEL.get(loc) or i18n.REGIME_LABEL["en"]
+    out["regime_label"] = labels.get(rkey, out.get("label") or rkey)
+    style_key = str(out.get("strategy_style") or "generic")
+    style_labels = i18n.STRATEGY_STYLE_LABEL.get(loc) or i18n.STRATEGY_STYLE_LABEL["en"]
+    out["strategy_label"] = style_labels.get(style_key, out.get("strategy_label") or style_key)
+    verdict = out.get("fit_verdict")
+    if verdict:
+        vmap = i18n.FIT_VERDICT_LABEL.get(loc) or i18n.FIT_VERDICT_LABEL["en"]
+        out["fit_verdict"] = vmap.get(str(verdict), verdict)
+    score = out.get("fit_score")
+    if loc == "en":
+        out["fit_hint"] = (
+            f"{out['strategy_label']} · fit {score}/100"
+            if score is not None
+            else str(out.get("fit_hint") or "")
+        )
+    return out
+
+
 def _thresholds() -> QualityThresholds:
     s = get_settings()
     if not s.research_gate_enabled:
@@ -438,6 +465,8 @@ def project_quality_payload(db: Session, project_id: uuid.UUID, *, locale: str =
         m for m in academy_milestones if m["mastery_stage"] == next_stage
     ]
 
+    regime_out = _localize_regime_payload(regime, locale)
+
     return {
         "passed": verdict.passed,
         "reasons": verdict.reasons,
@@ -449,7 +478,7 @@ def project_quality_payload(db: Session, project_id: uuid.UUID, *, locale: str =
         "paper_thresholds": paper_thresholds_payload(),
         "factor_id": str(factor_id) if factor_id else None,
         "symbol": project.symbol if project else None,
-        "regime": regime,
+        "regime": regime_out,
         "mastery": mastery,
         "paper_decay": paper_decay,
         "academy_milestones": academy_milestones,

@@ -30,6 +30,7 @@ import ValidationResultsPanel from "../components/ValidationResultsPanel";
 import BacktestResultsPanel from "../components/BacktestResultsPanel";
 import QualityCoach from "../components/QualityCoach";
 import MasteryPathPanel from "../components/MasteryPathPanel";
+import ProjectRegimePanel from "../components/ProjectRegimePanel";
 import FailureCoachPanel from "../components/FailureCoachPanel";
 import PublishFeedPreview from "../components/PublishFeedPreview";
 import DataQualityBanner from "../components/DataQualityBanner";
@@ -387,7 +388,11 @@ export default function ProjectDetail() {
       {symbol && activeTimeframe && (
         <>
           <DataQualityBanner symbol={symbol} timeframe={activeTimeframe} />
-          <VolRegimeBanner symbol={symbol} timeframe={activeTimeframe} />
+          <VolRegimeBanner
+            symbol={symbol}
+            timeframe={activeTimeframe}
+            enabled={!quality.data?.regime?.fit_score}
+          />
         </>
       )}
 
@@ -422,6 +427,8 @@ export default function ProjectDetail() {
       {quality.data && (
         <PublishFeedPreview quality={quality.data} published={proj.status === "published"} />
       )}
+
+      {quality.data && <ProjectRegimePanel quality={quality.data} />}
 
       {quality.data && (
         <MasteryPathPanel quality={quality.data} onAction={handleMasteryAction} />

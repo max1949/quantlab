@@ -30,6 +30,17 @@ def test_project_quality_endpoint(client, db_session):
         settings.research_gate_enabled = False
 
 
+def test_project_quality_includes_regime_fit(client, db_session):
+    seed_sample_market_data(db_session)
+    h = _register(client, "regqual")
+    proj, _ = _full_research(client, h, db_session)
+    q = client.get(f"{BASE}/projects/{proj['id']}/quality", headers=h).json()
+    assert q.get("regime") is not None
+    assert q["regime"].get("fit_score") is not None
+    assert q["regime"].get("strategy_style")
+    assert q["regime"].get("regime_label")
+
+
 def test_paper_readiness_stricter_than_publish():
     from engine.research_quality import assess_paper_readiness, assess_publish_readiness
 

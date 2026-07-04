@@ -344,6 +344,13 @@ const en = {
       ({ RB: "Rebar RB", AU: "Gold AU", IF: "Index IF" })[sym] ?? sym,
     regimeSymbolMatch: "This symbol",
   },
+  projectRegime: {
+    title: (symbol: string) => `Market regime · ${symbol}`,
+    asOf: (date: string) => `as of ${date}`,
+    strategy: (label: string) => `Strategy style: ${label}`,
+    fitLabel: "Regime fit score",
+    tryOtherTemplate: "Browse regime-matched templates →",
+  },
   masteryPath: {
     title: "Mastery path",
     subtitle: "From template to paper trading — follow the steps to grow like a pro.",
@@ -1488,6 +1495,13 @@ const zh = {
     regimeSymbol: (sym: string) =>
       ({ RB: "螺纹钢 RB", AU: "黄金 AU", IF: "股指 IF" })[sym] ?? sym,
     regimeSymbolMatch: "本标的",
+  },
+  projectRegime: {
+    title: (symbol: string) => `Market regime · ${symbol}`,
+    asOf: (date: string) => `as of ${date}`,
+    strategy: (label: string) => `Strategy style: ${label}`,
+    fitLabel: "Regime fit score",
+    tryOtherTemplate: "Browse regime-matched templates →",
   },
   masteryPath: {
     title: "大师成长路径",

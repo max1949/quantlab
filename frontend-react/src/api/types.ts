@@ -523,6 +523,7 @@ export interface VolRegime {
   timeframe: string;
   regime: "low" | "mid" | "high";
   label: string;
+  regime_label?: string;
   volatility_ann: number;
   percentile: number;
   vol_window: number;

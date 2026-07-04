@@ -62,16 +62,6 @@ export default function MasteryPathPanel({ quality, onAction }: Props) {
         </div>
       )}
 
-      {quality.regime && (
-        <p className="mb-3 text-xs text-slate-600 dark:text-slate-300">
-          {m.regimeHint(
-            String(quality.regime.regime ?? "—"),
-            quality.regime.fit_score != null ? Number(quality.regime.fit_score) : null,
-            quality.regime.fit_verdict ? String(quality.regime.fit_verdict) : null,
-          )}
-        </p>
-      )}
-
       {quality.paper_ready && mastery.stage === "track" && mastery.decay_attention ? (
         <div
           className={`rounded-lg border px-3 py-2 text-sm ${

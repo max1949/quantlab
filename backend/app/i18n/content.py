@@ -527,6 +527,21 @@ FIT_VERDICT_LABEL: dict[Locale, dict[str, str]] = {
     "zh": {"适合": "适合", "一般": "一般", "谨慎": "谨慎"},
 }
 
+STRATEGY_STYLE_LABEL: dict[Locale, dict[str, str]] = {
+    "en": {
+        "trend": "Trend/momentum",
+        "mean_reversion": "Mean reversion",
+        "volatility": "Volatility",
+        "generic": "General",
+    },
+    "zh": {
+        "trend": "趋势/动量",
+        "mean_reversion": "均值回归",
+        "volatility": "波动率",
+        "generic": "综合",
+    },
+}
+
 REGIME_NEXT_ACTION: dict[Locale, str] = {
     "en": " · {regime} regime → recommended 「{title}」 ({verdict} {score})",
     "zh": " · 当前{regime}，推荐「{title}」（{verdict} {score}分）",
