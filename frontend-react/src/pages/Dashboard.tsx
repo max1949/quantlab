@@ -91,15 +91,46 @@ export default function Dashboard() {
 
       {mentor.data && (
         <div className="mt-4 card border-brand-100 bg-brand-50/40">
-          <div className="flex items-start gap-3">
-            <span className="text-2xl">🤖</span>
-            <div>
-              <p className="font-semibold text-slate-800">
-                {d.aiMentor} · {mentor.data.title}
-              </p>
-              <p className="mt-1 text-sm text-slate-600">{mentor.data.message}</p>
-              <p className="mt-2 text-xs text-slate-400">{mentor.data.disclaimer}</p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">🤖</span>
+              <div>
+                <p className="font-semibold text-slate-800">
+                  {d.aiMentor} · {mentor.data.title}
+                </p>
+                <p className="mt-1 text-sm text-slate-600">{mentor.data.message}</p>
+                {mentor.data.regime_pick?.template_title && (
+                  <p className="mt-2 rounded-lg border border-violet-200 bg-violet-50/60 px-2.5 py-1.5 text-xs text-violet-900 dark:border-violet-900 dark:bg-violet-950/30 dark:text-violet-100">
+                    {d.mentorRegime(
+                      mentor.data.regime_pick.symbol,
+                      mentor.data.regime_pick.regime_label ?? "",
+                      mentor.data.regime_pick.template_title,
+                      mentor.data.regime_pick.fit_verdict,
+                      mentor.data.regime_pick.fit_score,
+                    )}
+                  </p>
+                )}
+                <p className="mt-2 text-xs text-slate-400">{mentor.data.disclaimer}</p>
+              </div>
             </div>
+            {mentor.data.stage === "create_project" && mentor.data.recommended_template && (
+              <button
+                type="button"
+                className="btn shrink-0 text-sm"
+                onClick={() =>
+                  navigate(
+                    stageToRoute(
+                      mentor.data!.stage,
+                      mentor.data!.recommended_template,
+                      null,
+                      mentor.data!.regime_pick?.symbol,
+                    ),
+                  )
+                }
+              >
+                {stageToCtaLabel(mentor.data.stage, stages)}
+              </button>
+            )}
           </div>
         </div>
       )}

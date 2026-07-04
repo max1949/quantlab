@@ -217,6 +217,17 @@ def mentor_next(db: Session, user: User, locale: str = "en") -> dict:
     message = f"{step['title']} — {step['action']}"
     if step["stage"] == "keep_going":
         message = i18n.MENTOR_KEEP_GOING_PREFIX[loc] + step["action"]
+    regime_pick = step.get("regime_pick")
+    if regime_pick and regime_pick.get("template_title"):
+        fmt = i18n.MENTOR_REGIME_APPEND.get(loc) or i18n.MENTOR_REGIME_APPEND["en"]
+        message += fmt.format(
+            symbol=regime_pick.get("symbol") or "RB",
+            regime=regime_pick.get("regime_label") or regime_pick.get("regime") or "",
+            coach=regime_pick.get("coach_hint") or "",
+            title=regime_pick["template_title"],
+            verdict=regime_pick.get("fit_verdict") or "",
+            score=regime_pick.get("fit_score") or 0,
+        )
     return {
         "stage": step["stage"],
         "title": step["title"],
@@ -224,6 +235,7 @@ def mentor_next(db: Session, user: User, locale: str = "en") -> dict:
         "cta_path": step["cta_path"],
         "message": message,
         "recommended_template": step.get("recommended_template"),
+        "regime_pick": regime_pick,
         "disclaimer": i18n.DISCLAIMER[loc],
     }
 

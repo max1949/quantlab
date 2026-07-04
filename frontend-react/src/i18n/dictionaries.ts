@@ -416,6 +416,8 @@ const en = {
     journeyEnrollChallenge: "Join challenge →",
     regimeCoach: (regime: string, title: string, verdict: string, score: number) =>
       `${regime} · 「${title}」 ${verdict} ${score}`,
+    mentorRegime: (symbol: string, regime: string, title: string, verdict: string, score: number) =>
+      `${symbol} · ${regime} → 「${title}」 ${verdict} ${score}`,
   },
   masteryGoal: {
     title: "Paper Masters goal",
@@ -1559,6 +1561,8 @@ const zh = {
     journeyEnrollChallenge: "去报名挑战 →",
     regimeCoach: (regime: string, title: string, verdict: string, score: number) =>
       `${regime} · 推荐「${title}」${verdict} ${score}分`,
+    mentorRegime: (symbol: string, regime: string, title: string, verdict: string, score: number) =>
+      `${symbol} · ${regime} → 推荐「${title}」${verdict} ${score}分`,
   },
   masteryGoal: {
     title: "距 Paper 大师榜",

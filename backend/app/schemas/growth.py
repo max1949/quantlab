@@ -185,4 +185,5 @@ class MentorOut(BaseModel):
     cta_path: str
     message: str
     recommended_template: str | None = None
+    regime_pick: dict | None = None
     disclaimer: str

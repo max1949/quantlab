@@ -376,6 +376,21 @@ def test_ai_mentor_next(client, db_session, monkeypatch):
     assert "trading advice" in m["disclaimer"] or "不构成交易建议" in m["disclaimer"]
 
 
+def test_ai_mentor_includes_regime_pick(client, db_session, monkeypatch):
+    from backend.app.services.market_data import seed_sample_market_data
+    from backend.app.services.template_service import seed_default_templates
+
+    monkeypatch.setattr(llm_client, "is_enabled", lambda: False)
+    seed_sample_market_data(db_session)
+    seed_default_templates(db_session)
+    h = _register(client, "mentorreg")
+    m = client.get(f"{BASE}/ai/mentor/next", headers=h).json()
+    assert m.get("regime_pick") is not None
+    assert m["regime_pick"]["template_code"] == m["recommended_template"]
+    assert m["regime_pick"]["coach_hint"]
+    assert m["regime_pick"]["template_title"] in m["message"]
+
+
 def test_event_tracking_anonymous_allowed(client, db_session):
     # 匿名上报 visit
     assert client.post(f"{BASE}/events", json={"event": "visit", "props": {}}).status_code == 204

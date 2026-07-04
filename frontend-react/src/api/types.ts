@@ -108,6 +108,7 @@ export interface Mentor {
   cta_path: string;
   message: string;
   recommended_template: string | null;
+  regime_pick?: NextStep["regime_pick"];
   disclaimer: string;
 }
 

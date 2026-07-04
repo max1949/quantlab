@@ -651,6 +651,11 @@ MENTOR_KEEP_GOING_PREFIX: dict[Locale, str] = {
     "zh": "你已经走完了第一个完整研究闭环! ",
 }
 
+MENTOR_REGIME_APPEND: dict[Locale, str] = {
+    "en": " {symbol} is in {regime} — {coach} Try 「{title}」 ({verdict} {score}).",
+    "zh": " {symbol} 当前{regime} — {coach} 建议从「{title}」开局（{verdict} {score}分）。",
+}
+
 DISCLAIMER: dict[Locale, str] = {
     "en": "Research workflow guidance only — not trading advice.",
     "zh": "仅为研究流程提醒, 不构成交易建议。",
