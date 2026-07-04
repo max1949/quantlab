@@ -63,6 +63,11 @@ export interface MasteryGoal {
   publish_ready: boolean;
   hint: string;
   challenge_paper_milestones: ChallengePaperMilestone[];
+  board_limit: number;
+  cutoff_graduated: number | null;
+  graduated_needed: number | null;
+  needs_tracking_boost: boolean;
+  ranks_outside_board: number | null;
 }
 
 export interface ChallengePaperMilestone {

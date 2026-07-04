@@ -84,7 +84,15 @@ export default function Leaderboards() {
             <p className="mt-2 text-emerald-900 dark:text-emerald-100">
               {onBoard && myRank != null
                 ? l.yourRankOnBoard(myRank, masteryGoal.paper_graduated_count)
-                : l.notOnBoardYet(masteryGoal.paper_graduated_count)}
+                : masteryGoal.graduated_needed != null && masteryGoal.graduated_needed > 0
+                  ? l.gapToBoardLine(
+                      masteryGoal.graduated_needed,
+                      masteryGoal.cutoff_graduated ?? 0,
+                      masteryGoal.board_limit,
+                    )
+                  : masteryGoal.needs_tracking_boost
+                    ? l.trackingBoostLine(masteryGoal.paper_graduated_count)
+                    : l.notOnBoardYet(masteryGoal.paper_graduated_count)}
             </p>
           )}
           {user && !onBoard && (

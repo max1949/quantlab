@@ -26,6 +26,7 @@ KINDS = {"researcher", "contributor", "newcomer", "improved", "paper_mastery"}
 
 NEWCOMER_DAYS = 30
 IMPROVED_DAYS = 14
+PAPER_MASTERY_BOARD_LIMIT = 50
 
 
 def _row(rank: int, user: User, metric_label: str, metric_value) -> dict:
@@ -104,40 +105,84 @@ def leaderboard(db: Session, kind: str, limit: int = 50) -> list[dict]:
     return out
 
 
-def paper_mastery_rank_for_user(db: Session, user_id, *, board_limit: int = 50) -> tuple[int | None, bool]:
-    """用户在全站 Paper 大师榜的名次；on_board 表示是否出现在默认榜单页 (前 board_limit 名)。"""
+def _paper_mastery_ranked(db: Session) -> list[tuple]:
+    """[(user_id, graduated, tracking), ...] 按毕业数、跟踪数降序。"""
     from backend.app.services import research_quality_service as rqs
 
     owner_ids = list(db.execute(select(Factor.owner_id).distinct()).scalars().all())
-    scores: dict = {}
-    for uid in owner_ids:
-        counts = rqs.user_paper_mastery_counts(db, uid)
-        if counts["paper_graduated_count"] > 0:
-            scores[uid] = (counts["paper_graduated_count"], counts["paper_tracking_count"])
-
-    ranked = sorted(scores.items(), key=lambda kv: (kv[1][0], kv[1][1]), reverse=True)
-    for i, (uid, _) in enumerate(ranked):
-        if uid == user_id:
-            rank = i + 1
-            return rank, rank <= board_limit
-    return None, False
-
-
-def _paper_mastery_board(db: Session, limit: int) -> list[dict]:
-    from backend.app.services import research_quality_service as rqs
-
-    owner_ids = list(db.execute(select(Factor.owner_id).distinct()).scalars().all())
-    scores: dict = {}
+    scores: list[tuple] = []
     for uid in owner_ids:
         counts = rqs.user_paper_mastery_counts(db, uid)
         graduated = counts["paper_graduated_count"]
-        if graduated <= 0:
-            continue
-        scores[uid] = (graduated, counts["paper_tracking_count"])
+        if graduated > 0:
+            scores.append((uid, graduated, counts["paper_tracking_count"]))
+    scores.sort(key=lambda row: (row[1], row[2]), reverse=True)
+    return scores
 
-    ranked = sorted(scores.items(), key=lambda kv: (kv[1][0], kv[1][1]), reverse=True)[:limit]
+
+def paper_mastery_board_context(
+    db: Session, user_id, *, board_limit: int = PAPER_MASTERY_BOARD_LIMIT
+) -> dict:
+    """Paper 大师榜名次 + 榜外距入榜线差距 (孵化指引)。"""
+    from backend.app.services import research_quality_service as rqs
+
+    ranked = _paper_mastery_ranked(db)
+    counts = rqs.user_paper_mastery_counts(db, user_id)
+    graduated = counts["paper_graduated_count"]
+    tracking = counts["paper_tracking_count"]
+
+    rank = None
+    for i, (uid, _, _) in enumerate(ranked):
+        if uid == user_id:
+            rank = i + 1
+            break
+
+    on_board = rank is not None and rank <= board_limit
+    cutoff_graduated = None
+    cutoff_tracking = None
+    if ranked:
+        idx = min(board_limit - 1, len(ranked) - 1)
+        _, cutoff_graduated, cutoff_tracking = ranked[idx]
+
+    graduated_needed = None
+    needs_tracking_boost = False
+    ranks_outside_board = None
+
+    if graduated > 0 and not on_board:
+        if rank is not None:
+            ranks_outside_board = max(0, rank - board_limit)
+        if cutoff_graduated is not None:
+            if graduated < cutoff_graduated:
+                graduated_needed = cutoff_graduated - graduated
+            elif graduated == cutoff_graduated and tracking <= cutoff_tracking:
+                needs_tracking_boost = True
+            elif rank is not None and rank > board_limit:
+                graduated_needed = 1
+
+    return {
+        "board_limit": board_limit,
+        "leaderboard_rank": rank,
+        "on_leaderboard": on_board,
+        "cutoff_graduated": cutoff_graduated,
+        "graduated_needed": graduated_needed,
+        "needs_tracking_boost": needs_tracking_boost,
+        "ranks_outside_board": ranks_outside_board,
+        "total_ranked": len(ranked),
+    }
+
+
+def paper_mastery_rank_for_user(db: Session, user_id, *, board_limit: int = PAPER_MASTERY_BOARD_LIMIT) -> tuple[int | None, bool]:
+    """用户在全站 Paper 大师榜的名次；on_board 表示是否出现在默认榜单页 (前 board_limit 名)。"""
+    ctx = paper_mastery_board_context(db, user_id, board_limit=board_limit)
+    return ctx["leaderboard_rank"], ctx["on_leaderboard"]
+
+
+def _paper_mastery_board(db: Session, limit: int) -> list[dict]:
+    from backend.app.models.user import User
+
+    ranked = _paper_mastery_ranked(db)[:limit]
     out: list[dict] = []
-    for i, (uid, (graduated, tracking)) in enumerate(ranked):
+    for i, (uid, graduated, tracking) in enumerate(ranked):
         user = db.get(User, uid)
         if user is None:
             continue

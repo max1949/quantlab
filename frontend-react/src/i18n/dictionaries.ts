@@ -421,6 +421,11 @@ const en = {
     challengePaperItem: (title: string, stage: string) =>
       stage ? `${title} (mastery · ${stage})` : title,
     challengePaperCta: "View challenge →",
+    gapToBoard: (needed: number, cutoff: number, limit: number) =>
+      `${needed} more graduated factor(s) to reach top ${limit} (bar ≈ ${cutoff})`,
+    rankOutside: (rank: number, outside: number, limit: number) =>
+      `Global rank #${rank} — ${outside} spots outside top ${limit}`,
+    trackingBoost: "Graduation count matches the bar — track more paper NAV to climb.",
   },
   stages: {
     create_project: "Start from template →",
@@ -567,6 +572,10 @@ const en = {
       count > 0
         ? `You have ${count} graduated factor(s) but are outside the top 50 — keep tracking paper NAV to climb.`
         : "Not on board yet — follow the mastery path on your dashboard.",
+    gapToBoardLine: (needed: number, cutoff: number, limit: number) =>
+      `Need ${needed} more graduated factor(s) for top ${limit} (bar ≈ ${cutoff}).`,
+    trackingBoostLine: (count: number) =>
+      `${count} graduated — track more paper NAV to move up the board.`,
     goDashboard: "Go to dashboard →",
     you: "you",
     rank: "Rank",
@@ -1528,6 +1537,11 @@ const zh = {
     challengePaperItem: (title: string, stage: string) =>
       stage ? `${title}（大师路径 · ${stage}）` : title,
     challengePaperCta: "查看挑战 →",
+    gapToBoard: (needed: number, cutoff: number, limit: number) =>
+      `距前 ${limit} 名还差 ${needed} 个毕业因子（入榜线约 ${cutoff} 个）`,
+    rankOutside: (rank: number, outside: number, limit: number) =>
+      `全站第 ${rank} 名 — 距前 ${limit} 名还差 ${outside} 位`,
+    trackingBoost: "毕业数已达入榜线 — 多跟踪 Paper 净值即可往前冲。",
   },
   stages: {
     create_project: "从模板开始 →",
@@ -1670,6 +1684,10 @@ const zh = {
       count > 0
         ? `你已有 ${count} 个毕业因子，暂未进前 50 名 — 继续跟踪 Paper 净值冲榜。`
         : "暂未上榜 — 去工作台跟着大师路径走即可。",
+    gapToBoardLine: (needed: number, cutoff: number, limit: number) =>
+      `距前 ${limit} 名还差 ${needed} 个毕业因子（入榜线约 ${cutoff} 个）。`,
+    trackingBoostLine: (count: number) =>
+      `已有 ${count} 个毕业因子 — 多跟踪 Paper 净值即可往前冲。`,
     goDashboard: "去工作台 →",
     you: "你",
     rank: "排名",

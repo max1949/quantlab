@@ -83,6 +83,27 @@ def test_journey_mastery_goal_challenge_paper_milestones(client, db_session):
     codes = {m["code"] for m in mg["challenge_paper_milestones"]}
     assert codes == {"first_paper_order", "paper_graduated"}
     assert all(not m["completed"] for m in mg["challenge_paper_milestones"])
+    assert mg["board_limit"] == 50
+    assert "graduated_needed" in mg
+
+
+def test_paper_mastery_board_context_unit(db_session):
+    from backend.app.services.leaderboard_service import paper_mastery_board_context
+    from backend.app.models.user import User
+    import uuid
+
+    user = User(
+        id=uuid.uuid4(),
+        email="gap@x.com",
+        username="gapuser",
+        hashed_password="x",
+    )
+    db_session.add(user)
+    db_session.commit()
+    ctx = paper_mastery_board_context(db_session, user.id)
+    assert ctx["on_leaderboard"] is False
+    assert ctx["graduated_needed"] is None
+    assert ctx["board_limit"] == 50
 
 
 def test_public_report_detail(client, db_session):

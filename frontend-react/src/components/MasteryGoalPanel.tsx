@@ -38,6 +38,25 @@ export default function MasteryGoalPanel() {
 
       <p className="mb-3 text-sm text-slate-700 dark:text-slate-200">{g.hint}</p>
 
+      {!g.on_leaderboard && g.graduated_needed != null && g.graduated_needed > 0 && (
+        <div className="mb-3 rounded-lg border border-sky-200 bg-sky-50/70 px-3 py-2 text-xs text-sky-900 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-100">
+          <p className="font-medium">
+            {d.gapToBoard(g.graduated_needed, g.cutoff_graduated ?? 0, g.board_limit)}
+          </p>
+          {g.leaderboard_rank != null && g.ranks_outside_board != null && g.ranks_outside_board > 0 && (
+            <p className="mt-1 opacity-90">
+              {d.rankOutside(g.leaderboard_rank, g.ranks_outside_board, g.board_limit)}
+            </p>
+          )}
+        </div>
+      )}
+
+      {!g.on_leaderboard && g.needs_tracking_boost && (
+        <div className="mb-3 rounded-lg border border-violet-200 bg-violet-50/70 px-3 py-2 text-xs text-violet-900 dark:border-violet-900 dark:bg-violet-950/30 dark:text-violet-100">
+          <p className="font-medium">{d.trackingBoost}</p>
+        </div>
+      )}
+
       {g.mastery_progress_pct > 0 && !g.on_leaderboard && (
         <div className="mb-3">
           <div className="mb-1 flex justify-between text-xs text-slate-500">

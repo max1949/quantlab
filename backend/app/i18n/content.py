@@ -487,12 +487,18 @@ MASTERY_GOAL_HINT: dict[Locale, dict[str, str]] = {
         "paper_ready": "Paper bar passed — submit a paper order to climb the masters board.",
         "in_progress": "Next toward Paper Masters: {next} ({pct}% on mastery path).",
         "start": "Start a project from a template — the mastery path leads to the Paper Masters board.",
+        "outside_board_graduated": "Top {limit}: #{limit} needs {cutoff} graduated factor(s). You have {count} — {needed} more to reach the line.",
+        "outside_board_tracking": "You match the graduation bar ({count}) — track more paper NAV to climb past rank #{limit}.",
+        "outside_board_rank": "You rank #{rank} globally — {outside} spots outside the top {limit}.",
     },
     "zh": {
         "on_board": "你已在 Paper 大师榜第 {rank} 名（{count} 个毕业因子）。",
         "paper_ready": "已通过 Paper 毕业线 — 下模拟单即可冲击大师榜。",
         "in_progress": "距 Paper 大师榜：下一步 {next}（大师路径 {pct}%）。",
         "start": "从模板开局 — 跟着大师路径就能冲上 Paper 大师榜。",
+        "outside_board_graduated": "前 {limit} 名入榜线约 {cutoff} 个毕业因子，你已有 {count} 个 — 还差 {needed} 个。",
+        "outside_board_tracking": "毕业数已达入榜线（{count} 个）— 多跟踪 Paper 净值即可往前冲。",
+        "outside_board_rank": "你当前全站第 {rank} 名 — 距前 {limit} 名还差 {outside} 位。",
     },
 }
 

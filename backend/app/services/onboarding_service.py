@@ -172,11 +172,25 @@ def _mastery_goal_hint(
     paper_ready: bool,
     mastery_next: str | None,
     progress_pct: int,
+    board_ctx: dict,
 ) -> str:
     hints = i18n.MASTERY_GOAL_HINT.get(locale) or i18n.MASTERY_GOAL_HINT["en"]
     labels = i18n.MASTERY_STAGE_LABEL.get(locale) or i18n.MASTERY_STAGE_LABEL["en"]
+    limit = int(board_ctx.get("board_limit") or 50)
     if on_board and rank:
         return hints["on_board"].format(rank=rank, count=graduated)
+    if graduated > 0 and not on_board:
+        cutoff = board_ctx.get("cutoff_graduated")
+        needed = board_ctx.get("graduated_needed")
+        if needed and needed > 0 and cutoff is not None:
+            return hints["outside_board_graduated"].format(
+                limit=limit, cutoff=cutoff, count=graduated, needed=needed
+            )
+        if board_ctx.get("needs_tracking_boost"):
+            return hints["outside_board_tracking"].format(limit=limit, count=graduated)
+        outside = board_ctx.get("ranks_outside_board")
+        if rank and outside and outside > 0:
+            return hints["outside_board_rank"].format(rank=rank, limit=limit, outside=outside)
     if paper_ready:
         return hints["paper_ready"]
     if mastery_next:
@@ -191,11 +205,9 @@ def _mastery_goal_payload(db: Session, user: User, locale: Locale) -> dict:
     counts = rqs.user_paper_mastery_counts(db, user.id)
     graduated = counts["paper_graduated_count"]
     tracking = counts["paper_tracking_count"]
-    rank, on_board = (
-        leaderboard_service.paper_mastery_rank_for_user(db, user.id)
-        if graduated > 0
-        else (None, False)
-    )
+    board_ctx = leaderboard_service.paper_mastery_board_context(db, user.id)
+    rank = board_ctx["leaderboard_rank"]
+    on_board = board_ctx["on_leaderboard"]
 
     active_id = _active_project_id(db, user)
     mastery_stage = None
@@ -222,6 +234,7 @@ def _mastery_goal_payload(db: Session, user: User, locale: Locale) -> dict:
         paper_ready=paper_ready,
         mastery_next=mastery_next_action,
         progress_pct=mastery_progress_pct,
+        board_ctx=board_ctx,
     )
 
     challenge_paper: list[dict] = []
@@ -258,6 +271,11 @@ def _mastery_goal_payload(db: Session, user: User, locale: Locale) -> dict:
         "publish_ready": publish_ready,
         "hint": hint,
         "challenge_paper_milestones": challenge_paper,
+        "board_limit": board_ctx["board_limit"],
+        "cutoff_graduated": board_ctx["cutoff_graduated"],
+        "graduated_needed": board_ctx["graduated_needed"],
+        "needs_tracking_boost": board_ctx["needs_tracking_boost"],
+        "ranks_outside_board": board_ctx["ranks_outside_board"],
     }
 
 
