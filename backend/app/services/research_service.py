@@ -277,17 +277,69 @@ def _feed_factor_meta(db: Session, report: ResearchReport) -> dict:
     }
 
 
+def _feed_mastery_badges(db: Session, report: ResearchReport) -> dict:
+    """大师化徽章 — Paper 毕业线 / 模拟跟踪 (Feed 卡片展示)。"""
+    out = {
+        "paper_graduated": False,
+        "paper_tracking": False,
+        "mastery_badge": None,
+    }
+    if not report.factor_id:
+        return out
+
+    from backend.app.models.execution import PaperOrder
+    from backend.app.services import research_quality_service as rqs
+
+    factor = db.get(Factor, report.factor_id)
+    project = db.get(ResearchProject, report.project_id) if report.project_id else None
+    regime_fit_score = None
+    if factor and project and report.owner_id:
+        owner = db.get(User, report.owner_id)
+        if owner:
+            from backend.app.services import regime_advisory
+
+            regime = regime_advisory.market_regime_for_symbol(
+                db,
+                owner,
+                project.symbol or report.symbol or "RB",
+                "1d",
+                factor=factor,
+            )
+            if regime:
+                regime_fit_score = regime.get("fit_score")
+
+    verdict = rqs.assess_factor_paper(
+        db, report.factor_id, regime_fit_score=regime_fit_score
+    )
+    has_po = (
+        db.execute(
+            select(PaperOrder.id).where(PaperOrder.factor_id == report.factor_id).limit(1)
+        ).first()
+        is not None
+    )
+    out["paper_graduated"] = verdict.passed
+    out["paper_tracking"] = has_po
+    if verdict.passed and has_po:
+        out["mastery_badge"] = "track"
+    elif verdict.passed:
+        out["mastery_badge"] = "paper"
+    return out
+
+
 def feed_summary(
     db: Session,
     report: ResearchReport,
     metric: tuple[float | None, float | None] | None = None,
+    badges: dict | None = None,
 ) -> dict:
     oos_sharpe, robustness_score = metric or _feed_metrics(db, report)
+    mastery = badges if badges is not None else _feed_mastery_badges(db, report)
     return {
         **ReportSummary.model_validate(report).model_dump(),
         "oos_sharpe": oos_sharpe,
         "robustness_score": robustness_score,
         **_feed_factor_meta(db, report),
+        **mastery,
     }
 
 
@@ -327,9 +379,11 @@ def feed(db: Session, sort: str = "latest", limit: int = 30) -> list[dict]:
         except (TypeError, ValueError):
             val_id = None
         metrics_by_report[row.id] = _validation_metrics(validations.get(val_id)) if val_id else (None, None)
+    badges_by_report = {r.id: _feed_mastery_badges(db, r) for r in rows}
     if sort == "top":
         rows.sort(
             key=lambda r: (
+                badges_by_report.get(r.id, {}).get("paper_graduated", False),
                 _GRADE_RANK.get(r.grade or "", -1),
                 metrics_by_report.get(r.id, (None, None))[1] or 0,
                 metrics_by_report.get(r.id, (None, None))[0] or 0,
@@ -337,4 +391,7 @@ def feed(db: Session, sort: str = "latest", limit: int = 30) -> list[dict]:
             ),
             reverse=True,
         )
-    return [feed_summary(db, r, metrics_by_report.get(r.id)) for r in rows[:limit]]
+    return [
+        feed_summary(db, r, metrics_by_report.get(r.id), badges_by_report.get(r.id))
+        for r in rows[:limit]
+    ]

@@ -12,6 +12,7 @@ import ReportCard from "../components/ReportCard";
 export default function Feed() {
   const user = useAuth((s) => s.user);
   const f = useLocale((s) => s.dict.feed);
+  const rc = useLocale((s) => s.dict.reportCard);
   const [params] = useSearchParams();
   const highlightId = params.get("highlight");
   const highlightRef = useRef<HTMLDivElement>(null);
@@ -49,6 +50,24 @@ export default function Feed() {
         >
           {f.sortLatest}
         </button>
+      </div>
+
+      <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300">
+        <p className="mb-1.5 font-medium text-slate-700 dark:text-slate-200">{f.badgeLegendTitle}</p>
+        <div className="flex flex-wrap gap-2">
+          <span className="inline-flex items-center gap-1">
+            <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
+              {rc.badgePaperGraduated}
+            </span>
+            {f.badgeLegendPaper}
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <span className="rounded-full bg-brand-100 px-1.5 py-0.5 text-[10px] font-semibold text-brand-800 dark:bg-brand-950 dark:text-brand-200">
+              {rc.badgePaperTracking}
+            </span>
+            {f.badgeLegendTracking}
+          </span>
+        </div>
       </div>
 
       {!user && (

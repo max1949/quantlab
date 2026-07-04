@@ -30,6 +30,9 @@ class ReportSummary(BaseModel):
     factor_kind: str | None = None
     factor_template: str | None = None
     timeframe: str | None = None
+    paper_graduated: bool = False
+    paper_tracking: bool = False
+    mastery_badge: str | None = None
 
 
 class ReportDetail(BaseModel):

@@ -17,6 +17,20 @@ export default function ReportCard({ report }: { report: ReportSummary }) {
         </Link>
         <GradeBadge grade={report.grade} />
       </div>
+      {(report.paper_graduated || report.paper_tracking) && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {report.paper_graduated && (
+            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
+              {rc.badgePaperGraduated}
+            </span>
+          )}
+          {report.paper_tracking && (
+            <span className="rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand-800 dark:bg-brand-950 dark:text-brand-200">
+              {rc.badgePaperTracking}
+            </span>
+          )}
+        </div>
+      )}
       <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-400">
         <span className="badge">{report.symbol}</span>
         {report.timeframe && (

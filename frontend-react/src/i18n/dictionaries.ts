@@ -445,6 +445,9 @@ const en = {
     sortTop: "Top quality",
     sortLatest: "Latest",
     highlightBanner: "Your study is live here — highlighted below.",
+    badgeLegendTitle: "Mastery badges",
+    badgeLegendPaper: "Paper graduated — passed stricter live-trading bar",
+    badgeLegendTracking: "Paper live — author submitted a paper order & tracks NAV",
   },
   validationPanel: {
     title: "Scientific validation results",
@@ -1012,6 +1015,8 @@ const en = {
     factorKind: (k: string) =>
       ({ template: "Template", stack: "Stack", formula: "Formula", python: "Python" } as Record<string, string>)[k] ?? k,
     timeframe: "TF",
+    badgePaperGraduated: "Paper graduated",
+    badgePaperTracking: "Paper tracking",
   },
   l4Tools: {
     title: "L4 Pro portfolio tools",
@@ -1503,6 +1508,9 @@ const zh = {
     sortTop: "质量优先",
     sortLatest: "最新发布",
     highlightBanner: "你的研究已出现在这里 — 下方高亮卡片就是。",
+    badgeLegendTitle: "大师化徽章说明",
+    badgeLegendPaper: "Paper 毕业 — 通过更严的模拟实盘毕业线",
+    badgeLegendTracking: "Paper 跟踪中 — 作者已下模拟单并跟踪净值",
   },
   validationPanel: {
     title: "科学验证结果",
@@ -2062,6 +2070,8 @@ const zh = {
     factorKind: (k: string) =>
       ({ template: "模板", stack: "组合", formula: "公式", python: "Python" } as Record<string, string>)[k] ?? k,
     timeframe: "周期",
+    badgePaperGraduated: "Paper 毕业",
+    badgePaperTracking: "Paper 跟踪",
   },
   l4Tools: {
     title: "L4 准职业组合工具",

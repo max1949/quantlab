@@ -674,6 +674,9 @@ export interface ReportSummary {
   factor_kind?: string | null;
   factor_template?: string | null;
   timeframe?: string | null;
+  paper_graduated?: boolean;
+  paper_tracking?: boolean;
+  mastery_badge?: string | null;
 }
 
 export interface ReportDetail extends ReportSummary {

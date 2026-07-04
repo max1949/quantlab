@@ -193,6 +193,9 @@ def test_public_feed_no_auth(client, db_session):
     card = next(r for r in feed if r["id"] == rep["id"])
     assert card.get("factor_kind") is not None
     assert card.get("timeframe") is not None
+    assert "paper_graduated" in card
+    assert isinstance(card["paper_graduated"], bool)
+    assert isinstance(card.get("paper_tracking"), bool)
 
 
 def test_share_missing_report_404(client, db_session):
