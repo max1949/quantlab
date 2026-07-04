@@ -91,6 +91,7 @@ export interface ChallengePaperMilestone {
 
 export interface AttentionAlert {
   kind: string;
+  alert_key: string;
   title: string;
   message: string;
   project_id: string | null;

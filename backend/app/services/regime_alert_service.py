@@ -3,14 +3,17 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from backend.app.core.config import get_settings
 from backend.app.core.locale import Locale
 from backend.app.i18n import content as i18n
 from backend.app.models.execution import PaperOrder
 from backend.app.models.factor import Factor
+from backend.app.models.growth import AttentionAlertDismissal
 from backend.app.models.project import ResearchProject
 from backend.app.models.user import User
 from backend.app.services import market_data_policy as mdp
@@ -20,6 +23,54 @@ from backend.app.services.research_quality_service import _representative_factor
 _SEVERITY_ORDER = {"info": 0, "watch": 1, "alert": 2}
 _MAX_ALERTS = 5
 _WEAK_FIT_THRESHOLD = 55
+
+
+def make_alert_key(
+    kind: str,
+    *,
+    project_id: str | None = None,
+    factor_id: str | None = None,
+    symbol: str | None = None,
+) -> str:
+    if kind == "paper_decay" and factor_id:
+        return f"paper_decay:{factor_id}"
+    if project_id:
+        return f"{kind}:{project_id}"
+    return f"{kind}:{symbol or 'general'}"
+
+
+def dismiss_attention_alert(db: Session, user_id: uuid.UUID, alert_key: str) -> dict:
+    """用户忽略提醒 — 冷却期内不再展示。"""
+    key = alert_key.strip()
+    if not key or len(key) > 128:
+        raise ValueError("无效的提醒标识")
+    now = datetime.now(timezone.utc)
+    row = db.execute(
+        select(AttentionAlertDismissal).where(
+            AttentionAlertDismissal.user_id == user_id,
+            AttentionAlertDismissal.alert_key == key,
+        )
+    ).scalar_one_or_none()
+    if row is None:
+        row = AttentionAlertDismissal(user_id=user_id, alert_key=key, dismissed_at=now)
+        db.add(row)
+    else:
+        row.dismissed_at = now
+    db.commit()
+    days = get_settings().attention_alert_cooldown_days
+    return {"alert_key": key, "cooldown_days": days, "dismissed_at": now.isoformat()}
+
+
+def _dismissed_keys(db: Session, user_id: uuid.UUID) -> set[str]:
+    days = max(1, get_settings().attention_alert_cooldown_days)
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+    rows = db.execute(
+        select(AttentionAlertDismissal.alert_key).where(
+            AttentionAlertDismissal.user_id == user_id,
+            AttentionAlertDismissal.dismissed_at >= cutoff,
+        )
+    ).scalars()
+    return set(rows.all())
 
 
 def list_attention_alerts(
@@ -34,7 +85,8 @@ def list_attention_alerts(
     regime_labels = i18n.REGIME_LABEL.get(locale) or i18n.REGIME_LABEL["en"]
     verdict_labels = i18n.FIT_VERDICT_LABEL.get(locale) or i18n.FIT_VERDICT_LABEL["en"]
     alerts: list[dict] = []
-    seen: set[tuple[str, str | None]] = set()
+    seen: set[str] = set()
+    dismissed = _dismissed_keys(db, user.id)
 
     projects = list(
         db.execute(
@@ -59,14 +111,17 @@ def list_attention_alerts(
 
         shift = _detect_shift_for_symbol(db, user, symbol)
         if shift and shift.get("shifted"):
-            key = ("regime_shift", pid)
-            if key not in seen:
-                seen.add(key)
+            akey = make_alert_key("regime_shift", project_id=pid)
+            if akey in dismissed or akey in seen:
+                pass
+            else:
+                seen.add(akey)
                 from_l = regime_labels.get(shift["from_regime"], shift.get("from_label", ""))
                 to_l = regime_labels.get(shift["to_regime"], shift.get("to_label", ""))
                 alerts.append(
                     _alert(
                         kind="regime_shift",
+                        alert_key=akey,
                         title=labels["regime_shift_title"].format(symbol=symbol),
                         message=labels["regime_shift_msg"].format(
                             from_label=from_l,
@@ -84,15 +139,16 @@ def list_attention_alerts(
         regime = _regime_fit(db, user, symbol, factor)
         fit_score = regime.get("fit_score") if regime else None
         if fit_score is not None and fit_score < _WEAK_FIT_THRESHOLD:
-            key = ("weak_regime_fit", pid)
-            if key not in seen:
-                seen.add(key)
+            akey = make_alert_key("weak_regime_fit", project_id=pid)
+            if akey not in dismissed and akey not in seen:
+                seen.add(akey)
                 verdict = verdict_labels.get(
                     regime.get("fit_verdict", ""), regime.get("fit_verdict", "")
                 )
                 alerts.append(
                     _alert(
                         kind="weak_regime_fit",
+                        alert_key=akey,
                         title=labels["weak_fit_title"].format(symbol=symbol),
                         message=labels["weak_fit_msg"].format(
                             project_title=project.title,
@@ -124,6 +180,9 @@ def list_attention_alerts(
     for fid in paper_factor_ids:
         if fid is None:
             continue
+        akey = make_alert_key("paper_decay", factor_id=str(fid))
+        if akey in dismissed or akey in seen:
+            continue
         decay = pts.assess_factor_decay(db, fid, user.id)
         status = decay.get("status", "ok")
         if status not in ("watch", "alert"):
@@ -134,15 +193,13 @@ def list_attention_alerts(
         if factor and factor.project_id:
             proj = db.get(ResearchProject, factor.project_id)
             symbol = proj.symbol if proj else None
-        key = ("paper_decay", str(fid))
-        if key in seen:
-            continue
-        seen.add(key)
+        seen.add(akey)
         reason = (decay.get("reasons") or [""])[0]
         title_key = "paper_decay_alert_title" if status == "alert" else "paper_decay_watch_title"
         alerts.append(
             _alert(
                 kind="paper_decay",
+                alert_key=akey,
                 title=labels[title_key].format(
                     factor_name=factor.name if factor else labels["paper_factor_fallback"]
                 ),
@@ -162,6 +219,7 @@ def list_attention_alerts(
 def _alert(
     *,
     kind: str,
+    alert_key: str,
     title: str,
     message: str,
     project_id: str | None,
@@ -172,6 +230,7 @@ def _alert(
 ) -> dict:
     return {
         "kind": kind,
+        "alert_key": alert_key,
         "title": title,
         "message": message,
         "project_id": project_id,

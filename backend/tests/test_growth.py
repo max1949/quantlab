@@ -115,9 +115,41 @@ def test_journey_includes_attention_alerts(client, db_session):
     assert isinstance(j2["attention_alerts"], list)
     for alert in j2["attention_alerts"]:
         assert alert["kind"] in ("regime_shift", "weak_regime_fit", "paper_decay")
+        assert alert["alert_key"]
         assert alert["title"]
         assert alert["cta_path"]
         assert alert["severity"] in ("info", "watch", "alert")
+
+
+def test_dismiss_attention_alert_hides_from_journey(client, db_session):
+    from backend.app.services.regime_alert_service import make_alert_key
+
+    seed_sample_market_data(db_session)
+    h = _register(client, "dismiss1")
+    proj, _ = _full_research(client, h, db_session)
+    j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    alerts = j["attention_alerts"]
+    if not alerts:
+        key = make_alert_key("weak_regime_fit", project_id=proj["id"])
+        client.post(
+            f"{BASE}/onboarding/attention-alerts/dismiss",
+            headers=h,
+            json={"alert_key": key},
+        ).json()
+        return
+    key = alerts[0]["alert_key"]
+    before = len(alerts)
+    out = client.post(
+        f"{BASE}/onboarding/attention-alerts/dismiss",
+        headers=h,
+        json={"alert_key": key},
+    ).json()
+    assert out["alert_key"] == key
+    assert out["cooldown_days"] == 7
+    j2 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    keys = {a["alert_key"] for a in j2["attention_alerts"]}
+    assert key not in keys
+    assert len(j2["attention_alerts"]) <= before - 1
 
 
 def test_paper_mastery_board_context_unit(db_session):

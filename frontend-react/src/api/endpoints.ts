@@ -124,6 +124,15 @@ export async function getResearchJourney(): Promise<ResearchJourney> {
   return data;
 }
 
+export async function dismissAttentionAlert(alert_key: string): Promise<{
+  alert_key: string;
+  cooldown_days: number;
+  dismissed_at: string;
+}> {
+  const { data } = await api.post("/onboarding/attention-alerts/dismiss", { alert_key });
+  return data;
+}
+
 export async function getMentor(): Promise<Mentor> {
   const { data } = await api.get<Mentor>("/ai/mentor/next");
   return data;

@@ -56,6 +56,7 @@ class MasteryGoalOut(BaseModel):
 
 class AttentionAlertOut(BaseModel):
     kind: str
+    alert_key: str
     title: str
     message: str
     project_id: uuid.UUID | None = None
@@ -63,6 +64,16 @@ class AttentionAlertOut(BaseModel):
     action: str
     cta_path: str
     severity: str = "info"
+
+
+class DismissAttentionAlertRequest(BaseModel):
+    alert_key: str = Field(min_length=1, max_length=128)
+
+
+class DismissAttentionAlertOut(BaseModel):
+    alert_key: str
+    cooldown_days: int
+    dismissed_at: str
 
 
 class ResearchJourneyOut(BaseModel):

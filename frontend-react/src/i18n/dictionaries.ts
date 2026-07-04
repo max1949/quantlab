@@ -463,6 +463,9 @@ const en = {
     ctaRevalidate: "Re-validate →",
     ctaTemplates: "Better templates →",
     ctaProject: "Open project →",
+    dismiss: "Dismiss",
+    dismissDone: (days: number) => `Dismissed — won't show again for ${days} days`,
+    cooldownHint: "Dismiss hides a reminder for 7 days if the issue persists.",
   },
   stages: {
     create_project: "Start from template →",
@@ -1632,6 +1635,9 @@ const zh = {
     ctaRevalidate: "去重验 →",
     ctaTemplates: "换更合拍模板 →",
     ctaProject: "打开项目 →",
+    dismiss: "知道了",
+    dismissDone: (days: number) => `已忽略 — ${days} 天内不再重复提醒`,
+    cooldownHint: "点「知道了」可隐藏 7 天；若问题仍在，到期后会再次提示。",
   },
   stages: {
     create_project: "从模板开始 →",

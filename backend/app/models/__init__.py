@@ -31,6 +31,7 @@ from backend.app.models.project import (  # noqa: F401
 from backend.app.models.factor import Factor, FactorKind  # noqa: F401
 from backend.app.models.factor_scan import FactorScan  # noqa: F401
 from backend.app.models.growth import (  # noqa: F401
+    AttentionAlertDismissal,
     Referral,
     ReferralStatus,
     ResearchShare,
@@ -87,6 +88,7 @@ __all__ = [
     "ResearchShare",
     "UserFollow",
     "UserEvent",
+    "AttentionAlertDismissal",
     "Subscription",
     "SubscriptionStatus",
     "RedeemCode",

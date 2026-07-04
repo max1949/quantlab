@@ -102,6 +102,7 @@ class Settings(BaseSettings):
 
     # 纸面跟踪
     paper_tracking_bars: int = 120
+    attention_alert_cooldown_days: int = 7
 
     # Python 因子沙箱
     sandbox_timeout_sec: float = 15.0

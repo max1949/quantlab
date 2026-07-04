@@ -10,9 +10,15 @@ from sqlalchemy.orm import Session
 from backend.app.auth.deps import CurrentUser
 from backend.app.core.database import get_db
 from backend.app.core.locale import RequestLocale
-from backend.app.schemas.growth import ChooseTypeRequest, NextStepOut, ResearchJourneyOut
+from backend.app.schemas.growth import (
+    ChooseTypeRequest,
+    DismissAttentionAlertOut,
+    DismissAttentionAlertRequest,
+    NextStepOut,
+    ResearchJourneyOut,
+)
 from backend.app.schemas.user import UserOut
-from backend.app.services import growth_service, onboarding_service
+from backend.app.services import growth_service, onboarding_service, regime_alert_service
 
 router = APIRouter()
 
@@ -47,3 +53,26 @@ def research_journey(
     locale: RequestLocale,
 ) -> ResearchJourneyOut:
     return ResearchJourneyOut(**onboarding_service.research_journey(db, current_user, locale))
+
+
+@router.post(
+    "/attention-alerts/dismiss",
+    response_model=DismissAttentionAlertOut,
+    status_code=status.HTTP_200_OK,
+    summary="忽略工作台主动提醒 (冷却期内不再展示)",
+)
+def dismiss_attention_alert(
+    payload: DismissAttentionAlertRequest,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> DismissAttentionAlertOut:
+    try:
+        out = regime_alert_service.dismiss_attention_alert(
+            db, current_user.id, payload.alert_key
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    growth_service.log_event(
+        db, "dismiss_attention_alert", current_user.id, {"alert_key": payload.alert_key}
+    )
+    return DismissAttentionAlertOut(**out)

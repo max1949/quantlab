@@ -130,3 +130,21 @@ class UserEvent(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+
+
+class AttentionAlertDismissal(Base):
+    """用户忽略的工作台主动提醒 — 冷却期内不再重复展示。"""
+
+    __tablename__ = "attention_alert_dismissals"
+    __table_args__ = (
+        UniqueConstraint("user_id", "alert_key", name="uq_attention_alert_dismiss"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    alert_key: Mapped[str] = mapped_column(String(128), nullable=False)
+    dismissed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
