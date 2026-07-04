@@ -55,7 +55,7 @@ export default function MasteryGoalPanel() {
 
       <div className="flex flex-wrap gap-2">
         {g.on_leaderboard ? (
-          <Link to="/leaderboards" className="btn-primary text-xs">
+          <Link to="/leaderboards?kind=paper_mastery" className="btn-primary text-xs">
             {d.viewBoard}
           </Link>
         ) : g.paper_ready && activeId ? (
@@ -71,7 +71,7 @@ export default function MasteryGoalPanel() {
             {d.fromTemplate}
           </Link>
         )}
-        <Link to="/leaderboards" className="btn text-xs">
+        <Link to="/leaderboards?kind=paper_mastery" className="btn text-xs">
           {d.viewBoard}
         </Link>
       </div>

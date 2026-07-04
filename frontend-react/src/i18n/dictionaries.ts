@@ -553,6 +553,18 @@ const en = {
     newcomer: "Rising stars",
     improved: "Most improved",
     paperMastery: "Paper masters",
+    paperMasteryTitle: "Paper Masters board",
+    paperMasteryHow:
+      "Ranked by factors that pass the paper quality gate. Graduate → submit paper orders → track NAV to climb.",
+    paperMasteryEmpty: "No paper masters yet — be the first to graduate a factor.",
+    yourRankOnBoard: (rank: number, count: number) =>
+      `You are #${rank} on the board with ${count} graduated factor(s).`,
+    notOnBoardYet: (count: number) =>
+      count > 0
+        ? `You have ${count} graduated factor(s) but are outside the top 50 — keep tracking paper NAV to climb.`
+        : "Not on board yet — follow the mastery path on your dashboard.",
+    goDashboard: "Go to dashboard →",
+    you: "you",
     rank: "Rank",
     user: "Researcher",
     score: "Score",
@@ -987,6 +999,7 @@ const en = {
     reports: "Reports",
     paperGraduated: "Paper graduated factors",
     paperTracking: "Paper tracking",
+    viewPaperBoard: "View Paper Masters board →",
     masteryBanner: (graduated: number, tracking: number) =>
       `${graduated} factor(s) passed the paper bar${tracking > 0 ? ` · ${tracking} live on paper` : ""}`,
     following: "Following",
@@ -1638,6 +1651,18 @@ const zh = {
     newcomer: "新秀榜",
     improved: "进步榜",
     paperMastery: "Paper 大师榜",
+    paperMasteryTitle: "Paper 大师榜",
+    paperMasteryHow:
+      "按通过 Paper 毕业线的因子数排名。验证过关 → 过 Paper 线 → 下模拟单 → 跟踪净值即可冲榜。",
+    paperMasteryEmpty: "暂无大师上榜 — 成为第一个毕业因子的人吧。",
+    yourRankOnBoard: (rank: number, count: number) =>
+      `你当前榜内第 ${rank} 名，${count} 个毕业因子。`,
+    notOnBoardYet: (count: number) =>
+      count > 0
+        ? `你已有 ${count} 个毕业因子，暂未进前 50 名 — 继续跟踪 Paper 净值冲榜。`
+        : "暂未上榜 — 去工作台跟着大师路径走即可。",
+    goDashboard: "去工作台 →",
+    you: "你",
     rank: "排名",
     user: "研究员",
     score: "分数",
@@ -2069,6 +2094,7 @@ const zh = {
     reports: "研究报告",
     paperGraduated: "Paper 毕业因子",
     paperTracking: "Paper 跟踪中",
+    viewPaperBoard: "查看 Paper 大师榜 →",
     masteryBanner: (graduated: number, tracking: number) =>
       `${graduated} 个因子通过 Paper 毕业线${tracking > 0 ? ` · ${tracking} 个正在 Paper 跟踪` : ""}`,
     following: "关注",

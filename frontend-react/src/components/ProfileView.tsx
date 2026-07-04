@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ResearcherProfile } from "../api/types";
 import { follow, unfollow } from "../api/endpoints";
@@ -102,6 +103,12 @@ export default function ProfileView({
             <Stat label={t.paperGraduated} value={profile.paper_graduated_count ?? 0} />
             <Stat label={t.paperTracking} value={profile.paper_tracking_count ?? 0} />
           </div>
+          <Link
+            to="/leaderboards?kind=paper_mastery"
+            className="mt-3 inline-block text-sm font-medium text-brand-600 hover:underline"
+          >
+            {t.viewPaperBoard}
+          </Link>
         </div>
       )}
     </div>
