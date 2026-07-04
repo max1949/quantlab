@@ -54,6 +54,17 @@ class MasteryGoalOut(BaseModel):
     ranks_outside_board: int | None = None
 
 
+class AttentionAlertOut(BaseModel):
+    kind: str
+    title: str
+    message: str
+    project_id: uuid.UUID | None = None
+    symbol: str | None = None
+    action: str
+    cta_path: str
+    severity: str = "info"
+
+
 class ResearchJourneyOut(BaseModel):
     done_count: int
     total: int
@@ -64,6 +75,7 @@ class ResearchJourneyOut(BaseModel):
     challenge_completed_count: int = 0
     challenge_total: int = 0
     mastery_goal: MasteryGoalOut = Field(default_factory=MasteryGoalOut)
+    attention_alerts: list[AttentionAlertOut] = Field(default_factory=list)
 
 
 # ---- 研究模板 ----

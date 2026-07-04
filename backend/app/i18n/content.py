@@ -547,6 +547,29 @@ REGIME_NEXT_ACTION: dict[Locale, str] = {
     "zh": " · 当前{regime}，推荐「{title}」（{verdict} {score}分）",
 }
 
+ATTENTION_ALERT: dict[Locale, dict[str, str]] = {
+    "en": {
+        "regime_shift_title": "Regime shift · {symbol}",
+        "regime_shift_msg": "{from_label} → {to_label} on 「{project_title}」 — re-validate factor fit.",
+        "weak_fit_title": "Weak regime fit · {symbol}",
+        "weak_fit_msg": "「{project_title}」 scores {score} ({verdict}) — try a better-matched template.",
+        "paper_decay_watch_title": "Paper drift · {factor_name}",
+        "paper_decay_alert_title": "Paper decay alert · {factor_name}",
+        "paper_decay_msg": "Paper NAV diverges from validation — review or re-validate.",
+        "paper_factor_fallback": "your factor",
+    },
+    "zh": {
+        "regime_shift_title": "制度切换 · {symbol}",
+        "regime_shift_msg": "「{project_title}」：{from_label} → {to_label}，建议重验因子适配。",
+        "weak_fit_title": "制度适配偏弱 · {symbol}",
+        "weak_fit_msg": "「{project_title}」适配 {score} 分（{verdict}）— 可换更合拍的模板。",
+        "paper_decay_watch_title": "Paper 走弱 · {factor_name}",
+        "paper_decay_alert_title": "Paper 衰减预警 · {factor_name}",
+        "paper_decay_msg": "纸面净值与验证期偏离 — 建议复查或重验。",
+        "paper_factor_fallback": "你的因子",
+    },
+}
+
 JOURNEY_STEPS: dict[Locale, dict[str, str]] = {
     "en": {
         "template": "Pick template",

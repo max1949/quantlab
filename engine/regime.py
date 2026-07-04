@@ -46,6 +46,48 @@ def detect_vol_regime(
     }
 
 
+def detect_regime_shift(
+    ohlcv: pd.DataFrame,
+    *,
+    shift_bars: int = 20,
+    vol_window: int = 20,
+    lookback: int = 252,
+) -> dict:
+    """对比当前波动制度与 shift_bars 根 K 线前的制度, 用于主动提醒制度切换。"""
+    min_len = vol_window + shift_bars + 10
+    if "close" not in ohlcv.columns or len(ohlcv) < min_len:
+        return {"shifted": False, "reason": "insufficient_data"}
+
+    current = detect_vol_regime(ohlcv, vol_window=vol_window, lookback=lookback)
+    prior_df = ohlcv.iloc[:-shift_bars]
+    try:
+        prior = detect_vol_regime(prior_df, vol_window=vol_window, lookback=lookback)
+    except ValueError:
+        return {"shifted": False, "reason": "insufficient_data"}
+
+    shifted = prior["regime"] != current["regime"]
+    return {
+        "shifted": shifted,
+        "from_regime": prior["regime"],
+        "to_regime": current["regime"],
+        "from_label": prior["label"],
+        "to_label": current["label"],
+        "shift_bars": shift_bars,
+        "as_of": current["as_of"],
+        "hint": _shift_hint(prior["regime"], current["regime"]) if shifted else "",
+    }
+
+
+def _shift_hint(from_regime: str, to_regime: str) -> str:
+    if to_regime == "high":
+        return "波动率抬升 — 趋势因子回撤风险上升, 建议重验或考虑均值回归类模板。"
+    if to_regime == "low":
+        return "波动率回落 — 突破动量信号可能偏弱, 关注制度适配与样本外表现。"
+    if from_regime == "high" and to_regime == "mid":
+        return "高波动缓和 — 可重新评估趋势类因子的风险收益比。"
+    return "波动制度发生变化 — 建议对当前因子做样本外复检与制度适配检查。"
+
+
 def _regime_hint(regime: str) -> str:
     if regime == "high":
         return "高波动制度：趋势/动量因子可能失效，注意回撤与成本；可考虑降低杠杆或换均值回归。"

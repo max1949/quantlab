@@ -102,6 +102,24 @@ def test_journey_mastery_goal_challenge_paper_milestones(client, db_session):
     assert "graduated_needed" in mg
 
 
+def test_journey_includes_attention_alerts(client, db_session):
+    seed_sample_market_data(db_session)
+    seed_default_challenge(db_session)
+    h = _register(client, "attn1")
+    j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    assert "attention_alerts" in j
+    assert isinstance(j["attention_alerts"], list)
+
+    proj, _ = _full_research(client, h, db_session)
+    j2 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    assert isinstance(j2["attention_alerts"], list)
+    for alert in j2["attention_alerts"]:
+        assert alert["kind"] in ("regime_shift", "weak_regime_fit", "paper_decay")
+        assert alert["title"]
+        assert alert["cta_path"]
+        assert alert["severity"] in ("info", "watch", "alert")
+
+
 def test_paper_mastery_board_context_unit(db_session):
     from backend.app.services.leaderboard_service import paper_mastery_board_context
     from backend.app.models.user import User

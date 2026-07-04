@@ -89,6 +89,17 @@ export interface ChallengePaperMilestone {
   mastery_stage_label?: string | null;
 }
 
+export interface AttentionAlert {
+  kind: string;
+  title: string;
+  message: string;
+  project_id: string | null;
+  symbol: string | null;
+  action: string;
+  cta_path: string;
+  severity: string;
+}
+
 export interface ResearchJourney {
   done_count: number;
   total: number;
@@ -99,6 +110,7 @@ export interface ResearchJourney {
   challenge_completed_count: number;
   challenge_total: number;
   mastery_goal: MasteryGoal;
+  attention_alerts: AttentionAlert[];
 }
 
 export interface Mentor {

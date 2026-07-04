@@ -447,6 +447,16 @@ const en = {
       `Global rank #${rank} — ${outside} spots outside top ${limit}`,
     trackingBoost: "Graduation count matches the bar — track more paper NAV to climb.",
   },
+  attentionAlerts: {
+    title: "Needs your attention",
+    subtitle: "Regime shifts, weak fit, and paper drift — act before they hurt your edge",
+    loading: "Scanning your projects…",
+    severityBadge: (severity: string) =>
+      severity === "alert" ? "⚠️" : severity === "watch" ? "👀" : "💡",
+    ctaRevalidate: "Re-validate →",
+    ctaTemplates: "Better templates →",
+    ctaProject: "Open project →",
+  },
   stages: {
     create_project: "Start from template →",
     create_factor: "Build factor →",
@@ -1598,6 +1608,16 @@ const zh = {
     rankOutside: (rank: number, outside: number, limit: number) =>
       `全站第 ${rank} 名 — 距前 ${limit} 名还差 ${outside} 位`,
     trackingBoost: "毕业数已达入榜线 — 多跟踪 Paper 净值即可往前冲。",
+  },
+  attentionAlerts: {
+    title: "需要你关注",
+    subtitle: "制度切换、适配偏弱、Paper 衰减 — 早发现早调整",
+    loading: "正在扫描你的项目…",
+    severityBadge: (severity: string) =>
+      severity === "alert" ? "⚠️" : severity === "watch" ? "👀" : "💡",
+    ctaRevalidate: "去重验 →",
+    ctaTemplates: "换更合拍模板 →",
+    ctaProject: "打开项目 →",
   },
   stages: {
     create_project: "从模板开始 →",

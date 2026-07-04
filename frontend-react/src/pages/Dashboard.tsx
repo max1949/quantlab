@@ -14,6 +14,7 @@ import { GradeBadge, PageTitle, Spinner, Stat } from "../components/ui";
 import AcademyTasks from "../components/AcademyTasks";
 import ResearchJourneyRing from "../components/ResearchJourneyRing";
 import MasteryGoalPanel from "../components/MasteryGoalPanel";
+import AttentionAlertsPanel from "../components/AttentionAlertsPanel";
 
 export default function Dashboard() {
   const user = useAuth((s) => s.user)!;
@@ -79,6 +80,10 @@ export default function Dashboard() {
             </button>
           </div>
         ) : null}
+      </div>
+
+      <div className="mt-6">
+        <AttentionAlertsPanel />
       </div>
 
       <div className="mt-6">

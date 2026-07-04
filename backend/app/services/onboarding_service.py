@@ -377,6 +377,8 @@ def research_journey(db: Session, user: User, locale: Locale = "en") -> dict:
             }
         )
     done_count = sum(1 for s in steps if s["done"])
+    from backend.app.services import regime_alert_service
+
     return {
         "done_count": done_count,
         "total": len(steps),
@@ -387,4 +389,5 @@ def research_journey(db: Session, user: User, locale: Locale = "en") -> dict:
         "challenge_completed_count": challenge_completed_count,
         "challenge_total": challenge_total,
         "mastery_goal": _mastery_goal_payload(db, user, locale),
+        "attention_alerts": regime_alert_service.list_attention_alerts(db, user, locale),
     }
