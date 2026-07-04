@@ -22,6 +22,16 @@ from backend.app.models.membership import (
 )
 from backend.app.models.user import User, UserLevel
 
+
+def frontend_origin() -> str:
+    from backend.app.core.config import get_settings
+
+    settings = get_settings()
+    return (
+        settings.frontend_base_url or settings.public_base_url or "http://localhost:5173"
+    ).rstrip("/")
+
+
 # --- 档位 ---
 TIER_FREE = 0
 TIER_PLUS = 1
@@ -358,7 +368,7 @@ def start_checkout(db: Session, user: User, plan_code: str) -> dict:
         }
 
     settings = get_settings()
-    origin = (settings.public_base_url or "http://localhost:8000").rstrip("/")
+    origin = frontend_origin()
     pay_url = payment_service.create_checkout_session(
         plan_name=plan["name"],
         price_cny=plan["price_cny"],
@@ -367,12 +377,65 @@ def start_checkout(db: Session, user: User, plan_code: str) -> dict:
             "plan_code": plan_code,
             "user_id": str(user.id),
         },
-        success_url=f"{origin}/app/pricing?checkout=success",
-        cancel_url=f"{origin}/app/pricing?checkout=cancel",
+        success_url=f"{origin}/pricing?checkout=success&plan={plan_code}",
+        cancel_url=f"{origin}/pricing?checkout=cancel",
     )
     return {
         **base,
         "configured": True,
         "pay_url": pay_url,
         "message": "正在跳转支付…",
+    }
+
+
+def upgrade_coaching_payload(
+    db: Session,
+    user: User,
+    locale: str,
+    *,
+    mastery_goal: dict,
+    challenge_paper_coaching: dict | None = None,
+) -> dict | None:
+    """大师路径 Pro 升级教练 — Paper 模拟盘等需专业档时友好指引。"""
+    from backend.app.core.locale import Locale
+    from backend.app.i18n import content as i18n
+    from backend.app.services import payment_service
+
+    loc: Locale = "zh" if locale == "zh" else "en"
+    tier = current_tier(db, user)
+    if tier >= TIER_PRO:
+        return None
+
+    paper = feature_state(user.level, tier, "paper_trading")
+    if paper["allowed"]:
+        return None
+
+    reason: str | None = None
+    if mastery_goal.get("paper_ready"):
+        reason = "paper_ready"
+    elif mastery_goal.get("mastery_next_action") == "paper":
+        reason = "mastery_paper"
+    elif challenge_paper_coaching and challenge_paper_coaching.get("next_code") == "first_paper_order":
+        reason = "challenge_d22"
+    elif mastery_goal.get("mastery_next_action") in ("track", "graduate"):
+        reason = "mastery_track"
+
+    if not reason:
+        return None
+
+    labels = i18n.UPGRADE_COACH.get(loc) or i18n.UPGRADE_COACH["en"]
+    plan = PLAN_BY_CODE["pro_monthly"]
+    return {
+        "current_tier": tier,
+        "current_tier_name": TIER_NAMES.get(tier, "免费"),
+        "target_tier": TIER_PRO,
+        "target_tier_name": TIER_NAMES[TIER_PRO],
+        "plan_code": "pro_monthly",
+        "plan_name": plan["name"],
+        "price_cny": plan["price_cny"],
+        "reason": reason,
+        "message": labels[reason],
+        "cta_path": "/pricing",
+        "stripe_available": payment_service.stripe_configured(),
+        "unlock_features": labels["unlock_features"],
     }

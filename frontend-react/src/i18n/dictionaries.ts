@@ -95,6 +95,16 @@ const en = {
     billingExportFail: "CSV export failed",
     invoicePdf: "PDF receipt",
     invoiceDownloadFail: "PDF download failed",
+    checkoutSuccess: "Payment received — Pro features are unlocking. Refresh if needed.",
+    checkoutCancel: "Checkout cancelled — you can upgrade anytime from the workspace.",
+  },
+  upgradeCoach: {
+    badge: (tier: string) => `Upgrade to ${tier}`,
+    unlock: (features: string) => `Unlocks: ${features}`,
+    planPrice: (name: string, price: number) => `${name} · ¥${price}/mo`,
+    checkoutCta: "Upgrade with Stripe →",
+    viewPlans: "View plans →",
+    redeemHint: "Online pay not configured — redeem a card on the plans page.",
   },
   adminOps: {
     title: "Ops console",
@@ -1287,6 +1297,16 @@ const zh = {
     billingExportFail: "CSV 导出失败",
     invoicePdf: "PDF 凭证",
     invoiceDownloadFail: "PDF 下载失败",
+    checkoutSuccess: "支付成功 — 专业档权益正在生效，必要时刷新页面。",
+    checkoutCancel: "已取消支付 — 可随时在工作台升级。",
+  },
+  upgradeCoach: {
+    badge: (tier: string) => `升级至${tier}`,
+    unlock: (features: string) => `解锁：${features}`,
+    planPrice: (name: string, price: number) => `${name} · ¥${price}/月`,
+    checkoutCta: "Stripe 在线升级 →",
+    viewPlans: "查看套餐 →",
+    redeemHint: "在线支付未开通 — 请在会员页输入卡密兑换。",
   },
   adminOps: {
     title: "运营控制台",

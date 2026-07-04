@@ -79,6 +79,21 @@ class ChallengePaperCoachingOut(BaseModel):
     linked_alert_kinds: list[str] = Field(default_factory=list)
 
 
+class UpgradeCoachingOut(BaseModel):
+    current_tier: int
+    current_tier_name: str
+    target_tier: int
+    target_tier_name: str
+    plan_code: str
+    plan_name: str
+    price_cny: int
+    reason: str
+    message: str
+    cta_path: str
+    stripe_available: bool = False
+    unlock_features: str = ""
+
+
 class DismissAttentionAlertRequest(BaseModel):
     alert_key: str = Field(min_length=1, max_length=128)
 
@@ -125,6 +140,7 @@ class ResearchJourneyOut(BaseModel):
     mastery_goal: MasteryGoalOut = Field(default_factory=MasteryGoalOut)
     attention_alerts: list[AttentionAlertOut] = Field(default_factory=list)
     challenge_paper_coaching: ChallengePaperCoachingOut | None = None
+    upgrade_coaching: UpgradeCoachingOut | None = None
 
 
 # ---- 研究模板 ----

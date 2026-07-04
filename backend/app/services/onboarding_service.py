@@ -395,6 +395,16 @@ def research_journey(db: Session, user: User, locale: Locale = "en") -> dict:
         mastery_next_action=mastery_goal.get("mastery_next_action"),
     )
 
+    from backend.app.services import membership_service as ms
+
+    upgrade_coaching = ms.upgrade_coaching_payload(
+        db,
+        user,
+        locale,
+        mastery_goal=mastery_goal,
+        challenge_paper_coaching=challenge_paper_coaching,
+    )
+
     return {
         "done_count": done_count,
         "total": len(steps),
@@ -407,4 +417,5 @@ def research_journey(db: Session, user: User, locale: Locale = "en") -> dict:
         "mastery_goal": mastery_goal,
         "attention_alerts": attention_alerts,
         "challenge_paper_coaching": challenge_paper_coaching,
+        "upgrade_coaching": upgrade_coaching,
     }

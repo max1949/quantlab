@@ -114,6 +114,21 @@ export interface ChallengePaperCoaching {
   linked_alert_kinds: string[];
 }
 
+export interface UpgradeCoaching {
+  current_tier: number;
+  current_tier_name: string;
+  target_tier: number;
+  target_tier_name: string;
+  plan_code: string;
+  plan_name: string;
+  price_cny: number;
+  reason: string;
+  message: string;
+  cta_path: string;
+  stripe_available: boolean;
+  unlock_features: string;
+}
+
 export interface ResearchJourney {
   done_count: number;
   total: number;
@@ -126,6 +141,7 @@ export interface ResearchJourney {
   mastery_goal: MasteryGoal;
   attention_alerts: AttentionAlert[];
   challenge_paper_coaching: ChallengePaperCoaching | null;
+  upgrade_coaching: UpgradeCoaching | null;
 }
 
 export interface Mentor {

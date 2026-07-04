@@ -650,6 +650,23 @@ ATTENTION_HISTORY_KIND: dict[Locale, dict[str, str]] = {
     },
 }
 
+UPGRADE_COACH: dict[Locale, dict[str, str]] = {
+    "en": {
+        "paper_ready": "Paper bar passed — upgrade to Pro to submit paper orders and start the masters tracking loop.",
+        "mastery_paper": "Next on your mastery path: paper orders — Pro unlocks institutional paper trading.",
+        "challenge_d22": "30-day challenge D22 needs a paper order — Pro unlocks paper trading on your graduated factor.",
+        "mastery_track": "Climb the Paper Masters board with live paper tracking — available on Pro.",
+        "unlock_features": "Paper trading · full history data · portfolio optimization",
+    },
+    "zh": {
+        "paper_ready": "已通过 Paper 毕业线 — 升级专业档即可下模拟单，开启大师跟踪闭环。",
+        "mastery_paper": "大师路径下一步：Paper 模拟单 — 专业档解锁机构级纸面跟踪。",
+        "challenge_d22": "30 天挑战 D22 需下 Paper 单 — 专业档解锁毕业因子的模拟交易。",
+        "mastery_track": "冲击 Paper 大师榜需持续跟踪净值 — 专业档解锁模拟实盘。",
+        "unlock_features": "Paper 模拟盘 · 全历史行情 · 组合优化",
+    },
+}
+
 CHALLENGE_PAPER_COACH: dict[Locale, dict[str, str]] = {
     "en": {
         "d22_ready": "Challenge D{day}: 「{title}」 — paper bar passed. Submit a paper order on your project to light this milestone.",

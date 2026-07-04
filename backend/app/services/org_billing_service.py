@@ -237,10 +237,9 @@ def start_org_checkout(
             "message": "在线支付尚未开通，请联系运营获取团队兑换码，在机构页下方兑换。",
         }
 
-    from backend.app.core.config import get_settings
+    from backend.app.services.membership_service import frontend_origin
 
-    settings = get_settings()
-    origin = (settings.public_base_url or "http://localhost:8000").rstrip("/")
+    origin = frontend_origin()
     pay_url = payment_service.create_checkout_session(
         plan_name=plan["name"],
         price_cny=plan["price_cny"],
@@ -250,8 +249,8 @@ def start_org_checkout(
             "plan_code": plan_code,
             "user_id": str(user_id),
         },
-        success_url=f"{origin}/app/orgs/{org_id}?checkout=success",
-        cancel_url=f"{origin}/app/orgs/{org_id}?checkout=cancel",
+        success_url=f"{origin}/orgs/{org_id}?checkout=success",
+        cancel_url=f"{origin}/orgs/{org_id}?checkout=cancel",
     )
     return {
         **base,

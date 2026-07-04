@@ -201,6 +201,31 @@ def test_attention_alert_history_and_restore(client, db_session):
     assert key not in {i["alert_key"] for i in hist2["items"]}
 
 
+def test_journey_includes_upgrade_coaching_when_paper_ready(client, db_session):
+    from backend.app.core.config import get_settings
+    from backend.app.models.user import User, UserLevel
+    from sqlalchemy import select
+
+    settings = get_settings()
+    settings.research_gate_enabled = True
+    try:
+        seed_sample_market_data(db_session)
+        h = _register(client, "upcoach")
+        _full_research(client, h, db_session)
+        user = db_session.execute(select(User).where(User.username == "upcoach")).scalar_one()
+        user.level = UserLevel.L4
+        db_session.add(user)
+        db_session.commit()
+        j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+        assert "upgrade_coaching" in j
+        uc = j["upgrade_coaching"]
+        if uc:
+            assert uc["plan_code"] == "pro_monthly"
+            assert uc["target_tier"] == 2
+    finally:
+        settings.research_gate_enabled = False
+
+
 def test_paper_mastery_board_context_unit(db_session):
     from backend.app.services.leaderboard_service import paper_mastery_board_context
     from backend.app.models.user import User

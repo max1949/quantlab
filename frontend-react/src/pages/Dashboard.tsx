@@ -16,6 +16,7 @@ import ResearchJourneyRing from "../components/ResearchJourneyRing";
 import MasteryGoalPanel from "../components/MasteryGoalPanel";
 import AttentionAlertsPanel from "../components/AttentionAlertsPanel";
 import ChallengePaperCoachPanel from "../components/ChallengePaperCoachPanel";
+import UpgradeCoachPanel from "../components/UpgradeCoachPanel";
 
 export default function Dashboard() {
   const user = useAuth((s) => s.user)!;
@@ -89,6 +90,10 @@ export default function Dashboard() {
 
       <div className="mt-4">
         <ChallengePaperCoachPanel />
+      </div>
+
+      <div className="mt-4">
+        <UpgradeCoachPanel />
       </div>
 
       <div className="mt-6">

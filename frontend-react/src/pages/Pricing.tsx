@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   checkout,
@@ -22,6 +22,7 @@ export default function Pricing() {
   const notify = useUi((s) => s.notify);
   const p = useLocale((s) => s.dict.pricing);
   const qc = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const plans = useQuery({ queryKey: ["plans"], queryFn: getPlans });
   const sub = useQuery({
@@ -42,6 +43,23 @@ export default function Pricing() {
 
   const [code, setCode] = useState("");
   const [billingExporting, setBillingExporting] = useState(false);
+
+  useEffect(() => {
+    const checkoutState = searchParams.get("checkout");
+    if (!checkoutState) return;
+    if (checkoutState === "success") {
+      notify(p.checkoutSuccess, "success");
+      void qc.invalidateQueries({ queryKey: ["subscription"] });
+      void qc.invalidateQueries({ queryKey: ["entitlements"] });
+      void qc.invalidateQueries({ queryKey: ["billing-history"] });
+      void qc.invalidateQueries({ queryKey: ["research-journey"] });
+    } else if (checkoutState === "cancel") {
+      notify(p.checkoutCancel, "info");
+    }
+    searchParams.delete("checkout");
+    searchParams.delete("plan");
+    setSearchParams(searchParams, { replace: true });
+  }, [searchParams, setSearchParams, notify, p, qc]);
 
   const doRedeem = useMutation({
     mutationFn: () => redeemCode(code.trim()),
