@@ -5,23 +5,32 @@ import { getResearchJourney } from "../api/endpoints";
 import { NETWORK_FOLLOW_TARGET } from "../lib/journeyFollowing";
 import { useLocale } from "../store/locale";
 
-const DISMISS_KEY = "quantlab-dashboard-mastery-loop-dismissed";
+const WEEK_KEY = "quantlab-dashboard-mastery-loop-week";
+
+function currentIsoWeek(): string {
+  const d = new Date();
+  const onejan = new Date(d.getFullYear(), 0, 1);
+  const week = Math.ceil(((d.getTime() - onejan.getTime()) / 86400000 + onejan.getDay() + 1) / 7);
+  return `${d.getFullYear()}-W${week}`;
+}
 
 export default function DashboardMasteryLoopPanel() {
   const d = useLocale((s) => s.dict.dashboardMasteryLoop);
-  const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISS_KEY) === "1");
+  const [weekShown, setWeekShown] = useState(
+    () => typeof window !== "undefined" && localStorage.getItem(WEEK_KEY) === currentIsoWeek(),
+  );
   const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
   const following = journey.data?.social_following_count ?? 0;
   const coach = journey.data?.share_growth_coaching;
   const hasShare = Boolean(coach);
 
-  const matches = !dismissed && following >= NETWORK_FOLLOW_TARGET && !journey.isLoading;
+  const matches = !weekShown && following >= NETWORK_FOLLOW_TARGET && !journey.isLoading;
 
   if (!matches) return null;
 
   const dismiss = () => {
-    localStorage.setItem(DISMISS_KEY, "1");
-    setDismissed(true);
+    localStorage.setItem(WEEK_KEY, currentIsoWeek());
+    setWeekShown(true);
   };
 
   return (
