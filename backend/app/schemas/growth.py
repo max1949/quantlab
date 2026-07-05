@@ -94,6 +94,26 @@ class UpgradeCoachingOut(BaseModel):
     unlock_features: str = ""
 
 
+class MarketDataCoachingOut(BaseModel):
+    symbol: str
+    timeframe: str
+    current_tier: int
+    current_summary: str
+    target_tier: int
+    target_summary: str
+    plan_code: str
+    plan_name: str
+    price_cny: int
+    reason: str
+    message: str
+    effective_rows: int | None = None
+    total_rows: int | None = None
+    quality_grade: str | None = None
+    quality_warnings: list[str] = Field(default_factory=list)
+    cta_path: str
+    stripe_available: bool = False
+
+
 class DismissAttentionAlertRequest(BaseModel):
     alert_key: str = Field(min_length=1, max_length=128)
 
@@ -141,6 +161,7 @@ class ResearchJourneyOut(BaseModel):
     attention_alerts: list[AttentionAlertOut] = Field(default_factory=list)
     challenge_paper_coaching: ChallengePaperCoachingOut | None = None
     upgrade_coaching: UpgradeCoachingOut | None = None
+    market_data_coaching: MarketDataCoachingOut | None = None
 
 
 # ---- 研究模板 ----

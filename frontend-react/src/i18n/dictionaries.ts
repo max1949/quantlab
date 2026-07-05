@@ -106,6 +106,15 @@ const en = {
     viewPlans: "View plans →",
     redeemHint: "Online pay not configured — redeem a card on the plans page.",
   },
+  marketDataCoach: {
+    badge: (symbol: string, tf: string) => `Market data · ${symbol} · ${tf}`,
+    currentPlan: (summary: string) => `Now: ${summary}`,
+    targetPlan: (summary: string) => summary,
+    barsUsed: (effective: number, total: number) => `Using ${effective} of ${total} available bars on your plan`,
+    upgradeCta: (plan: string, price: number) => `Upgrade · ${plan} ¥${price}/mo →`,
+    viewPlans: "View plans →",
+    redeemHint: "Online pay not configured — redeem a card on the plans page.",
+  },
   adminOps: {
     title: "Ops console",
     subtitle: "PMF metrics, health probes, and audit trail (admin key required).",
@@ -1307,6 +1316,15 @@ const zh = {
     checkoutCta: "Stripe 在线升级 →",
     viewPlans: "查看套餐 →",
     redeemHint: "在线支付未开通 — 请在会员页输入卡密兑换。",
+  },
+  marketDataCoach: {
+    badge: (symbol: string, tf: string) => `行情数据 · ${symbol} · ${tf}`,
+    currentPlan: (summary: string) => `当前：${summary}`,
+    targetPlan: (summary: string) => summary,
+    barsUsed: (effective: number, total: number) => `套餐内使用 ${effective}/${total} 根 K 线`,
+    upgradeCta: (plan: string, price: number) => `升级 · ${plan} ¥${price}/月 →`,
+    viewPlans: "查看套餐 →",
+    redeemHint: "在线支付未配置 — 请到套餐页兑换月卡。",
   },
   adminOps: {
     title: "运营控制台",

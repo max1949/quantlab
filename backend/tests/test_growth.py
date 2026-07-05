@@ -226,6 +226,42 @@ def test_journey_includes_upgrade_coaching_when_paper_ready(client, db_session):
         settings.research_gate_enabled = False
 
 
+def test_journey_includes_market_data_coaching(client, db_session):
+    seed_sample_market_data(db_session)
+    h = _register(client, "mdcoach")
+    proj = client.post(f"{BASE}/projects", headers=h, json={"title": "p", "symbol": "RB"}).json()
+    assert proj["id"]
+    j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    assert "market_data_coaching" in j
+    md = j["market_data_coaching"]
+    if md:
+        assert md["symbol"] == "RB"
+        assert md["plan_code"]
+        assert "stripe_available" in md
+
+
+def test_journey_suppresses_market_data_when_upgrade_coaching_wins(client, db_session):
+    from backend.app.core.config import get_settings
+    from backend.app.models.user import User, UserLevel
+    from sqlalchemy import select
+
+    settings = get_settings()
+    settings.research_gate_enabled = True
+    try:
+        seed_sample_market_data(db_session)
+        h = _register(client, "coachdedup")
+        _full_research(client, h, db_session)
+        user = db_session.execute(select(User).where(User.username == "coachdedup")).scalar_one()
+        user.level = UserLevel.L4
+        db_session.add(user)
+        db_session.commit()
+        j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+        assert j.get("upgrade_coaching") is not None
+        assert j.get("market_data_coaching") is None
+    finally:
+        settings.research_gate_enabled = False
+
+
 def test_paper_mastery_board_context_unit(db_session):
     from backend.app.services.leaderboard_service import paper_mastery_board_context
     from backend.app.models.user import User

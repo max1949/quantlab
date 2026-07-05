@@ -128,9 +128,10 @@ def list_datasets_for_user(db: Session, user: User) -> list[dict]:
     return out
 
 
-def entitlement_payload(db: Session, user: User) -> dict:
+def entitlement_payload(db: Session, user: User, locale: str = "zh") -> dict:
     tier = ms.current_tier(db, user)
     policy = policy_for_tier(tier)
+    loc = "en" if locale == "en" else "zh"
     limits = {}
     labels = policy.get("limit_labels", {})
     for tf in sorted(policy["timeframes"]):
@@ -142,5 +143,105 @@ def entitlement_payload(db: Session, user: User) -> dict:
     return {
         "allowed_timeframes": sorted(policy["timeframes"]),
         "limits": limits,
-        "summary": policy["summary_zh"],
+        "summary": policy[f"summary_{loc}"],
+        "tier": tier,
+    }
+
+
+def market_data_coaching_payload(
+    db: Session,
+    user: User,
+    locale: str = "zh",
+    *,
+    symbol: str | None = None,
+    has_active_research: bool = False,
+) -> dict | None:
+    """行情深度 × 数据质量 — 友好升级引导 (大师路径需更长样本外)。"""
+    from backend.app.core.locale import Locale
+    from backend.app.i18n import content as i18n
+    from backend.app.services import payment_service
+    from engine.data_quality import assess_ohlcv_quality
+
+    if not has_active_research:
+        return None
+
+    loc: Locale = "zh" if locale == "zh" else "en"
+    tier = ms.current_tier(db, user)
+    if tier >= ms.TIER_PRO:
+        return None
+
+    sym = (symbol or "RB").upper()
+    ds_row = None
+    for row in list_datasets_for_user(db, user):
+        if row["symbol"] == sym and row["timeframe"] == "1d":
+            ds_row = row
+            break
+
+    capped = bool(
+        ds_row
+        and ds_row.get("tier_cap")
+        and ds_row["effective_rows"] < ds_row["rows"]
+    )
+
+    quality_poor = False
+    qual: dict = {}
+    try:
+        df = load_for_user(db, user, sym, "1d")
+        qual = assess_ohlcv_quality(df, "1d")
+        quality_poor = not qual.get("passed", True)
+    except MarketDataAccessError:
+        pass
+
+    reason: str | None = None
+    if tier == ms.TIER_FREE:
+        if capped:
+            reason = "free_history_cap"
+        elif quality_poor:
+            reason = "free_quality"
+        elif has_active_research:
+            reason = "free_upgrade_hint"
+    elif tier == ms.TIER_PLUS:
+        if capped:
+            reason = "plus_history_cap"
+        elif quality_poor:
+            reason = "plus_quality"
+
+    if not reason:
+        return None
+
+    if reason in ("plus_history_cap", "plus_quality"):
+        plan_code = "pro_monthly"
+        target_tier = ms.TIER_PRO
+    else:
+        plan_code = "plus_monthly"
+        target_tier = ms.TIER_PLUS
+
+    plan = ms.PLAN_BY_CODE[plan_code]
+    labels = i18n.DATA_COACH.get(loc) or i18n.DATA_COACH["en"]
+    cur_policy = policy_for_tier(tier)
+    tgt_policy = policy_for_tier(target_tier)
+
+    return {
+        "symbol": sym,
+        "timeframe": "1d",
+        "current_tier": tier,
+        "current_summary": cur_policy[f"summary_{loc}"],
+        "target_tier": target_tier,
+        "target_summary": tgt_policy[f"summary_{loc}"],
+        "plan_code": plan_code,
+        "plan_name": plan["name"],
+        "price_cny": plan["price_cny"],
+        "reason": reason,
+        "message": labels[reason].format(
+            symbol=sym,
+            effective=ds_row["effective_rows"] if ds_row else 0,
+            total=ds_row["rows"] if ds_row else 0,
+            grade=qual.get("grade", ""),
+        ),
+        "effective_rows": ds_row["effective_rows"] if ds_row else None,
+        "total_rows": ds_row["rows"] if ds_row else None,
+        "quality_grade": qual.get("grade"),
+        "quality_warnings": (qual.get("warnings") or [])[:2],
+        "cta_path": "/pricing",
+        "stripe_available": payment_service.stripe_configured(),
     }

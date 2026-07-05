@@ -405,6 +405,26 @@ def research_journey(db: Session, user: User, locale: Locale = "en") -> dict:
         challenge_paper_coaching=challenge_paper_coaching,
     )
 
+    from backend.app.services import market_data_policy as mdp
+
+    active_symbol = None
+    if active_id:
+        proj = db.get(ResearchProject, active_id)
+        active_symbol = proj.symbol if proj else None
+
+    market_data_coaching = mdp.market_data_coaching_payload(
+        db,
+        user,
+        locale,
+        symbol=active_symbol,
+        has_active_research=done_count >= 1,
+    )
+
+    # 新手友好：大师路径 Pro 升级优先于行情深度 Plus 引导，避免双卡堆叠
+    if upgrade_coaching and market_data_coaching:
+        if upgrade_coaching["target_tier"] >= market_data_coaching["target_tier"]:
+            market_data_coaching = None
+
     return {
         "done_count": done_count,
         "total": len(steps),
@@ -418,4 +438,5 @@ def research_journey(db: Session, user: User, locale: Locale = "en") -> dict:
         "attention_alerts": attention_alerts,
         "challenge_paper_coaching": challenge_paper_coaching,
         "upgrade_coaching": upgrade_coaching,
+        "market_data_coaching": market_data_coaching,
     }

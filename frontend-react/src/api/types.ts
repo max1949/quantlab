@@ -129,6 +129,26 @@ export interface UpgradeCoaching {
   unlock_features: string;
 }
 
+export interface MarketDataCoaching {
+  symbol: string;
+  timeframe: string;
+  current_tier: number;
+  current_summary: string;
+  target_tier: number;
+  target_summary: string;
+  plan_code: string;
+  plan_name: string;
+  price_cny: number;
+  reason: string;
+  message: string;
+  effective_rows: number | null;
+  total_rows: number | null;
+  quality_grade: string | null;
+  quality_warnings: string[];
+  cta_path: string;
+  stripe_available: boolean;
+}
+
 export interface ResearchJourney {
   done_count: number;
   total: number;
@@ -142,6 +162,7 @@ export interface ResearchJourney {
   attention_alerts: AttentionAlert[];
   challenge_paper_coaching: ChallengePaperCoaching | null;
   upgrade_coaching: UpgradeCoaching | null;
+  market_data_coaching: MarketDataCoaching | null;
 }
 
 export interface Mentor {

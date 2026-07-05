@@ -17,6 +17,7 @@ import MasteryGoalPanel from "../components/MasteryGoalPanel";
 import AttentionAlertsPanel from "../components/AttentionAlertsPanel";
 import ChallengePaperCoachPanel from "../components/ChallengePaperCoachPanel";
 import UpgradeCoachPanel from "../components/UpgradeCoachPanel";
+import MarketDataCoachPanel from "../components/MarketDataCoachPanel";
 
 export default function Dashboard() {
   const user = useAuth((s) => s.user)!;
@@ -94,6 +95,10 @@ export default function Dashboard() {
 
       <div className="mt-4">
         <UpgradeCoachPanel />
+      </div>
+
+      <div className="mt-4">
+        <MarketDataCoachPanel />
       </div>
 
       <div className="mt-6">

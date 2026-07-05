@@ -667,6 +667,23 @@ UPGRADE_COACH: dict[Locale, dict[str, str]] = {
     },
 }
 
+DATA_COACH: dict[Locale, dict[str, str]] = {
+    "en": {
+        "free_history_cap": "{symbol}: your plan uses {effective}/{total} daily bars — longer history improves OOS validation.",
+        "free_quality": "{symbol}: data quality is 「{grade}」 on the free window — upgrade for deeper, cleaner history.",
+        "free_upgrade_hint": "{symbol}: unlock 2-year daily + minute bars to run institutional-grade validation.",
+        "plus_history_cap": "{symbol}: capped at {effective}/{total} bars — Pro unlocks full history for mastery-grade research.",
+        "plus_quality": "{symbol}: quality issues on your window (「{grade}」) — Pro gets full-depth bars for robust checks.",
+    },
+    "zh": {
+        "free_history_cap": "{symbol}：当前套餐仅用 {effective}/{total} 根日线 — 更长样本外验证更可靠。",
+        "free_quality": "{symbol}：免费窗口数据质量「{grade}」— 升级可获得更深、更干净的行情。",
+        "free_upgrade_hint": "{symbol}：升级可解锁 2 年日线 + 分钟线，做机构级验证。",
+        "plus_history_cap": "{symbol}：已截断为 {effective}/{total} 根 — 专业档解锁全历史，冲击大师榜更稳。",
+        "plus_quality": "{symbol}：当前窗口质量「{grade}」— 专业档全深度行情利于稳健性检查。",
+    },
+}
+
 CHALLENGE_PAPER_COACH: dict[Locale, dict[str, str]] = {
     "en": {
         "d22_ready": "Challenge D{day}: 「{title}」 — paper bar passed. Submit a paper order on your project to light this milestone.",
