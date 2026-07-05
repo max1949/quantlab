@@ -126,6 +126,7 @@ const en = {
   firstMentorWelcome: {
     badge: "First workspace visit",
     firstStep: (label: string) => `Your first step: ${label}`,
+    templatePick: (title: string) => `Regime-fit pick: start with 「${title}」 — one click to open templates.`,
     openQuickstart: "3-step guide →",
     gotIt: "Got it",
     ctaDefault: "Start →",
@@ -1496,6 +1497,7 @@ const zh = {
   firstMentorWelcome: {
     badge: "首次进入工作台",
     firstStep: (label: string) => `你的第一步：${label}`,
+    templatePick: (title: string) => `行情适配推荐：从「${title}」模板一键开局。`,
     openQuickstart: "3 步引导 →",
     gotIt: "知道了",
     ctaDefault: "开始 →",

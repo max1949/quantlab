@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getMentor, getResearchJourney } from "../api/endpoints";
 import { FIRST_MENTOR_WELCOME_KEY } from "../lib/onboardingFocus";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
-import { stageToCtaLabel } from "../lib/nav";
+import { stageToCtaLabel, stageToRoute } from "../lib/nav";
 
 const DISMISS_KEY = "quantlab-first-mentor-welcome-dismissed";
 
 export default function FirstDashboardMentorPanel() {
   const user = useAuth((s) => s.user);
+  const navigate = useNavigate();
   const d = useLocale((s) => s.dict.firstMentorWelcome);
   const dash = useLocale((s) => s.dict.dashboard);
   const stages = useLocale((s) => s.dict.stages);
@@ -32,11 +33,16 @@ export default function FirstDashboardMentorPanel() {
 
   const guide = journey.data?.quickstart_guide;
   const m = mentor.data;
-  if (!guide || !m) return null;
+  if (!m) return null;
 
-  const current = guide.steps[guide.current_index];
-  const stepCta =
-    current && current.cta_action in stages
+  const current = guide?.steps[guide.current_index];
+  const templateStart = m.stage === "create_project" && Boolean(m.recommended_template);
+  const primaryRoute = templateStart
+    ? stageToRoute(m.stage, m.recommended_template, null, m.regime_pick?.symbol)
+    : current?.cta_path;
+  const primaryLabel = templateStart
+    ? stageToCtaLabel(m.stage, stages)
+    : current && current.cta_action in stages
       ? stageToCtaLabel(current.cta_action, stages)
       : d.ctaDefault;
 
@@ -66,23 +72,61 @@ export default function FirstDashboardMentorPanel() {
               )}
               {m.message}
             </p>
-            {current && !current.done && (
+            {m.regime_pick?.template_title && (
+              <p className="mt-2 rounded-lg border border-violet-200 bg-violet-50/60 px-2.5 py-1.5 text-xs text-violet-900 dark:border-violet-900 dark:bg-violet-950/30 dark:text-violet-100">
+                {dash.mentorRegime(
+                  m.regime_pick.symbol,
+                  m.regime_pick.regime_label ?? "",
+                  m.regime_pick.template_title,
+                  m.regime_pick.fit_verdict,
+                  m.regime_pick.fit_score,
+                )}
+                {m.regime_pick.coach_hint && (
+                  <span className="opacity-90"> — {m.regime_pick.coach_hint}</span>
+                )}
+              </p>
+            )}
+            {current && !current.done && !templateStart && (
               <p className="mt-2 rounded-lg border border-brand-200 bg-white/70 px-2.5 py-1.5 text-xs text-brand-900 dark:border-brand-800 dark:bg-slate-900/50 dark:text-brand-100">
                 {d.firstStep(current.label)}
+              </p>
+            )}
+            {templateStart && m.regime_pick?.template_title && (
+              <p className="mt-2 rounded-lg border border-brand-200 bg-white/70 px-2.5 py-1.5 text-xs text-brand-900 dark:border-brand-800 dark:bg-slate-900/50 dark:text-brand-100">
+                {d.templatePick(m.regime_pick.template_title)}
               </p>
             )}
             <p className="mt-2 text-[11px] text-slate-400">{m.disclaimer}</p>
           </div>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
-          {current && !current.done && (
-            <Link to={current.cta_path} className="btn-primary whitespace-nowrap text-xs">
-              {stepCta}
-            </Link>
+          {primaryRoute && (
+            templateStart ? (
+              <button
+                type="button"
+                className="btn-primary whitespace-nowrap text-xs"
+                onClick={() => {
+                  dismiss();
+                  navigate(primaryRoute);
+                }}
+              >
+                {primaryLabel}
+              </button>
+            ) : (
+              <Link
+                to={primaryRoute}
+                className="btn-primary whitespace-nowrap text-xs"
+                onClick={dismiss}
+              >
+                {primaryLabel}
+              </Link>
+            )
           )}
-          <a href="#quickstart" className="btn whitespace-nowrap text-xs">
-            {d.openQuickstart}
-          </a>
+          {guide && (
+            <a href="#quickstart" className="btn whitespace-nowrap text-xs">
+              {d.openQuickstart}
+            </a>
+          )}
           <button type="button" className="btn whitespace-nowrap text-xs" onClick={dismiss}>
             {d.gotIt}
           </button>
