@@ -270,6 +270,23 @@ def test_journey_includes_quickstart_guide(client, db_session):
     assert j3.get("quickstart_guide") is None
 
 
+def test_journey_includes_first_report_coaching(client, db_session):
+    seed_sample_market_data(db_session)
+    h = _register(client, "firstrep")
+    j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    assert j.get("first_report_coaching") is None
+
+    proj, _ = _full_research(client, h, db_session)
+    j2 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    coach = j2.get("first_report_coaching")
+    assert coach is not None
+    assert coach["badge"]
+    assert coach["celebrate"]
+    assert coach["cta_path"] == f"/projects/{proj['id']}"
+    assert coach["cta_action"] in ("run_paper", "publish_share", "run_validation")
+    assert j2.get("quickstart_guide") is None
+
+
 def test_journey_includes_checkout_coaching(client, db_session):
     from backend.app.models.user import User
     from backend.app.services import membership_service as ms

@@ -147,6 +147,18 @@ class QuickstartGuideOut(BaseModel):
     total: int
 
 
+class FirstReportCoachingOut(BaseModel):
+    reason: str
+    badge: str
+    message: str
+    celebrate: str
+    unlock_features: str
+    cta_action: str
+    cta_path: str
+    active_project_id: uuid.UUID | None = None
+    paper_ready: bool = False
+
+
 class DismissAttentionAlertRequest(BaseModel):
     alert_key: str = Field(min_length=1, max_length=128)
 
@@ -197,6 +209,7 @@ class ResearchJourneyOut(BaseModel):
     market_data_coaching: MarketDataCoachingOut | None = None
     checkout_coaching: CheckoutCoachingOut | None = None
     quickstart_guide: QuickstartGuideOut | None = None
+    first_report_coaching: FirstReportCoachingOut | None = None
 
 
 # ---- 研究模板 ----

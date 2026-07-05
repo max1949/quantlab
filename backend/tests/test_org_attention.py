@@ -122,6 +122,87 @@ def test_org_research_attention_webhook_dispatch(client, db_session):
         settings.execution_sla_alert_enabled = prev_enabled
 
 
+def test_org_research_dedicated_webhook_separate_from_sla(client, db_session):
+    settings = get_settings()
+    prev_enabled = settings.execution_sla_alert_enabled
+    settings.execution_sla_alert_enabled = True
+
+    owner = {"email": "dedwh@x.com", "username": "dedwhowner", "password": "s3cret-pass"}
+    client.post(f"{BASE}/auth/register", json=owner)
+    tok = client.post(
+        f"{BASE}/auth/login",
+        json={"identifier": owner["username"], "password": owner["password"]},
+    ).json()["access_token"]
+    h = {"Authorization": f"Bearer {tok}"}
+    org_id = client.post(f"{BASE}/orgs", headers=h, json={"name": "Dedicated WH"}).json()["id"]
+
+    client.put(
+        f"{BASE}/orgs/{org_id}/execution/alert-webhook",
+        headers=h,
+        json={"webhook_url": "https://hooks.example.com/sla-only", "webhook_secret": "sla-secret"},
+    )
+    client.put(
+        f"{BASE}/orgs/{org_id}/research/alert-webhook",
+        headers=h,
+        json={
+            "webhook_url": "https://hooks.example.com/research-only",
+            "webhook_secret": "research-dedicated",
+        },
+    )
+
+    wh = client.get(f"{BASE}/orgs/{org_id}/research/alert-webhook", headers=h).json()
+    assert wh["webhook_url"] == "https://hooks.example.com/research-only"
+    assert wh["uses_sla_fallback"] is False
+
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.raise_for_status = MagicMock()
+
+    with patch("backend.app.services.execution_alert_service.httpx.Client") as mock_client_cls:
+        mock_client = MagicMock()
+        mock_client.__enter__ = MagicMock(return_value=mock_client)
+        mock_client.__exit__ = MagicMock(return_value=False)
+        mock_client.post.return_value = mock_resp
+        mock_client_cls.return_value = mock_client
+
+        fake_item = {
+            "username": "bob",
+            "alert_key": "paper_decay:xyz",
+            "kind": "paper_decay",
+            "title": "Paper decay",
+            "message": "test",
+            "severity": "alert",
+        }
+        with patch(
+            "backend.app.services.org_attention_service.collect_team_attention"
+        ) as mock_rollup:
+            mock_rollup.return_value = {
+                "member_count": 1,
+                "members_with_alerts": 1,
+                "total_alerts": 1,
+                "summary": "1 alert",
+                "items": [fake_item],
+            }
+            resp = client.post(
+                f"{BASE}/orgs/{org_id}/research/attention-alerts/dispatch",
+                headers=h,
+                params={"force": True},
+            )
+
+    try:
+        assert resp.status_code == 200, resp.text
+        post_url = mock_client.post.call_args[0][0]
+        assert post_url == "https://hooks.example.com/research-only"
+        call_kwargs = mock_client.post.call_args.kwargs
+        body_bytes = call_kwargs["content"]
+        sig = call_kwargs["headers"][eas.SIGNATURE_HEADER]
+        assert eas.verify_webhook_signature(body_bytes, sig, "research-dedicated")
+        payload = json.loads(body_bytes.decode())
+        assert payload["webhook_dedicated"] is True
+    finally:
+        settings.execution_sla_alert_enabled = prev_enabled
+
+
 def test_org_team_attention_rollup_with_member_project(client, db_session):
     h_owner = _auth(client, OWNER)
     h_member = _auth(client, MEMBER)

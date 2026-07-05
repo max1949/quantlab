@@ -121,6 +121,12 @@ const en = {
     ctaDefault: "Continue →",
     dismiss: "Hide guide",
   },
+  firstReportCoach: {
+    unlocked: (features: string) => `Next unlocks: ${features}`,
+    ctaDefault: "Continue →",
+    viewBoard: "Paper Masters board →",
+    dismiss: "Got it",
+  },
   marketDataCoach: {
     badge: (symbol: string, tf: string) => `Market data · ${symbol} · ${tf}`,
     currentPlan: (summary: string) => `Now: ${summary}`,
@@ -315,7 +321,15 @@ const en = {
     teamAttentionMember: (user: string, kind: string) => `${user} · ${kind}`,
     teamAttentionViewProject: "Open project →",
     teamAttentionWebhookHint:
-      "Uses the same webhook below — pushes team research alerts (regime shift, weak fit, paper decay) to Slack/DingTalk.",
+      "Configure a dedicated research webhook below, or leave empty to use the SLA webhook as fallback.",
+    researchAlertWebhookTitle: "Research alert webhook",
+    researchAlertWebhookHint:
+      "Push team research alerts (regime shift, weak fit, paper decay) to a separate Slack/DingTalk channel.",
+    researchAlertWebhookFallback: (url: string) => `Using SLA webhook fallback: ${url}`,
+    researchAlertWebhookPlaceholder: "https://hooks.example.com/research",
+    researchAlertWebhookSave: "Save research webhook",
+    researchAlertWebhookSaved: "Research webhook saved",
+    researchAlertWebhookFail: "Failed to save research webhook",
     teamAttentionWebhookDispatch: "Push research alerts",
     teamAttentionWebhookDispatching: "Pushing…",
     teamAttentionWebhookDispatchDone: (n: number) => `Research alert webhook sent (${n} item(s))`,
@@ -1366,6 +1380,12 @@ const zh = {
     ctaDefault: "继续 →",
     dismiss: "收起引导",
   },
+  firstReportCoach: {
+    unlocked: (features: string) => `下一步解锁：${features}`,
+    ctaDefault: "继续 →",
+    viewBoard: "Paper 大师榜 →",
+    dismiss: "知道了",
+  },
   marketDataCoach: {
     badge: (symbol: string, tf: string) => `行情数据 · ${symbol} · ${tf}`,
     currentPlan: (summary: string) => `当前：${summary}`,
@@ -1560,7 +1580,15 @@ const zh = {
     teamAttentionMember: (user: string, kind: string) => `${user} · ${kind}`,
     teamAttentionViewProject: "打开项目 →",
     teamAttentionWebhookHint:
-      "与下方 Webhook 共用 — 将团队研究提醒（制度切换、适配偏弱、Paper 衰减）推送到 Slack/钉钉。",
+      "可在下方配置专用研究 Webhook；留空则自动回退到 SLA Webhook。",
+    researchAlertWebhookTitle: "研究提醒 Webhook",
+    researchAlertWebhookHint:
+      "将团队研究提醒（制度切换、适配偏弱、Paper 衰减）推送到独立的 Slack/钉钉群。",
+    researchAlertWebhookFallback: (url: string) => `当前回退 SLA Webhook：${url}`,
+    researchAlertWebhookPlaceholder: "https://hooks.example.com/research",
+    researchAlertWebhookSave: "保存研究 Webhook",
+    researchAlertWebhookSaved: "研究 Webhook 已保存",
+    researchAlertWebhookFail: "保存研究 Webhook 失败",
     teamAttentionWebhookDispatch: "推送研究提醒",
     teamAttentionWebhookDispatching: "推送中…",
     teamAttentionWebhookDispatchDone: (n: number) => `研究提醒 Webhook 已推送（${n} 条）`,

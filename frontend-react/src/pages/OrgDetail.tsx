@@ -26,6 +26,8 @@ import {
   dispatchOrgResearchAttentionAlerts,
   getOrgAlertWebhook,
   setOrgAlertWebhook,
+  getOrgResearchAlertWebhook,
+  setOrgResearchAlertWebhook,
   dispatchOrgSlaAlerts,
   fetchOrgAlertDeliveries,
   refreshOrgExecutionOrders,
@@ -61,6 +63,8 @@ export default function OrgDetail() {
   const [billingAddress, setBillingAddress] = useState("");
   const [alertWebhook, setAlertWebhook] = useState("");
   const [alertWebhookSecret, setAlertWebhookSecret] = useState("");
+  const [researchAlertWebhook, setResearchAlertWebhook] = useState("");
+  const [researchAlertWebhookSecret, setResearchAlertWebhookSecret] = useState("");
 
   const org = useQuery({ queryKey: ["org", id], queryFn: () => getOrg(id), enabled: Boolean(id) });
   const members = useQuery({
@@ -122,6 +126,11 @@ export default function OrgDetail() {
   const alertWebhookQuery = useQuery({
     queryKey: ["org-alert-webhook", id],
     queryFn: () => getOrgAlertWebhook(id),
+    enabled: Boolean(id) && (org.data?.my_role === "owner" || org.data?.my_role === "admin"),
+  });
+  const researchAlertWebhookQuery = useQuery({
+    queryKey: ["org-research-alert-webhook", id],
+    queryFn: () => getOrgResearchAlertWebhook(id),
     enabled: Boolean(id) && (org.data?.my_role === "owner" || org.data?.my_role === "admin"),
   });
   const alertDeliveries = useQuery({
@@ -274,10 +283,28 @@ export default function OrgDetail() {
       setAlertWebhook(r.webhook_url);
       setAlertWebhookSecret("");
       void qc.invalidateQueries({ queryKey: ["org-alert-webhook", id] });
+      void qc.invalidateQueries({ queryKey: ["org-research-alert-webhook", id] });
       void qc.invalidateQueries({ queryKey: ["org-activity", id] });
       notify(o.alertWebhookSaved, "success");
     },
     onError: (e) => notify(apiErrorMessage(e, o.alertWebhookFail), "error"),
+  });
+
+  const saveResearchAlertWebhook = useMutation({
+    mutationFn: () =>
+      setOrgResearchAlertWebhook(
+        id,
+        researchAlertWebhook.trim(),
+        researchAlertWebhookSecret.trim() || undefined,
+      ),
+    onSuccess: (r) => {
+      setResearchAlertWebhook(r.webhook_url);
+      setResearchAlertWebhookSecret("");
+      void qc.invalidateQueries({ queryKey: ["org-research-alert-webhook", id] });
+      void qc.invalidateQueries({ queryKey: ["org-activity", id] });
+      notify(o.researchAlertWebhookSaved, "success");
+    },
+    onError: (e) => notify(apiErrorMessage(e, o.researchAlertWebhookFail), "error"),
   });
 
   const dispatchResearchAttention = useMutation({
@@ -356,6 +383,16 @@ export default function OrgDetail() {
       setAlertWebhook(alertWebhookQuery.data.webhook_url);
     }
   }, [alertWebhookQuery.data]);
+
+  useEffect(() => {
+    if (researchAlertWebhookQuery.data) {
+      setResearchAlertWebhook(researchAlertWebhookQuery.data.webhook_url);
+    }
+  }, [researchAlertWebhookQuery.data]);
+
+  const researchWebhookReady = Boolean(
+    researchAlertWebhookQuery.data?.webhook_url || researchAlertWebhookQuery.data?.uses_sla_fallback,
+  );
 
   if (org.isLoading) return <Spinner />;
   if (org.isError || !org.data) {
@@ -723,12 +760,47 @@ export default function OrgDetail() {
                 <p className="text-xs text-slate-500">{o.teamAttentionEmpty}</p>
               )}
               <div className="mt-4 border-t border-violet-100 pt-3 dark:border-violet-900">
-                <p className="mb-2 text-xs text-slate-500">{o.teamAttentionWebhookHint}</p>
+                <p className="mb-1 text-sm font-medium">{o.researchAlertWebhookTitle}</p>
+                <p className="mb-2 text-xs text-slate-500">{o.researchAlertWebhookHint}</p>
+                {researchAlertWebhookQuery.data?.uses_sla_fallback && (
+                  <p className="mb-2 text-xs text-violet-700 dark:text-violet-300">
+                    {o.researchAlertWebhookFallback(researchAlertWebhookQuery.data.sla_fallback_url)}
+                  </p>
+                )}
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <input
+                    className="input flex-1 font-mono text-xs"
+                    placeholder={o.researchAlertWebhookPlaceholder}
+                    value={researchAlertWebhook}
+                    onChange={(e) => setResearchAlertWebhook(e.target.value)}
+                  />
+                  <input
+                    className="input flex-1 font-mono text-xs"
+                    placeholder={
+                      researchAlertWebhookQuery.data?.secret_configured
+                        ? o.alertWebhookSecretConfigured
+                        : o.alertWebhookSecretPlaceholder
+                    }
+                    value={researchAlertWebhookSecret}
+                    onChange={(e) => setResearchAlertWebhookSecret(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="btn shrink-0 text-xs"
+                    disabled={saveResearchAlertWebhook.isPending || researchAlertWebhookQuery.isLoading}
+                    onClick={() => saveResearchAlertWebhook.mutate()}
+                  >
+                    {saveResearchAlertWebhook.isPending
+                      ? o.alertWebhookSaving
+                      : o.researchAlertWebhookSave}
+                  </button>
+                </div>
+                <p className="mb-2 mt-3 text-xs text-slate-500">{o.teamAttentionWebhookHint}</p>
                 <button
                   type="button"
                   className="btn text-xs"
                   disabled={
-                    dispatchResearchAttention.isPending || !alertWebhookQuery.data?.webhook_url
+                    dispatchResearchAttention.isPending || !researchWebhookReady
                   }
                   onClick={() => dispatchResearchAttention.mutate()}
                 >

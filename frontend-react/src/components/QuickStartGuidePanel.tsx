@@ -8,16 +8,28 @@ import { Spinner } from "./ui";
 
 const DISMISS_KEY = "quantlab-quickstart-dismissed";
 
+function readDismissedProgress(): number {
+  const raw = localStorage.getItem(DISMISS_KEY);
+  if (!raw || raw === "1") return raw === "1" ? 999 : -1;
+  const n = Number.parseInt(raw, 10);
+  return Number.isFinite(n) ? n : -1;
+}
+
 export default function QuickStartGuidePanel() {
   const d = useLocale((s) => s.dict.quickstartGuide);
   const stages = useLocale((s) => s.dict.stages);
-  const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISS_KEY) === "1");
-
   const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
+
+  const guide = journey.data?.quickstart_guide;
+  const [hideAfterDismiss, setHideAfterDismiss] = useState(false);
+  const dismissedProgress = readDismissedProgress();
+  const dismissed =
+    hideAfterDismiss ||
+    dismissedProgress >= 999 ||
+    (guide != null && dismissedProgress >= guide.progress);
 
   if (dismissed) return null;
   if (journey.isLoading) return <Spinner />;
-  const guide = journey.data?.quickstart_guide;
   if (!guide) return null;
 
   const current = guide.steps[guide.current_index];
@@ -27,8 +39,8 @@ export default function QuickStartGuidePanel() {
       : d.ctaDefault;
 
   const dismiss = () => {
-    localStorage.setItem(DISMISS_KEY, "1");
-    setDismissed(true);
+    localStorage.setItem(DISMISS_KEY, String(guide.progress));
+    setHideAfterDismiss(true);
   };
 
   return (

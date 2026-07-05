@@ -144,6 +144,19 @@ def team_attention_rollup(
     return collect_team_attention(db, org_id, locale)
 
 
+def _resolve_research_webhook(org: ResearchOrg) -> tuple[str, str, bool]:
+    """研究提醒 Webhook — 优先专用 URL，否则回退 SLA Webhook。"""
+    research_url = (org.research_alert_webhook_url or "").strip()
+    sla_url = (org.alert_webhook_url or "").strip()
+    url = research_url or sla_url
+    settings = get_settings()
+    if research_url:
+        secret = (org.research_alert_webhook_secret or "").strip() or settings.execution_sla_webhook_secret
+    else:
+        secret = (org.alert_webhook_secret or "").strip() or settings.execution_sla_webhook_secret
+    return url, secret, bool(research_url)
+
+
 def dispatch_org_research_attention_webhook(
     db: Session,
     org_id: uuid.UUID,
@@ -154,7 +167,7 @@ def dispatch_org_research_attention_webhook(
     trigger: str = "manual",
     retry_of_id: uuid.UUID | None = None,
 ) -> dict:
-    """推送团队研究提醒到机构 Webhook (与 SLA 共用 URL/签名密钥)。"""
+    """推送团队研究提醒到机构 Webhook (可配置专用 URL，否则回退 SLA)。"""
     from backend.app.services import execution_alert_service as eas
 
     org = db.get(ResearchOrg, org_id)
@@ -164,7 +177,7 @@ def dispatch_org_research_attention_webhook(
     if actor_id is not None:
         org_service.require_admin(db, org_id, actor_id)
 
-    url = (org.alert_webhook_url or "").strip()
+    url, signing_secret, dedicated = _resolve_research_webhook(org)
     if not url:
         return eas._log_skipped(
             db,
@@ -205,7 +218,6 @@ def dispatch_org_research_attention_webhook(
             retry_of_id=retry_of_id,
         )
 
-    signing_secret = (org.alert_webhook_secret or "").strip() or settings.execution_sla_webhook_secret
     payload = {
         "event": "research_attention_rollup",
         "generated_at": _now().isoformat(),
@@ -217,6 +229,7 @@ def dispatch_org_research_attention_webhook(
         "member_count": rollup["member_count"],
         "alert_count": len(to_send),
         "items": to_send,
+        "webhook_dedicated": dedicated,
     }
     try:
         status_code = eas._post_webhook(url, payload, secret=signing_secret)
@@ -280,7 +293,10 @@ def dispatch_all_org_research_attention_webhooks(db: Session) -> list[dict]:
     """定时任务：向已配置 Webhook 的机构推送团队研究提醒。"""
     org_ids = list(
         db.execute(
-            select(ResearchOrg.id).where(ResearchOrg.alert_webhook_url != "")
+            select(ResearchOrg.id).where(
+                (ResearchOrg.research_alert_webhook_url != "")
+                | (ResearchOrg.alert_webhook_url != "")
+            )
         ).scalars().all()
     )
     results: list[dict] = []

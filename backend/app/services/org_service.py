@@ -168,6 +168,50 @@ def set_alert_webhook(
     }
 
 
+def get_research_alert_webhook(db: Session, org_id: uuid.UUID, actor_id: uuid.UUID) -> dict:
+    require_admin(db, org_id, actor_id)
+    org = db.get(ResearchOrg, org_id)
+    if org is None:
+        raise OrgNotFoundError(str(org_id))
+    sla_url = (org.alert_webhook_url or "").strip()
+    research_url = (org.research_alert_webhook_url or "").strip()
+    return {
+        "webhook_url": research_url,
+        "secret_configured": bool((org.research_alert_webhook_secret or "").strip()),
+        "sla_fallback_url": sla_url,
+        "uses_sla_fallback": not research_url and bool(sla_url),
+    }
+
+
+def set_research_alert_webhook(
+    db: Session,
+    org_id: uuid.UUID,
+    actor_id: uuid.UUID,
+    webhook_url: str,
+    webhook_secret: str | None = None,
+) -> dict:
+    require_admin(db, org_id, actor_id)
+    org = db.get(ResearchOrg, org_id)
+    if org is None:
+        raise OrgNotFoundError(str(org_id))
+    cleaned = (webhook_url or "").strip()
+    if cleaned and not cleaned.startswith(("http://", "https://")):
+        raise OrgAccessDeniedError("Webhook URL 须以 http:// 或 https:// 开头")
+    org.research_alert_webhook_url = cleaned[:500]
+    if webhook_secret is not None:
+        org.research_alert_webhook_secret = webhook_secret.strip()[:200]
+    db.commit()
+    db.refresh(org)
+    sla_url = (org.alert_webhook_url or "").strip()
+    research_url = (org.research_alert_webhook_url or "").strip()
+    return {
+        "webhook_url": research_url,
+        "secret_configured": bool((org.research_alert_webhook_secret or "").strip()),
+        "sla_fallback_url": sla_url,
+        "uses_sla_fallback": not research_url and bool(sla_url),
+    }
+
+
 class OrgMemberNotFoundError(Exception):
     pass
 

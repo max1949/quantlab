@@ -161,6 +161,13 @@ class OrgAlertWebhookOut(BaseModel):
     secret_configured: bool = False
 
 
+class OrgResearchAlertWebhookOut(BaseModel):
+    webhook_url: str
+    secret_configured: bool = False
+    sla_fallback_url: str = ""
+    uses_sla_fallback: bool = False
+
+
 class OrgTeamAttentionItemOut(BaseModel):
     user_id: uuid.UUID
     username: str

@@ -182,6 +182,18 @@ export interface QuickstartGuide {
   total: number;
 }
 
+export interface FirstReportCoaching {
+  reason: string;
+  badge: string;
+  message: string;
+  celebrate: string;
+  unlock_features: string;
+  cta_action: string;
+  cta_path: string;
+  active_project_id: string | null;
+  paper_ready: boolean;
+}
+
 export interface ResearchJourney {
   done_count: number;
   total: number;
@@ -198,6 +210,7 @@ export interface ResearchJourney {
   market_data_coaching: MarketDataCoaching | null;
   checkout_coaching: CheckoutCoaching | null;
   quickstart_guide: QuickstartGuide | null;
+  first_report_coaching: FirstReportCoaching | null;
 }
 
 export interface Mentor {

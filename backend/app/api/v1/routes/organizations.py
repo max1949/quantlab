@@ -33,6 +33,7 @@ from backend.app.schemas.organization import (
     OrgOut,
     OrgAlertWebhookIn,
     OrgAlertWebhookOut,
+    OrgResearchAlertWebhookOut,
     OrgTeamAttentionRollupOut,
     OrgSsoDomainsIn,
     OrgSsoDomainsOut,
@@ -849,6 +850,63 @@ def set_org_alert_webhook(
     except org_service.OrgAccessDeniedError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     return OrgAlertWebhookOut(**data)
+
+
+@router.get(
+    "/{org_id}/research/alert-webhook",
+    response_model=OrgResearchAlertWebhookOut,
+    summary="机构研究提醒 Webhook (管理员)",
+)
+def get_org_research_alert_webhook(
+    org_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> OrgResearchAlertWebhookOut:
+    try:
+        data = org_service.get_research_alert_webhook(db, uuid.UUID(org_id), current_user.id)
+    except org_service.OrgNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="机构不存在")
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    return OrgResearchAlertWebhookOut(**data)
+
+
+@router.put(
+    "/{org_id}/research/alert-webhook",
+    response_model=OrgResearchAlertWebhookOut,
+    summary="配置机构研究提醒 Webhook (管理员)",
+)
+def set_org_research_alert_webhook(
+    org_id: str,
+    payload: OrgAlertWebhookIn,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> OrgResearchAlertWebhookOut:
+    try:
+        data = org_service.set_research_alert_webhook(
+            db,
+            uuid.UUID(org_id),
+            current_user.id,
+            payload.webhook_url,
+            payload.webhook_secret,
+        )
+        audit_service.log(
+            db,
+            actor_id=current_user.id,
+            action="org.research.alert_webhook",
+            resource_type="org",
+            resource_id=org_id,
+            detail={
+                "configured": bool(data["webhook_url"]),
+                "uses_sla_fallback": data["uses_sla_fallback"],
+                "secret_configured": bool(data["secret_configured"]),
+            },
+        )
+    except org_service.OrgNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="机构不存在")
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    return OrgResearchAlertWebhookOut(**data)
 
 
 @router.post(

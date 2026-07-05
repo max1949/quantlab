@@ -17,6 +17,7 @@ import MasteryGoalPanel from "../components/MasteryGoalPanel";
 import DashboardCoachStack from "../components/DashboardCoachStack";
 import PostCheckoutCoachPanel from "../components/PostCheckoutCoachPanel";
 import QuickStartGuidePanel from "../components/QuickStartGuidePanel";
+import FirstReportCoachPanel from "../components/FirstReportCoachPanel";
 
 export default function Dashboard() {
   const user = useAuth((s) => s.user)!;
@@ -50,6 +51,10 @@ export default function Dashboard() {
 
       <div className="mt-6">
         <QuickStartGuidePanel />
+      </div>
+
+      <div className="mt-6">
+        <FirstReportCoachPanel />
       </div>
 
       <div className="mt-6 rounded-2xl bg-gradient-to-r from-brand-600 to-brand-500 p-6 text-white shadow-md">

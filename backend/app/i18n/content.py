@@ -688,6 +688,27 @@ QUICKSTART_GUIDE: dict[Locale, dict[str, str]] = {
     },
 }
 
+FIRST_REPORT_COACH: dict[Locale, dict[str, str]] = {
+    "en": {
+        "badge": "First report complete",
+        "celebrate": "You crossed the institutional research bar — your first mastery report is ready.",
+        "paper_ready": "Paper graduation passed — submit your first paper order to enter the masters tracking loop.",
+        "publish_next": "Publish your project and share the report — build reputation on the research feed.",
+        "continue_mastery": "Keep sharpening your factor — run validation again or explore paper readiness.",
+        "unlock_paper": "Paper trading · live NAV tracking · Paper Masters board",
+        "unlock_share": "Public feed · follower growth · research reputation",
+    },
+    "zh": {
+        "badge": "首份报告已达成",
+        "celebrate": "你已跨过机构级研究门槛 — 第一份大师级报告出炉。",
+        "paper_ready": "Paper 毕业线已通过 — 下第一笔模拟单，进入大师跟踪闭环。",
+        "publish_next": "发布项目并分享报告 — 在研究广场积累声誉。",
+        "continue_mastery": "继续打磨因子 — 补跑验证或向 Paper 毕业线迈进。",
+        "unlock_paper": "Paper 模拟盘 · 净值跟踪 · Paper 大师榜",
+        "unlock_share": "公开广场 · 涨粉 · 研究声誉",
+    },
+}
+
 BILLING_RECEIPT_EMAIL: dict[Locale, dict[str, str]] = {
     "en": {
         "subject": "QuantLab receipt · {plan_name}",

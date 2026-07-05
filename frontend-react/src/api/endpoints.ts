@@ -1248,6 +1248,33 @@ export async function setOrgAlertWebhook(
   return data;
 }
 
+export async function getOrgResearchAlertWebhook(orgId: string): Promise<{
+  webhook_url: string;
+  secret_configured: boolean;
+  sla_fallback_url: string;
+  uses_sla_fallback: boolean;
+}> {
+  const { data } = await api.get(`/orgs/${orgId}/research/alert-webhook`);
+  return data;
+}
+
+export async function setOrgResearchAlertWebhook(
+  orgId: string,
+  webhookUrl: string,
+  webhookSecret?: string,
+): Promise<{
+  webhook_url: string;
+  secret_configured: boolean;
+  sla_fallback_url: string;
+  uses_sla_fallback: boolean;
+}> {
+  const { data } = await api.put(`/orgs/${orgId}/research/alert-webhook`, {
+    webhook_url: webhookUrl,
+    webhook_secret: webhookSecret || undefined,
+  });
+  return data;
+}
+
 export async function dispatchOrgSlaAlerts(
   orgId: string,
   force = false,

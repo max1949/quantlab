@@ -247,6 +247,66 @@ def quickstart_guide_payload(
     }
 
 
+def first_report_coaching_payload(
+    db: Session,
+    user: User,
+    locale: Locale,
+    flags: dict[str, bool],
+    *,
+    mastery_goal: dict,
+    active_project_id: uuid.UUID | None,
+) -> dict | None:
+    """首份报告毕业庆祝 — 引导进入 Paper 或发布分享闭环。"""
+    if not flags.get("report"):
+        return None
+
+    from backend.app.models.execution import PaperOrder
+
+    uid = user.id
+    paper_orders = _count(
+        db,
+        select(func.count(PaperOrder.id)).where(PaperOrder.user_id == uid),
+    )
+    if paper_orders > 0:
+        return None
+
+    labels = i18n.FIRST_REPORT_COACH.get(locale) or i18n.FIRST_REPORT_COACH["en"]
+    project_path = f"/projects/{active_project_id}" if active_project_id else "/projects"
+    paper_ready = bool(mastery_goal.get("paper_ready"))
+    publish_ready = bool(mastery_goal.get("publish_ready"))
+
+    if paper_ready:
+        reason = "paper_ready"
+        message = labels["paper_ready"]
+        unlock = labels["unlock_paper"]
+        cta_action = "run_paper"
+        cta_path = project_path
+    elif publish_ready:
+        reason = "publish_share"
+        message = labels["publish_next"]
+        unlock = labels["unlock_share"]
+        cta_action = "publish_share"
+        cta_path = project_path
+    else:
+        reason = "continue_mastery"
+        message = labels["continue_mastery"]
+        unlock = labels["unlock_paper"]
+        cta_action = "run_validation"
+        cta_path = project_path
+
+    return {
+        "reason": reason,
+        "badge": labels["badge"],
+        "message": message,
+        "celebrate": labels["celebrate"],
+        "unlock_features": unlock,
+        "cta_action": cta_action,
+        "cta_path": cta_path,
+        "active_project_id": active_project_id,
+        "paper_ready": paper_ready,
+    }
+
+
 def _mastery_goal_hint(
     locale: Locale,
     *,
@@ -504,6 +564,14 @@ def research_journey(
         active_project_id=active_id,
         recommended_template=nxt.get("recommended_template"),
     )
+    first_report_coaching = first_report_coaching_payload(
+        db,
+        user,
+        locale,
+        flags,
+        mastery_goal=mastery_goal,
+        active_project_id=active_id,
+    )
 
     return {
         "done_count": done_count,
@@ -521,4 +589,5 @@ def research_journey(
         "market_data_coaching": market_data_coaching,
         "checkout_coaching": checkout_coaching,
         "quickstart_guide": quickstart_guide,
+        "first_report_coaching": first_report_coaching,
     }
