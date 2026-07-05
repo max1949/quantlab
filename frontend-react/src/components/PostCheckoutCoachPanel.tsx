@@ -61,6 +61,9 @@ export default function PostCheckoutCoachPanel() {
           <p className="mt-2 text-xs text-emerald-800/90 dark:text-emerald-200/90">
             {d.unlocked(coach.unlock_features)}
           </p>
+          {coach.receipt_email_hint && (
+            <p className="mt-1 text-xs text-emerald-700 dark:text-emerald-300">{coach.receipt_email_hint}</p>
+          )}
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
           <Link to={coach.cta_path} className="btn-primary whitespace-nowrap text-xs">

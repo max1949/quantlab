@@ -121,6 +121,7 @@ class OrgBillingRedeemOut(BaseModel):
     expires_at: datetime | None
     seats: int
     message: str
+    receipt_email_enabled: bool = False
 
 
 class OrgBillingLedgerOut(BaseModel):

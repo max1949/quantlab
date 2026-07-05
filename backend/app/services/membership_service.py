@@ -454,6 +454,7 @@ def post_checkout_coaching_payload(
     """支付成功回跳 — 解锁指引与大师路径下一步 (新手友好)。"""
     from backend.app.core.locale import Locale
     from backend.app.i18n import content as i18n
+    from backend.app.services import billing_email_service as bes
 
     if not plan_code:
         return None
@@ -507,4 +508,5 @@ def post_checkout_coaching_payload(
         "cta_action": cta_action,
         "cta_path": cta_path,
         "active_project_id": active_project_id,
+        "receipt_email_hint": bes.receipt_coaching_hint(locale),
     }

@@ -62,6 +62,14 @@ class Settings(BaseSettings):
     stripe_secret_key: str = ""
     stripe_webhook_secret: str = ""
 
+    # 计费凭证邮件 (留空 smtp_host 则禁用自动发送)
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from: str = ""
+    smtp_use_tls: bool = True
+
     # 企业 SSO (OIDC; 全部留空则禁用 /auth/sso 接口)
     oidc_issuer: str = ""              # 例如 https://accounts.google.com
     oidc_client_id: str = ""

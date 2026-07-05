@@ -591,6 +591,9 @@ def org_billing_redeem(
 ) -> OrgBillingRedeemOut:
     from backend.app.services import membership_service as ms
 
+    from backend.app.i18n import content as i18n
+    from backend.app.services import billing_email_service as bes
+
     try:
         sub = org_billing_service.redeem_org_code(
             db, uuid.UUID(org_id), current_user.id, payload.code
@@ -605,13 +608,20 @@ def org_billing_redeem(
         resource_id=org_id,
         detail={"plan_code": sub.plan_code, "tier": sub.tier, "seats": sub.seats},
     )
+    msg = f"机构已开通「{ms.TIER_NAMES.get(sub.tier, '免费')}」团队套餐"
+    if bes.smtp_configured():
+        append = (i18n.BILLING_RECEIPT_EMAIL.get("zh") or i18n.BILLING_RECEIPT_EMAIL["en"]).get(
+            "redeem_append", ""
+        )
+        msg += append
     return OrgBillingRedeemOut(
         ok=True,
         tier=sub.tier,
         tier_name=ms.TIER_NAMES.get(sub.tier, "免费"),
         expires_at=sub.expires_at,
         seats=sub.seats,
-        message=f"机构已开通「{ms.TIER_NAMES.get(sub.tier, '免费')}」团队套餐",
+        message=msg,
+        receipt_email_enabled=bes.smtp_configured(),
     )
 
 

@@ -73,6 +73,9 @@ def record_org_subscription(
     db.add(row)
     db.commit()
     db.refresh(row)
+    from backend.app.services import billing_email_service as bes
+
+    bes.notify_receipt_for_ledger(db, row)
     return row
 
 
@@ -106,6 +109,9 @@ def record_personal_subscription(
     db.add(row)
     db.commit()
     db.refresh(row)
+    from backend.app.services import billing_email_service as bes
+
+    bes.notify_receipt_for_ledger(db, row)
     return row
 
 

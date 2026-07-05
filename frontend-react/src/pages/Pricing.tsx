@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -43,6 +43,19 @@ export default function Pricing() {
 
   const [code, setCode] = useState("");
   const [billingExporting, setBillingExporting] = useState(false);
+  const receiptHandled = useRef(false);
+
+  useEffect(() => {
+    const receiptId = searchParams.get("receipt");
+    if (!receiptId || !user || receiptHandled.current) return;
+    receiptHandled.current = true;
+    notify(p.receiptOpening, "info");
+    void downloadBillingInvoicePdf(receiptId)
+      .then(() => notify(p.receiptReady, "success"))
+      .catch((e) => notify(apiErrorMessage(e, p.invoiceDownloadFail), "error"));
+    searchParams.delete("receipt");
+    setSearchParams(searchParams, { replace: true });
+  }, [searchParams, setSearchParams, notify, p, user]);
 
   useEffect(() => {
     const checkoutState = searchParams.get("checkout");

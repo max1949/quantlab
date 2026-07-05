@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session
 
 from backend.app.auth.deps import CurrentUser
 from backend.app.core.database import get_db
+from backend.app.i18n import content as i18n
 from backend.app.schemas.membership import (
     BillingLedgerOut,
     CheckoutIn,
@@ -118,12 +119,22 @@ def redeem(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
         )
+    from backend.app.services import billing_email_service as bes
+
+    msg = f"已开通「{ms.TIER_NAMES.get(sub.tier, '免费')}」会员"
+    if bes.smtp_configured():
+        loc = "zh"
+        append = (i18n.BILLING_RECEIPT_EMAIL.get(loc) or i18n.BILLING_RECEIPT_EMAIL["en"]).get(
+            "redeem_append", ""
+        )
+        msg += append
     return RedeemOut(
         ok=True,
         tier=sub.tier,
         tier_name=ms.TIER_NAMES.get(sub.tier, "免费"),
         expires_at=sub.expires_at,
-        message=f"已开通「{ms.TIER_NAMES.get(sub.tier, '免费')}」会员",
+        message=msg,
+        receipt_email_enabled=bes.smtp_configured(),
     )
 
 

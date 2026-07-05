@@ -125,6 +125,7 @@ class CheckoutCoachingOut(BaseModel):
     cta_action: str
     cta_path: str
     active_project_id: uuid.UUID | None = None
+    receipt_email_hint: str | None = None
 
 
 class DismissAttentionAlertRequest(BaseModel):

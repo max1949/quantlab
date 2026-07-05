@@ -68,6 +68,7 @@ class RedeemOut(BaseModel):
     tier_name: str
     expires_at: datetime | None
     message: str
+    receipt_email_enabled: bool = False
 
 
 class CheckoutIn(BaseModel):

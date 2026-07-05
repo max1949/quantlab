@@ -663,6 +663,35 @@ TEAM_ATTENTION_COACH: dict[Locale, dict[str, str]] = {
     },
 }
 
+BILLING_RECEIPT_EMAIL: dict[Locale, dict[str, str]] = {
+    "en": {
+        "subject": "QuantLab receipt · {plan_name}",
+        "body": (
+            "Hello,\n\n"
+            "Your plan「{plan_name}」is now active ({currency} {amount}).\n"
+            "Receipt ID: {receipt_id}\n"
+            "Expires: {expires}\n\n"
+            "Download your PDF receipt:\n{receipt_link}\n\n"
+            "Continue your mastery path:\n{dashboard_link}\n"
+        ),
+        "checkout_hint": "A PDF receipt link was sent to your registered email.",
+        "redeem_append": " Receipt link sent to your email.",
+    },
+    "zh": {
+        "subject": "QuantLab 计费凭证 · {plan_name}",
+        "body": (
+            "您好，\n\n"
+            "您已成功开通「{plan_name}」（{currency} {amount}）。\n"
+            "凭证编号：{receipt_id}\n"
+            "到期时间：{expires}\n\n"
+            "下载 PDF 凭证：\n{receipt_link}\n\n"
+            "继续大师研究路径：\n{dashboard_link}\n"
+        ),
+        "checkout_hint": "PDF 凭证下载链接已发送至您的注册邮箱。",
+        "redeem_append": " 凭证链接已发送至您的邮箱。",
+    },
+}
+
 UPGRADE_COACH: dict[Locale, dict[str, str]] = {
     "en": {
         "paper_ready": "Paper bar passed — upgrade to Pro to submit paper orders and start the masters tracking loop.",

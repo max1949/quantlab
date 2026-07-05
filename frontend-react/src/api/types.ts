@@ -160,6 +160,7 @@ export interface CheckoutCoaching {
   cta_action: string;
   cta_path: string;
   active_project_id: string | null;
+  receipt_email_hint: string | null;
 }
 
 export interface ResearchJourney {

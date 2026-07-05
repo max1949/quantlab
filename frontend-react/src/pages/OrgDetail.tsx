@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addOrgMember,
@@ -46,6 +46,8 @@ export default function OrgDetail() {
   const notify = useUi((s) => s.notify);
   const me = useAuth((s) => s.user);
   const qc = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const receiptHandled = useRef(false);
   const [username, setUsername] = useState("");
   const [factorId, setFactorId] = useState("");
   const [symbol, setSymbol] = useState("RB");
@@ -322,6 +324,18 @@ export default function OrgDetail() {
       setBillingAddress(billingProfileQuery.data.address);
     }
   }, [billingProfileQuery.data]);
+
+  useEffect(() => {
+    const receiptId = searchParams.get("receipt");
+    if (!receiptId || !me || receiptHandled.current) return;
+    receiptHandled.current = true;
+    notify(o.receiptOpening, "info");
+    void downloadOrgBillingInvoicePdf(id, receiptId)
+      .then(() => notify(o.receiptReady, "success"))
+      .catch((e) => notify(apiErrorMessage(e, o.billingInvoiceFail), "error"));
+    searchParams.delete("receipt");
+    setSearchParams(searchParams, { replace: true });
+  }, [searchParams, setSearchParams, notify, o, me, id]);
 
   useEffect(() => {
     if (alertWebhookQuery.data) {
