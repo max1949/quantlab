@@ -16,9 +16,13 @@ export default function Feed() {
   const rc = useLocale((s) => s.dict.reportCard);
   const [params] = useSearchParams();
   const highlightId = params.get("highlight");
+  const focusFollow = params.get("focus") === "follow";
   const highlightRef = useRef<HTMLDivElement>(null);
-  const [sort, setSort] = useState<"top" | "latest">(highlightId ? "latest" : "top");
-  const [graduatedOnly, setGraduatedOnly] = useState(false);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [sort, setSort] = useState<"top" | "latest">(
+    highlightId ? "latest" : focusFollow ? "top" : "top",
+  );
+  const [graduatedOnly, setGraduatedOnly] = useState(focusFollow);
   useDocumentTitle(`${f.title} · QuantLab AI`);
   const feed = useQuery({
     queryKey: ["public-feed", sort, graduatedOnly],
@@ -32,6 +36,22 @@ export default function Feed() {
     }, 120);
     return () => window.clearTimeout(t);
   }, [highlightId, feed.data]);
+
+  useEffect(() => {
+    if (!focusFollow || feed.isLoading) return;
+    const t = window.setTimeout(() => {
+      gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 180);
+    return () => window.clearTimeout(t);
+  }, [focusFollow, feed.isLoading, feed.data]);
+
+  const discoverMasters = () => {
+    setSort("top");
+    setGraduatedOnly(true);
+    window.setTimeout(() => {
+      gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 80);
+  };
 
   return (
     <div>
@@ -79,7 +99,7 @@ export default function Feed() {
         </div>
       </div>
 
-      {user && <FeedFollowCoachPanel />}
+      {user && <FeedFollowCoachPanel onDiscoverMasters={discoverMasters} />}
 
       {!user && (
         <div className="mb-4 flex flex-col gap-3 rounded-xl border border-brand-200 bg-brand-50/60 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-brand-900 dark:bg-brand-950/40">
@@ -100,7 +120,7 @@ export default function Feed() {
       ) : feed.isError ? (
         <ErrorBox message={apiErrorMessage(feed.error)} />
       ) : feed.data && feed.data.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" ref={gridRef}>
           {highlightId && feed.data.some((r) => r.id === highlightId) && (
             <div className="col-span-full rounded-lg border border-emerald-200 bg-emerald-50/60 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200">
               {f.highlightBanner}

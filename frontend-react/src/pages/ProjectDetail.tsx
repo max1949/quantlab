@@ -32,8 +32,7 @@ import BacktestResultsPanel from "../components/BacktestResultsPanel";
 import QualityCoach from "../components/QualityCoach";
 import MasteryPathPanel from "../components/MasteryPathPanel";
 import ProjectRegimePanel from "../components/ProjectRegimePanel";
-import FailureCoachPanel from "../components/FailureCoachPanel";
-import AttentionCoachPanel from "../components/AttentionCoachPanel";
+import ProjectQualityCoachStack from "../components/ProjectQualityCoachStack";
 import PublishFeedPreview from "../components/PublishFeedPreview";
 import DataQualityBanner from "../components/DataQualityBanner";
 import VolRegimeBanner from "../components/VolRegimeBanner";
@@ -467,19 +466,16 @@ export default function ProjectDetail() {
 
       {quality.data && <ProjectRegimePanel quality={quality.data} />}
 
-      {quality.data?.attention_coaching && quality.data.attention_coaching.length > 0 && (
-        <AttentionCoachPanel
-          tips={quality.data.attention_coaching}
+      {(quality.data?.attention_coaching?.length || quality.data?.coaching_tips?.length) ? (
+        <ProjectQualityCoachStack
+          attentionTips={quality.data?.attention_coaching ?? []}
+          failureTips={quality.data?.coaching_tips ?? []}
           onAction={handleMasteryAction}
         />
-      )}
+      ) : null}
 
       {quality.data && (
         <MasteryPathPanel quality={quality.data} onAction={handleMasteryAction} />
-      )}
-
-      {quality.data && quality.data.coaching_tips && quality.data.coaching_tips.length > 0 && (
-        <FailureCoachPanel tips={quality.data.coaching_tips} onAction={handleMasteryAction} />
       )}
 
       {quality.data && (

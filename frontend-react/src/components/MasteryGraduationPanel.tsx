@@ -140,7 +140,7 @@ export default function MasteryGraduationPanel() {
           </Link>
           {coach.followers === 0 && (
             <Link
-              to="/feed"
+              to="/feed?focus=follow"
               className="btn whitespace-nowrap text-xs"
               onClick={() => sessionStorage.setItem(FIRST_FEED_FOLLOW_WELCOME_KEY, "1")}
             >

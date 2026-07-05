@@ -9,7 +9,11 @@ import { useLocale } from "../store/locale";
 
 const DISMISS_KEY = "quantlab-feed-follow-coach-dismissed";
 
-export default function FeedFollowCoachPanel() {
+type Props = {
+  onDiscoverMasters?: () => void;
+};
+
+export default function FeedFollowCoachPanel({ onDiscoverMasters }: Props) {
   const user = useAuth((s) => s.user);
   const d = useLocale((s) => s.dict.feedFollowCoach);
   const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISS_KEY) === "1");
@@ -29,7 +33,7 @@ export default function FeedFollowCoachPanel() {
   const matches =
     Boolean(user) &&
     !dismissed &&
-    following === 0 &&
+    (following ?? 0) === 0 &&
     (share != null || grad != null || freshWelcome);
 
   useEffect(() => {
@@ -56,7 +60,14 @@ export default function FeedFollowCoachPanel() {
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{d.message}</p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
-          <Link to="/me/following" className="btn-primary whitespace-nowrap text-xs" onClick={dismiss}>
+          <button
+            type="button"
+            className="btn-primary whitespace-nowrap text-xs"
+            onClick={() => onDiscoverMasters?.()}
+          >
+            {d.browseFeed}
+          </button>
+          <Link to="/me/following" className="btn whitespace-nowrap text-xs" onClick={dismiss}>
             {d.openFollowing}
           </Link>
           <button type="button" className="btn whitespace-nowrap text-xs" onClick={dismiss}>

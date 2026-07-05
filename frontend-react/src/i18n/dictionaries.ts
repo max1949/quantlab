@@ -1229,6 +1229,13 @@ const en = {
     projectCoachMore: (n: number) => `${n} more project coach tip(s) folded — focus on one step`,
     projectCoachExpand: "Show all project tips →",
     projectCoachCollapse: "Focus on current step ↑",
+    qualityCoachMore: (n: number) => `${n} more quality tip(s) folded — fix one issue at a time`,
+    qualityCoachExpand: "Show all quality tips →",
+    qualityCoachCollapse: "Focus on top priority ↑",
+  },
+  qualityCoachLabels: {
+    attention: "Attention risk",
+    failure: "Quality fix",
   },
   projectCoachLabels: {
     first_paper_order: (j: ResearchJourney) =>
@@ -1245,7 +1252,8 @@ const en = {
     title: "Follow active researchers — they'll notice your work too",
     message:
       "Pick 2–3 masters on the feed whose style you respect. Your following feed becomes a learning radar and helps others discover your share card.",
-    openFollowing: "Open following feed →",
+    browseFeed: "Show graduated masters →",
+    openFollowing: "My following feed",
     dismiss: "Later",
   },
   l2Analysis: {
@@ -2714,6 +2722,13 @@ const zh = {
     projectCoachMore: (n: number) => `还有 ${n} 条项目教练提示已折叠 — 先专注当前一步`,
     projectCoachExpand: "展开全部项目提示 →",
     projectCoachCollapse: "收起，专注当前步骤 ↑",
+    qualityCoachMore: (n: number) => `还有 ${n} 条质量提示已折叠 — 先解决最重要的一条`,
+    qualityCoachExpand: "展开全部质量提示 →",
+    qualityCoachCollapse: "收起，专注首要问题 ↑",
+  },
+  qualityCoachLabels: {
+    attention: "注意力风险",
+    failure: "质量修复",
   },
   projectCoachLabels: {
     first_paper_order: (j: ResearchJourney) =>
@@ -2730,7 +2745,8 @@ const zh = {
     title: "关注活跃研究员 — 他们也会注意到你的成果",
     message:
       "在广场上挑 2～3 位你欣赏风格的大师关注。关注流会变成学习雷达，也更容易让别人发现你的分享卡片。",
-    openFollowing: "打开关注流 →",
+    browseFeed: "筛选已毕业大师 →",
+    openFollowing: "我的关注流",
     dismiss: "稍后再说",
   },
   l2Analysis: {
