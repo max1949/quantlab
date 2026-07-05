@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import type { ReportDetail } from "../api/types";
 import { getResearcher, trackEvent } from "../api/endpoints";
-import { primaryTemplateForSymbol } from "../lib/templateHints";
+import { armFollowingTemplateHandoff, buildTemplatesHandoffPath, primaryTemplateForSymbol } from "../lib/templateHints";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import ResearcherFollowButton from "./ResearcherFollowButton";
@@ -20,7 +20,7 @@ export default function ReportDiscoverPanel({ report }: Props) {
 
   const templateCode = primaryTemplateForSymbol(report.symbol);
   const templateTitle = templateCode ? t.templateNames[templateCode as keyof typeof t.templateNames] : null;
-  const templatesPath = templateCode ? `/templates?focus=${templateCode}` : "/templates";
+  const templatesPath = buildTemplatesHandoffPath(report.symbol, templateCode);
 
   const researcher = useQuery({
     queryKey: ["researcher", report.owner_id],
@@ -96,13 +96,14 @@ export default function ReportDiscoverPanel({ report }: Props) {
             <Link
               to={templatesPath}
               className="btn-primary text-sm"
-              onClick={() =>
+              onClick={() => {
                 void trackEvent("report_discover_template", {
                   report_id: report.id,
                   symbol: report.symbol,
                   template: templateCode,
-                })
-              }
+                });
+                armFollowingTemplateHandoff(report.symbol);
+              }}
             >
               {t.startTemplate}
             </Link>

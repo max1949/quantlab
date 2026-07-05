@@ -6,7 +6,8 @@ import { apiErrorMessage } from "../api/client";
 import { useUi } from "../store/ui";
 import { useFlow } from "../store/flow";
 import { useLocale } from "../store/locale";
-import { FIRST_PROJECT_WELCOME_KEY, FOLLOWING_TEMPLATE_HANDOFF_KEY } from "../lib/onboardingFocus";
+import { FIRST_PROJECT_WELCOME_KEY, FOLLOWING_PROJECT_REPLICATION_KEY, FOLLOWING_TEMPLATE_HANDOFF_KEY } from "../lib/onboardingFocus";
+import { REGIME_TEMPLATE_SYMBOLS } from "../lib/templateHints";
 import { ErrorBox, PageTitle, Spinner } from "../components/ui";
 
 const REGIME_SYMBOLS = ["RB", "AU", "IF"] as const;
@@ -82,13 +83,24 @@ export default function Templates() {
     setMasterHandoffDismissed(true);
   };
 
+  useEffect(() => {
+    if (!masterHandoffSymbol) return;
+    const sym = masterHandoffSymbol.trim().toUpperCase();
+    if (!REGIME_TEMPLATE_SYMBOLS.has(sym) || sym === regimeSymbol) return;
+    setSymbol(sym as RegimeSymbol);
+  }, [masterHandoffSymbol, regimeSymbol]);
+
   const start = useMutation({
     mutationFn: (code: string) => startTemplate(code, true),
     onMutate: (code) => setStarting(code),
     onSuccess: (res) => {
-      void trackEvent("template_start", { template: res.template_code });
+      const fromReplication = Boolean(masterHandoffSymbol);
+      void trackEvent("template_start", { template: res.template_code, from_replication: fromReplication });
       setProject(res.project_id, res.factor_id);
       sessionStorage.setItem(FIRST_PROJECT_WELCOME_KEY, res.project_id);
+      if (fromReplication) {
+        sessionStorage.setItem(FOLLOWING_PROJECT_REPLICATION_KEY, res.project_id);
+      }
       sessionStorage.removeItem(FOLLOWING_TEMPLATE_HANDOFF_KEY);
       setMasterHandoffSymbol(null);
       void qc.invalidateQueries({ queryKey: ["projects"] });

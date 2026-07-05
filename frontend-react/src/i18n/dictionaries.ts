@@ -1487,6 +1487,16 @@ const en = {
     startTemplate: "Start similar template →",
     dismiss: "Keep reading",
   },
+  masterReplicationProjectCoach: {
+    badge: "Master replication",
+    title: "You're mirroring a master's research path",
+    message:
+      "Same template loop they used — backtest first, then validate, then write your own report.",
+    stepHint: "Step 1 of mastery replication: run backtest and compare Sharpe / drawdown to their bar.",
+    runBacktest: "Run backtest →",
+    running: "Running…",
+    dismiss: "Got it",
+  },
   academyTaskLabels: {
     welcome: {
       title: "Welcome to QuantLab",
@@ -3096,6 +3106,15 @@ const zh = {
     genericHint: "选一个行情匹配的模板，完成同样的验证 → 报告闭环。",
     startTemplate: "用类似模板开局 →",
     dismiss: "继续阅读",
+  },
+  masterReplicationProjectCoach: {
+    badge: "大师复现",
+    title: "你正在复现大师的研究路径",
+    message: "与大师相同的模板闭环 — 先回测，再验证，最后写出你自己的报告。",
+    stepHint: "复现第 1 步：跑回测，对照他们的夏普与回撤是否达标。",
+    runBacktest: "运行回测 →",
+    running: "运行中…",
+    dismiss: "知道了",
   },
   academyTaskLabels: {
     welcome: {

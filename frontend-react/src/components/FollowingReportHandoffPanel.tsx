@@ -3,8 +3,12 @@ import { Link } from "react-router-dom";
 import type { ReportDetail } from "../api/types";
 import { trackEvent } from "../api/endpoints";
 import { burstConfetti } from "../lib/confetti";
-import { primaryTemplateForSymbol } from "../lib/templateHints";
-import { FOLLOWING_REPORT_HANDOFF_KEY, FOLLOWING_TEMPLATE_HANDOFF_KEY } from "../lib/onboardingFocus";
+import {
+  armFollowingTemplateHandoff,
+  buildTemplatesHandoffPath,
+  primaryTemplateForSymbol,
+} from "../lib/templateHints";
+import { FOLLOWING_REPORT_HANDOFF_KEY } from "../lib/onboardingFocus";
 import { useLocale } from "../store/locale";
 
 type Props = {
@@ -28,7 +32,7 @@ export default function FollowingReportHandoffPanel({ report }: Props) {
   const templateTitle = templateCode
     ? rd.templateNames[templateCode as keyof typeof rd.templateNames]
     : null;
-  const templatesPath = templateCode ? `/templates?focus=${templateCode}` : "/templates";
+  const templatesPath = buildTemplatesHandoffPath(report.symbol, templateCode);
 
   const dismiss = () => sessionStorage.removeItem(FOLLOWING_REPORT_HANDOFF_KEY);
 
@@ -39,7 +43,7 @@ export default function FollowingReportHandoffPanel({ report }: Props) {
       symbol: report.symbol,
       template_code: templateCode ?? "",
     });
-    sessionStorage.setItem(FOLLOWING_TEMPLATE_HANDOFF_KEY, report.symbol);
+    armFollowingTemplateHandoff(report.symbol);
   };
 
   return (

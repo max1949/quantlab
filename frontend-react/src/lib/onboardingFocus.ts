@@ -33,3 +33,5 @@ export const FOLLOWING_FEED_HIGHLIGHT_KEY = "quantlab-following-feed-highlight-f
 export const FOLLOWING_REPORT_HANDOFF_KEY = "quantlab-following-report-handoff";
 /** Landed on templates after following-feed report — show master replication coach. */
 export const FOLLOWING_TEMPLATE_HANDOFF_KEY = "quantlab-following-template-handoff";
+/** Project started from master replication — show replication coach on project page. */
+export const FOLLOWING_PROJECT_REPLICATION_KEY = "quantlab-following-project-replication";
