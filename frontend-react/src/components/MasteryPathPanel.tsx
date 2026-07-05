@@ -1,17 +1,35 @@
+import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getResearchJourney } from "../api/endpoints";
 import { useLocale } from "../store/locale";
 import type { ProjectQuality } from "../api/endpoints";
 import { localizedAcademyTitle } from "../lib/academy";
+import { NETWORK_FOLLOW_TARGET } from "../lib/journeyFollowing";
 
 type Props = {
   quality: ProjectQuality;
   onAction: (action: string) => void;
+  isPublished?: boolean;
+  hasReport?: boolean;
+  reportId?: string | null;
+  publishReady?: boolean;
 };
 
 const STAGE_KEYS = ["start", "backtest", "validate", "graduate", "paper", "track", "share"] as const;
 
-export default function MasteryPathPanel({ quality, onAction }: Props) {
+export default function MasteryPathPanel({
+  quality,
+  onAction,
+  isPublished = false,
+  hasReport = false,
+  reportId = null,
+  publishReady = false,
+}: Props) {
   const m = useLocale((s) => s.dict.masteryPath);
   const atl = useLocale((s) => s.dict.academyTaskLabels);
+  const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
+  const following = journey.data?.social_following_count ?? 0;
+  const networkReady = following >= NETWORK_FOLLOW_TARGET;
   const mastery = quality.mastery;
   if (!mastery) return null;
 
@@ -59,14 +77,53 @@ export default function MasteryPathPanel({ quality, onAction }: Props) {
           {pendingAcademyTasks
             .slice(0, mastery.stage === "share" ? 4 : 2)
             .map((t) => (
-              <p key={t.code} className="mt-0.5 first:mt-0">
-                🏅 {m.academyStagePending(localizedAcademyTitle(t.code, t.title, atl), t.xp_reward)}
-              </p>
+              <div key={t.code} className="mt-0.5 first:mt-0">
+                <p>
+                  🏅 {m.academyStagePending(localizedAcademyTitle(t.code, t.title, atl), t.xp_reward)}
+                </p>
+                {mastery.stage === "share" && t.code === "network-radar" && !networkReady && (
+                  <Link to="/feed?focus=follow" className="ml-4 inline-block text-[11px] font-medium text-brand-700">
+                    {m.shareNetworkCta}
+                  </Link>
+                )}
+                {mastery.stage === "share" && t.code === "master-replication" && networkReady && (
+                  <Link to="/me/following" className="ml-4 inline-block text-[11px] font-medium text-brand-700">
+                    {m.shareReplicationCta}
+                  </Link>
+                )}
+              </div>
             ))}
         </div>
       )}
 
-      {quality.paper_ready && mastery.stage === "track" && mastery.decay_attention ? (
+      {mastery.stage === "share" ? (
+        <div className="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900 dark:border-brand-800 dark:bg-brand-950/40 dark:text-brand-100">
+          <p className="font-medium">{m.shareReady}</p>
+          <p className="mt-1 text-xs opacity-90">{m.shareHint}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {!hasReport && (
+              <button type="button" className="btn-primary text-xs" onClick={() => onAction("report")}>
+                {m.shareReportCta}
+              </button>
+            )}
+            {hasReport && !isPublished && publishReady && (
+              <button type="button" className="btn-primary text-xs" onClick={() => onAction("publish")}>
+                {m.sharePublishCta}
+              </button>
+            )}
+            {hasReport && reportId && (
+              <Link to={`/reports/${reportId}#report-share`} className="btn text-xs">
+                {m.shareCardCta}
+              </Link>
+            )}
+            {networkReady && (
+              <Link to="/me/following" className="btn text-xs">
+                {m.shareFollowingCta}
+              </Link>
+            )}
+          </div>
+        </div>
+      ) : quality.paper_ready && mastery.stage === "track" && mastery.decay_attention ? (
         <div
           className={`rounded-lg border px-3 py-2 text-sm ${
             mastery.decay_status === "alert"

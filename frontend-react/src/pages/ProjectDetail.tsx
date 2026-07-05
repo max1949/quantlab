@@ -261,8 +261,18 @@ export default function ProjectDetail() {
       }
       return;
     }
+    if (action === "report") {
+      if (!done.report) genReport.mutate();
+      return;
+    }
     if (action === "share" || action === "publish") {
+      const reportId = graph.data?.nodes.find((n) => n.ref_type === "report")?.ref_id ?? null;
+      if (done.publish && reportId) {
+        navigate(`/reports/${reportId}#report-share`);
+        return;
+      }
       if (quality.data?.passed && !done.publish) publish.mutate();
+      else if (!done.report) genReport.mutate();
       else scrollToFactorLab();
       return;
     }
@@ -513,7 +523,14 @@ export default function ProjectDetail() {
       ) : null}
 
       {quality.data && (
-        <MasteryPathPanel quality={quality.data} onAction={handleMasteryAction} />
+        <MasteryPathPanel
+          quality={quality.data}
+          onAction={handleMasteryAction}
+          isPublished={proj.status === "published"}
+          hasReport={done.report}
+          reportId={graph.data?.nodes.find((n) => n.ref_type === "report")?.ref_id ?? null}
+          publishReady={quality.data.passed}
+        />
       )}
 
       {quality.data && (
