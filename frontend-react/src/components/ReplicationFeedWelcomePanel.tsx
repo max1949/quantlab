@@ -30,7 +30,7 @@ export default function ReplicationFeedWelcomePanel() {
       <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-50">{d.title}</p>
       <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{d.message}</p>
       <div className="mt-3 flex flex-wrap gap-2">
-        <Link to={`/reports/${highlightId}#report-share`} className="btn-primary text-xs" onClick={dismiss}>
+        <Link to={`/reports/${highlightId}#report-share`} className="btn-primary text-xs">
           {d.createShare}
         </Link>
         <button type="button" className="btn text-xs" onClick={dismiss}>
