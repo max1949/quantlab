@@ -159,6 +159,66 @@ def list_deliveries(
     return [_delivery_to_dict(r) for r in rows]
 
 
+def export_org_deliveries_csv(
+    db: Session,
+    org_id: uuid.UUID,
+    *,
+    scope: str | None = None,
+    limit: int = 500,
+) -> str:
+    """导出机构 Webhook 投递审计 CSV。"""
+    import csv
+    import io
+
+    cap = min(limit, 1000)
+    if scope == "sla":
+        rows = list_deliveries(db, scope="org", org_id=org_id, limit=cap)
+    elif scope == "research":
+        rows = list_deliveries(db, scope="org_research", org_id=org_id, limit=cap)
+    else:
+        rows_sla = list_deliveries(db, scope="org", org_id=org_id, limit=limit)
+        rows_research = list_deliveries(db, scope="org_research", org_id=org_id, limit=limit)
+        rows = sorted(
+            rows_sla + rows_research,
+            key=lambda r: str(r.get("created_at") or ""),
+            reverse=True,
+        )[:cap]
+
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(
+        [
+            "created_at",
+            "scope",
+            "status",
+            "trigger",
+            "alert_count",
+            "http_status",
+            "signed",
+            "skipped_reason",
+            "error_message",
+            "webhook_url",
+        ]
+    )
+    for r in rows:
+        created = r.get("created_at")
+        writer.writerow(
+            [
+                created.isoformat() if hasattr(created, "isoformat") else created,
+                r.get("scope"),
+                r.get("status"),
+                r.get("trigger"),
+                r.get("alert_count"),
+                r.get("http_status"),
+                r.get("signed"),
+                r.get("skipped_reason") or "",
+                r.get("error_message") or "",
+                r.get("webhook_url") or "",
+            ]
+        )
+    return buf.getvalue()
+
+
 def _post_webhook(url: str, payload: dict, *, secret: str = "") -> int:
     body = serialize_webhook_payload(payload)
     headers = {"Content-Type": "application/json"}

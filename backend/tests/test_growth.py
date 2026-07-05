@@ -284,6 +284,8 @@ def test_journey_includes_first_report_coaching(client, db_session):
     assert coach["celebrate"]
     assert coach["cta_path"] == f"/projects/{proj['id']}"
     assert coach["cta_action"] in ("run_paper", "publish_share", "run_validation")
+    assert coach.get("academy_completed") is True
+    assert coach.get("academy_xp") == 125
     assert j2.get("quickstart_guide") is None
 
 

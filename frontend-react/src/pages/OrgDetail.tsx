@@ -30,6 +30,7 @@ import {
   setOrgResearchAlertWebhook,
   dispatchOrgSlaAlerts,
   fetchOrgAlertDeliveries,
+  downloadOrgAlertDeliveriesCsv,
   refreshOrgExecutionOrders,
   retryOrgFailedAlertDeliveries,
   removeOrgMember,
@@ -338,6 +339,12 @@ export default function OrgDetail() {
       notify(o.alertDeliveryRetryDone(r.retried), "success");
     },
     onError: (e) => notify(apiErrorMessage(e, o.alertDeliveryRetryFail), "error"),
+  });
+
+  const exportAlertDeliveries = useMutation({
+    mutationFn: () => downloadOrgAlertDeliveriesCsv(id, deliveryScope),
+    onSuccess: () => notify(o.alertDeliveryExportDone, "success"),
+    onError: (e) => notify(apiErrorMessage(e, o.alertDeliveryExportFail), "error"),
   });
 
   function canManageMember(userId: string, role: string) {
@@ -924,6 +931,16 @@ export default function OrgDetail() {
                     {retryOrgAlertDeliveries.isPending
                       ? o.alertDeliveryRetrying
                       : o.alertDeliveryRetry}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn text-xs"
+                    disabled={exportAlertDeliveries.isPending}
+                    onClick={() => exportAlertDeliveries.mutate()}
+                  >
+                    {exportAlertDeliveries.isPending
+                      ? o.alertDeliveryExporting
+                      : o.alertDeliveryExport}
                   </button>
                 </div>
                 {alertDeliveries.isLoading ? (

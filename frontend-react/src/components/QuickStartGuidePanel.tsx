@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { getResearchJourney } from "../api/endpoints";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { enrollChallenge, getResearchJourney } from "../api/endpoints";
+import { apiErrorMessage } from "../api/client";
 import { useLocale } from "../store/locale";
+import { useUi } from "../store/ui";
 import { stageToCtaLabel } from "../lib/nav";
 import { Spinner } from "./ui";
 
@@ -18,7 +20,10 @@ function readDismissedProgress(): number {
 export default function QuickStartGuidePanel() {
   const d = useLocale((s) => s.dict.quickstartGuide);
   const sprintLabels = useLocale((s) => s.dict.beginnerSprint);
+  const challengePage = useLocale((s) => s.dict.challengesPage);
   const stages = useLocale((s) => s.dict.stages);
+  const notify = useUi((s) => s.notify);
+  const qc = useQueryClient();
   const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
 
   const guide = journey.data?.quickstart_guide;
@@ -29,6 +34,16 @@ export default function QuickStartGuidePanel() {
     hideAfterDismiss ||
     dismissedProgress >= 999 ||
     (guide != null && dismissedProgress >= guide.progress);
+
+  const enroll = useMutation({
+    mutationFn: () => enrollChallenge(sprint!.challenge_code),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["research-journey"] });
+      void qc.invalidateQueries({ queryKey: ["challenge-progress", sprint?.challenge_code] });
+      notify(sprintLabels.enrollSuccess, "success");
+    },
+    onError: (e) => notify(apiErrorMessage(e, challengePage.enrollFail), "error"),
+  });
 
   if (dismissed) return null;
   if (journey.isLoading) return <Spinner />;
@@ -130,14 +145,23 @@ export default function QuickStartGuidePanel() {
         <div className="mt-4 border-t border-sky-200 pt-3 dark:border-sky-800">
           <p className="text-xs font-semibold text-sky-800 dark:text-sky-200">{sprint.title}</p>
           <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">{sprint.message}</p>
-          <Link
-            to={sprint.cta_path}
-            className="mt-2 inline-block text-xs font-medium text-brand-600 hover:underline"
-          >
-            {sprint.cta_action === "enroll_challenge"
-              ? sprintLabels.enrollCta
-              : sprintLabels.viewCta}
-          </Link>
+          {sprint.cta_action === "enroll_challenge" && !sprint.challenge_enrolled ? (
+            <button
+              type="button"
+              className="btn-primary mt-2 text-xs"
+              disabled={enroll.isPending}
+              onClick={() => enroll.mutate()}
+            >
+              {enroll.isPending ? sprintLabels.enrolling : sprintLabels.enrollCta}
+            </button>
+          ) : (
+            <Link
+              to={sprint.cta_path}
+              className="mt-2 inline-block text-xs font-medium text-brand-600 hover:underline"
+            >
+              {sprintLabels.viewCta}
+            </Link>
+          )}
         </div>
       )}
     </div>

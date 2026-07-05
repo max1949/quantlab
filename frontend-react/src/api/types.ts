@@ -192,6 +192,10 @@ export interface FirstReportCoaching {
   cta_path: string;
   active_project_id: string | null;
   paper_ready: boolean;
+  academy_title: string | null;
+  academy_xp: number | null;
+  academy_completed: boolean;
+  challenge_milestone_done: boolean;
 }
 
 export interface BeginnerSprint {

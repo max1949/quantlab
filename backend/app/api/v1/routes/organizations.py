@@ -979,6 +979,34 @@ def org_execution_alert_deliveries(
     return [SlaAlertDeliveryOut(**r) for r in rows]
 
 
+@router.get(
+    "/{org_id}/execution/alert-deliveries/export",
+    summary="导出机构 Webhook 投递审计 CSV (管理员)",
+)
+def org_execution_alert_deliveries_export(
+    org_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+    scope: str | None = None,
+    limit: int = 500,
+) -> Response:
+    try:
+        org_service.require_admin(db, uuid.UUID(org_id), current_user.id)
+        csv_text = eas.export_org_deliveries_csv(
+            db, uuid.UUID(org_id), scope=scope, limit=limit
+        )
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    suffix = scope or "all"
+    return Response(
+        content="\ufeff" + csv_text,
+        media_type="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": f'attachment; filename="org-{org_id}-webhook-{suffix}.csv"'
+        },
+    )
+
+
 @router.post(
     "/{org_id}/execution/alert-deliveries/retry",
     summary="重试机构失败 SLA 投递 (管理员)",

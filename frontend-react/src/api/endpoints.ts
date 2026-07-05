@@ -1312,6 +1312,22 @@ export async function fetchOrgAlertDeliveries(
   return data;
 }
 
+export async function downloadOrgAlertDeliveriesCsv(
+  orgId: string,
+  scope?: "all" | "sla" | "research",
+): Promise<void> {
+  const { data } = await api.get<Blob>(`/orgs/${orgId}/execution/alert-deliveries/export`, {
+    params: { scope: scope && scope !== "all" ? scope : undefined },
+    responseType: "blob",
+  });
+  const url = URL.createObjectURL(data);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `org-${orgId}-webhook-${scope ?? "all"}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export async function retryOrgFailedAlertDeliveries(orgId: string): Promise<{ retried: number }> {
   const { data } = await api.post<{ retried: number }>(
     `/orgs/${orgId}/execution/alert-deliveries/retry`,

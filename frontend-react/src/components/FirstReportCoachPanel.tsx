@@ -28,13 +28,23 @@ export default function FirstReportCoachPanel() {
   };
 
   return (
-    <div className="card border border-amber-200 bg-gradient-to-r from-amber-50/90 to-orange-50/50 dark:border-amber-900 dark:from-amber-950/40 dark:to-orange-950/20">
+    <div className="card animate-[pulse_2s_ease-in-out_1] border border-amber-200 bg-gradient-to-r from-amber-50/90 to-orange-50/50 dark:border-amber-900 dark:from-amber-950/40 dark:to-orange-950/20">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
-            {coach.badge}
+            🎓 {coach.badge}
           </p>
           <p className="mt-1 text-sm font-medium text-slate-800 dark:text-slate-100">{coach.celebrate}</p>
+          {coach.academy_completed && coach.academy_xp != null && coach.academy_title && (
+            <p className="mt-2 rounded-lg border border-amber-300/60 bg-amber-100/50 px-2.5 py-1.5 text-xs font-medium text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
+              {d.academyEarned(coach.academy_title, coach.academy_xp)}
+            </p>
+          )}
+          {coach.challenge_milestone_done && (
+            <p className="mt-2 rounded-lg border border-violet-300/60 bg-violet-100/50 px-2.5 py-1.5 text-xs font-medium text-violet-900 dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-100">
+              {d.challengeMilestone}
+            </p>
+          )}
           <p className="mt-2 text-sm text-amber-900/90 dark:text-amber-100/90">{coach.message}</p>
           <p className="mt-2 text-xs text-amber-800/80 dark:text-amber-200/80">
             {d.unlocked(coach.unlock_features)}

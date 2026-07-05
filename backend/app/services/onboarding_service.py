@@ -294,6 +294,34 @@ def first_report_coaching_payload(
         cta_action = "run_validation"
         cta_path = project_path
 
+    from backend.app.services import task_service
+
+    task_service.seed_default_tasks(db)
+    academy_title = None
+    academy_xp = None
+    academy_completed = False
+    try:
+        task = task_service.get_by_code(db, "first-report")
+        if task:
+            academy_title = task.title
+            academy_xp = task.xp_reward
+            completed_ids = task_service.completed_task_ids(db, user.id)
+            academy_completed = task.id in completed_ids
+            if not academy_completed and flags.get("report"):
+                academy_completed = True
+    except task_service.TaskNotFoundError:
+        pass
+
+    challenge_milestone_done = False
+    from backend.app.services import challenge_service
+
+    ch_prog = challenge_service.progress_if_enrolled(db, user)
+    if ch_prog:
+        for m in ch_prog["milestones"]:
+            if m["code"] == "first_report" and m["completed"]:
+                challenge_milestone_done = True
+                break
+
     return {
         "reason": reason,
         "badge": labels["badge"],
@@ -304,6 +332,10 @@ def first_report_coaching_payload(
         "cta_path": cta_path,
         "active_project_id": active_project_id,
         "paper_ready": paper_ready,
+        "academy_title": academy_title,
+        "academy_xp": academy_xp,
+        "academy_completed": academy_completed,
+        "challenge_milestone_done": challenge_milestone_done,
     }
 
 

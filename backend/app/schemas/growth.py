@@ -157,6 +157,10 @@ class FirstReportCoachingOut(BaseModel):
     cta_path: str
     active_project_id: uuid.UUID | None = None
     paper_ready: bool = False
+    academy_title: str | None = None
+    academy_xp: int | None = None
+    academy_completed: bool = False
+    challenge_milestone_done: bool = False
 
 
 class BeginnerSprintOut(BaseModel):
