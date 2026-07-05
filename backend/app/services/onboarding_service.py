@@ -358,6 +358,40 @@ def quickstart_guide_payload(
     }
 
 
+def first_backtest_coaching_payload(
+    db: Session,
+    user: User,
+    locale: Locale,
+    flags: dict[str, bool],
+    *,
+    active_project_id: uuid.UUID | None,
+) -> dict | None:
+    """首次回测后 — 引导跑样本外科学验证。"""
+    if not flags.get("backtest"):
+        return None
+    if flags.get("validation"):
+        return None
+    if not active_project_id:
+        return None
+
+    project = db.get(ResearchProject, active_project_id)
+    if project is None or project.owner_id != user.id:
+        return None
+
+    labels = i18n.FIRST_BACKTEST_COACH.get(locale) or i18n.FIRST_BACKTEST_COACH["en"]
+    project_path = f"/projects/{active_project_id}"
+    return {
+        "badge": labels["badge"],
+        "celebrate": labels["celebrate"],
+        "message": labels["message"],
+        "unlock_features": labels["unlock_features"],
+        "cta_action": "run_validation",
+        "cta_path": project_path,
+        "active_project_id": active_project_id,
+        "project_title": project.title,
+    }
+
+
 def first_project_coaching_payload(
     db: Session,
     user: User,
@@ -1080,6 +1114,13 @@ def research_journey(
         flags,
         active_project_id=active_id,
     )
+    first_backtest_coaching = first_backtest_coaching_payload(
+        db,
+        user,
+        locale,
+        flags,
+        active_project_id=active_id,
+    )
     first_report_coaching = first_report_coaching_payload(
         db,
         user,
@@ -1138,6 +1179,7 @@ def research_journey(
         "checkout_coaching": checkout_coaching,
         "quickstart_guide": quickstart_guide,
         "first_project_coaching": first_project_coaching,
+        "first_backtest_coaching": first_backtest_coaching,
         "first_report_coaching": first_report_coaching,
         "beginner_sprint": beginner_sprint,
         "mastery_overview": mastery_overview,

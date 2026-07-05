@@ -139,6 +139,12 @@ const en = {
     running: "Running…",
     dismiss: "Got it",
   },
+  firstBacktestCoach: {
+    unlocked: (features: string) => `Next unlocks: ${features}`,
+    ctaDefault: "Run validation →",
+    running: "Running…",
+    dismiss: "Got it",
+  },
   firstReportCoach: {
     unlocked: (features: string) => `Next unlocks: ${features}`,
     ctaDefault: "Continue →",
@@ -1519,6 +1525,12 @@ const zh = {
     factorReady: (name: string) => `起步因子已就绪：${name}`,
     unlocked: (features: string) => `下一步解锁：${features}`,
     ctaDefault: "跑回测 →",
+    running: "运行中…",
+    dismiss: "知道了",
+  },
+  firstBacktestCoach: {
+    unlocked: (features: string) => `下一步解锁：${features}`,
+    ctaDefault: "跑验证 →",
     running: "运行中…",
     dismiss: "知道了",
   },

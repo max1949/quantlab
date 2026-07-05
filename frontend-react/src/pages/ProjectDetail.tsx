@@ -37,7 +37,9 @@ import PublishFeedPreview from "../components/PublishFeedPreview";
 import DataQualityBanner from "../components/DataQualityBanner";
 import VolRegimeBanner from "../components/VolRegimeBanner";
 import FirstProjectCoachPanel from "../components/FirstProjectCoachPanel";
+import FirstBacktestCoachPanel from "../components/FirstBacktestCoachPanel";
 import FactorCatalogPanel from "../components/FactorCatalogPanel";
+import { FIRST_BACKTEST_WELCOME_KEY } from "../lib/onboardingFocus";
 import type { Graph } from "../api/types";
 
 type StepKey = "factor" | "backtest" | "validation" | "report" | "publish";
@@ -111,6 +113,9 @@ export default function ProjectDetail() {
     onSuccess: async (bt) => {
       void trackEvent("backtest_run", { project: id, status: bt.status });
       notify(p.backtestDone(bt.status), "success");
+      if (bt.status === "success") {
+        sessionStorage.setItem(FIRST_BACKTEST_WELCOME_KEY, id);
+      }
       const msg = academyRewardMessage(bt.academy_rewards, d.academyXpEarned);
       if (msg) notify(msg, "success");
       void qc.invalidateQueries({ queryKey: ["backtests"] });
@@ -341,6 +346,14 @@ export default function ProjectDetail() {
         onRunBacktest={() => runBacktest.mutate()}
       />
 
+      <FirstBacktestCoachPanel
+        projectId={id}
+        backtestDone={done.backtest}
+        validationDone={done.validation}
+        validationPending={busy === "validation"}
+        onRunValidation={() => runValidation.mutate()}
+      />
+
       {projectFactors.length > 1 && (
         <div className="mb-4 flex items-center gap-2 text-sm">
           <span className="text-slate-500">{p.factorForRun}</span>
@@ -561,7 +574,13 @@ export default function ProjectDetail() {
             return (
               <div
                 key={s.key}
-                id={s.key === "backtest" ? "project-step-backtest" : undefined}
+                id={
+                  s.key === "backtest"
+                    ? "project-step-backtest"
+                    : s.key === "validation"
+                      ? "project-step-validation"
+                      : undefined
+                }
                 className={`card flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${
                   finished ? "border-emerald-200 bg-emerald-50/40" : ""
                 } ${isNext ? "ring-2 ring-brand-400 ring-offset-2 dark:ring-offset-slate-950" : ""}`}

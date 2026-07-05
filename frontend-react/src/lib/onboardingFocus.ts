@@ -3,3 +3,5 @@ export const FOCUS_QUICKSTART_KEY = "quantlab-focus-quickstart";
 export const FIRST_MENTOR_WELCOME_KEY = "quantlab-first-mentor-welcome";
 /** Set when a template one-click start lands on a new project — consumed on first project visit. */
 export const FIRST_PROJECT_WELCOME_KEY = "quantlab-first-project-welcome";
+/** Set after first successful backtest — consumed to highlight validation step. */
+export const FIRST_BACKTEST_WELCOME_KEY = "quantlab-first-backtest-welcome";

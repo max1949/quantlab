@@ -719,6 +719,21 @@ BEGINNER_ONEPAGER: dict[Locale, dict[str, str]] = {
     },
 }
 
+FIRST_BACKTEST_COACH: dict[Locale, dict[str, str]] = {
+    "en": {
+        "badge": "Backtest complete",
+        "celebrate": "In-sample numbers are in — now prove the edge survives out-of-sample.",
+        "message": "Run scientific validation next. OOS Sharpe and robustness gates separate real alpha from curve-fit.",
+        "unlock_features": "OOS validation · quality scorecard · mastery report",
+    },
+    "zh": {
+        "badge": "回测已完成",
+        "celebrate": "样本内数据已出 — 接下来证明这条边在样本外也站得住。",
+        "message": "请跑科学验证。样本外夏普与稳健性门槛，能区分真 alpha 和过拟合。",
+        "unlock_features": "样本外验证 · 质量评分卡 · 大师级报告",
+    },
+}
+
 FIRST_PROJECT_COACH: dict[Locale, dict[str, str]] = {
     "en": {
         "badge": "Project created",
