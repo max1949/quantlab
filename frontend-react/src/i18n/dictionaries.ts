@@ -145,6 +145,21 @@ const en = {
     print: "Print path map →",
     dismiss: "Hide map",
     open: "Open this step →",
+    shareToFeed: "Share path map to feed →",
+    sharing: "Sharing…",
+    shareSuccess: "Path map shared — your study is on the research feed.",
+    viewOnFeed: "See it on the feed →",
+  },
+  masteryPathMini: {
+    title: "Mastery path",
+    progress: (done: number, total: number) => `${done}/${total}`,
+    phases: {
+      incubate: "Incubate",
+      report: "Report",
+      paper: "Paper",
+      masters: "Masters",
+      reputation: "Share",
+    },
   },
   marketDataCoach: {
     badge: (symbol: string, tf: string) => `Market data · ${symbol} · ${tf}`,
@@ -1432,6 +1447,21 @@ const zh = {
     print: "打印路径图 →",
     dismiss: "收起总览",
     open: "打开这一步 →",
+    shareToFeed: "分享路径图到广场 →",
+    sharing: "分享中…",
+    shareSuccess: "路径图已分享 — 你的研究已出现在研究广场。",
+    viewOnFeed: "去广场看看 →",
+  },
+  masteryPathMini: {
+    title: "大师路径",
+    progress: (done: number, total: number) => `${done}/${total}`,
+    phases: {
+      incubate: "孵化",
+      report: "报告",
+      paper: "Paper",
+      masters: "毕业",
+      reputation: "分享",
+    },
   },
   marketDataCoach: {
     badge: (symbol: string, tf: string) => `行情数据 · ${symbol} · ${tf}`,

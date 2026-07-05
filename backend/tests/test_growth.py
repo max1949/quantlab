@@ -362,6 +362,36 @@ def test_journey_includes_mastery_overview(client, db_session):
     paper_phase = next(p for p in ov2["phases"] if p["key"] == "paper")
     assert paper_phase["cta_path"] == f"/projects/{j2['active_project_id']}"
     assert paper_phase["cta_action"] == "run_paper"
+    assert "share_ready" in ov2
+    assert "share_hint" in ov2
+    assert ov2.get("share_cta")
+
+
+def test_mastery_overview_share_ready_after_publishable_report(client, db_session):
+    seed_sample_market_data(db_session)
+    h = _register(client, "movshare")
+    proj, rep = _full_research(client, h, db_session)
+    j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    ov = j.get("mastery_overview")
+    assert ov is not None
+    mg = j.get("mastery_goal") or {}
+    if mg.get("publish_ready"):
+        assert ov["share_ready"] is True
+        assert ov["share_report_id"] == rep["id"]
+    else:
+        assert ov["share_ready"] is False
+
+
+def test_share_card_includes_mastery_path(client, db_session):
+    seed_sample_market_data(db_session)
+    h = _register(client, "movcard")
+    _, rep = _full_research(client, h, db_session)
+    out = client.post(f"{BASE}/research/reports/{rep['id']}/share", headers=h).json()
+    mp = out["card"].get("mastery_path")
+    assert mp is not None
+    assert mp["total"] == 5
+    assert len(mp["phases"]) == 5
+    assert mp["done_count"] >= 2
 
 
 def test_first_report_coaching_hides_after_paper_order(client, db_session):
@@ -624,6 +654,10 @@ def test_public_feed_no_auth(client, db_session):
     assert "paper_graduated" in card
     assert isinstance(card["paper_graduated"], bool)
     assert isinstance(card.get("paper_tracking"), bool)
+    mp = card.get("mastery_path")
+    assert mp is not None
+    assert mp["total"] == 5
+    assert len(mp["phases"]) == 5
 
 
 def test_share_missing_report_404(client, db_session):

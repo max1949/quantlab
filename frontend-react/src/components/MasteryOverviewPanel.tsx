@@ -1,18 +1,41 @@
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { getResearchJourney } from "../api/endpoints";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getResearchJourney, shareReport } from "../api/endpoints";
+import { apiErrorMessage } from "../api/client";
+import { academyRewardMessage } from "../lib/academy";
 import { useLocale } from "../store/locale";
+import { useUi } from "../store/ui";
 
 const DISMISS_KEY = "quantlab-mastery-overview-dismissed";
 
 export default function MasteryOverviewPanel() {
   const d = useLocale((s) => s.dict.masteryOverview);
+  const dash = useLocale((s) => s.dict.dashboard);
   const printRef = useRef<HTMLDivElement>(null);
+  const notify = useUi((s) => s.notify);
+  const qc = useQueryClient();
   const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISS_KEY) === "1");
+  const [feedHref, setFeedHref] = useState<string | null>(null);
 
   const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
   const overview = journey.data?.mastery_overview;
+
+  const shareToFeed = useMutation({
+    mutationFn: () => shareReport(overview!.share_report_id!),
+    onSuccess: (res) => {
+      const reportId = overview!.share_report_id!;
+      const href = `/feed?highlight=${reportId}`;
+      setFeedHref(href);
+      notify(d.shareSuccess, "success");
+      const msg = academyRewardMessage(res.academy_rewards, dash.academyXpEarned);
+      if (msg) notify(msg, "success");
+      void qc.invalidateQueries({ queryKey: ["research-journey"] });
+      void qc.invalidateQueries({ queryKey: ["public-feed"] });
+      void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
+    },
+    onError: (e) => notify(apiErrorMessage(e, d.shareToFeed), "error"),
+  });
 
   if (dismissed || journey.isLoading || !overview) return null;
 
@@ -84,10 +107,31 @@ export default function MasteryOverviewPanel() {
               );
             })}
           </ol>
+
+          {overview.share_hint && (
+            <p className="mt-3 text-xs text-violet-800/90 dark:text-violet-200/90">{overview.share_hint}</p>
+          )}
         </div>
 
         <div className="flex shrink-0 flex-wrap gap-2 print:hidden">
-          <button type="button" className="btn-primary text-xs" onClick={printMap}>
+          {overview.share_ready && overview.share_report_id && (
+            <>
+              <button
+                type="button"
+                className="btn-primary text-xs"
+                disabled={shareToFeed.isPending}
+                onClick={() => shareToFeed.mutate()}
+              >
+                {shareToFeed.isPending ? d.sharing : overview.share_cta || d.shareToFeed}
+              </button>
+              {feedHref && (
+                <Link to={feedHref} className="btn text-xs">
+                  {d.viewOnFeed}
+                </Link>
+              )}
+            </>
+          )}
+          <button type="button" className="btn text-xs" onClick={printMap}>
             {d.print}
           </button>
           <button type="button" className="btn text-xs" onClick={dismiss}>

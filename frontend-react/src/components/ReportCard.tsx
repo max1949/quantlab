@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import type { ReportSummary } from "../api/types";
 import { useLocale } from "../store/locale";
+import MasteryPathMini from "./MasteryPathMini";
 import { GradeBadge } from "./ui";
 
 export default function ReportCard({ report }: { report: ReportSummary }) {
@@ -56,6 +57,9 @@ export default function ReportCard({ report }: { report: ReportSummary }) {
         )}
         <span>{new Date(report.created_at).toLocaleDateString()}</span>
       </div>
+      {report.mastery_path && report.mastery_path.done_count > 0 && (
+        <MasteryPathMini path={report.mastery_path} compact />
+      )}
       <div className="mt-auto flex items-center justify-between pt-3 text-sm">
         <Link to={`/reports/${report.id}`} className="font-medium text-brand-600 hover:underline">
           {rc.readFull} →

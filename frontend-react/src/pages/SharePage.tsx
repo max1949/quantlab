@@ -6,6 +6,8 @@ import { apiErrorMessage } from "../api/client";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { useLocale } from "../store/locale";
 import { GradeBadge, Spinner } from "../components/ui";
+import MasteryPathMini from "../components/MasteryPathMini";
+import type { MasteryPathSnapshot } from "../api/types";
 
 export default function SharePage() {
   const { dict } = useLocale();
@@ -90,6 +92,9 @@ function ShareCardView({
             <p className="mt-1 text-sm leading-relaxed text-slate-600">{card.hypothesis}</p>
           </div>
         )}
+        {"mastery_path" in card && card.mastery_path ? (
+          <MasteryPathMini path={card.mastery_path as MasteryPathSnapshot} />
+        ) : null}
       </div>
     </div>
   );

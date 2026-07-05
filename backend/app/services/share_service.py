@@ -28,8 +28,8 @@ class ShareNotFoundError(Exception):
     pass
 
 
-def _build_card(report: ResearchReport, owner: User) -> dict:
-    return {
+def _build_card(report: ResearchReport, owner: User, *, mastery_path: dict | None = None) -> dict:
+    card = {
         "title": report.title,
         "researcher": owner.username,
         "researcher_level": owner.level,
@@ -38,6 +38,9 @@ def _build_card(report: ResearchReport, owner: User) -> dict:
         "summary": report.summary,
         "hypothesis": report.hypothesis,
     }
+    if mastery_path:
+        card["mastery_path"] = mastery_path
+    return card
 
 
 def create_share(db: Session, owner: User, report_id: uuid.UUID) -> ResearchShare:
@@ -47,6 +50,10 @@ def create_share(db: Session, owner: User, report_id: uuid.UUID) -> ResearchShar
     report = db.get(ResearchReport, report_id)
     if report is None or report.owner_id != owner.id:
         raise ReportNotFoundError(str(report_id))
+
+    from backend.app.services import onboarding_service
+
+    mastery_path = onboarding_service.mastery_path_snapshot_for_user(db, owner, "en")
 
     if report.project_id:
         try:
@@ -59,7 +66,7 @@ def create_share(db: Session, owner: User, report_id: uuid.UUID) -> ResearchShar
     ).scalar_one_or_none()
     if existing is not None:
         # 复用已存在的分享 (刷新卡片快照)。
-        existing.card = _build_card(report, owner)
+        existing.card = _build_card(report, owner, mastery_path=mastery_path)
         db.commit()
         db.refresh(existing)
         existing.academy_rewards = []
@@ -69,7 +76,7 @@ def create_share(db: Session, owner: User, report_id: uuid.UUID) -> ResearchShar
         report_id=report_id,
         owner_id=owner.id,
         token=secrets.token_urlsafe(12)[:24],
-        card=_build_card(report, owner),
+        card=_build_card(report, owner, mastery_path=mastery_path),
     )
     db.add(share)
     db.commit()

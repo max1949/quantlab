@@ -7,6 +7,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from backend.app.schemas.growth import MasteryPathSnapshotOut
 from backend.app.schemas.task import AcademyRewardOut
 
 
@@ -33,6 +34,7 @@ class ReportSummary(BaseModel):
     paper_graduated: bool = False
     paper_tracking: bool = False
     mastery_badge: str | None = None
+    mastery_path: MasteryPathSnapshotOut | None = None
 
 
 class ReportDetail(BaseModel):

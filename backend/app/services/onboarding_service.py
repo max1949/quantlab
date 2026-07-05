@@ -51,6 +51,117 @@ def _active_project_id(db: Session, user: User):
     ).scalar_one_or_none()
 
 
+def _latest_report_id(db: Session, user: User) -> uuid.UUID | None:
+    return db.execute(
+        select(ResearchReport.id)
+        .where(ResearchReport.owner_id == user.id)
+        .order_by(ResearchReport.created_at.desc())
+        .limit(1)
+    ).scalar_one_or_none()
+
+
+def _journey_flags(db: Session, user: User) -> dict[str, bool]:
+    from backend.app.models.growth import ResearchShare
+
+    uid = user.id
+    return {
+        "template": _count(db, select(func.count(ResearchProject.id)).where(ResearchProject.owner_id == uid)) > 0,
+        "factor": _count(db, select(func.count(Factor.id)).where(Factor.owner_id == uid)) > 0,
+        "backtest": _count(
+            db,
+            select(func.count(Backtest.id)).where(
+                Backtest.owner_id == uid, Backtest.status == BacktestStatus.SUCCESS.value
+            ),
+        )
+        > 0,
+        "validation": _count(
+            db,
+            select(func.count(Validation.id)).where(
+                Validation.owner_id == uid, Validation.status == ValidationStatus.SUCCESS.value
+            ),
+        )
+        > 0,
+        "report": _count(db, select(func.count(ResearchReport.id)).where(ResearchReport.owner_id == uid)) > 0,
+        "publish": _count(
+            db,
+            select(func.count(ResearchProject.id)).where(
+                ResearchProject.owner_id == uid, ResearchProject.status == ProjectStatus.PUBLISHED.value
+            ),
+        )
+        > 0,
+        "share": _count(db, select(func.count(ResearchShare.id)).where(ResearchShare.owner_id == uid)) > 0,
+    }
+
+
+def _mastery_path_phase_rows(
+    locale: Locale,
+    flags: dict[str, bool],
+    *,
+    mastery_goal: dict,
+    active_project_id: uuid.UUID | None,
+) -> list[dict]:
+    labels = i18n.MASTERY_OVERVIEW.get(locale) or i18n.MASTERY_OVERVIEW["en"]
+    phase_keys = ("incubate", "report", "paper", "masters", "reputation")
+    incubate_done = bool(flags.get("backtest") and flags.get("validation"))
+    report_done = bool(flags.get("report"))
+    paper_active = int(mastery_goal.get("paper_tracking_count") or 0) > 0
+    paper_graduated = int(mastery_goal.get("paper_graduated_count") or 0) > 0
+    reputation_done = bool(flags.get("share") or flags.get("publish"))
+
+    done_map = {
+        "incubate": incubate_done,
+        "report": report_done,
+        "paper": paper_active,
+        "masters": paper_graduated,
+        "reputation": reputation_done,
+    }
+    project_path = f"/projects/{active_project_id}" if active_project_id else "/projects"
+    cta_map = {
+        "incubate": (project_path if active_project_id else "/templates", "run_validation" if active_project_id else "create_project"),
+        "report": (project_path, "generate_report"),
+        "paper": (project_path, "run_paper"),
+        "masters": ("/leaderboards/paper_mastery", "view_board"),
+        "reputation": (project_path if active_project_id else "/feed", "publish_share"),
+    }
+    return [
+        {
+            "key": key,
+            "label": labels[f"phase_{key}"],
+            "hint": labels[f"phase_{key}_hint"],
+            "done": done_map[key],
+            "cta_path": cta_map[key][0],
+            "cta_action": cta_map[key][1],
+        }
+        for key in phase_keys
+    ]
+
+
+def mastery_path_snapshot_for_user(
+    db: Session,
+    user: User,
+    locale: Locale,
+    *,
+    flags: dict[str, bool] | None = None,
+    mastery_goal: dict | None = None,
+    active_project_id: uuid.UUID | None = None,
+) -> dict:
+    """五阶段大师路径快照 — 用于 Feed / 分享卡片展示。"""
+    flags = flags if flags is not None else _journey_flags(db, user)
+    if mastery_goal is None:
+        mastery_goal = _mastery_goal_payload(db, user, locale)
+    if active_project_id is None:
+        active_project_id = _active_project_id(db, user)
+    phases = _mastery_path_phase_rows(
+        locale, flags, mastery_goal=mastery_goal, active_project_id=active_project_id
+    )
+    done_count = sum(1 for p in phases if p["done"])
+    return {
+        "done_count": done_count,
+        "total": len(phases),
+        "phases": [{"key": p["key"], "label": p["label"], "done": p["done"]} for p in phases],
+    }
+
+
 def _stage(db: Session, user: User) -> str:
     uid = user.id
     projects = _count(db, select(func.count(ResearchProject.id)).where(ResearchProject.owner_id == uid))
@@ -414,6 +525,8 @@ def beginner_sprint_payload(
 
 
 def mastery_overview_payload(
+    db: Session,
+    user: User,
     locale: Locale,
     flags: dict[str, bool],
     *,
@@ -422,44 +535,17 @@ def mastery_overview_payload(
 ) -> dict | None:
     """新手大师路径一页纸总览 — 五阶段全部完成前展示。"""
     labels = i18n.MASTERY_OVERVIEW.get(locale) or i18n.MASTERY_OVERVIEW["en"]
-    phase_keys = ("incubate", "report", "paper", "masters", "reputation")
-    incubate_done = bool(flags.get("backtest") and flags.get("validation"))
-    report_done = bool(flags.get("report"))
-    paper_active = int(mastery_goal.get("paper_tracking_count") or 0) > 0
-    paper_graduated = int(mastery_goal.get("paper_graduated_count") or 0) > 0
-    reputation_done = bool(flags.get("share") or flags.get("publish"))
-
-    done_map = {
-        "incubate": incubate_done,
-        "report": report_done,
-        "paper": paper_active,
-        "masters": paper_graduated,
-        "reputation": reputation_done,
-    }
-    project_path = f"/projects/{active_project_id}" if active_project_id else "/projects"
-    cta_map = {
-        "incubate": (project_path if active_project_id else "/templates", "run_validation" if active_project_id else "create_project"),
-        "report": (project_path, "generate_report"),
-        "paper": (project_path, "run_paper"),
-        "masters": ("/leaderboards/paper_mastery", "view_board"),
-        "reputation": (project_path if active_project_id else "/feed", "publish_share"),
-    }
-    phases = [
-        {
-            "key": key,
-            "label": labels[f"phase_{key}"],
-            "hint": labels[f"phase_{key}_hint"],
-            "done": done_map[key],
-            "cta_path": cta_map[key][0],
-            "cta_action": cta_map[key][1],
-        }
-        for key in phase_keys
-    ]
+    phases = _mastery_path_phase_rows(
+        locale, flags, mastery_goal=mastery_goal, active_project_id=active_project_id
+    )
     done_count = sum(1 for p in phases if p["done"])
     if done_count >= len(phases):
         return None
 
     current_index = next((i for i, p in enumerate(phases) if not p["done"]), len(phases) - 1)
+    report_id = _latest_report_id(db, user)
+    publish_ready = bool(mastery_goal.get("publish_ready"))
+    share_ready = bool(flags.get("report") and publish_ready and report_id is not None)
     return {
         "title": labels["title"],
         "subtitle": labels["subtitle"],
@@ -469,6 +555,10 @@ def mastery_overview_payload(
         "done_count": done_count,
         "total": len(phases),
         "current_index": current_index,
+        "share_ready": share_ready,
+        "share_report_id": report_id if share_ready else None,
+        "share_hint": labels["share_hint"] if share_ready else labels["share_locked"],
+        "share_cta": labels["share_cta"],
     }
 
 
@@ -592,36 +682,7 @@ def research_journey(
     db: Session, user: User, locale: Locale = "en", checkout_plan: str | None = None
 ) -> dict:
     """七步研究闭环进度 (工作台进度环)。"""
-    from backend.app.models.growth import ResearchShare
-
-    uid = user.id
-    flags = {
-        "template": _count(db, select(func.count(ResearchProject.id)).where(ResearchProject.owner_id == uid)) > 0,
-        "factor": _count(db, select(func.count(Factor.id)).where(Factor.owner_id == uid)) > 0,
-        "backtest": _count(
-            db,
-            select(func.count(Backtest.id)).where(
-                Backtest.owner_id == uid, Backtest.status == BacktestStatus.SUCCESS.value
-            ),
-        )
-        > 0,
-        "validation": _count(
-            db,
-            select(func.count(Validation.id)).where(
-                Validation.owner_id == uid, Validation.status == ValidationStatus.SUCCESS.value
-            ),
-        )
-        > 0,
-        "report": _count(db, select(func.count(ResearchReport.id)).where(ResearchReport.owner_id == uid)) > 0,
-        "publish": _count(
-            db,
-            select(func.count(ResearchProject.id)).where(
-                ResearchProject.owner_id == uid, ResearchProject.status == ProjectStatus.PUBLISHED.value
-            ),
-        )
-        > 0,
-        "share": _count(db, select(func.count(ResearchShare.id)).where(ResearchShare.owner_id == uid)) > 0,
-    }
+    flags = _journey_flags(db, user)
     labels = i18n.JOURNEY_STEPS.get(locale) or i18n.JOURNEY_STEPS["en"]
 
     challenge_by_journey: dict[str, list[dict]] = {}
@@ -745,6 +806,8 @@ def research_journey(
         quickstart_guide=quickstart_guide,
     )
     mastery_overview = mastery_overview_payload(
+        db,
+        user,
         locale,
         flags,
         mastery_goal=mastery_goal,

@@ -220,6 +220,18 @@ export interface BeginnerSprint {
   cta_action: string;
 }
 
+export interface MasteryPathPhaseSnapshot {
+  key: string;
+  label: string;
+  done: boolean;
+}
+
+export interface MasteryPathSnapshot {
+  done_count: number;
+  total: number;
+  phases: MasteryPathPhaseSnapshot[];
+}
+
 export interface MasteryOverviewPhase {
   key: string;
   label: string;
@@ -238,6 +250,10 @@ export interface MasteryOverview {
   done_count: number;
   total: number;
   current_index: number;
+  share_ready: boolean;
+  share_report_id: string | null;
+  share_hint: string;
+  share_cta: string;
 }
 
 export interface ResearchJourney {
@@ -898,6 +914,7 @@ export interface ReportSummary {
   paper_graduated?: boolean;
   paper_tracking?: boolean;
   mastery_badge?: string | null;
+  mastery_path?: MasteryPathSnapshot | null;
 }
 
 export interface ReportDetail extends ReportSummary {

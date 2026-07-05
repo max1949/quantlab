@@ -194,6 +194,18 @@ class MasteryOverviewPhaseOut(BaseModel):
     cta_action: str
 
 
+class MasteryPathPhaseSnapshotOut(BaseModel):
+    key: str
+    label: str
+    done: bool
+
+
+class MasteryPathSnapshotOut(BaseModel):
+    done_count: int
+    total: int
+    phases: list[MasteryPathPhaseSnapshotOut] = Field(default_factory=list)
+
+
 class MasteryOverviewOut(BaseModel):
     title: str
     subtitle: str
@@ -203,6 +215,10 @@ class MasteryOverviewOut(BaseModel):
     done_count: int
     total: int
     current_index: int
+    share_ready: bool = False
+    share_report_id: uuid.UUID | None = None
+    share_hint: str = ""
+    share_cta: str = ""
 
 
 class DismissAttentionAlertRequest(BaseModel):

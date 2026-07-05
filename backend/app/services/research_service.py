@@ -331,16 +331,21 @@ def feed_summary(
     report: ResearchReport,
     metric: tuple[float | None, float | None] | None = None,
     badges: dict | None = None,
+    *,
+    mastery_path: dict | None = None,
 ) -> dict:
     oos_sharpe, robustness_score = metric or _feed_metrics(db, report)
     mastery = badges if badges is not None else _feed_mastery_badges(db, report)
-    return {
+    out = {
         **ReportSummary.model_validate(report).model_dump(),
         "oos_sharpe": oos_sharpe,
         "robustness_score": robustness_score,
         **_feed_factor_meta(db, report),
         **mastery,
     }
+    if mastery_path is not None:
+        out["mastery_path"] = mastery_path
+    return out
 
 
 def feed(db: Session, sort: str = "latest", limit: int = 30, *, graduated_only: bool = False) -> list[dict]:
@@ -393,7 +398,21 @@ def feed(db: Session, sort: str = "latest", limit: int = 30, *, graduated_only: 
             ),
             reverse=True,
         )
-    return [
-        feed_summary(db, r, metrics_by_report.get(r.id), badges_by_report.get(r.id))
-        for r in rows[:limit]
-    ]
+    from backend.app.services import onboarding_service
+
+    path_by_owner: dict[uuid.UUID, dict] = {}
+    out_rows = []
+    for r in rows[:limit]:
+        mp = None
+        if r.owner_id:
+            if r.owner_id not in path_by_owner:
+                owner = db.get(User, r.owner_id)
+                if owner:
+                    path_by_owner[r.owner_id] = onboarding_service.mastery_path_snapshot_for_user(
+                        db, owner, "en"
+                    )
+            mp = path_by_owner.get(r.owner_id)
+        out_rows.append(
+            feed_summary(db, r, metrics_by_report.get(r.id), badges_by_report.get(r.id), mastery_path=mp)
+        )
+    return out_rows

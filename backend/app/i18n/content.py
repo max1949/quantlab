@@ -758,6 +758,9 @@ MASTERY_OVERVIEW: dict[Locale, dict[str, str]] = {
         "phase_masters_hint": "Pass the paper bar and climb the Masters board.",
         "phase_reputation": "Publish & share",
         "phase_reputation_hint": "Build reputation on the research feed.",
+        "share_cta": "Share path map to feed →",
+        "share_hint": "Your mastery progress appears on your research card — inspire others on the feed.",
+        "share_locked": "Finish publish quality gate first — then share your path map with your report.",
     },
     "zh": {
         "title": "大师路径总览",
@@ -774,6 +777,9 @@ MASTERY_OVERVIEW: dict[Locale, dict[str, str]] = {
         "phase_masters_hint": "通过毕业线，冲击大师榜。",
         "phase_reputation": "发布与分享",
         "phase_reputation_hint": "在研究广场积累声誉。",
+        "share_cta": "分享路径图到广场 →",
+        "share_hint": "大师路径进度会显示在你的研究卡片上 — 在研究广场激励更多新手。",
+        "share_locked": "先通过发布质量闸门 — 再随报告一起分享路径图。",
     },
 }
 
