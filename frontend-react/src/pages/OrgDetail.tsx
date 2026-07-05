@@ -65,6 +65,7 @@ export default function OrgDetail() {
   const [alertWebhookSecret, setAlertWebhookSecret] = useState("");
   const [researchAlertWebhook, setResearchAlertWebhook] = useState("");
   const [researchAlertWebhookSecret, setResearchAlertWebhookSecret] = useState("");
+  const [deliveryScope, setDeliveryScope] = useState<"all" | "sla" | "research">("all");
 
   const org = useQuery({ queryKey: ["org", id], queryFn: () => getOrg(id), enabled: Boolean(id) });
   const members = useQuery({
@@ -134,8 +135,8 @@ export default function OrgDetail() {
     enabled: Boolean(id) && (org.data?.my_role === "owner" || org.data?.my_role === "admin"),
   });
   const alertDeliveries = useQuery({
-    queryKey: ["org-alert-deliveries", id],
-    queryFn: () => fetchOrgAlertDeliveries(id),
+    queryKey: ["org-alert-deliveries", id, deliveryScope],
+    queryFn: () => fetchOrgAlertDeliveries(id, 20, deliveryScope),
     enabled: Boolean(id) && (org.data?.my_role === "owner" || org.data?.my_role === "admin"),
   });
 
@@ -894,6 +895,26 @@ export default function OrgDetail() {
               <div className="mt-4 border-t border-slate-200 pt-3 dark:border-slate-700">
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm font-medium">{o.alertDeliveryTitle}</p>
+                  <div className="flex flex-wrap gap-1">
+                    {(["all", "sla", "research"] as const).map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        className={`rounded px-2 py-0.5 text-xs ${
+                          deliveryScope === s
+                            ? "bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-200"
+                            : "text-slate-500 hover:text-slate-700"
+                        }`}
+                        onClick={() => setDeliveryScope(s)}
+                      >
+                        {s === "all"
+                          ? o.alertDeliveryFilterAll
+                          : s === "sla"
+                            ? o.alertDeliveryFilterSla
+                            : o.alertDeliveryFilterResearch}
+                      </button>
+                    ))}
+                  </div>
                   <button
                     type="button"
                     className="btn text-xs"
@@ -922,8 +943,8 @@ export default function OrgDetail() {
                               : ""
                         }
                       >
-                        {new Date(row.created_at).toLocaleString()} · {row.status} · {row.trigger} ·{" "}
-                        {row.alert_count} alerts
+                        {new Date(row.created_at).toLocaleString()} · {o.alertDeliveryScope(row.scope)} ·{" "}
+                        {row.status} · {row.trigger} · {row.alert_count} alerts
                         {row.signed ? ` · ${o.alertDeliverySigned}` : ""}
                         {row.error_message ? ` · ${row.error_message}` : ""}
                       </li>

@@ -17,10 +17,12 @@ function readDismissedProgress(): number {
 
 export default function QuickStartGuidePanel() {
   const d = useLocale((s) => s.dict.quickstartGuide);
+  const sprintLabels = useLocale((s) => s.dict.beginnerSprint);
   const stages = useLocale((s) => s.dict.stages);
   const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
 
   const guide = journey.data?.quickstart_guide;
+  const sprint = journey.data?.beginner_sprint;
   const [hideAfterDismiss, setHideAfterDismiss] = useState(false);
   const dismissedProgress = readDismissedProgress();
   const dismissed =
@@ -123,6 +125,21 @@ export default function QuickStartGuidePanel() {
           </button>
         )}
       </div>
+
+      {sprint && (
+        <div className="mt-4 border-t border-sky-200 pt-3 dark:border-sky-800">
+          <p className="text-xs font-semibold text-sky-800 dark:text-sky-200">{sprint.title}</p>
+          <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">{sprint.message}</p>
+          <Link
+            to={sprint.cta_path}
+            className="mt-2 inline-block text-xs font-medium text-brand-600 hover:underline"
+          >
+            {sprint.cta_action === "enroll_challenge"
+              ? sprintLabels.enrollCta
+              : sprintLabels.viewCta}
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

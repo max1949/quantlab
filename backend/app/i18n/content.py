@@ -709,6 +709,25 @@ FIRST_REPORT_COACH: dict[Locale, dict[str, str]] = {
     },
 }
 
+BEGINNER_SPRINT: dict[Locale, dict[str, str]] = {
+    "en": {
+        "title": "7-day beginner sprint · Day {day}/7",
+        "days_1_3": "Days 1–3: finish the 3-step quick start — template, validation, first report.",
+        "days_4_7_enroll": "Days 4–7: enroll the 30-day challenge — milestones auto-sync with your progress.",
+        "days_4_7_active": "Days 4–7: keep climbing the challenge — Paper masters path unlocks next.",
+        "enroll_cta": "Join 30-day challenge →",
+        "view_cta": "View challenge progress →",
+    },
+    "zh": {
+        "title": "7 天新手冲刺 · 第 {day}/7 天",
+        "days_1_3": "第 1–3 天：完成 3 步快速上手 — 模板、验证、首份报告。",
+        "days_4_7_enroll": "第 4–7 天：报名 30 天挑战 — 里程碑会随你的进度自动点亮。",
+        "days_4_7_active": "第 4–7 天：继续挑战进度 — 下一步是 Paper 大师路径。",
+        "enroll_cta": "报名 30 天挑战 →",
+        "view_cta": "查看挑战进度 →",
+    },
+}
+
 BILLING_RECEIPT_EMAIL: dict[Locale, dict[str, str]] = {
     "en": {
         "subject": "QuantLab receipt · {plan_name}",

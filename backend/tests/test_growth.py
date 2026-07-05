@@ -287,6 +287,59 @@ def test_journey_includes_first_report_coaching(client, db_session):
     assert j2.get("quickstart_guide") is None
 
 
+def test_journey_includes_beginner_sprint(client, db_session):
+    seed_sample_market_data(db_session)
+    seed_default_templates(db_session)
+    h = _register(client, "sprint1")
+    j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    sprint = j.get("beginner_sprint")
+    assert sprint is not None
+    assert sprint["sprint_day"] >= 1
+    assert sprint["sprint_total"] == 7
+    assert sprint["challenge_code"] == "30d-research"
+    assert sprint["cta_path"] == "/challenges"
+
+    _full_research(client, h, db_session)
+    j2 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    assert j2.get("beginner_sprint") is None
+
+
+def test_first_report_coaching_hides_after_paper_order(client, db_session):
+    from backend.app.models.user import User, UserLevel
+    from backend.app.services import membership_service as ms
+    from sqlalchemy import select
+
+    seed_sample_market_data(db_session)
+    h = _register(client, "firstrep2")
+    proj, _ = _full_research(client, h, db_session)
+    j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    assert j.get("first_report_coaching") is not None
+
+    user = db_session.execute(select(User).where(User.username == "firstrep2")).scalar_one()
+    user.level = UserLevel.L4
+    db_session.add(user)
+    db_session.commit()
+    ms.grant(db_session, user, ms.TIER_PRO, 30, "pro_monthly")
+
+    factors = client.get(f"{BASE}/factors", headers=h).json()
+    fid = next(f["id"] for f in factors if f.get("project_id") == proj["id"])
+    created = client.post(
+        f"{BASE}/execution/paper/orders",
+        headers=h,
+        json={
+            "symbol": "RB",
+            "side": "buy",
+            "notional_cny": 50000,
+            "factor_id": fid,
+            "signal_value": 0.82,
+        },
+    )
+    assert created.status_code == 201, created.text
+
+    j2 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    assert j2.get("first_report_coaching") is None
+
+
 def test_journey_includes_checkout_coaching(client, db_session):
     from backend.app.models.user import User
     from backend.app.services import membership_service as ms

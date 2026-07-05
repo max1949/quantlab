@@ -127,6 +127,10 @@ const en = {
     viewBoard: "Paper Masters board →",
     dismiss: "Got it",
   },
+  beginnerSprint: {
+    enrollCta: "Join 30-day challenge →",
+    viewCta: "View challenge progress →",
+  },
   marketDataCoach: {
     badge: (symbol: string, tf: string) => `Market data · ${symbol} · ${tf}`,
     currentPlan: (summary: string) => `Now: ${summary}`,
@@ -351,6 +355,11 @@ const en = {
     alertWebhookDispatchFail: "Webhook push failed",
     alertDeliveryTitle: "Webhook delivery audit",
     alertDeliveryEmpty: "No delivery records yet.",
+    alertDeliveryFilterAll: "All",
+    alertDeliveryFilterSla: "SLA",
+    alertDeliveryFilterResearch: "Research",
+    alertDeliveryScope: (scope: string) =>
+      scope === "org_research" ? "Research" : scope === "org" ? "SLA" : scope,
     alertDeliverySigned: "signed",
     alertDeliveryRetry: "Retry failed",
     alertDeliveryRetrying: "Retrying…",
@@ -1386,6 +1395,10 @@ const zh = {
     viewBoard: "Paper 大师榜 →",
     dismiss: "知道了",
   },
+  beginnerSprint: {
+    enrollCta: "报名 30 天挑战 →",
+    viewCta: "查看挑战进度 →",
+  },
   marketDataCoach: {
     badge: (symbol: string, tf: string) => `行情数据 · ${symbol} · ${tf}`,
     currentPlan: (summary: string) => `当前：${summary}`,
@@ -1610,6 +1623,11 @@ const zh = {
     alertWebhookDispatchFail: "Webhook 推送失败",
     alertDeliveryTitle: "Webhook 投递审计",
     alertDeliveryEmpty: "暂无投递记录。",
+    alertDeliveryFilterAll: "全部",
+    alertDeliveryFilterSla: "SLA",
+    alertDeliveryFilterResearch: "研究",
+    alertDeliveryScope: (scope: string) =>
+      scope === "org_research" ? "研究" : scope === "org" ? "SLA" : scope,
     alertDeliverySigned: "已签名",
     alertDeliveryRetry: "重试失败投递",
     alertDeliveryRetrying: "重试中…",

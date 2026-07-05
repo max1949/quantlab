@@ -159,6 +159,18 @@ class FirstReportCoachingOut(BaseModel):
     paper_ready: bool = False
 
 
+class BeginnerSprintOut(BaseModel):
+    sprint_day: int
+    sprint_total: int
+    phase: str
+    title: str
+    message: str
+    challenge_enrolled: bool
+    challenge_code: str
+    cta_path: str
+    cta_action: str
+
+
 class DismissAttentionAlertRequest(BaseModel):
     alert_key: str = Field(min_length=1, max_length=128)
 
@@ -210,6 +222,7 @@ class ResearchJourneyOut(BaseModel):
     checkout_coaching: CheckoutCoachingOut | None = None
     quickstart_guide: QuickstartGuideOut | None = None
     first_report_coaching: FirstReportCoachingOut | None = None
+    beginner_sprint: BeginnerSprintOut | None = None
 
 
 # ---- 研究模板 ----

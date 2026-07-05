@@ -203,6 +203,85 @@ def test_org_research_dedicated_webhook_separate_from_sla(client, db_session):
         settings.execution_sla_alert_enabled = prev_enabled
 
 
+def test_org_alert_deliveries_scope_filter(client, db_session):
+    settings = get_settings()
+    prev_enabled = settings.execution_sla_alert_enabled
+    settings.execution_sla_alert_enabled = True
+
+    owner = {"email": "scopef@x.com", "username": "scopefowner", "password": "s3cret-pass"}
+    client.post(f"{BASE}/auth/register", json=owner)
+    tok = client.post(
+        f"{BASE}/auth/login",
+        json={"identifier": owner["username"], "password": owner["password"]},
+    ).json()["access_token"]
+    h = {"Authorization": f"Bearer {tok}"}
+    org_id = client.post(f"{BASE}/orgs", headers=h, json={"name": "Scope Filter"}).json()["id"]
+
+    client.put(
+        f"{BASE}/orgs/{org_id}/execution/alert-webhook",
+        headers=h,
+        json={"webhook_url": "https://hooks.example.com/sla", "webhook_secret": "sla-secret"},
+    )
+    client.put(
+        f"{BASE}/orgs/{org_id}/research/alert-webhook",
+        headers=h,
+        json={"webhook_url": "https://hooks.example.com/research", "webhook_secret": "rs-secret"},
+    )
+
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.raise_for_status = MagicMock()
+
+    with patch("backend.app.services.execution_alert_service.httpx.Client") as mock_client_cls:
+        mock_client = MagicMock()
+        mock_client.__enter__ = MagicMock(return_value=mock_client)
+        mock_client.__exit__ = MagicMock(return_value=False)
+        mock_client.post.return_value = mock_resp
+        mock_client_cls.return_value = mock_client
+
+        with patch(
+            "backend.app.services.org_attention_service.collect_team_attention"
+        ) as mock_rollup:
+            mock_rollup.return_value = {
+                "member_count": 0,
+                "members_with_alerts": 0,
+                "total_alerts": 1,
+                "summary": "1 alert",
+                "items": [
+                    {
+                        "username": "u",
+                        "alert_key": "k",
+                        "kind": "regime_shift",
+                        "title": "t",
+                        "message": "m",
+                        "severity": "watch",
+                    }
+                ],
+            }
+            client.post(
+                f"{BASE}/orgs/{org_id}/research/attention-alerts/dispatch",
+                headers=h,
+                params={"force": True},
+            )
+
+    try:
+        research_rows = client.get(
+            f"{BASE}/orgs/{org_id}/execution/alert-deliveries",
+            headers=h,
+            params={"scope": "research"},
+        ).json()
+        sla_rows = client.get(
+            f"{BASE}/orgs/{org_id}/execution/alert-deliveries",
+            headers=h,
+            params={"scope": "sla"},
+        ).json()
+        assert len(research_rows) >= 1
+        assert all(r["scope"] == "org_research" for r in research_rows)
+        assert all(r["scope"] == "org" for r in sla_rows)
+    finally:
+        settings.execution_sla_alert_enabled = prev_enabled
+
+
 def test_org_team_attention_rollup_with_member_project(client, db_session):
     h_owner = _auth(client, OWNER)
     h_member = _auth(client, MEMBER)

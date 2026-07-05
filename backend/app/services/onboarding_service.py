@@ -307,6 +307,52 @@ def first_report_coaching_payload(
     }
 
 
+def beginner_sprint_payload(
+    user: User,
+    locale: Locale,
+    flags: dict[str, bool],
+    *,
+    challenge_enrolled: bool,
+    quickstart_guide: dict | None,
+) -> dict | None:
+    """注册后 7 天内 — 3 步上手与 30 天挑战联动冲刺。"""
+    if flags.get("report") or quickstart_guide is None:
+        return None
+
+    from datetime import datetime, timezone
+
+    created = user.created_at
+    if created.tzinfo is None:
+        created = created.replace(tzinfo=timezone.utc)
+    day = min(7, max(1, (datetime.now(timezone.utc) - created).days + 1))
+
+    labels = i18n.BEGINNER_SPRINT.get(locale) or i18n.BEGINNER_SPRINT["en"]
+    if day <= 3:
+        phase = "quickstart"
+        message = labels["days_1_3"]
+        cta_action = "create_project"
+    elif not challenge_enrolled:
+        phase = "enroll"
+        message = labels["days_4_7_enroll"]
+        cta_action = "enroll_challenge"
+    else:
+        phase = "challenge"
+        message = labels["days_4_7_active"]
+        cta_action = "view_challenge"
+
+    return {
+        "sprint_day": day,
+        "sprint_total": 7,
+        "phase": phase,
+        "title": labels["title"].format(day=day),
+        "message": message,
+        "challenge_enrolled": challenge_enrolled,
+        "challenge_code": "30d-research",
+        "cta_path": "/challenges",
+        "cta_action": cta_action,
+    }
+
+
 def _mastery_goal_hint(
     locale: Locale,
     *,
@@ -572,6 +618,13 @@ def research_journey(
         mastery_goal=mastery_goal,
         active_project_id=active_id,
     )
+    beginner_sprint = beginner_sprint_payload(
+        user,
+        locale,
+        flags,
+        challenge_enrolled=challenge_enrolled,
+        quickstart_guide=quickstart_guide,
+    )
 
     return {
         "done_count": done_count,
@@ -590,4 +643,5 @@ def research_journey(
         "checkout_coaching": checkout_coaching,
         "quickstart_guide": quickstart_guide,
         "first_report_coaching": first_report_coaching,
+        "beginner_sprint": beginner_sprint,
     }

@@ -1303,10 +1303,11 @@ export interface OrgSlaAlertDelivery {
 export async function fetchOrgAlertDeliveries(
   orgId: string,
   limit = 20,
+  scope?: "all" | "sla" | "research",
 ): Promise<OrgSlaAlertDelivery[]> {
   const { data } = await api.get<OrgSlaAlertDelivery[]>(
     `/orgs/${orgId}/execution/alert-deliveries`,
-    { params: { limit } },
+    { params: { limit, scope: scope && scope !== "all" ? scope : undefined } },
   );
   return data;
 }

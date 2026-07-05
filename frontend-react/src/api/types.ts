@@ -194,6 +194,18 @@ export interface FirstReportCoaching {
   paper_ready: boolean;
 }
 
+export interface BeginnerSprint {
+  sprint_day: number;
+  sprint_total: number;
+  phase: string;
+  title: string;
+  message: string;
+  challenge_enrolled: boolean;
+  challenge_code: string;
+  cta_path: string;
+  cta_action: string;
+}
+
 export interface ResearchJourney {
   done_count: number;
   total: number;
@@ -211,6 +223,7 @@ export interface ResearchJourney {
   checkout_coaching: CheckoutCoaching | null;
   quickstart_guide: QuickstartGuide | null;
   first_report_coaching: FirstReportCoaching | null;
+  beginner_sprint: BeginnerSprint | null;
 }
 
 export interface Mentor {

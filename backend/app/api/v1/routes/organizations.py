@@ -947,21 +947,33 @@ def org_execution_alert_deliveries(
     current_user: CurrentUser,
     db: Annotated[Session, Depends(get_db)],
     status: str | None = None,
+    scope: str | None = None,
     limit: int = 30,
 ) -> list[SlaAlertDeliveryOut]:
     try:
         org_service.require_admin(db, uuid.UUID(org_id), current_user.id)
-        rows_sla = eas.list_deliveries(
-            db, scope="org", org_id=uuid.UUID(org_id), status=status, limit=limit
-        )
-        rows_research = eas.list_deliveries(
-            db, scope="org_research", org_id=uuid.UUID(org_id), status=status, limit=limit
-        )
-        rows = sorted(
-            rows_sla + rows_research,
-            key=lambda r: r.get("created_at") or "",
-            reverse=True,
-        )[: min(limit, 60)]
+        org_uuid = uuid.UUID(org_id)
+        cap = min(limit, 60)
+        if scope == "sla":
+            rows = eas.list_deliveries(
+                db, scope="org", org_id=org_uuid, status=status, limit=cap
+            )
+        elif scope == "research":
+            rows = eas.list_deliveries(
+                db, scope="org_research", org_id=org_uuid, status=status, limit=cap
+            )
+        else:
+            rows_sla = eas.list_deliveries(
+                db, scope="org", org_id=org_uuid, status=status, limit=limit
+            )
+            rows_research = eas.list_deliveries(
+                db, scope="org_research", org_id=org_uuid, status=status, limit=limit
+            )
+            rows = sorted(
+                rows_sla + rows_research,
+                key=lambda r: r.get("created_at") or "",
+                reverse=True,
+            )[:cap]
     except org_service.OrgAccessDeniedError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     return [SlaAlertDeliveryOut(**r) for r in rows]
@@ -979,7 +991,7 @@ def retry_org_execution_alert_deliveries(
     try:
         org_uuid = uuid.UUID(org_id)
         org_service.require_admin(db, org_uuid, current_user.id)
-        result = eas.retry_failed_deliveries(db, scope="org", org_id=org_uuid)
+        result = eas.retry_failed_deliveries(db, org_id=org_uuid)
         if result.get("retried", 0) > 0:
             audit_service.log(
                 db,
