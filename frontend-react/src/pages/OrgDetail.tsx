@@ -23,6 +23,7 @@ import {
   listOrgExecutionOrders,
   fetchOrgExecutionCompliance,
   fetchOrgTeamAttentionRollup,
+  dispatchOrgResearchAttentionAlerts,
   getOrgAlertWebhook,
   setOrgAlertWebhook,
   dispatchOrgSlaAlerts,
@@ -277,6 +278,19 @@ export default function OrgDetail() {
       notify(o.alertWebhookSaved, "success");
     },
     onError: (e) => notify(apiErrorMessage(e, o.alertWebhookFail), "error"),
+  });
+
+  const dispatchResearchAttention = useMutation({
+    mutationFn: () => dispatchOrgResearchAttentionAlerts(id, true),
+    onSuccess: (r) => {
+      void qc.invalidateQueries({ queryKey: ["org-alert-deliveries", id] });
+      if (r.sent > 0) {
+        notify(o.teamAttentionWebhookDispatchDone(r.sent), "success");
+      } else if (r.skipped && r.reason) {
+        notify(o.alertWebhookDispatchSkipped(r.reason), "info");
+      }
+    },
+    onError: (e) => notify(apiErrorMessage(e, o.alertWebhookDispatchFail), "error"),
   });
 
   const dispatchOrgAlerts = useMutation({
@@ -708,6 +722,21 @@ export default function OrgDetail() {
               ) : (
                 <p className="text-xs text-slate-500">{o.teamAttentionEmpty}</p>
               )}
+              <div className="mt-4 border-t border-violet-100 pt-3 dark:border-violet-900">
+                <p className="mb-2 text-xs text-slate-500">{o.teamAttentionWebhookHint}</p>
+                <button
+                  type="button"
+                  className="btn text-xs"
+                  disabled={
+                    dispatchResearchAttention.isPending || !alertWebhookQuery.data?.webhook_url
+                  }
+                  onClick={() => dispatchResearchAttention.mutate()}
+                >
+                  {dispatchResearchAttention.isPending
+                    ? o.teamAttentionWebhookDispatching
+                    : o.teamAttentionWebhookDispatch}
+                </button>
+              </div>
             </>
           ) : null}
         </div>

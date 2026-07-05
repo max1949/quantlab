@@ -25,6 +25,9 @@ def check_execution_sla_alerts_task() -> dict:
     try:
         global_result = eas.dispatch_sla_webhook(db, force=False)
         org_results = eas.dispatch_all_org_sla_webhooks(db)
-        return {"global": global_result, "orgs": org_results}
+        from backend.app.services import org_attention_service as oas
+
+        research_results = oas.dispatch_all_org_research_attention_webhooks(db)
+        return {"global": global_result, "orgs": org_results, "research": research_results}
     finally:
         db.close()

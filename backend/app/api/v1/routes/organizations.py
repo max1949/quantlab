@@ -696,6 +696,39 @@ def org_team_attention_alerts(
     return OrgTeamAttentionRollupOut(**data)
 
 
+@router.post(
+    "/{org_id}/research/attention-alerts/dispatch",
+    summary="推送机构团队研究提醒 Webhook (管理员)",
+)
+def org_research_attention_dispatch(
+    org_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+    locale: RequestLocale,
+    force: bool = False,
+) -> dict:
+    try:
+        result = org_attention_service.dispatch_org_research_attention_webhook(
+            db,
+            uuid.UUID(org_id),
+            actor_id=current_user.id,
+            locale=locale,
+            force=force,
+        )
+        if result.get("sent", 0) > 0 or result.get("failed"):
+            audit_service.log(
+                db,
+                actor_id=current_user.id,
+                action="org.research.attention.dispatch",
+                resource_type="org",
+                resource_id=org_id,
+                detail=result,
+            )
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    return result
+
+
 @router.get(
     "/{org_id}/execution/orders",
     response_model=list[OrgPaperOrderOut],
@@ -860,9 +893,17 @@ def org_execution_alert_deliveries(
 ) -> list[SlaAlertDeliveryOut]:
     try:
         org_service.require_admin(db, uuid.UUID(org_id), current_user.id)
-        rows = eas.list_deliveries(
+        rows_sla = eas.list_deliveries(
             db, scope="org", org_id=uuid.UUID(org_id), status=status, limit=limit
         )
+        rows_research = eas.list_deliveries(
+            db, scope="org_research", org_id=uuid.UUID(org_id), status=status, limit=limit
+        )
+        rows = sorted(
+            rows_sla + rows_research,
+            key=lambda r: r.get("created_at") or "",
+            reverse=True,
+        )[: min(limit, 60)]
     except org_service.OrgAccessDeniedError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     return [SlaAlertDeliveryOut(**r) for r in rows]

@@ -501,6 +501,18 @@ def retry_failed_deliveries(
                     retry_of_id=row.id,
                 )
             )
+        elif row.scope == "org_research" and row.org_id:
+            from backend.app.services import org_attention_service as oas
+
+            results.append(
+                oas.dispatch_org_research_attention_webhook(
+                    db,
+                    row.org_id,
+                    force=True,
+                    trigger="retry",
+                    retry_of_id=row.id,
+                )
+            )
         elif row.scope == "global":
             results.append(
                 dispatch_sla_webhook(

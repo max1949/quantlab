@@ -1214,6 +1214,16 @@ export async function fetchOrgTeamAttentionRollup(orgId: string): Promise<OrgTea
   return data;
 }
 
+export async function dispatchOrgResearchAttentionAlerts(
+  orgId: string,
+  force = false,
+): Promise<{ sent: number; skipped?: boolean; reason?: string; scope?: string }> {
+  const { data } = await api.post(`/orgs/${orgId}/research/attention-alerts/dispatch`, null, {
+    params: { force },
+  });
+  return data;
+}
+
 export async function getOrgAlertWebhook(
   orgId: string,
 ): Promise<{ webhook_url: string; secret_configured: boolean }> {

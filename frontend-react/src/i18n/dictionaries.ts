@@ -309,6 +309,11 @@ const en = {
     teamAttentionEmpty: "No active alerts — team research looks healthy.",
     teamAttentionMember: (user: string, kind: string) => `${user} · ${kind}`,
     teamAttentionViewProject: "Open project →",
+    teamAttentionWebhookHint:
+      "Uses the same webhook below — pushes team research alerts (regime shift, weak fit, paper decay) to Slack/DingTalk.",
+    teamAttentionWebhookDispatch: "Push research alerts",
+    teamAttentionWebhookDispatching: "Pushing…",
+    teamAttentionWebhookDispatchDone: (n: number) => `Research alert webhook sent (${n} item(s))`,
     receiptOpening: "Opening your PDF receipt…",
     receiptReady: "PDF receipt download started.",
     alertWebhookTitle: "SLA alert webhook",
@@ -1544,6 +1549,11 @@ const zh = {
     teamAttentionEmpty: "暂无活跃提醒 — 团队研究状态良好。",
     teamAttentionMember: (user: string, kind: string) => `${user} · ${kind}`,
     teamAttentionViewProject: "打开项目 →",
+    teamAttentionWebhookHint:
+      "与下方 Webhook 共用 — 将团队研究提醒（制度切换、适配偏弱、Paper 衰减）推送到 Slack/钉钉。",
+    teamAttentionWebhookDispatch: "推送研究提醒",
+    teamAttentionWebhookDispatching: "推送中…",
+    teamAttentionWebhookDispatchDone: (n: number) => `研究提醒 Webhook 已推送（${n} 条）`,
     receiptOpening: "正在打开 PDF 凭证…",
     receiptReady: "PDF 凭证下载已开始。",
     alertWebhookTitle: "SLA 告警 Webhook",
