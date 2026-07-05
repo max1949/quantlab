@@ -557,6 +557,9 @@ def test_journey_includes_mastery_graduation_when_path_complete(client, db_sessi
     assert grad["on_leaderboard"] is True
     assert grad["leaderboard_rank"] == 3
     assert grad["profile_path"] == "/me"
+    assert grad["share_url_path"].startswith("/share/")
+    assert grad["feed_path"].startswith("/feed")
+    assert j.get("share_growth_coaching") is None
     assert len(grad.get("guide_steps") or []) == 3
 
 

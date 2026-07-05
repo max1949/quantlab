@@ -22,6 +22,7 @@ from backend.app.services import (
     sso_service,
     user_service,
     welcome_email_service,
+    revisit_email_service,
 )
 
 router = APIRouter()
@@ -92,6 +93,7 @@ def login(
     payload: UserLogin,
     request: Request,
     db: Annotated[Session, Depends(get_db)],
+    locale: RequestLocale,
 ) -> Token:
     try:
         rate_limit.check_login(get_client_ip(request))
@@ -105,6 +107,7 @@ def login(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="用户名/邮箱或密码错误",
         )
+    revisit_email_service.maybe_send_revisit_email(db, user, locale=locale)
     token = create_access_token(subject=str(user.id))
     return Token(access_token=token)
 
@@ -156,6 +159,7 @@ def sso_callback(
         welcome_email_service.notify_welcome_email(db, user, locale=locale)
     else:
         growth_service.log_event(db, "sso_login", user.id, {})
+        revisit_email_service.maybe_send_revisit_email(db, user, locale=locale)
     token = create_access_token(subject=str(user.id))
     redirect = f"{origin}/app/login?sso_token={token}"
     if created:

@@ -13,8 +13,9 @@ export default function ShareGrowthCoachPanel() {
   const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISS_KEY) === "1");
   const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
   const coach = journey.data?.share_growth_coaching;
+  const graduated = journey.data?.mastery_graduation_coaching;
 
-  if (dismissed || journey.isLoading || !coach) return null;
+  if (dismissed || journey.isLoading || !coach || graduated) return null;
 
   const dismiss = () => {
     localStorage.setItem(DISMISS_KEY, "1");

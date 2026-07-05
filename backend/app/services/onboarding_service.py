@@ -947,6 +947,21 @@ def mastery_graduation_coaching_payload(
 
     from backend.app.services import social_service
 
+    from backend.app.models.growth import ResearchShare
+
+    share_row = db.execute(
+        select(ResearchShare, ResearchReport)
+        .join(ResearchReport, ResearchReport.id == ResearchShare.report_id)
+        .where(ResearchShare.owner_id == user.id)
+        .order_by(ResearchShare.created_at.desc())
+        .limit(1)
+    ).first()
+    if share_row is None:
+        return None
+    share, report = share_row
+    share_path = f"/share/{share.token}"
+    feed_path = f"/feed?highlight={report.id}"
+
     labels = i18n.MASTERY_GRADUATION_COACH.get(locale) or i18n.MASTERY_GRADUATION_COACH["en"]
     on_board = bool(mastery_goal.get("on_leaderboard"))
     rank = mastery_goal.get("leaderboard_rank")
@@ -968,13 +983,16 @@ def mastery_graduation_coaching_payload(
         "cta_action": "view_board",
         "cta_path": "/leaderboards?kind=paper_mastery",
         "profile_path": "/me",
+        "share_url_path": share_path,
+        "feed_path": feed_path,
+        "report_title": report.title,
         "guide_steps": [
             {
                 "step": 1,
                 "label": labels["step1_label"],
                 "hint": labels["step1_hint"],
-                "cta_path": project_path,
-                "cta_action": "run_paper",
+                "cta_path": share_path,
+                "cta_action": "keep_going",
             },
             {
                 "step": 2,
@@ -1377,6 +1395,8 @@ def research_journey(
         mastery_goal=mastery_goal,
         active_project_id=active_id,
     )
+    if mastery_graduation_coaching:
+        share_growth_coaching = None
 
     return {
         "done_count": done_count,

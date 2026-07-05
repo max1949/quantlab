@@ -289,6 +289,9 @@ class MasteryGraduationCoachingOut(BaseModel):
     cta_action: str
     cta_path: str
     profile_path: str
+    share_url_path: str
+    feed_path: str
+    report_title: str | None = None
     guide_steps: list[FirstReportGuideStepOut] = Field(default_factory=list)
 
 

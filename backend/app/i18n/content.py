@@ -1031,6 +1031,31 @@ SHARE_GROWTH_COACH: dict[Locale, dict[str, str]] = {
     },
 }
 
+REVISIT_EMAIL: dict[Locale, dict[str, str]] = {
+    "en": {
+        "subject": "Your QuantLab mastery coach is waiting",
+        "body": (
+            "Hello {username},\n\n"
+            "You joined QuantLab {days} days ago — your auto-guided path is still one click away.\n\n"
+            "Start from a regime-fit template (takes ~2 minutes):\n{templates_link}\n\n"
+            "Open your dashboard for the next step:\n{dashboard_link}\n\n"
+            "The full loop: template → backtest → validation → report → Paper Masters.\n\n"
+            "— QuantLab\n"
+        ),
+    },
+    "zh": {
+        "subject": "你的 QuantLab 大师教练还在等你",
+        "body": (
+            "你好，{username}：\n\n"
+            "你已加入 QuantLab {days} 天 — 全自动大师路径仍只需一键开启。\n\n"
+            "从行情适配模板开始（约 2 分钟）：\n{templates_link}\n\n"
+            "打开工作台查看下一步：\n{dashboard_link}\n\n"
+            "完整闭环：模板 → 回测 → 验证 → 报告 → Paper 大师榜。\n\n"
+            "— QuantLab\n"
+        ),
+    },
+}
+
 WELCOME_EMAIL: dict[Locale, dict[str, str]] = {
     "en": {
         "subject": "Welcome to QuantLab — your mastery path starts here",

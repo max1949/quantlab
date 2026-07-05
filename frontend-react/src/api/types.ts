@@ -372,6 +372,9 @@ export interface MasteryGraduationCoaching {
   cta_action: string;
   cta_path: string;
   profile_path: string;
+  share_url_path: string;
+  feed_path: string;
+  report_title: string | null;
   guide_steps: FirstReportGuideStep[];
 }
 

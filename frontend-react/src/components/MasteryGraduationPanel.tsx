@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getResearchJourney } from "../api/endpoints";
 import { burstConfetti } from "../lib/confetti";
 import { useLocale } from "../store/locale";
+import { useUi } from "../store/ui";
 import { stageToCtaLabel } from "../lib/nav";
 import HandbookExportButtons from "./HandbookExportButtons";
 
@@ -13,15 +14,27 @@ const CONFETTI_KEY = "quantlab-mastery-graduation-confetti";
 export default function MasteryGraduationPanel() {
   const d = useLocale((s) => s.dict.masteryGraduation);
   const stages = useLocale((s) => s.dict.stages);
+  const notify = useUi((s) => s.notify);
+  const rootRef = useRef<HTMLDivElement>(null);
   const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISS_KEY) === "1");
+  const [highlighted, setHighlighted] = useState(false);
 
   const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
   const coach = journey.data?.mastery_graduation_coaching;
 
   useEffect(() => {
     if (!coach || localStorage.getItem(CONFETTI_KEY) === "1") return;
-    burstConfetti(3200);
+    burstConfetti(3600);
     localStorage.setItem(CONFETTI_KEY, "1");
+    const scrollTimer = window.setTimeout(() => {
+      rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setHighlighted(true);
+    }, 150);
+    const clearTimer = window.setTimeout(() => setHighlighted(false), 3500);
+    return () => {
+      window.clearTimeout(scrollTimer);
+      window.clearTimeout(clearTimer);
+    };
   }, [coach]);
 
   if (dismissed || journey.isLoading || !coach) return null;
@@ -34,8 +47,19 @@ export default function MasteryGraduationPanel() {
     setDismissed(true);
   };
 
+  const copyLink = async () => {
+    const url = `${window.location.origin}${coach.share_url_path}`;
+    await navigator.clipboard.writeText(url);
+    notify(d.copied, "success");
+  };
+
   return (
-    <div className="card animate-[pulse_2s_ease-in-out_1] border border-violet-300 bg-gradient-to-r from-violet-50/95 via-amber-50/70 to-fuchsia-50/60 dark:border-violet-800 dark:from-violet-950/50 dark:via-amber-950/30 dark:to-fuchsia-950/30">
+    <div
+      ref={rootRef}
+      className={`card border border-violet-300 bg-gradient-to-r from-violet-50/95 via-amber-50/70 to-fuchsia-50/60 dark:border-violet-800 dark:from-violet-950/50 dark:via-amber-950/30 dark:to-fuchsia-950/30 ${
+        highlighted ? "ring-2 ring-violet-400 shadow-lg shadow-violet-200/50 dark:shadow-violet-900/30" : ""
+      }`}
+    >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
           <p className="text-xs font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300">
@@ -58,6 +82,9 @@ export default function MasteryGraduationPanel() {
               </span>
             )}
           </div>
+          {coach.report_title && (
+            <p className="mt-2 text-sm font-medium text-slate-800 dark:text-slate-100">{coach.report_title}</p>
+          )}
           <p className="mt-2 text-sm text-violet-900/90 dark:text-violet-100/90">{coach.message}</p>
 
           <div className="mt-4 rounded-lg border border-violet-300/50 bg-white/60 p-3 dark:border-violet-800 dark:bg-slate-900/40">
@@ -102,7 +129,13 @@ export default function MasteryGraduationPanel() {
         </div>
 
         <div className="flex shrink-0 flex-wrap gap-2">
-          <Link to={coach.cta_path} className="btn-primary whitespace-nowrap text-xs">
+          <Link to={coach.feed_path} className="btn-primary whitespace-nowrap text-xs">
+            {d.viewFeed}
+          </Link>
+          <button type="button" className="btn whitespace-nowrap text-xs" onClick={copyLink}>
+            {d.copyLink}
+          </button>
+          <Link to={coach.cta_path} className="btn whitespace-nowrap text-xs">
             {ctaLabel}
           </Link>
           <Link to={coach.profile_path} className="btn whitespace-nowrap text-xs">
