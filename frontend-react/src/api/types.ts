@@ -250,6 +250,16 @@ export interface OrgMemberCoaching {
   guide_steps: FirstReportGuideStep[];
 }
 
+export interface OrgNetworkCoaching {
+  badge: string;
+  celebrate: string;
+  message: string;
+  org_id: string;
+  org_name: string;
+  following: number;
+  feed_path: string;
+}
+
 export interface ResearchRevisitCoaching {
   badge: string;
   celebrate: string;
@@ -397,6 +407,7 @@ export interface ResearchJourney {
   quickstart_guide: QuickstartGuide | null;
   first_project_coaching: FirstProjectCoaching | null;
   org_member_coaching: OrgMemberCoaching | null;
+  org_network_coaching: OrgNetworkCoaching | null;
   research_revisit_coaching: ResearchRevisitCoaching | null;
   first_backtest_coaching: FirstBacktestCoaching | null;
   first_validation_coaching: FirstValidationCoaching | null;

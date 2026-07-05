@@ -777,6 +777,25 @@ ORG_MEMBER_COACH: dict[Locale, dict[str, str]] = {
     },
 }
 
+ORG_NETWORK_COACH: dict[Locale, dict[str, str]] = {
+    "en": {
+        "badge": "Team peer network",
+        "celebrate": "Follow desk mates who are shipping research",
+        "message": (
+            "Researchers in {org_name} who publish on the feed share validation habits worth copying — "
+            "follow 2–3 before your next milestone."
+        ),
+    },
+    "zh": {
+        "badge": "团队人脉",
+        "celebrate": "关注正在出成果的团队同伴",
+        "message": (
+            "在 {org_name} 里持续发布到广场的同事，验证节奏往往值得借鉴 — "
+            "下一里程碑前请先关注 2～3 位。"
+        ),
+    },
+}
+
 FIRST_PAPER_ORDER_COACH: dict[Locale, dict[str, str]] = {
     "en": {
         "badge": "First paper order live",

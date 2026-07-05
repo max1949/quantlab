@@ -27,3 +27,5 @@ export const FIRST_ORG_PAGE_WELCOME_KEY = "quantlab-first-org-page-welcome";
 export const FIRST_FEED_FOLLOW_WELCOME_KEY = "quantlab-first-feed-follow-welcome";
 /** First following-feed visit after 3-follow network milestone. */
 export const FIRST_FOLLOWING_FEED_WELCOME_KEY = "quantlab-first-following-feed-welcome";
+/** Highlight first report card on following feed after milestone welcome. */
+export const FOLLOWING_FEED_HIGHLIGHT_KEY = "quantlab-following-feed-highlight-first";

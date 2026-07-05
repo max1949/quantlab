@@ -13,6 +13,8 @@ import FirstReportCoachPanel from "./FirstReportCoachPanel";
 import MasteryGraduationPanel from "./MasteryGraduationPanel";
 import MasteryOverviewPanel from "./MasteryOverviewPanel";
 import OrgMemberCoachPanel from "./OrgMemberCoachPanel";
+import OrgNetworkCoachPanel from "./OrgNetworkCoachPanel";
+import ChallengeNetworkCoachPanel from "./ChallengeNetworkCoachPanel";
 import PostCheckoutCoachPanel from "./PostCheckoutCoachPanel";
 import QuickStartGuidePanel from "./QuickStartGuidePanel";
 import ResearchRevisitCoachPanel from "./ResearchRevisitCoachPanel";
@@ -37,6 +39,10 @@ function CoachById({ id }: { id: IncubationCoachId }) {
       return <FirstReportCoachPanel />;
     case "org_member":
       return <OrgMemberCoachPanel />;
+    case "org_network":
+      return <OrgNetworkCoachPanel />;
+    case "challenge_network":
+      return <ChallengeNetworkCoachPanel />;
     case "reputation":
       return <ReputationCoachPanel />;
     case "share_growth":

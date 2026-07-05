@@ -207,6 +207,16 @@ class OrgMemberCoachingOut(BaseModel):
     guide_steps: list[FirstReportGuideStepOut] = Field(default_factory=list)
 
 
+class OrgNetworkCoachingOut(BaseModel):
+    badge: str
+    celebrate: str
+    message: str
+    org_id: uuid.UUID
+    org_name: str
+    following: int
+    feed_path: str = "/feed?focus=follow"
+
+
 class ResearchRevisitCoachingOut(BaseModel):
     badge: str
     celebrate: str
@@ -396,6 +406,7 @@ class ResearchJourneyOut(BaseModel):
     quickstart_guide: QuickstartGuideOut | None = None
     first_project_coaching: FirstProjectCoachingOut | None = None
     org_member_coaching: OrgMemberCoachingOut | None = None
+    org_network_coaching: OrgNetworkCoachingOut | None = None
     research_revisit_coaching: ResearchRevisitCoachingOut | None = None
     first_backtest_coaching: FirstBacktestCoachingOut | None = None
     first_validation_coaching: FirstValidationCoachingOut | None = None

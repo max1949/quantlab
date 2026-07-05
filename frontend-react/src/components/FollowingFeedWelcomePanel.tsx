@@ -1,19 +1,21 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { burstConfetti } from "../lib/confetti";
-import { FIRST_FOLLOWING_FEED_WELCOME_KEY } from "../lib/onboardingFocus";
+import { FIRST_FOLLOWING_FEED_WELCOME_KEY, FOLLOWING_FEED_HIGHLIGHT_KEY } from "../lib/onboardingFocus";
 import { useLocale } from "../store/locale";
 
-export default function FollowingFeedWelcomePanel() {
+export default function FollowingFeedWelcomePanel({ onHighlightReady }: { onHighlightReady?: () => void }) {
   const d = useLocale((s) => s.dict.followingFeedWelcome);
   const show =
     typeof window !== "undefined" && sessionStorage.getItem(FIRST_FOLLOWING_FEED_WELCOME_KEY) === "1";
 
   useEffect(() => {
     if (!show) return;
+    sessionStorage.setItem(FOLLOWING_FEED_HIGHLIGHT_KEY, "1");
     sessionStorage.removeItem(FIRST_FOLLOWING_FEED_WELCOME_KEY);
+    onHighlightReady?.();
     burstConfetti(2800);
-  }, [show]);
+  }, [show, onHighlightReady]);
 
   if (!show) return null;
 

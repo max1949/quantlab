@@ -1,5 +1,6 @@
 import type { ResearchJourney } from "../api/types";
 import { FIRST_MENTOR_WELCOME_KEY, FIRST_PAPER_ORDER_WELCOME_KEY } from "./onboardingFocus";
+import { NETWORK_FOLLOW_TARGET } from "./journeyFollowing";
 
 export type IncubationCoachId =
   | "checkout"
@@ -7,6 +8,8 @@ export type IncubationCoachId =
   | "first_paper_order"
   | "first_report"
   | "org_member"
+  | "org_network"
+  | "challenge_network"
   | "reputation"
   | "share_growth"
   | "first_mentor"
@@ -20,6 +23,8 @@ export const INCUBATION_COACH_PRIORITY: IncubationCoachId[] = [
   "first_paper_order",
   "first_report",
   "org_member",
+  "org_network",
+  "challenge_network",
   "reputation",
   "share_growth",
   "first_mentor",
@@ -69,6 +74,17 @@ export function listActiveIncubationCoaches(
   const orgCoach = journey.org_member_coaching;
   if (orgCoach && ls(`quantlab-org-member-coach-${orgCoach.org_id}`) !== "1") {
     active.push("org_member");
+  }
+  const orgNetwork = journey.org_network_coaching;
+  if (orgNetwork && ls(`quantlab-org-network-coach-${orgNetwork.org_id}`) !== "1") {
+    active.push("org_network");
+  }
+  if (
+    journey.challenge_enrolled &&
+    journey.social_following_count < NETWORK_FOLLOW_TARGET &&
+    ls("quantlab-challenge-network-coach-dismissed") !== "1"
+  ) {
+    active.push("challenge_network");
   }
   if (journey.reputation_coaching && ls("quantlab-reputation-coach-dismissed") !== "1") {
     const defer =

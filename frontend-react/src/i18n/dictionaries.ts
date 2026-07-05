@@ -148,6 +148,12 @@ const en = {
     stepGo: "Go →",
     dismiss: "Got it",
   },
+  orgNetworkCoach: {
+    progress: (n: number, target: number) => `${n} / ${target} researchers followed`,
+    browseFeed: "Find peers on feed →",
+    openOrg: (name: string) => `Open ${name} →`,
+    dismiss: "Later",
+  },
   orgMemberPageCoach: {
     pageHint: "Browse the team factor catalog below, or start your own guided path from a template.",
     ctaDefault: "Start from template →",
@@ -700,6 +706,8 @@ const en = {
     first_paper_order: (j: ResearchJourney) => j.first_paper_order_coaching?.celebrate ?? "First paper order",
     first_report: (j: ResearchJourney) => j.first_report_coaching?.celebrate ?? "First report",
     org_member: (j: ResearchJourney) => j.org_member_coaching?.celebrate ?? "Team desk joined",
+    org_network: (j: ResearchJourney) => j.org_network_coaching?.celebrate ?? "Team peer network",
+    challenge_network: () => "Challenge peer network",
     reputation: (j: ResearchJourney) => j.reputation_coaching?.celebrate ?? "Reputation loop",
     share_growth: (j: ResearchJourney) => j.share_growth_coaching?.message ?? "Share growth",
     first_mentor: () => "First workspace visit · AI mentor",
@@ -1451,6 +1459,7 @@ const en = {
     emptyTitle: "Nothing yet",
     emptyHint: "Follow researchers from the feed",
     goFeed: "Browse feed",
+    highlightFirst: "Start here — open this report to see how a master validated their factor.",
   },
   followingFeedWelcome: {
     badge: "Network live",
@@ -1679,6 +1688,12 @@ const zh = {
     openOrg: (name: string) => `打开 ${name} →`,
     stepGo: "前往 →",
     dismiss: "知道了",
+  },
+  orgNetworkCoach: {
+    progress: (n: number, target: number) => `已关注 ${n} / ${target} 位研究员`,
+    browseFeed: "去广场找同伴 →",
+    openOrg: (name: string) => `打开 ${name} →`,
+    dismiss: "稍后再说",
   },
   orgMemberPageCoach: {
     pageHint: "先看下方团队因子库，或从模板一键开始你自己的大师路径。",
@@ -2230,6 +2245,8 @@ const zh = {
     first_paper_order: (j: ResearchJourney) => j.first_paper_order_coaching?.celebrate ?? "首笔 Paper 单",
     first_report: (j: ResearchJourney) => j.first_report_coaching?.celebrate ?? "首份报告",
     org_member: (j: ResearchJourney) => j.org_member_coaching?.celebrate ?? "已加入团队",
+    org_network: (j: ResearchJourney) => j.org_network_coaching?.celebrate ?? "团队人脉",
+    challenge_network: () => "挑战营人脉",
     reputation: (j: ResearchJourney) => j.reputation_coaching?.celebrate ?? "声誉闭环",
     share_growth: (j: ResearchJourney) => j.share_growth_coaching?.message ?? "分享增长",
     first_mentor: () => "首次进入工作台 · AI 导师",
@@ -2971,6 +2988,7 @@ const zh = {
     emptyTitle: "还没有关注动态",
     emptyHint: "去研究广场关注一些研究员吧",
     goFeed: "去研究广场",
+    highlightFirst: "从这里开始 — 点开这篇报告，看大师如何完成验证。",
   },
   followingFeedWelcome: {
     badge: "人脉已激活",

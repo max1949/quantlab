@@ -591,6 +591,41 @@ def org_member_coaching_payload(
     }
 
 
+def org_network_coaching_payload(
+    db: Session,
+    user: User,
+    locale: Locale,
+    flags: dict[str, bool],
+) -> dict | None:
+    """机构成员已有研究进展、关注不足 — 引导关注团队同伴。"""
+    if not flags.get("backtest") and not flags.get("share"):
+        return None
+
+    from backend.app.services import org_service, social_service
+
+    orgs = org_service.list_orgs_for_user(db, user.id)
+    if not orgs:
+        return None
+
+    following = int(social_service.counts(db, user.id)["following"])
+    if following >= 3:
+        return None
+
+    org = orgs[0]
+    org_id = org["id"]
+    org_name = org["name"]
+    labels = i18n.ORG_NETWORK_COACH.get(locale) or i18n.ORG_NETWORK_COACH["en"]
+    return {
+        "badge": labels["badge"],
+        "celebrate": labels["celebrate"],
+        "message": labels["message"].format(org_name=org_name),
+        "org_id": org_id,
+        "org_name": org_name,
+        "following": following,
+        "feed_path": "/feed?focus=follow",
+    }
+
+
 def first_project_coaching_payload(
     db: Session,
     user: User,
@@ -1335,6 +1370,7 @@ def research_journey(
         active_project_id=active_id,
     )
     org_member_coaching = org_member_coaching_payload(db, user, locale, flags)
+    org_network_coaching = org_network_coaching_payload(db, user, locale, flags)
     research_revisit_coaching = research_revisit_coaching_payload(db, user, locale, flags)
     first_backtest_coaching = first_backtest_coaching_payload(
         db,
@@ -1423,6 +1459,7 @@ def research_journey(
         "quickstart_guide": quickstart_guide,
         "first_project_coaching": first_project_coaching,
         "org_member_coaching": org_member_coaching,
+        "org_network_coaching": org_network_coaching,
         "research_revisit_coaching": research_revisit_coaching,
         "first_backtest_coaching": first_backtest_coaching,
         "first_validation_coaching": first_validation_coaching,

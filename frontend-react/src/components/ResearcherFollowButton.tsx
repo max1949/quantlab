@@ -6,6 +6,7 @@ import { burstConfetti } from "../lib/confetti";
 import {
   FIRST_FEED_FOLLOW_WELCOME_KEY,
   FIRST_FOLLOWING_FEED_WELCOME_KEY,
+  FOLLOWING_FEED_HIGHLIGHT_KEY,
 } from "../lib/onboardingFocus";
 import { journeyFollowingCount, NETWORK_FOLLOW_TARGET } from "../lib/journeyFollowing";
 import { useAuth } from "../store/auth";
@@ -64,6 +65,7 @@ export default function ResearcherFollowButton({
           burstConfetti(3600);
           localStorage.setItem(DISMISS_KEY, "1");
           sessionStorage.setItem(FIRST_FOLLOWING_FEED_WELCOME_KEY, "1");
+          sessionStorage.setItem(FOLLOWING_FEED_HIGHLIGHT_KEY, "1");
           window.dispatchEvent(new Event("quantlab-network-milestone"));
           notify(fc.networkReady, "success");
         } else if (followingCount > 0) {
