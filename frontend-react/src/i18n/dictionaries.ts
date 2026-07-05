@@ -1557,6 +1557,19 @@ const en = {
     openFollowing: "Open following feed →",
     autoFollowingToast: "Replication shared — opening your following feed to keep the loop going.",
   },
+  reportShareCoach: {
+    challengeBadge: "30-day challenge",
+    challengeTitle: "Last step: your first share card",
+    challengeMessage:
+      "Masters ship share cards — one click below completes the network milestone and puts your validated work where campmates can learn from it.",
+    challengeCta: "Challenge progress →",
+    replicationBadge: "Replication loop",
+    replicationTitle: "Finish the loop — share your replication",
+    replicationMessage:
+      "Generate a share card and we'll open your following feed so you can pick the next master report to study.",
+    replicationGenerate: "Share & return to following →",
+    loopBackFollowing: "Open following feed →",
+  },
   followingReplicationReturn: {
     badge: "Growth loop",
     title: "You contributed — now keep learning from peers",
@@ -3297,6 +3310,18 @@ const zh = {
     successDesc: "链接可复制；接下来去关注动态，挑同伴报告准备下一次复现。",
     openFollowing: "打开关注动态 →",
     autoFollowingToast: "复现已分享 — 正在打开关注动态，继续你的大师闭环。",
+  },
+  reportShareCoach: {
+    challengeBadge: "30 天挑战",
+    challengeTitle: "最后一步：生成你的第一份分享卡片",
+    challengeMessage:
+      "大师都会发布分享卡片 — 点一下即可完成人脉里程碑，让同伴看到你的经得住验证的研究。",
+    challengeCta: "查看挑战进度 →",
+    replicationBadge: "复现闭环",
+    replicationTitle: "完成闭环 — 分享你的复现成果",
+    replicationMessage: "生成分享卡片后，系统会打开关注动态，方便你挑选下一篇大师报告精读。",
+    replicationGenerate: "分享并回关注动态 →",
+    loopBackFollowing: "打开关注动态 →",
   },
   followingReplicationReturn: {
     badge: "成长闭环",

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { shareReport, trackEvent } from "../api/endpoints";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getResearchJourney, shareReport, trackEvent } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
 import { academyRewardMessage } from "../lib/academy";
 import { celebrateFirstShare } from "../lib/firstShare";
@@ -18,6 +18,7 @@ type Props = {
 
 export default function ReportShareCoach({ reportId }: Props) {
   const t = useLocale((s) => s.dict.report);
+  const rsc = useLocale((s) => s.dict.reportShareCoach);
   const rs = useLocale((s) => s.dict.replicationShareCoach);
   const d = useLocale((s) => s.dict.dashboard);
   const atl = useLocale((s) => s.dict.academyTaskLabels);
@@ -27,6 +28,11 @@ export default function ReportShareCoach({ reportId }: Props) {
   const qc = useQueryClient();
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+
+  const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
+  const replicationFlow = isReplicationReportFlow(reportId);
+  const shareMilestones = journey.data?.mastery_goal?.challenge_share_milestones ?? [];
+  const pendingShareChallenge = shareMilestones.some((m) => !m.completed && m.code === "research_share");
 
   const share = useMutation({
     mutationFn: (replicationLoop: boolean) => shareReport(reportId, { replicationLoop }),
@@ -65,6 +71,7 @@ export default function ReportShareCoach({ reportId }: Props) {
         notify,
       );
       if (!first) notify(t.shareCreated, "success");
+      if (first) burstConfetti(2400);
       await refreshMe();
       requestAnimationFrame(() => {
         rootRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -107,6 +114,13 @@ export default function ReportShareCoach({ reportId }: Props) {
           >
             {t.shareViewOnFeed}
           </Link>
+          <Link
+            to="/me/following"
+            className="btn"
+            onClick={() => void trackEvent("share_goto_following", { report_id: reportId })}
+          >
+            {rsc.loopBackFollowing}
+          </Link>
           <button type="button" className="btn" onClick={copyLink}>
             {t.copyLink}
           </button>
@@ -125,14 +139,41 @@ export default function ReportShareCoach({ reportId }: Props) {
 
   return (
     <div id="report-share" ref={rootRef} className="mt-6 card bg-brand-50/40 dark:bg-brand-950/20">
+      {pendingShareChallenge && !replicationFlow && (
+        <div className="mb-4 rounded-lg border border-violet-200 bg-violet-50/70 px-3 py-2 text-sm text-violet-900 dark:border-violet-900 dark:bg-violet-950/30 dark:text-violet-100">
+          <p className="text-xs font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300">
+            🏅 {rsc.challengeBadge}
+          </p>
+          <p className="mt-1 font-medium">{rsc.challengeTitle}</p>
+          <p className="mt-1 text-xs opacity-90">{rsc.challengeMessage}</p>
+          <Link to="/challenges" className="mt-2 inline-block text-xs font-medium text-brand-600 hover:underline">
+            {rsc.challengeCta}
+          </Link>
+        </div>
+      )}
+
+      {replicationFlow && (
+        <div className="mb-4 rounded-lg border border-violet-200 bg-gradient-to-r from-violet-50/80 to-indigo-50/50 px-3 py-2 text-sm text-violet-900 dark:border-violet-900 dark:from-violet-950/40 dark:to-indigo-950/30 dark:text-violet-100">
+          <p className="text-xs font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300">
+            🔁 {rsc.replicationBadge}
+          </p>
+          <p className="mt-1 font-medium">{rsc.replicationTitle}</p>
+          <p className="mt-1 text-xs opacity-90">{rsc.replicationMessage}</p>
+        </div>
+      )}
+
       <h3 className="font-semibold text-slate-800 dark:text-slate-100">📣 {t.shareTitle}</h3>
       <p className="mt-1 text-sm text-slate-500">{t.shareDesc}</p>
       <button
         className="btn-primary mt-3"
         disabled={share.isPending}
-        onClick={() => share.mutate(isReplicationReportFlow(reportId))}
+        onClick={() => share.mutate(replicationFlow)}
       >
-        {share.isPending ? t.shareGenerating : t.shareGenerate}
+        {share.isPending
+          ? t.shareGenerating
+          : replicationFlow
+            ? rsc.replicationGenerate
+            : t.shareGenerate}
       </button>
     </div>
   );
