@@ -660,6 +660,25 @@ def test_template_one_click_start(client, db_session):
     # 因子确实归属新建项目
     f = client.get(f"{BASE}/factors/{body['factor_id']}", headers=h).json()
     assert f["project_id"] == str(body["project_id"])
+    j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    coach = j.get("first_project_coaching")
+    assert coach is not None
+    assert coach["cta_action"] == "run_backtest"
+    assert coach["cta_path"] == f"/projects/{body['project_id']}"
+    assert coach.get("factor_name")
+
+
+def test_journey_first_project_coaching_hides_after_backtest(client, db_session):
+    seed_default_templates(db_session)
+    seed_sample_market_data(db_session)
+    h = _register(client, "projcoach")
+    res = client.post(f"{BASE}/research/templates/gold-trend/start", headers=h, json={"with_factor": True}).json()
+    j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    assert j.get("first_project_coaching") is not None
+    fid = res["factor_id"]
+    client.post(f"{BASE}/backtests", headers=h, json={"factor_id": fid, "symbol": "AU"})
+    j2 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    assert j2.get("first_project_coaching") is None
 
 
 def test_template_unknown_404(client, db_session):

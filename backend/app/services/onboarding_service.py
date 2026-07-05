@@ -358,6 +358,50 @@ def quickstart_guide_payload(
     }
 
 
+def first_project_coaching_payload(
+    db: Session,
+    user: User,
+    locale: Locale,
+    flags: dict[str, bool],
+    *,
+    active_project_id: uuid.UUID | None,
+) -> dict | None:
+    """模板开局后 — 引导跑第一次回测。"""
+    if not flags.get("template") or not flags.get("factor"):
+        return None
+    if flags.get("backtest"):
+        return None
+    if not active_project_id:
+        return None
+
+    project = db.get(ResearchProject, active_project_id)
+    if project is None or project.owner_id != user.id:
+        return None
+
+    factor = db.execute(
+        select(Factor)
+        .where(Factor.project_id == active_project_id, Factor.owner_id == user.id)
+        .order_by(Factor.created_at.asc())
+        .limit(1)
+    ).scalar_one_or_none()
+    if factor is None:
+        return None
+
+    labels = i18n.FIRST_PROJECT_COACH.get(locale) or i18n.FIRST_PROJECT_COACH["en"]
+    project_path = f"/projects/{active_project_id}"
+    return {
+        "badge": labels["badge"],
+        "celebrate": labels["celebrate"],
+        "message": labels["message"],
+        "unlock_features": labels["unlock_features"],
+        "cta_action": "run_backtest",
+        "cta_path": project_path,
+        "active_project_id": active_project_id,
+        "project_title": project.title,
+        "factor_name": factor.name,
+    }
+
+
 def first_report_coaching_payload(
     db: Session,
     user: User,
@@ -1029,6 +1073,13 @@ def research_journey(
         active_project_id=active_id,
         recommended_template=nxt.get("recommended_template"),
     )
+    first_project_coaching = first_project_coaching_payload(
+        db,
+        user,
+        locale,
+        flags,
+        active_project_id=active_id,
+    )
     first_report_coaching = first_report_coaching_payload(
         db,
         user,
@@ -1086,6 +1137,7 @@ def research_journey(
         "market_data_coaching": market_data_coaching,
         "checkout_coaching": checkout_coaching,
         "quickstart_guide": quickstart_guide,
+        "first_project_coaching": first_project_coaching,
         "first_report_coaching": first_report_coaching,
         "beginner_sprint": beginner_sprint,
         "mastery_overview": mastery_overview,

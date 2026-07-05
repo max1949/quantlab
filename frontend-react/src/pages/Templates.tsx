@@ -6,6 +6,7 @@ import { apiErrorMessage } from "../api/client";
 import { useUi } from "../store/ui";
 import { useFlow } from "../store/flow";
 import { useLocale } from "../store/locale";
+import { FIRST_PROJECT_WELCOME_KEY } from "../lib/onboardingFocus";
 import { ErrorBox, PageTitle, Spinner } from "../components/ui";
 
 const REGIME_SYMBOLS = ["RB", "AU", "IF"] as const;
@@ -70,7 +71,9 @@ export default function Templates() {
     onSuccess: (res) => {
       void trackEvent("template_start", { template: res.template_code });
       setProject(res.project_id, res.factor_id);
+      sessionStorage.setItem(FIRST_PROJECT_WELCOME_KEY, res.project_id);
       void qc.invalidateQueries({ queryKey: ["projects"] });
+      void qc.invalidateQueries({ queryKey: ["research-journey"] });
       notify(t.started, "success");
       navigate(`/projects/${res.project_id}`);
     },

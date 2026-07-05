@@ -147,6 +147,18 @@ class QuickstartGuideOut(BaseModel):
     total: int
 
 
+class FirstProjectCoachingOut(BaseModel):
+    badge: str
+    celebrate: str
+    message: str
+    unlock_features: str
+    cta_action: str
+    cta_path: str
+    active_project_id: uuid.UUID | None = None
+    project_title: str | None = None
+    factor_name: str | None = None
+
+
 class FirstReportGuideStepOut(BaseModel):
     step: int
     label: str
@@ -318,6 +330,7 @@ class ResearchJourneyOut(BaseModel):
     market_data_coaching: MarketDataCoachingOut | None = None
     checkout_coaching: CheckoutCoachingOut | None = None
     quickstart_guide: QuickstartGuideOut | None = None
+    first_project_coaching: FirstProjectCoachingOut | None = None
     first_report_coaching: FirstReportCoachingOut | None = None
     beginner_sprint: BeginnerSprintOut | None = None
     mastery_overview: MasteryOverviewOut | None = None

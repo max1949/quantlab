@@ -719,6 +719,21 @@ BEGINNER_ONEPAGER: dict[Locale, dict[str, str]] = {
     },
 }
 
+FIRST_PROJECT_COACH: dict[Locale, dict[str, str]] = {
+    "en": {
+        "badge": "Project created",
+        "celebrate": "Your template project is ready — the starter factor is wired in.",
+        "message": "Run your first backtest now. We will show Sharpe, drawdown, and whether the edge holds up.",
+        "unlock_features": "Backtest metrics · OOS validation · research report",
+    },
+    "zh": {
+        "badge": "项目已创建",
+        "celebrate": "模板项目已就绪 — 起步因子已自动配置好。",
+        "message": "现在跑第一次回测。系统会展示夏普、回撤，帮你判断这条边是否站得住。",
+        "unlock_features": "回测指标 · 样本外验证 · 研究报告",
+    },
+}
+
 FIRST_REPORT_COACH: dict[Locale, dict[str, str]] = {
     "en": {
         "badge": "First report complete",

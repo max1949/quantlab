@@ -36,6 +36,7 @@ import AttentionCoachPanel from "../components/AttentionCoachPanel";
 import PublishFeedPreview from "../components/PublishFeedPreview";
 import DataQualityBanner from "../components/DataQualityBanner";
 import VolRegimeBanner from "../components/VolRegimeBanner";
+import FirstProjectCoachPanel from "../components/FirstProjectCoachPanel";
 import FactorCatalogPanel from "../components/FactorCatalogPanel";
 import type { Graph } from "../api/types";
 
@@ -333,6 +334,13 @@ export default function ProjectDetail() {
         ))}
       </div>
 
+      <FirstProjectCoachPanel
+        projectId={id}
+        backtestDone={done.backtest}
+        backtestPending={busy === "backtest"}
+        onRunBacktest={() => runBacktest.mutate()}
+      />
+
       {projectFactors.length > 1 && (
         <div className="mb-4 flex items-center gap-2 text-sm">
           <span className="text-slate-500">{p.factorForRun}</span>
@@ -553,6 +561,7 @@ export default function ProjectDetail() {
             return (
               <div
                 key={s.key}
+                id={s.key === "backtest" ? "project-step-backtest" : undefined}
                 className={`card flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${
                   finished ? "border-emerald-200 bg-emerald-50/40" : ""
                 } ${isNext ? "ring-2 ring-brand-400 ring-offset-2 dark:ring-offset-slate-950" : ""}`}

@@ -1,3 +1,5 @@
 /** Session keys set when onboarding completes — consumed on first dashboard visit. */
 export const FOCUS_QUICKSTART_KEY = "quantlab-focus-quickstart";
 export const FIRST_MENTOR_WELCOME_KEY = "quantlab-first-mentor-welcome";
+/** Set when a template one-click start lands on a new project — consumed on first project visit. */
+export const FIRST_PROJECT_WELCOME_KEY = "quantlab-first-project-welcome";

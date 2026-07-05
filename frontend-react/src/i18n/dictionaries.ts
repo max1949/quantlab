@@ -132,6 +132,13 @@ const en = {
     gotIt: "Got it",
     ctaDefault: "Start →",
   },
+  firstProjectCoach: {
+    factorReady: (name: string) => `Starter factor ready: ${name}`,
+    unlocked: (features: string) => `Next unlocks: ${features}`,
+    ctaDefault: "Run backtest →",
+    running: "Running…",
+    dismiss: "Got it",
+  },
   firstReportCoach: {
     unlocked: (features: string) => `Next unlocks: ${features}`,
     ctaDefault: "Continue →",
@@ -1507,6 +1514,13 @@ const zh = {
     openQuickstart: "3 步引导 →",
     gotIt: "知道了",
     ctaDefault: "开始 →",
+  },
+  firstProjectCoach: {
+    factorReady: (name: string) => `起步因子已就绪：${name}`,
+    unlocked: (features: string) => `下一步解锁：${features}`,
+    ctaDefault: "跑回测 →",
+    running: "运行中…",
+    dismiss: "知道了",
   },
   firstReportCoach: {
     unlocked: (features: string) => `下一步解锁：${features}`,
