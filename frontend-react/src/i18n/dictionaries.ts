@@ -462,6 +462,13 @@ const en = {
     mentorRegime: (symbol: string, regime: string, title: string, verdict: string, score: number) =>
       `${symbol} · ${regime} → 「${title}」 ${verdict} ${score}`,
     mentorAttentionTitle: "Needs your attention",
+    coachStackMore: (n: number) => `${n} more guide(s) folded — expand when ready`,
+    coachStackExpand: "Show all guides →",
+    coachStackCollapse: "Collapse guides ↑",
+    coachStackAttention: (n: number) => `Attention alerts · ${n} item(s)`,
+    coachStackChallenge: (msg: string) => `Challenge · ${msg}`,
+    coachStackUpgrade: (msg: string) => `Upgrade · ${msg}`,
+    coachStackMarket: (msg: string) => `Market data · ${msg}`,
   },
   jointAttentionCoach: {
     title: "Joint coaching · regime × paper",
@@ -1690,6 +1697,13 @@ const zh = {
     mentorRegime: (symbol: string, regime: string, title: string, verdict: string, score: number) =>
       `${symbol} · ${regime} → 推荐「${title}」${verdict} ${score}分`,
     mentorAttentionTitle: "需要你关注",
+    coachStackMore: (n: number) => `还有 ${n} 条指引已收起 — 准备好了再展开`,
+    coachStackExpand: "展开全部指引 →",
+    coachStackCollapse: "收起指引 ↑",
+    coachStackAttention: (n: number) => `主动提醒 · ${n} 条`,
+    coachStackChallenge: (msg: string) => `挑战联动 · ${msg}`,
+    coachStackUpgrade: (msg: string) => `升级教练 · ${msg}`,
+    coachStackMarket: (msg: string) => `行情教练 · ${msg}`,
   },
   jointAttentionCoach: {
     title: "联合教练 · 制度 × Paper",

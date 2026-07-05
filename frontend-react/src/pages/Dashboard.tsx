@@ -14,10 +14,7 @@ import { GradeBadge, PageTitle, Spinner, Stat } from "../components/ui";
 import AcademyTasks from "../components/AcademyTasks";
 import ResearchJourneyRing from "../components/ResearchJourneyRing";
 import MasteryGoalPanel from "../components/MasteryGoalPanel";
-import AttentionAlertsPanel from "../components/AttentionAlertsPanel";
-import ChallengePaperCoachPanel from "../components/ChallengePaperCoachPanel";
-import UpgradeCoachPanel from "../components/UpgradeCoachPanel";
-import MarketDataCoachPanel from "../components/MarketDataCoachPanel";
+import DashboardCoachStack from "../components/DashboardCoachStack";
 import PostCheckoutCoachPanel from "../components/PostCheckoutCoachPanel";
 
 export default function Dashboard() {
@@ -91,19 +88,7 @@ export default function Dashboard() {
       </div>
 
       <div className="mt-6">
-        <AttentionAlertsPanel />
-      </div>
-
-      <div className="mt-4">
-        <ChallengePaperCoachPanel />
-      </div>
-
-      <div className="mt-4">
-        <UpgradeCoachPanel />
-      </div>
-
-      <div className="mt-4">
-        <MarketDataCoachPanel />
+        <DashboardCoachStack />
       </div>
 
       <div className="mt-6">
