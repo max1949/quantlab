@@ -151,6 +151,16 @@ const en = {
     dismiss: "Got it",
     stepGo: "Open →",
   },
+  masteryGraduation: {
+    progress: (done: number, total: number) => `${done}/${total} mastery phases complete`,
+    paperGraduated: (n: number) => `${n} paper-graduated factor${n === 1 ? "" : "s"}`,
+    followers: (n: number) => `${n} follower${n === 1 ? "" : "s"}`,
+    onBoard: (rank: number) => `Paper Masters board #${rank}`,
+    ctaDefault: "Continue →",
+    viewProfile: "My profile →",
+    dismiss: "Celebrate later",
+    stepGo: "Go →",
+  },
   beginnerSprint: {
     enrollCta: "Join 30-day challenge →",
     viewCta: "View challenge progress →",
@@ -1500,6 +1510,16 @@ const zh = {
     copied: "分享链接已复制 — 发给一个精准读者吧。",
     dismiss: "知道了",
     stepGo: "打开 →",
+  },
+  masteryGraduation: {
+    progress: (done: number, total: number) => `大师路径 ${done}/${total} 阶段已完成`,
+    paperGraduated: (n: number) => `${n} 个 Paper 毕业因子`,
+    followers: (n: number) => `${n} 位粉丝`,
+    onBoard: (rank: number) => `Paper 大师榜第 ${rank} 名`,
+    ctaDefault: "继续 →",
+    viewProfile: "我的主页 →",
+    dismiss: "稍后再看",
+    stepGo: "去 →",
   },
   beginnerSprint: {
     enrollCta: "报名 30 天挑战 →",

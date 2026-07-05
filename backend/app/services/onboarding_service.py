@@ -649,6 +649,74 @@ def share_growth_coaching_payload(db: Session, user: User, locale: Locale, flags
     }
 
 
+def mastery_graduation_coaching_payload(
+    db: Session,
+    user: User,
+    locale: Locale,
+    flags: dict[str, bool],
+    *,
+    mastery_goal: dict,
+    active_project_id: uuid.UUID | None,
+) -> dict | None:
+    """五阶段大师路径全部完成且已分享 — 毕业庆祝与进阶指引。"""
+    if not flags.get("share"):
+        return None
+
+    phases = _mastery_path_phase_rows(
+        locale, flags, mastery_goal=mastery_goal, active_project_id=active_project_id
+    )
+    if not phases or not all(p["done"] for p in phases):
+        return None
+
+    from backend.app.services import social_service
+
+    labels = i18n.MASTERY_GRADUATION_COACH.get(locale) or i18n.MASTERY_GRADUATION_COACH["en"]
+    on_board = bool(mastery_goal.get("on_leaderboard"))
+    rank = mastery_goal.get("leaderboard_rank")
+    followers = int(social_service.counts(db, user.id)["followers"])
+    graduated = int(mastery_goal.get("paper_graduated_count") or 0)
+    project_path = f"/projects/{active_project_id}" if active_project_id else "/projects"
+
+    return {
+        "badge": labels["badge"],
+        "celebrate": labels["celebrate"],
+        "message": labels["on_board"] if on_board else labels["off_board"],
+        "guide_title": labels["guide_title"],
+        "done_count": len(phases),
+        "total": len(phases),
+        "paper_graduated_count": graduated,
+        "on_leaderboard": on_board,
+        "leaderboard_rank": rank,
+        "followers": followers,
+        "cta_action": "view_board",
+        "cta_path": "/leaderboards/paper_mastery",
+        "profile_path": "/me",
+        "guide_steps": [
+            {
+                "step": 1,
+                "label": labels["step1_label"],
+                "hint": labels["step1_hint"],
+                "cta_path": project_path,
+                "cta_action": "run_paper",
+            },
+            {
+                "step": 2,
+                "label": labels["step2_label"],
+                "hint": labels["step2_hint"],
+                "cta_path": "/me",
+                "cta_action": "keep_going",
+            },
+            {
+                "step": 3,
+                "label": labels["step3_label"],
+                "hint": labels["step3_hint"],
+                "cta_path": "/templates?focus=vol-regime",
+                "cta_action": "create_project",
+            },
+        ],
+    }
+
+
 def beginner_sprint_payload(
     user: User,
     locale: Locale,
@@ -993,6 +1061,14 @@ def research_journey(
         active_project_id=active_id,
     )
     share_growth_coaching = share_growth_coaching_payload(db, user, locale, flags)
+    mastery_graduation_coaching = mastery_graduation_coaching_payload(
+        db,
+        user,
+        locale,
+        flags,
+        mastery_goal=mastery_goal,
+        active_project_id=active_id,
+    )
 
     return {
         "done_count": done_count,
@@ -1015,4 +1091,5 @@ def research_journey(
         "mastery_overview": mastery_overview,
         "reputation_coaching": reputation_coaching,
         "share_growth_coaching": share_growth_coaching,
+        "mastery_graduation_coaching": mastery_graduation_coaching,
     }

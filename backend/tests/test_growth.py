@@ -493,6 +493,42 @@ def test_journey_includes_reputation_coaching_after_paper(client, db_session):
     assert len(growth.get("guide_steps") or []) == 3
 
 
+def test_journey_includes_mastery_graduation_when_path_complete(client, db_session, monkeypatch):
+    from backend.app.services import onboarding_service as obs
+
+    seed_sample_market_data(db_session)
+    h = _register(client, "gradcoach")
+    proj, report = _full_research(client, h, db_session)
+
+    real_goal = obs._mastery_goal_payload
+
+    def boosted_goal(db, user, locale):
+        g = real_goal(db, user, locale)
+        g["paper_graduated_count"] = 1
+        g["paper_tracking_count"] = 1
+        g["on_leaderboard"] = True
+        g["leaderboard_rank"] = 3
+        return g
+
+    monkeypatch.setattr(obs, "_mastery_goal_payload", boosted_goal)
+
+    client.post(f"{BASE}/projects/{proj['id']}/publish", headers=h)
+    share_resp = client.post(f"{BASE}/research/reports/{report['id']}/share", headers=h)
+    assert share_resp.status_code == 201, share_resp.text
+
+    j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    assert j.get("mastery_overview") is None
+    grad = j.get("mastery_graduation_coaching")
+    assert grad is not None
+    assert grad["done_count"] == 5
+    assert grad["total"] == 5
+    assert grad["paper_graduated_count"] == 1
+    assert grad["on_leaderboard"] is True
+    assert grad["leaderboard_rank"] == 3
+    assert grad["profile_path"] == "/me"
+    assert len(grad.get("guide_steps") or []) == 3
+
+
 def test_journey_includes_checkout_coaching(client, db_session):
     from backend.app.models.user import User
     from backend.app.services import membership_service as ms

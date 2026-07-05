@@ -849,6 +849,35 @@ REPUTATION_COACH: dict[Locale, dict[str, str]] = {
     },
 }
 
+MASTERY_GRADUATION_COACH: dict[Locale, dict[str, str]] = {
+    "en": {
+        "badge": "Mastery graduate",
+        "celebrate": "You completed the full QuantLab mastery path — from template to public research reputation.",
+        "on_board": "You're on the Paper Masters board — your graduated research is now a public reference for the community.",
+        "off_board": "Paper graduated and shared — keep tracking NAV and climb the Masters board next.",
+        "guide_title": "What's next for a research master",
+        "step1_label": "Guard your paper edge",
+        "step1_hint": "Watch decay alerts and re-validate when regime shifts — masters protect OOS quality.",
+        "step2_label": "Grow your research brand",
+        "step2_hint": "Your profile is your long-term asset — followers and feed presence compound over time.",
+        "step3_label": "Launch the next study",
+        "step3_hint": "Pick an advanced template or combine factors — iteration is how pros stay ahead.",
+    },
+    "zh": {
+        "badge": "大师毕业",
+        "celebrate": "你已完成 QuantLab 全流程大师路径 — 从模板到公开研究声誉。",
+        "on_board": "你已登上 Paper 大师榜 — 毕业研究已成为社区的公开参考。",
+        "off_board": "Paper 已毕业并分享 — 继续跟踪净值，冲击大师榜吧。",
+        "guide_title": "毕业后的下一步",
+        "step1_label": "守护 Paper 优势",
+        "step1_hint": "关注衰减提醒、行情切换时重新验证 — 大师守护样本外质量。",
+        "step2_label": "经营研究品牌",
+        "step2_hint": "研究员主页是长期资产 — 粉丝与广场曝光会复利增长。",
+        "step3_label": "启动下一项研究",
+        "step3_hint": "选择进阶模板或组合因子 — 持续迭代才是专业研究员的常态。",
+    },
+}
+
 SHARE_GROWTH_COACH: dict[Locale, dict[str, str]] = {
     "en": {
         "badge": "Growth loop",

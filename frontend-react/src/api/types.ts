@@ -286,6 +286,23 @@ export interface ShareGrowthCoaching {
   guide_steps: FirstReportGuideStep[];
 }
 
+export interface MasteryGraduationCoaching {
+  badge: string;
+  celebrate: string;
+  message: string;
+  guide_title: string;
+  done_count: number;
+  total: number;
+  paper_graduated_count: number;
+  on_leaderboard: boolean;
+  leaderboard_rank: number | null;
+  followers: number;
+  cta_action: string;
+  cta_path: string;
+  profile_path: string;
+  guide_steps: FirstReportGuideStep[];
+}
+
 export interface ResearchJourney {
   done_count: number;
   total: number;
@@ -307,6 +324,7 @@ export interface ResearchJourney {
   mastery_overview: MasteryOverview | null;
   reputation_coaching: ReputationCoaching | null;
   share_growth_coaching: ShareGrowthCoaching | null;
+  mastery_graduation_coaching: MasteryGraduationCoaching | null;
 }
 
 export interface Mentor {

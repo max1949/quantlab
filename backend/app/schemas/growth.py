@@ -203,6 +203,23 @@ class ShareGrowthCoachingOut(BaseModel):
     guide_steps: list[FirstReportGuideStepOut] = Field(default_factory=list)
 
 
+class MasteryGraduationCoachingOut(BaseModel):
+    badge: str
+    celebrate: str
+    message: str
+    guide_title: str
+    done_count: int
+    total: int
+    paper_graduated_count: int
+    on_leaderboard: bool
+    leaderboard_rank: int | None = None
+    followers: int
+    cta_action: str
+    cta_path: str
+    profile_path: str
+    guide_steps: list[FirstReportGuideStepOut] = Field(default_factory=list)
+
+
 class BeginnerSprintOut(BaseModel):
     sprint_day: int
     sprint_total: int
@@ -306,6 +323,7 @@ class ResearchJourneyOut(BaseModel):
     mastery_overview: MasteryOverviewOut | None = None
     reputation_coaching: ReputationCoachingOut | None = None
     share_growth_coaching: ShareGrowthCoachingOut | None = None
+    mastery_graduation_coaching: MasteryGraduationCoachingOut | None = None
 
 
 # ---- 研究模板 ----
