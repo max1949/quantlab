@@ -27,10 +27,12 @@ export default function MasteryPathPanel({
   publishReady = false,
 }: Props) {
   const m = useLocale((s) => s.dict.masteryPath);
+  const mg = useLocale((s) => s.dict.masteryGoal);
   const atl = useLocale((s) => s.dict.academyTaskLabels);
   const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
   const following = journey.data?.social_following_count ?? 0;
   const networkReady = following >= NETWORK_FOLLOW_TARGET;
+  const shareMilestones = journey.data?.mastery_goal?.challenge_share_milestones ?? [];
   const mastery = quality.mastery;
   if (!mastery) return null;
 
@@ -94,6 +96,46 @@ export default function MasteryPathPanel({
                 )}
               </div>
             ))}
+        </div>
+      )}
+
+      {mastery.stage === "share" && shareMilestones.some((cm) => !cm.completed) && (
+        <div className="mb-3 rounded-lg border border-violet-200 bg-violet-50/60 px-3 py-2 text-xs text-violet-900 dark:border-violet-900 dark:bg-violet-950/30 dark:text-violet-100">
+          <p className="font-medium">{mg.challengeShareTitle}</p>
+          {shareMilestones
+            .filter((cm) => !cm.completed)
+            .map((cm) => (
+              <p key={cm.code} className="mt-1">
+                🌐 {mg.challengeShareItem(cm.title, cm.mastery_stage_label ?? cm.mastery_stage ?? "")}
+              </p>
+            ))}
+          <div className="mt-2 flex flex-wrap gap-2">
+            {shareMilestones.some((cm) => !cm.completed && cm.code === "network_radar") && (
+              <Link to="/feed?focus=follow" className="font-medium text-brand-600 hover:underline">
+                {mg.challengeShareFeedCta}
+              </Link>
+            )}
+            {shareMilestones.some((cm) => !cm.completed && cm.code === "research_share") &&
+              (reportId ? (
+                <Link
+                  to={`/reports/${reportId}#report-share`}
+                  className="font-medium text-brand-600 hover:underline"
+                >
+                  {m.shareCardCta}
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  className="font-medium text-brand-600 hover:underline"
+                  onClick={() => onAction("report")}
+                >
+                  {m.shareReportCta}
+                </button>
+              ))}
+            <Link to="/challenges" className="font-medium text-brand-600 hover:underline">
+              {mg.challengeShareCta}
+            </Link>
+          </div>
         </div>
       )}
 

@@ -694,6 +694,7 @@ const en = {
     journeyProgress: (done: number, total: number) => `${done}/${total} complete`,
     journeyNext: (label: string) => `Next: ${label}`,
     journeyGoProject: "Open project →",
+    journeyGoShare: "Grow your network →",
     journeyChallengeSync: (done: number, total: number) =>
       `30-day challenge synced: ${done}/${total} milestones`,
     journeyViewChallenge: "View challenge →",
@@ -2448,6 +2449,7 @@ const zh = {
     journeyProgress: (done: number, total: number) => `已完成 ${done}/${total}`,
     journeyNext: (label: string) => `下一步：${label}`,
     journeyGoProject: "打开项目 →",
+    journeyGoShare: "去扩大人脉 →",
     journeyChallengeSync: (done: number, total: number) =>
       `30 天挑战已同步：${done}/${total} 个里程碑`,
     journeyViewChallenge: "查看挑战 →",

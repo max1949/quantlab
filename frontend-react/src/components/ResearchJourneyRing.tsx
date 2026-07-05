@@ -94,6 +94,16 @@ export default function ResearchJourneyRing() {
             <Link to={`/projects/${active_project_id}`} className="ml-2 text-brand-600 hover:underline">
               {d.journeyGoProject}
             </Link>
+          ) : next.key === "share" ? (
+            active_project_id ? (
+              <Link to={`/projects/${active_project_id}`} className="ml-2 text-brand-600 hover:underline">
+                {d.journeyGoProject}
+              </Link>
+            ) : (
+              <Link to="/feed?focus=follow" className="ml-2 text-brand-600 hover:underline">
+                {d.journeyGoShare}
+              </Link>
+            )
           ) : next.key === "template" ? (
             <Link to="/templates" className="ml-2 text-brand-600 hover:underline">
               {d.fromTemplate}
