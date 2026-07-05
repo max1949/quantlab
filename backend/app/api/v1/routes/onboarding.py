@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from backend.app.auth.deps import CurrentUser
@@ -22,6 +23,7 @@ from backend.app.schemas.growth import (
 )
 from backend.app.schemas.user import UserOut
 from backend.app.services import growth_service, onboarding_service, regime_alert_service
+from backend.app.services import beginner_onepager_service
 
 router = APIRouter()
 
@@ -58,6 +60,25 @@ def research_journey(
 ) -> ResearchJourneyOut:
     return ResearchJourneyOut(
         **onboarding_service.research_journey(db, current_user, locale, checkout_plan=checkout_plan)
+    )
+
+
+@router.get(
+    "/beginner-handbook.pdf",
+    summary="下载新手大师一页纸 PDF",
+    response_class=Response,
+)
+def beginner_handbook_pdf(
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+    locale: RequestLocale,
+) -> Response:
+    pdf = beginner_onepager_service.render_beginner_onepager_pdf(db, current_user, locale)
+    growth_service.log_event(db, "beginner_handbook_pdf", current_user.id, {"locale": locale})
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": 'attachment; filename="quantlab-beginner-handbook.pdf"'},
     )
 
 

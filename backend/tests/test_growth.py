@@ -322,6 +322,15 @@ def test_first_report_paper_guide_steps(client, db_session):
     assert coach["guide_steps"][1]["cta_path"] == f"/projects/{proj['id']}"
 
 
+def test_beginner_handbook_pdf(client, db_session):
+    seed_sample_market_data(db_session)
+    h = _register(client, "handpdf")
+    resp = client.get(f"{BASE}/onboarding/beginner-handbook.pdf", headers=h)
+    assert resp.status_code == 200
+    assert resp.headers["content-type"] == "application/pdf"
+    assert resp.content[:4] == b"%PDF"
+
+
 def test_journey_includes_beginner_sprint(client, db_session):
     seed_sample_market_data(db_session)
     seed_default_templates(db_session)

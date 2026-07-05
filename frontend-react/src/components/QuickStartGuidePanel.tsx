@@ -7,6 +7,7 @@ import { celebrateChallengeEnroll } from "../lib/challengeEnroll";
 import { useLocale } from "../store/locale";
 import { useAuth } from "../store/auth";
 import { useUi } from "../store/ui";
+import HandbookExportButtons from "./HandbookExportButtons";
 import { stageToCtaLabel } from "../lib/nav";
 import { Spinner } from "./ui";
 
@@ -22,6 +23,7 @@ function readDismissedProgress(): number {
 export default function QuickStartGuidePanel() {
   const d = useLocale((s) => s.dict.quickstartGuide);
   const sprintLabels = useLocale((s) => s.dict.beginnerSprint);
+  const handbook = useLocale((s) => s.dict.beginnerHandbook);
   const challengePage = useLocale((s) => s.dict.challengesPage);
   const dash = useLocale((s) => s.dict.dashboard);
   const stages = useLocale((s) => s.dict.stages);
@@ -175,6 +177,12 @@ export default function QuickStartGuidePanel() {
           )}
         </div>
       )}
+      <div className="mt-4 border-t border-sky-200 pt-3 dark:border-sky-800">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-sky-700 dark:text-sky-300">
+          {handbook.title}
+        </p>
+        <HandbookExportButtons compact />
+      </div>
     </div>
   );
 }

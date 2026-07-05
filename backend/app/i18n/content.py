@@ -688,6 +688,37 @@ QUICKSTART_GUIDE: dict[Locale, dict[str, str]] = {
     },
 }
 
+BEGINNER_ONEPAGER: dict[Locale, dict[str, str]] = {
+    "en": {
+        "doc_title": "QuantLab Beginner Mastery One-Pager",
+        "user_line": "Researcher: {username}",
+        "progress_line": "Mastery path: {done}/{total} phases complete",
+        "section_quickstart": "3-STEP QUICK START",
+        "step_line": "{n}. {label}",
+        "section_mastery": "MASTERY PATH MAP (beginner -> Paper Masters)",
+        "done_mark": "[x]",
+        "todo_mark": "[ ]",
+        "section_next": "YOUR NEXT AUTO-GUIDED STEP",
+        "section_sprint": "7-DAY SPRINT + 30-DAY CHALLENGE",
+        "sprint_hint": "Days 1-3: quick start. Days 4-7: enroll the 30-day challenge on the dashboard.",
+        "footer": "Open QuantLab dashboard — we guide every step to institutional-grade research.",
+    },
+    "zh": {
+        "doc_title": "QuantLab 新手大师一页纸",
+        "user_line": "研究员：{username}",
+        "progress_line": "大师路径进度：{done}/{total} 阶段已完成",
+        "section_quickstart": "3 步快速上手",
+        "step_line": "{n}. {label}",
+        "section_mastery": "大师路径总览（新手 -> Paper 大师）",
+        "done_mark": "[完成]",
+        "todo_mark": "[待做]",
+        "section_next": "你的下一步（全自动指引）",
+        "section_sprint": "7 天冲刺 + 30 天挑战",
+        "sprint_hint": "第 1-3 天：完成快速上手。第 4-7 天：在工作台报名 30 天挑战。",
+        "footer": "打开 QuantLab 工作台 — 每一步都有全自动指引，带你做到机构级研究。",
+    },
+}
+
 FIRST_REPORT_COACH: dict[Locale, dict[str, str]] = {
     "en": {
         "badge": "First report complete",

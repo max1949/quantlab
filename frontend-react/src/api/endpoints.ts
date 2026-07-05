@@ -128,6 +128,13 @@ export async function getResearchJourney(opts?: {
   return data;
 }
 
+export async function downloadBeginnerHandbookPdf(): Promise<void> {
+  const { data } = await api.get<Blob>("/onboarding/beginner-handbook.pdf", {
+    responseType: "blob",
+  });
+  downloadBlob(data, "quantlab-beginner-handbook.pdf");
+}
+
 export async function dismissAttentionAlert(alert_key: string): Promise<{
   alert_key: string;
   cooldown_days: number;

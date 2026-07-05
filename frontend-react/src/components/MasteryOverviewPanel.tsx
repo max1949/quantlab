@@ -6,6 +6,7 @@ import { apiErrorMessage } from "../api/client";
 import { academyRewardMessage } from "../lib/academy";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
+import HandbookExportButtons from "./HandbookExportButtons";
 
 const DISMISS_KEY = "quantlab-mastery-overview-dismissed";
 
@@ -134,6 +135,7 @@ export default function MasteryOverviewPanel() {
           <button type="button" className="btn text-xs" onClick={printMap}>
             {d.print}
           </button>
+          <HandbookExportButtons compact />
           <button type="button" className="btn text-xs" onClick={dismiss}>
             {d.dismiss}
           </button>

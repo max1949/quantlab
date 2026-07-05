@@ -26,6 +26,7 @@ import Following from "./pages/Following";
 import Experiments from "./pages/Experiments";
 import Leaderboards from "./pages/Leaderboards";
 import Challenges from "./pages/Challenges";
+import BeginnerHandbookPage from "./pages/BeginnerHandbookPage";
 import AttentionHistory from "./pages/AttentionHistory";
 import Pricing from "./pages/Pricing";
 import AdminOps from "./pages/AdminOps";
@@ -75,6 +76,7 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/app" element={<Dashboard />} />
+            <Route path="/handbook" element={<BeginnerHandbookPage />} />
             <Route path="/app/alerts" element={<AttentionHistory />} />
             <Route path="/templates" element={<Templates />} />
             <Route path="/projects" element={<Projects />} />
