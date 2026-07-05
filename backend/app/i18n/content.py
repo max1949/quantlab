@@ -1442,11 +1442,15 @@ MILESTONE_JOURNEY_KEYS: dict[str, str] = {
     "first_paper_order": "publish",
     "paper_graduated": "publish",
     "first_report": "report",
+    "network_radar": "publish",
+    "research_share": "report",
 }
 
 MILESTONE_MASTERY_STAGES: dict[str, str] = {
     "first_paper_order": "paper",
     "paper_graduated": "graduate",
+    "network_radar": "share",
+    "research_share": "share",
 }
 
 MILESTONE_TITLES: dict[str, dict[Locale, str]] = {
@@ -1473,6 +1477,14 @@ MILESTONE_TITLES: dict[str, dict[Locale, str]] = {
     "first_report": {
         "en": "Publish your first research report",
         "zh": "产出第一份研究报告",
+    },
+    "network_radar": {
+        "en": "Follow 3 researchers on the feed",
+        "zh": "关注 3 位研究员",
+    },
+    "research_share": {
+        "en": "Create your first share card",
+        "zh": "生成第一份分享卡片",
     },
 }
 

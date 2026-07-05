@@ -30,6 +30,8 @@ DEFAULT_MILESTONES = [
     {"day": 15, "code": "stack_factor", "title": "创建第一个组合因子", "check": "stack_factor", "reward_points": 40},
     {"day": 22, "code": "first_paper_order", "title": "下第一笔 Paper 模拟单", "check": "paper_order", "reward_points": 50},
     {"day": 28, "code": "paper_graduated", "title": "因子通过 Paper 毕业线", "check": "paper_graduated", "reward_points": 80},
+    {"day": 20, "code": "network_radar", "title": "关注 3 位研究员", "check": "following_three", "reward_points": 40},
+    {"day": 29, "code": "research_share", "title": "生成第一份分享卡片", "check": "research_share", "reward_points": 50},
     {"day": 30, "code": "first_report", "title": "产出第一份研究报告", "check": "report", "reward_points": 100},
 ]
 CHALLENGE_COMPLETE_BONUS = 200  # 全部完成额外奖励
@@ -103,7 +105,10 @@ def _count(db: Session, stmt) -> int:
 
 def _user_stats(db: Session, uid: uuid.UUID) -> dict:
     from backend.app.services import research_quality_service as rqs
+    from backend.app.models.growth import ResearchShare
+    from backend.app.services import social_service
 
+    following = int(social_service.counts(db, uid)["following"])
     return {
         "factor": _count(db, select(func.count(Factor.id)).where(Factor.owner_id == uid)),
         "stack_factor": _count(
@@ -126,6 +131,10 @@ def _user_stats(db: Session, uid: uuid.UUID) -> dict:
             db, select(func.count(PaperOrder.id)).where(PaperOrder.user_id == uid)
         ),
         "paper_graduated": rqs.user_paper_mastery_counts(db, uid)["paper_graduated_count"],
+        "following_three": 1 if following >= 3 else 0,
+        "research_share": _count(
+            db, select(func.count(ResearchShare.id)).where(ResearchShare.owner_id == uid)
+        ),
     }
 
 

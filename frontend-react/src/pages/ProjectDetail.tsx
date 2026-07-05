@@ -18,7 +18,8 @@ import { apiErrorMessage } from "../api/client";
 import { academyRewardMessage } from "../lib/academy";
 import { celebrateFirstReport } from "../lib/celebrateFirstReport";
 import { burstConfetti } from "../lib/confetti";
-import { isReplicationReportFlow } from "../lib/replicationFlow";
+import { isProjectReplicationFlow, resolveReplicationReportId } from "../lib/replicationFlow";
+import { loadReplicationBenchmark } from "../lib/replicationBenchmark";
 import { useAuth } from "../store/auth";
 import { useUi } from "../store/ui";
 import { useLocale } from "../store/locale";
@@ -39,12 +40,14 @@ import PublishFeedPreview from "../components/PublishFeedPreview";
 import DataQualityBanner from "../components/DataQualityBanner";
 import VolRegimeBanner from "../components/VolRegimeBanner";
 import MasterReplicationBenchmarkPanel from "../components/MasterReplicationBenchmarkPanel";
+import ProjectReplicationRhythmPanel from "../components/ProjectReplicationRhythmPanel";
 import ProjectIncubationCoachStack from "../components/ProjectIncubationCoachStack";
 import FactorCatalogPanel from "../components/FactorCatalogPanel";
 import {
   FIRST_BACKTEST_WELCOME_KEY,
   FIRST_REPORT_WELCOME_KEY,
   FIRST_VALIDATION_WELCOME_KEY,
+  FOLLOWING_PROJECT_REPLICATION_KEY,
   REPLICATION_FLOW_REPORT_KEY,
   REPLICATION_PUBLISH_FEED_KEY,
   REPLICATION_REPORT_PENDING_KEY,
@@ -109,6 +112,14 @@ export default function ProjectDetail() {
     graph.data,
     project.data?.status,
   ]);
+  const replicationActiveOnProject = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    return (
+      sessionStorage.getItem(FOLLOWING_PROJECT_REPLICATION_KEY) === id ||
+      sessionStorage.getItem(REPLICATION_REPORT_PENDING_KEY) === id ||
+      loadReplicationBenchmark(id) != null
+    );
+  }, [id]);
 
   const [busy, setBusy] = useState<StepKey | null>(null);
 
@@ -211,8 +222,10 @@ export default function ProjectDetail() {
       const me = await useAuth.getState().refreshMe();
       if (me) setUser(me);
       refreshAll();
-      const reportId = graph.data?.nodes.find((n) => n.ref_type === "report")?.ref_id ?? null;
-      if (reportId && isReplicationReportFlow(reportId)) {
+      const reportId = resolveReplicationReportId(
+        graph.data?.nodes.find((n) => n.ref_type === "report")?.ref_id ?? null,
+      );
+      if (reportId && isProjectReplicationFlow(id, reportId)) {
         sessionStorage.removeItem(REPLICATION_REPORT_WELCOME_KEY);
         sessionStorage.removeItem(REPLICATION_FLOW_REPORT_KEY);
         sessionStorage.setItem(REPLICATION_PUBLISH_FEED_KEY, reportId);
@@ -424,6 +437,11 @@ export default function ProjectDetail() {
         }
         onRunValidation={() => runValidation.mutate()}
         onGenerateReport={() => genReport.mutate()}
+      />
+
+      <ProjectReplicationRhythmPanel
+        projectId={id}
+        replicationActive={replicationActiveOnProject}
       />
 
       {projectFactors.length > 1 && (

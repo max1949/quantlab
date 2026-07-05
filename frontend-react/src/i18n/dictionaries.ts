@@ -1510,6 +1510,16 @@ const en = {
     shareGrowth: "My share card →",
     dismiss: "Got it",
   },
+  projectReplicationRhythm: {
+    badge: "Weekly replication",
+    title: "Ready for another master replication?",
+    message:
+      "You've built your network — pick a report on your following feed, mirror it on a new project, and ship validated research back to the community.",
+    hint: "Dismiss for this week anytime; we'll nudge you again next week until the loop feels natural.",
+    openFollowing: "Following feed →",
+    browseFeed: "Research feed →",
+    dismiss: "Got it",
+  },
   replicationReportHandoff: {
     badge: "Replication complete",
     title: "You finished a master replication — now contribute back",
@@ -3233,6 +3243,16 @@ const zh = {
     openFollowing: "关注动态 →",
     browseFeed: "研究广场 →",
     shareGrowth: "我的分享卡 →",
+    dismiss: "知道了",
+  },
+  projectReplicationRhythm: {
+    badge: "每周复现",
+    title: "准备好再复现一篇大师报告了吗？",
+    message:
+      "人脉已搭好 — 去关注动态挑一篇细读，在新项目里复现验证，再把成果发布回馈社区。",
+    hint: "随时点「知道了」本周不再提醒；下周会再轻轻推你一把，直到这条闭环成为习惯。",
+    openFollowing: "关注动态 →",
+    browseFeed: "研究广场 →",
     dismiss: "知道了",
   },
   replicationReportHandoff: {
