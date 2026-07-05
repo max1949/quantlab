@@ -719,6 +719,21 @@ BEGINNER_ONEPAGER: dict[Locale, dict[str, str]] = {
     },
 }
 
+FIRST_VALIDATION_COACH: dict[Locale, dict[str, str]] = {
+    "en": {
+        "badge": "Validation passed",
+        "celebrate": "OOS checks cleared — your factor survived the scientific gate.",
+        "message": "Generate your first mastery report now. It packages metrics, grade, and next steps like institutional research.",
+        "unlock_features": "Mastery report · Paper path · research feed reputation",
+    },
+    "zh": {
+        "badge": "验证已通过",
+        "celebrate": "样本外检验过关 — 你的因子通过了科学验证门槛。",
+        "message": "现在生成第一份大师级报告。系统会把指标、评级和下一步打包成机构级研究产出。",
+        "unlock_features": "大师级报告 · Paper 路径 · 研究广场声誉",
+    },
+}
+
 FIRST_BACKTEST_COACH: dict[Locale, dict[str, str]] = {
     "en": {
         "badge": "Backtest complete",

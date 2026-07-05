@@ -145,6 +145,12 @@ const en = {
     running: "Running…",
     dismiss: "Got it",
   },
+  firstValidationCoach: {
+    unlocked: (features: string) => `Next unlocks: ${features}`,
+    ctaDefault: "Generate report →",
+    running: "Generating…",
+    dismiss: "Got it",
+  },
   firstReportCoach: {
     unlocked: (features: string) => `Next unlocks: ${features}`,
     ctaDefault: "Continue →",
@@ -1532,6 +1538,12 @@ const zh = {
     unlocked: (features: string) => `下一步解锁：${features}`,
     ctaDefault: "跑验证 →",
     running: "运行中…",
+    dismiss: "知道了",
+  },
+  firstValidationCoach: {
+    unlocked: (features: string) => `下一步解锁：${features}`,
+    ctaDefault: "生成报告 →",
+    running: "生成中…",
     dismiss: "知道了",
   },
   firstReportCoach: {

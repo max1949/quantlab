@@ -38,8 +38,9 @@ import DataQualityBanner from "../components/DataQualityBanner";
 import VolRegimeBanner from "../components/VolRegimeBanner";
 import FirstProjectCoachPanel from "../components/FirstProjectCoachPanel";
 import FirstBacktestCoachPanel from "../components/FirstBacktestCoachPanel";
+import FirstValidationCoachPanel from "../components/FirstValidationCoachPanel";
 import FactorCatalogPanel from "../components/FactorCatalogPanel";
-import { FIRST_BACKTEST_WELCOME_KEY } from "../lib/onboardingFocus";
+import { FIRST_BACKTEST_WELCOME_KEY, FIRST_VALIDATION_WELCOME_KEY } from "../lib/onboardingFocus";
 import type { Graph } from "../api/types";
 
 type StepKey = "factor" | "backtest" | "validation" | "report" | "publish";
@@ -136,6 +137,9 @@ export default function ProjectDetail() {
     onSuccess: async (v) => {
       void trackEvent("validation_run", { project: id, status: v.status });
       notify(p.validationDone(v.status), "success");
+      if (v.status === "success") {
+        sessionStorage.setItem(FIRST_VALIDATION_WELCOME_KEY, id);
+      }
       const msg = academyRewardMessage(v.academy_rewards, d.academyXpEarned);
       if (msg) notify(msg, "success");
       void qc.invalidateQueries({ queryKey: ["validations"] });
@@ -352,6 +356,14 @@ export default function ProjectDetail() {
         validationDone={done.validation}
         validationPending={busy === "validation"}
         onRunValidation={() => runValidation.mutate()}
+      />
+
+      <FirstValidationCoachPanel
+        projectId={id}
+        validationDone={done.validation}
+        reportDone={done.report}
+        reportPending={busy === "report"}
+        onGenerateReport={() => genReport.mutate()}
       />
 
       {projectFactors.length > 1 && (
@@ -579,7 +591,9 @@ export default function ProjectDetail() {
                     ? "project-step-backtest"
                     : s.key === "validation"
                       ? "project-step-validation"
-                      : undefined
+                      : s.key === "report"
+                        ? "project-step-report"
+                        : undefined
                 }
                 className={`card flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${
                   finished ? "border-emerald-200 bg-emerald-50/40" : ""

@@ -703,6 +703,30 @@ def test_journey_first_backtest_coaching_after_backtest(client, db_session):
     assert j2.get("first_backtest_coaching") is None
 
 
+def test_journey_first_validation_coaching_after_validation(client, db_session):
+    seed_default_templates(db_session)
+    seed_sample_market_data(db_session)
+    h = _register(client, "valcoach")
+    res = client.post(f"{BASE}/research/templates/gold-trend/start", headers=h, json={"with_factor": True}).json()
+    fid = res["factor_id"]
+    client.post(f"{BASE}/backtests", headers=h, json={"factor_id": fid, "symbol": "AU"})
+    client.post(
+        f"{BASE}/validations",
+        headers=h,
+        json={"factor_id": fid, "symbol": "AU", "oos_ratio": 0.3, "n_splits": 4},
+    )
+    j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    coach = j.get("first_validation_coaching")
+    assert coach is not None
+    assert coach["cta_action"] == "generate_report"
+    assert coach["cta_path"] == f"/projects/{res['project_id']}"
+    assert j.get("first_backtest_coaching") is None
+    client.post(f"{BASE}/research/reports/generate", headers=h, json={"project_id": res["project_id"]})
+    j2 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    assert j2.get("first_validation_coaching") is None
+    assert j2.get("first_report_coaching") is not None
+
+
 def test_template_unknown_404(client, db_session):
     h = _register(client, "quill")
     assert client.post(f"{BASE}/research/templates/nope/start", headers=h, json={}).status_code == 404

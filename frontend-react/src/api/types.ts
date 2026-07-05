@@ -190,6 +190,17 @@ export interface FirstReportGuideStep {
   cta_action: string;
 }
 
+export interface FirstValidationCoaching {
+  badge: string;
+  celebrate: string;
+  message: string;
+  unlock_features: string;
+  cta_action: string;
+  cta_path: string;
+  active_project_id: string | null;
+  project_title: string | null;
+}
+
 export interface FirstBacktestCoaching {
   badge: string;
   celebrate: string;
@@ -344,6 +355,7 @@ export interface ResearchJourney {
   quickstart_guide: QuickstartGuide | null;
   first_project_coaching: FirstProjectCoaching | null;
   first_backtest_coaching: FirstBacktestCoaching | null;
+  first_validation_coaching: FirstValidationCoaching | null;
   first_report_coaching: FirstReportCoaching | null;
   beginner_sprint: BeginnerSprint | null;
   mastery_overview: MasteryOverview | null;
