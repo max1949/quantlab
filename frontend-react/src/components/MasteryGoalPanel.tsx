@@ -101,6 +101,41 @@ export default function MasteryGoalPanel() {
         </div>
       )}
 
+      {g.mastery_stage === "share" &&
+        g.challenge_share_milestones?.some((m) => !m.completed) && (
+          <div className="mb-3 rounded-lg border border-violet-200 bg-violet-50/60 px-3 py-2 text-xs text-violet-900 dark:border-violet-900 dark:bg-violet-950/30 dark:text-violet-100">
+            <p className="font-medium">{d.challengeShareTitle}</p>
+            {g.challenge_share_milestones
+              .filter((m) => !m.completed)
+              .map((m) => (
+                <p key={m.code} className="mt-1">
+                  🌐 {d.challengeShareItem(m.title, m.mastery_stage_label ?? m.mastery_stage ?? "")}
+                </p>
+              ))}
+            <div className="mt-2 flex flex-wrap gap-2">
+              {g.challenge_share_milestones.some((m) => !m.completed && m.code === "network_radar") && (
+                <Link to="/feed" className="font-medium text-brand-600 hover:underline">
+                  {d.challengeShareFeedCta}
+                </Link>
+              )}
+              {activeId &&
+                g.challenge_share_milestones.some(
+                  (m) => !m.completed && m.code === "research_share",
+                ) && (
+                  <Link
+                    to={`/projects/${activeId}`}
+                    className="font-medium text-brand-600 hover:underline"
+                  >
+                    {d.challengeShareProjectCta}
+                  </Link>
+                )}
+              <Link to="/challenges" className="font-medium text-brand-600 hover:underline">
+                {d.challengeShareCta}
+              </Link>
+            </div>
+          </div>
+        )}
+
       <div className="flex flex-wrap gap-2">
         {g.on_leaderboard ? (
           <Link to="/leaderboards?kind=paper_mastery" className="btn-primary text-xs">

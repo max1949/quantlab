@@ -98,6 +98,10 @@ def test_journey_mastery_goal_challenge_paper_milestones(client, db_session):
     codes = {m["code"] for m in mg["challenge_paper_milestones"]}
     assert codes == {"first_paper_order", "paper_graduated"}
     assert all(not m["completed"] for m in mg["challenge_paper_milestones"])
+    assert len(mg["challenge_share_milestones"]) == 2
+    share_codes = {m["code"] for m in mg["challenge_share_milestones"]}
+    assert share_codes == {"network_radar", "research_share"}
+    assert all(not m["completed"] for m in mg["challenge_share_milestones"])
     assert mg["board_limit"] == 50
     assert "graduated_needed" in mg
 

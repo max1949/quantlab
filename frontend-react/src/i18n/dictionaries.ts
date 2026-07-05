@@ -752,6 +752,12 @@ const en = {
     challengePaperItem: (title: string, stage: string) =>
       stage ? `${title} (mastery · ${stage})` : title,
     challengePaperCta: "View challenge →",
+    challengeShareTitle: "30-day challenge · Network & share milestones",
+    challengeShareItem: (title: string, stage: string) =>
+      stage ? `${title} (mastery · ${stage})` : title,
+    challengeShareFeedCta: "Research feed →",
+    challengeShareProjectCta: "Open project →",
+    challengeShareCta: "View challenge →",
     gapToBoard: (needed: number, cutoff: number, limit: number) =>
       `${needed} more graduated factor(s) to reach top ${limit} (bar ≈ ${cutoff})`,
     rankOutside: (rank: number, outside: number, limit: number) =>
@@ -2500,6 +2506,12 @@ const zh = {
     challengePaperItem: (title: string, stage: string) =>
       stage ? `${title}（大师路径 · ${stage}）` : title,
     challengePaperCta: "查看挑战 →",
+    challengeShareTitle: "30 天挑战 · 人脉与分享里程碑",
+    challengeShareItem: (title: string, stage: string) =>
+      stage ? `${title}（大师路径 · ${stage}）` : title,
+    challengeShareFeedCta: "研究广场 →",
+    challengeShareProjectCta: "打开项目 →",
+    challengeShareCta: "查看挑战 →",
     gapToBoard: (needed: number, cutoff: number, limit: number) =>
       `距前 ${limit} 名还差 ${needed} 个毕业因子（入榜线约 ${cutoff} 个）`,
     rankOutside: (rank: number, outside: number, limit: number) =>

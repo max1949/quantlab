@@ -1442,7 +1442,7 @@ MILESTONE_JOURNEY_KEYS: dict[str, str] = {
     "first_paper_order": "publish",
     "paper_graduated": "publish",
     "first_report": "report",
-    "network_radar": "publish",
+    "network_radar": "share",
     "research_share": "report",
 }
 

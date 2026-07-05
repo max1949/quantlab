@@ -47,6 +47,7 @@ class MasteryGoalOut(BaseModel):
     publish_ready: bool = False
     hint: str = ""
     challenge_paper_milestones: list[dict] = Field(default_factory=list)
+    challenge_share_milestones: list[dict] = Field(default_factory=list)
     board_limit: int = 50
     cutoff_graduated: int | None = None
     graduated_needed: int | None = None

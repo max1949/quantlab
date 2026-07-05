@@ -252,6 +252,33 @@ def get_certificate(db: Session, user: User, code: str) -> dict:
 
 
 _PAPER_MILESTONE_CODES = ("first_paper_order", "paper_graduated")
+_SHARE_MILESTONE_CODES = ("network_radar", "research_share")
+
+
+def _challenge_milestones_payload(
+    prog: dict,
+    codes: tuple[str, ...],
+    locale: Locale,
+) -> list[dict]:
+    out: list[dict] = []
+    for m in prog["milestones"]:
+        if m["code"] not in codes:
+            continue
+        titles = MILESTONE_TITLES.get(m["code"], {})
+        title = titles.get(locale) or m["title"]
+        ms = m.get("mastery_stage") or MILESTONE_MASTERY_STAGES.get(m["code"])
+        stage_labels = i18n.MASTERY_STAGE_LABEL.get(locale) or i18n.MASTERY_STAGE_LABEL["en"]
+        out.append(
+            {
+                "code": m["code"],
+                "day": m["day"],
+                "title": title,
+                "completed": m["completed"],
+                "mastery_stage": ms,
+                "mastery_stage_label": stage_labels.get(ms, ms) if ms else None,
+            }
+        )
+    return out
 
 
 def _pending_paper_milestones(prog: dict) -> list[dict]:
@@ -260,6 +287,20 @@ def _pending_paper_milestones(prog: dict) -> list[dict]:
         for m in prog["milestones"]
         if m["code"] in _PAPER_MILESTONE_CODES and not m["completed"]
     ]
+
+
+def challenge_paper_milestones_for_journey(db: Session, user: User, locale: Locale) -> list[dict]:
+    prog = progress_if_enrolled(db, user)
+    if not prog:
+        return []
+    return _challenge_milestones_payload(prog, _PAPER_MILESTONE_CODES, locale)
+
+
+def challenge_share_milestones_for_journey(db: Session, user: User, locale: Locale) -> list[dict]:
+    prog = progress_if_enrolled(db, user)
+    if not prog:
+        return []
+    return _challenge_milestones_payload(prog, _SHARE_MILESTONE_CODES, locale)
 
 
 def alert_challenge_hints(db: Session, user: User, locale: Locale = "en") -> dict[str, str]:
