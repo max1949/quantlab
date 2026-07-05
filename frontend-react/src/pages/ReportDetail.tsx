@@ -6,6 +6,7 @@ import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import { ErrorBox, GradeBadge, PageTitle, Spinner } from "../components/ui";
 import ReportPublishCoach from "../components/ReportPublishCoach";
+import FollowingReportHandoffPanel from "../components/FollowingReportHandoffPanel";
 import ReportDiscoverPanel from "../components/ReportDiscoverPanel";
 import ReportShareCoach from "../components/ReportShareCoach";
 import FirstReportCoachPanel from "../components/FirstReportCoachPanel";
@@ -59,6 +60,8 @@ export default function ReportDetail() {
       </div>
 
       {isOwner && <FirstReportCoachPanel placement="report" reportId={id} />}
+
+      {!isOwner && <FollowingReportHandoffPanel report={r} />}
 
       {!isOwner && <ReportDiscoverPanel report={r} />}
 

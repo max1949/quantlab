@@ -45,6 +45,7 @@ import { useUi } from "../store/ui";
 import { ErrorBox, PageTitle, Spinner } from "../components/ui";
 import OrgIncubationStrip from "../components/OrgIncubationStrip";
 import OrgMemberPageCoachPanel from "../components/OrgMemberPageCoachPanel";
+import OrgNetworkCoachPanel from "../components/OrgNetworkCoachPanel";
 
 export default function OrgDetail() {
   const { id = "" } = useParams();
@@ -426,6 +427,7 @@ export default function OrgDetail() {
 
       {canAdmin && <OrgIncubationStrip canInvite={canAdmin} />}
       {!canAdmin && <OrgMemberPageCoachPanel orgId={id} />}
+      {!canAdmin && <OrgNetworkCoachPanel orgId={id} />}
 
       {isOwner && billing.data && (
         <div className="mb-6 card">

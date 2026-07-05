@@ -52,7 +52,7 @@ export default function Following() {
                   : undefined
               }
             >
-              <ReportCard report={r} />
+              <ReportCard report={r} markHandoffOnOpen={highlightFirst && index === 0} />
             </div>
           ))}
         </div>

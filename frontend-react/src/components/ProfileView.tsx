@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ResearcherProfile } from "../api/types";
 import { follow, unfollow } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
+import { academyRewardMessage } from "../lib/academy";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
 import { Stat } from "./ui";
@@ -18,15 +19,27 @@ export default function ProfileView({
 }) {
   const { dict } = useLocale();
   const t = dict.profile;
+  const dash = dict.dashboard;
   const qc = useQueryClient();
   const notify = useUi((s) => s.notify);
 
   const toggle = useMutation({
-    mutationFn: () =>
-      profile.is_following ? unfollow(profile.user_id) : follow(profile.user_id),
-    onSuccess: () => {
+    mutationFn: async () => {
+      if (profile.is_following) {
+        await unfollow(profile.user_id);
+        return { academy_rewards: [] };
+      }
+      return follow(profile.user_id);
+    },
+    onSuccess: (result) => {
       void qc.invalidateQueries({ queryKey });
-      notify(profile.is_following ? t.unfollowed : t.followed, "success");
+      void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
+      if (!profile.is_following) {
+        const xpMsg = academyRewardMessage(result?.academy_rewards, dash.academyXpEarned);
+        notify(xpMsg ?? t.followed, "success");
+      } else {
+        notify(t.unfollowed, "success");
+      }
     },
     onError: (e) => notify(apiErrorMessage(e, t.followFail), "error"),
   });

@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from backend.app.auth.deps import CurrentUser, OptionalUser
 from backend.app.core.database import get_db
 from backend.app.core.locale import RequestLocale
-from backend.app.schemas.profile import ResearcherProfile
+from backend.app.schemas.profile import FollowOut, ResearcherProfile
 from backend.app.services import profile_service, social_service
 
 router = APIRouter()
@@ -45,18 +45,19 @@ def researcher_profile(
     return ResearcherProfile(**profile_service.build_profile(db, user, viewer=viewer, locale=locale))
 
 
-@router.post("/{user_id}/follow", status_code=status.HTTP_204_NO_CONTENT, summary="关注研究员")
+@router.post("/{user_id}/follow", response_model=FollowOut, summary="关注研究员")
 def follow(
     user_id: str,
     current_user: CurrentUser,
     db: Annotated[Session, Depends(get_db)],
-):
+) -> FollowOut:
     try:
-        social_service.follow(db, current_user, uuid.UUID(user_id))
+        _, rewards = social_service.follow(db, current_user, uuid.UUID(user_id))
     except (social_service.UserNotFoundError, ValueError):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="用户不存在")
     except social_service.CannotFollowSelfError:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="不能关注自己")
+    return FollowOut(academy_rewards=rewards)
 
 
 @router.delete("/{user_id}/follow", status_code=status.HTTP_204_NO_CONTENT, summary="取消关注")

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { api } from "./client";
 import type {
+  AcademyReward,
   Backtest,
   Certificate,
   ChallengeOut,
@@ -873,8 +874,9 @@ export async function getResearcher(userId: string): Promise<ResearcherProfile> 
   return data;
 }
 
-export async function follow(userId: string): Promise<void> {
-  await api.post(`/researchers/${userId}/follow`);
+export async function follow(userId: string): Promise<{ academy_rewards: AcademyReward[] }> {
+  const { data } = await api.post<{ academy_rewards: AcademyReward[] }>(`/researchers/${userId}/follow`);
+  return data;
 }
 
 export async function unfollow(userId: string): Promise<void> {

@@ -29,3 +29,5 @@ export const FIRST_FEED_FOLLOW_WELCOME_KEY = "quantlab-first-feed-follow-welcome
 export const FIRST_FOLLOWING_FEED_WELCOME_KEY = "quantlab-first-following-feed-welcome";
 /** Highlight first report card on following feed after milestone welcome. */
 export const FOLLOWING_FEED_HIGHLIGHT_KEY = "quantlab-following-feed-highlight-first";
+/** Opened highlighted report from following feed — show template handoff coach. */
+export const FOLLOWING_REPORT_HANDOFF_KEY = "quantlab-following-report-handoff";

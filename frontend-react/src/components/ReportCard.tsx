@@ -1,21 +1,34 @@
 import { Link } from "react-router-dom";
 import type { ReportSummary } from "../api/types";
+import { FOLLOWING_REPORT_HANDOFF_KEY } from "../lib/onboardingFocus";
 import { useLocale } from "../store/locale";
 import MasteryPathMini from "./MasteryPathMini";
 import ResearcherFollowButton from "./ResearcherFollowButton";
 import { GradeBadge } from "./ui";
 
-export default function ReportCard({ report, showFollow = false }: { report: ReportSummary; showFollow?: boolean }) {
+export default function ReportCard({
+  report,
+  showFollow = false,
+  markHandoffOnOpen = false,
+}: {
+  report: ReportSummary;
+  showFollow?: boolean;
+  markHandoffOnOpen?: boolean;
+}) {
   const { dict } = useLocale();
   const rc = dict.reportCard;
   const researcherLabel = report.owner_username
     ? rc.researcherName(report.owner_username)
     : rc.viewResearcher;
 
+  const markHandoff = () => {
+    if (markHandoffOnOpen) sessionStorage.setItem(FOLLOWING_REPORT_HANDOFF_KEY, report.id);
+  };
+
   return (
     <div className="card flex h-full flex-col hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
-        <Link to={`/reports/${report.id}`} className="min-w-0 flex-1">
+        <Link to={`/reports/${report.id}`} className="min-w-0 flex-1" onClick={markHandoff}>
           <h3 className="font-semibold text-slate-800 hover:text-brand-600 dark:text-slate-100">
             {report.title}
           </h3>
@@ -65,7 +78,7 @@ export default function ReportCard({ report, showFollow = false }: { report: Rep
         <MasteryPathMini path={report.mastery_path} compact />
       )}
       <div className="mt-auto flex items-center justify-between gap-2 pt-3 text-sm">
-        <Link to={`/reports/${report.id}`} className="font-medium text-brand-600 hover:underline">
+        <Link to={`/reports/${report.id}`} className="font-medium text-brand-600 hover:underline" onClick={markHandoff}>
           {rc.readFull} →
         </Link>
         <div className="flex items-center gap-2">

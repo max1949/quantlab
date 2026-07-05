@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { follow, trackEvent, unfollow } from "../api/endpoints";
 import type { ResearchJourney } from "../api/types";
 import { apiErrorMessage } from "../api/client";
+import { academyRewardMessage } from "../lib/academy";
 import { burstConfetti } from "../lib/confetti";
 import {
   FIRST_FEED_FOLLOW_WELCOME_KEY,
@@ -35,6 +36,7 @@ export default function ResearcherFollowButton({
   const user = useAuth((s) => s.user);
   const p = useLocale((s) => s.dict.profile);
   const fc = useLocale((s) => s.dict.feedFollowCoach);
+  const dash = useLocale((s) => s.dict.dashboard);
   const notify = useUi((s) => s.notify);
   const qc = useQueryClient();
 
@@ -43,8 +45,14 @@ export default function ResearcherFollowButton({
   }
 
   const toggleFollow = useMutation({
-    mutationFn: () => (isFollowing ? unfollow(ownerId) : follow(ownerId)),
-    onSuccess: async () => {
+    mutationFn: async () => {
+      if (isFollowing) {
+        await unfollow(ownerId);
+        return { academy_rewards: [] };
+      }
+      return follow(ownerId);
+    },
+    onSuccess: async (result) => {
       await Promise.all([
         qc.invalidateQueries({ queryKey: ["public-feed"] }),
         qc.invalidateQueries({ queryKey: ["following-feed"] }),
@@ -61,17 +69,21 @@ export default function ResearcherFollowButton({
 
         const journey = qc.getQueryData<ResearchJourney>(["research-journey"]);
         const followingCount = journeyFollowingCount(journey);
+        void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
+        const xpMsg = !isFollowing
+          ? academyRewardMessage(result?.academy_rewards, dash.academyXpEarned)
+          : null;
         if (followingCount >= NETWORK_FOLLOW_TARGET) {
           burstConfetti(3600);
           localStorage.setItem(DISMISS_KEY, "1");
           sessionStorage.setItem(FIRST_FOLLOWING_FEED_WELCOME_KEY, "1");
           sessionStorage.setItem(FOLLOWING_FEED_HIGHLIGHT_KEY, "1");
           window.dispatchEvent(new Event("quantlab-network-milestone"));
-          notify(fc.networkReady, "success");
+          notify(xpMsg ?? fc.networkReady, "success");
         } else if (followingCount > 0) {
-          notify(fc.progressToast(followingCount, NETWORK_FOLLOW_TARGET), "success");
+          notify(xpMsg ?? fc.progressToast(followingCount, NETWORK_FOLLOW_TARGET), "success");
         } else {
-          notify(p.followed, "success");
+          notify(xpMsg ?? p.followed, "success");
         }
       } else {
         notify(p.unfollowed, "success");

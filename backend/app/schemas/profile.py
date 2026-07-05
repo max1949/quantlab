@@ -28,3 +28,7 @@ class ResearcherProfile(BaseModel):
     is_following: bool
     tags: list[str]
     joined_at: datetime
+
+
+class FollowOut(BaseModel):
+    academy_rewards: list[dict] = []

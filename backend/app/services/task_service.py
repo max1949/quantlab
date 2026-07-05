@@ -252,6 +252,15 @@ DEFAULT_TASKS: list[dict] = [
         "order_index": 37,
     },
     {
+        "code": "network-radar",
+        "title": "学习雷达就绪",
+        "description": "在广场关注 3 位研究员后自动完成 — 关注流成为你的大师学习雷达。",
+        "category": "research",
+        "min_level": UserLevel.L0.value,
+        "xp_reward": 60,
+        "order_index": 38,
+    },
+    {
         "code": "write-formula-factor",
         "title": "编写公式因子",
         "description": "在因子实验室创建公式因子后自动完成 (L2 + 研究员会员)。",
@@ -294,6 +303,7 @@ MASTERY_STAGE_BY_TASK_CODE: dict[str, str] = {
     "first-report": "share",
     "first-publish": "share",
     "first-share": "share",
+    "network-radar": "share",
     "use-template-factor": "start",
     "combine-factors": "graduate",
     "write-formula-factor": "graduate",
@@ -307,7 +317,7 @@ MASTERY_STAGE_TASK_CODES: dict[str, list[str]] = {
     "graduate": ["combine-factors", "write-formula-factor"],
     "paper": ["first-paper-order"],
     "track": ["paper-decay-review"],
-    "share": ["first-report", "first-publish", "first-share"],
+    "share": ["first-report", "first-publish", "first-share", "network-radar"],
 }
 
 

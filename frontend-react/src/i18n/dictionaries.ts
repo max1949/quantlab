@@ -1469,6 +1469,16 @@ const en = {
     hint: "Pick one report below, read how they validated, then try a similar template on your desk.",
     scrollReports: "Scroll to reports ↓",
   },
+  followingReportHandoff: {
+    badge: "Learn from a master",
+    title: "You opened a report from your following feed",
+    message: (symbol: string) =>
+      `Notice how they framed hypothesis, validation, and risk on ${symbol} — that's the mastery bar.`,
+    templateHint: (title: string) => `Try a similar path with「${title}」on your desk.`,
+    genericHint: "Pick a regime-matched template and run the same validate → report loop.",
+    startTemplate: "Start similar template →",
+    dismiss: "Keep reading",
+  },
   share: {
     invalid: "Share not found or expired",
     pitch: "Want to do your own quant research?",
@@ -2996,6 +3006,16 @@ const zh = {
     message: "你已关注 3 位研究员 — 这个页面就是你的大师学习雷达。",
     hint: "从下方挑一篇报告细读：看他们如何验证，再回工作台用类似模板练手。",
     scrollReports: "往下看报告 ↓",
+  },
+  followingReportHandoff: {
+    badge: "向大师学习",
+    title: "你打开了关注流中的一篇报告",
+    message: (symbol: string) =>
+      `留意他们在 ${symbol} 上如何写假设、验证与风险 — 这就是大师水准。`,
+    templateHint: (title: string) => `用「${title}」在你的工位上走一遍类似路径。`,
+    genericHint: "选一个行情匹配的模板，完成同样的验证 → 报告闭环。",
+    startTemplate: "用类似模板开局 →",
+    dismiss: "继续阅读",
   },
   share: {
     invalid: "分享不存在或已失效",

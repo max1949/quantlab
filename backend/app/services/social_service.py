@@ -25,8 +25,8 @@ class UserNotFoundError(Exception):
     pass
 
 
-def follow(db: Session, follower: User, followee_id: uuid.UUID) -> bool:
-    """关注 (幂等)。返回是否新建。"""
+def follow(db: Session, follower: User, followee_id: uuid.UUID) -> tuple[bool, list[dict]]:
+    """关注 (幂等)。返回 (是否新建, 学院奖励)。"""
     if follower.id == followee_id:
         raise CannotFollowSelfError
     followee = db.get(User, followee_id)
@@ -38,12 +38,18 @@ def follow(db: Session, follower: User, followee_id: uuid.UUID) -> bool:
         )
     ).scalar_one_or_none()
     if existing is not None:
-        return False
+        return False, []
     db.add(UserFollow(follower_id=follower.id, followee_id=followee_id))
     db.commit()
     growth_service.recompute_contribution_score(db, followee)
     growth_service.log_event(db, "follow", follower.id, {"followee_id": str(followee_id)})
-    return True
+    rewards: list[dict] = []
+    following = int(counts(db, follower.id)["following"])
+    if following >= 3:
+        from backend.app.services import academy_hooks
+
+        rewards = academy_hooks.on_network_radar(db, follower)
+    return True, rewards
 
 
 def unfollow(db: Session, follower: User, followee_id: uuid.UUID) -> bool:

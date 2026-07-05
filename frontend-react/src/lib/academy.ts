@@ -29,4 +29,5 @@ export const AUTO_ACADEMY_TASK_CODES = new Set([
   "write-python-factor",
   "first-paper-order",
   "paper-decay-review",
+  "network-radar",
 ]);

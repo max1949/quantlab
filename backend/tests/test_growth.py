@@ -904,7 +904,7 @@ def test_follow_and_feed(client, db_session):
     _, rep = _full_research(client, hb, db_session)
     client.post(f"{BASE}/research/reports/{rep['id']}/share", headers=hb)  # 置公开
     # A 关注 B
-    assert client.post(f"{BASE}/researchers/{uid_b}/follow", headers=ha).status_code == 204
+    assert client.post(f"{BASE}/researchers/{uid_b}/follow", headers=ha).status_code == 200
     prof_b = client.get(f"{BASE}/researchers/{uid_b}", headers=ha).json()
     assert prof_b["followers"] == 1 and prof_b["is_following"] is True
     # A 的 feed 看到 B 的研究
@@ -912,6 +912,22 @@ def test_follow_and_feed(client, db_session):
     assert any(r["owner_id"] == uid_b for r in feed)
     # 取关
     assert client.delete(f"{BASE}/researchers/{uid_b}/follow", headers=ha).status_code == 204
+
+
+def test_network_radar_academy_on_third_follow(client, db_session):
+    from backend.app.services.task_service import seed_default_tasks
+
+    seed_default_tasks(db_session)
+    ha = _register(client, "net_a")
+    targets = []
+    for name in ("net_b", "net_c", "net_d"):
+        hb = _register(client, name)
+        targets.append(client.get(f"{BASE}/researchers/me", headers=hb).json()["user_id"])
+    rewards = []
+    for uid in targets:
+        body = client.post(f"{BASE}/researchers/{uid}/follow", headers=ha).json()
+        rewards.extend(body.get("academy_rewards") or [])
+    assert any(r.get("code") == "network-radar" for r in rewards)
 
 
 def test_cannot_follow_self(client, db_session):

@@ -10,7 +10,12 @@ function dismissKey(orgId: string) {
   return `quantlab-org-network-coach-${orgId}`;
 }
 
-export default function OrgNetworkCoachPanel() {
+type Props = {
+  /** When set, only show on matching org detail page */
+  orgId?: string;
+};
+
+export default function OrgNetworkCoachPanel({ orgId: pageOrgId }: Props = {}) {
   const d = useLocale((s) => s.dict.orgNetworkCoach);
   const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
   const coach = journey.data?.org_network_coaching;
@@ -22,6 +27,7 @@ export default function OrgNetworkCoachPanel() {
   }, [orgId]);
 
   if (!coach || !orgId || dismissed || journey.isLoading) return null;
+  if (pageOrgId && coach.org_id !== pageOrgId) return null;
 
   const dismiss = () => {
     localStorage.setItem(dismissKey(orgId), "1");
@@ -29,7 +35,9 @@ export default function OrgNetworkCoachPanel() {
   };
 
   return (
-    <div className="card border border-indigo-200 bg-gradient-to-r from-indigo-50/90 to-violet-50/60 dark:border-indigo-900 dark:from-indigo-950/40 dark:to-violet-950/30">
+    <div
+      className={`card border border-indigo-200 bg-gradient-to-r from-indigo-50/90 to-violet-50/60 dark:border-indigo-900 dark:from-indigo-950/40 dark:to-violet-950/30${pageOrgId ? " mb-6" : ""}`}
+    >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
           <p className="text-xs font-semibold uppercase tracking-wide text-indigo-800 dark:text-indigo-200">
