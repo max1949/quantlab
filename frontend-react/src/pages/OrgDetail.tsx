@@ -43,6 +43,7 @@ import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
 import { ErrorBox, PageTitle, Spinner } from "../components/ui";
+import OrgIncubationStrip from "../components/OrgIncubationStrip";
 
 export default function OrgDetail() {
   const { id = "" } = useParams();
@@ -422,6 +423,8 @@ export default function OrgDetail() {
         <StatCard label={o.overlap} value={cat?.high_overlap_count ?? 0} />
       </div>
 
+      {canAdmin && <OrgIncubationStrip canInvite={canAdmin} />}
+
       {isOwner && billing.data && (
         <div className="mb-6 card">
           <h2 className="mb-2 font-semibold">{o.billingTitle}</h2>
@@ -575,7 +578,7 @@ export default function OrgDetail() {
       )}
 
       {canAdmin && (
-        <div className="mb-6 grid gap-4 lg:grid-cols-2">
+        <div id="org-invite" className="mb-6 grid gap-4 lg:grid-cols-2">
           <div className="card">
             <h2 className="mb-2 font-semibold">{o.inviteTitle}</h2>
             <p className="mb-3 text-sm text-slate-500">{o.inviteHint}</p>

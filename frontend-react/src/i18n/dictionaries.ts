@@ -330,6 +330,18 @@ const en = {
     auditFilterProject: "Publish actions",
     auditFilterBacktest: "Backtest actions",
   },
+  orgIncubation: {
+    badge: "Team incubation pack",
+    title: "Onboard your desk like an institutional PM program",
+    subtitle: "Share the same mastery handbook and invite link — every teammate gets the full beginner-to-masters path.",
+    steps: [
+      "Download the team handbook (PDF) and share with new hires",
+      "Create a bulk invite link — up to 20 teammates in 14 days",
+      "Each member follows the auto-guided path: template → validation → Paper Masters",
+    ],
+    inviteCta: "Create team invite →",
+    memberDashboard: "Open member workspace →",
+  },
   orgLibrary: {
     title: "Team factor library",
     subtitle: "Institutional workspace — share factors across your research desk.",
@@ -1733,6 +1745,18 @@ const zh = {
     auditFilterOrg: "机构相关",
     auditFilterProject: "发布相关",
     auditFilterBacktest: "回测相关",
+  },
+  orgIncubation: {
+    badge: "团队孵化包",
+    title: "像机构 PM 培养计划一样带新人",
+    subtitle: "同一份大师手册 + 邀请链接 — 每位成员都走完整的新手到 Paper 大师路径。",
+    steps: [
+      "下载团队手册（PDF）发给新成员",
+      "生成批量邀请链接 — 14 天内最多 20 人",
+      "成员按全自动引导：模板 → 验证 → Paper 大师榜",
+    ],
+    inviteCta: "生成团队邀请 →",
+    memberDashboard: "打开成员工作台 →",
   },
   orgLibrary: {
     title: "团队因子库",

@@ -378,6 +378,8 @@ export default function ProjectDetail() {
         onGenerateReport={() => genReport.mutate()}
       />
 
+      <FirstPaperOrderCoachPanel projectId={id} placement="project" />
+
       {projectFactors.length > 1 && (
         <div className="mb-4 flex items-center gap-2 text-sm">
           <span className="text-slate-500">{p.factorForRun}</span>
@@ -678,8 +680,6 @@ export default function ProjectDetail() {
           symbol={symbol}
         />
       </div>
-
-      <FirstPaperOrderCoachPanel projectId={id} />
 
       <div className="mt-4" id="paper-tracking">
         <PaperTrackingPanel

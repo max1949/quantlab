@@ -8,30 +8,40 @@ import { useLocale } from "../store/locale";
 import { stageToCtaLabel } from "../lib/nav";
 
 type Props = {
-  projectId: string;
+  projectId?: string;
+  placement?: "dashboard" | "project";
 };
 
 function dismissKey(projectId: string) {
   return `quantlab-first-paper-order-coach-${projectId}`;
 }
 
-export default function FirstPaperOrderCoachPanel({ projectId }: Props) {
+export default function FirstPaperOrderCoachPanel({
+  projectId,
+  placement = "project",
+}: Props) {
   const d = useLocale((s) => s.dict.firstPaperOrderCoach);
   const stages = useLocale((s) => s.dict.stages);
-  const [highlighted, setHighlighted] = useState(false);
-  const [dismissed, setDismissed] = useState(
-    () => localStorage.getItem(dismissKey(projectId)) === "1",
-  );
-
   const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
 
   const coach = journey.data?.first_paper_order_coaching;
+  const effectiveProjectId = projectId ?? coach?.active_project_id ?? "";
+  const [highlighted, setHighlighted] = useState(false);
+  const [dismissed, setDismissed] = useState(
+    () => effectiveProjectId && localStorage.getItem(dismissKey(effectiveProjectId)) === "1",
+  );
+  const freshPaperOrder =
+    typeof window !== "undefined" ? sessionStorage.getItem(FIRST_PAPER_ORDER_WELCOME_KEY) : null;
   const matches =
-    coach != null && coach.active_project_id === projectId && !dismissed;
+    coach != null &&
+    effectiveProjectId &&
+    coach.active_project_id === effectiveProjectId &&
+    !dismissed &&
+    !(placement === "dashboard" && freshPaperOrder);
 
   useEffect(() => {
     if (!matches) return;
-    if (sessionStorage.getItem(FIRST_PAPER_ORDER_WELCOME_KEY) !== projectId) return;
+    if (sessionStorage.getItem(FIRST_PAPER_ORDER_WELCOME_KEY) !== effectiveProjectId) return;
     sessionStorage.removeItem(FIRST_PAPER_ORDER_WELCOME_KEY);
     burstConfetti(3000);
     const scrollTimer = window.setTimeout(() => {
@@ -46,7 +56,7 @@ export default function FirstPaperOrderCoachPanel({ projectId }: Props) {
       window.clearTimeout(clearTimer);
       window.clearTimeout(scrollTimer);
     };
-  }, [matches, projectId]);
+  }, [matches, effectiveProjectId]);
 
   if (!matches || journey.isLoading) return null;
 
@@ -54,7 +64,9 @@ export default function FirstPaperOrderCoachPanel({ projectId }: Props) {
     coach.cta_action in stages ? stageToCtaLabel(coach.cta_action, stages) : d.ctaDefault;
 
   const dismiss = () => {
-    localStorage.setItem(dismissKey(projectId), "1");
+    if (effectiveProjectId) {
+      localStorage.setItem(dismissKey(effectiveProjectId), "1");
+    }
     setDismissed(true);
   };
 

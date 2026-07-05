@@ -20,6 +20,7 @@ import PostCheckoutCoachPanel from "../components/PostCheckoutCoachPanel";
 import QuickStartGuidePanel from "../components/QuickStartGuidePanel";
 import FirstDashboardMentorPanel from "../components/FirstDashboardMentorPanel";
 import FirstReportCoachPanel from "../components/FirstReportCoachPanel";
+import FirstPaperOrderCoachPanel from "../components/FirstPaperOrderCoachPanel";
 import MasteryOverviewPanel from "../components/MasteryOverviewPanel";
 import ReputationCoachPanel from "../components/ReputationCoachPanel";
 import ShareGrowthCoachPanel from "../components/ShareGrowthCoachPanel";
@@ -71,6 +72,10 @@ export default function Dashboard() {
 
       <div className="mt-6">
         <FirstReportCoachPanel />
+      </div>
+
+      <div className="mt-6">
+        <FirstPaperOrderCoachPanel placement="dashboard" />
       </div>
 
       <div className="mt-6">
