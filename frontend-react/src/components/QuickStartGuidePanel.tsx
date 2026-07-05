@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { enrollChallenge, getResearchJourney } from "../api/endpoints";
@@ -12,6 +12,7 @@ import { stageToCtaLabel } from "../lib/nav";
 import { Spinner } from "./ui";
 
 const DISMISS_KEY = "quantlab-quickstart-dismissed";
+const FOCUS_KEY = "quantlab-focus-quickstart";
 
 function readDismissedProgress(): number {
   const raw = localStorage.getItem(DISMISS_KEY);
@@ -30,10 +31,27 @@ export default function QuickStartGuidePanel() {
   const notify = useUi((s) => s.notify);
   const refreshMe = useAuth((s) => s.refreshMe);
   const qc = useQueryClient();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [highlighted, setHighlighted] = useState(false);
   const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
 
   const guide = journey.data?.quickstart_guide;
   const sprint = journey.data?.beginner_sprint;
+
+  useEffect(() => {
+    if (!guide || sessionStorage.getItem(FOCUS_KEY) !== "1") return;
+    sessionStorage.removeItem(FOCUS_KEY);
+    const scrollTimer = window.setTimeout(() => {
+      rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setHighlighted(true);
+    }, 120);
+    const clearTimer = window.setTimeout(() => setHighlighted(false), 3200);
+    return () => {
+      window.clearTimeout(scrollTimer);
+      window.clearTimeout(clearTimer);
+    };
+  }, [guide]);
+
   const [hideAfterDismiss, setHideAfterDismiss] = useState(false);
   const dismissedProgress = readDismissedProgress();
   const dismissed =
@@ -74,7 +92,13 @@ export default function QuickStartGuidePanel() {
   };
 
   return (
-    <div className="card border border-sky-200 bg-gradient-to-r from-sky-50/90 to-indigo-50/50 dark:border-sky-900 dark:from-sky-950/40 dark:to-indigo-950/20">
+    <div
+      id="quickstart"
+      ref={rootRef}
+      className={`card border border-sky-200 bg-gradient-to-r from-sky-50/90 to-indigo-50/50 dark:border-sky-900 dark:from-sky-950/40 dark:to-indigo-950/20 ${
+        highlighted ? "ring-2 ring-sky-400 ring-offset-2 dark:ring-sky-500" : ""
+      }`}
+    >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">

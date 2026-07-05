@@ -32,6 +32,7 @@ export default function Onboarding() {
       const updated = await chooseType(selected);
       setUser(updated);
       void trackEvent("onboarding_done", { user_type: selected });
+      sessionStorage.setItem("quantlab-focus-quickstart", "1");
       notify(o.saved, "success");
       navigate("/app", { replace: true });
     } catch (err) {
