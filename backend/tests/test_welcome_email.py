@@ -24,6 +24,17 @@ def test_build_welcome_email_contains_handbook_and_dashboard():
     assert "/app" in body
 
 
+def test_register_hint_when_smtp_configured(monkeypatch):
+    from backend.app.core.config import get_settings
+
+    settings = get_settings()
+    monkeypatch.setattr(settings, "smtp_host", "smtp.example.com")
+    monkeypatch.setattr(settings, "smtp_from", "hello@quantlab.ai")
+    hint = wes.register_hint("zh")
+    assert hint
+    assert "手册" in hint
+
+
 def test_notify_welcome_sends_when_smtp_configured(db_session, monkeypatch):
     from backend.app.core.config import get_settings
 

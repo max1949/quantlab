@@ -916,6 +916,7 @@ SHARE_GROWTH_COACH: dict[Locale, dict[str, str]] = {
 WELCOME_EMAIL: dict[Locale, dict[str, str]] = {
     "en": {
         "subject": "Welcome to QuantLab — your mastery path starts here",
+        "register_hint": "Beginner handbook link sent to your email — check inbox to save your mastery map.",
         "body": (
             "Hello {username},\n\n"
             "Welcome to QuantLab — the research incubator that guides you from template to Paper Masters.\n\n"
@@ -931,6 +932,7 @@ WELCOME_EMAIL: dict[Locale, dict[str, str]] = {
     },
     "zh": {
         "subject": "欢迎加入 QuantLab — 你的大师路径从这里开始",
+        "register_hint": "新手手册链接已发到你的邮箱 — 请查收并保存大师路径图。",
         "body": (
             "你好，{username}：\n\n"
             "欢迎加入 QuantLab — 从模板到 Paper 大师的全自动研究孵化器。\n\n"

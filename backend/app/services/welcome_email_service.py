@@ -34,6 +34,13 @@ def build_welcome_email(user: User, *, locale: Locale = "zh") -> tuple[str, str]
     return subject, body
 
 
+def register_hint(locale: Locale = "zh") -> str | None:
+    if not bes.smtp_configured():
+        return None
+    labels = i18n.WELCOME_EMAIL.get(locale) or i18n.WELCOME_EMAIL["en"]
+    return labels.get("register_hint")
+
+
 def notify_welcome_email(
     db: Session,
     user: User,

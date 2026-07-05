@@ -16,7 +16,7 @@ interface AuthState {
     ref?: string | null;
     captcha_token?: string;
     captcha_answer?: string;
-  }) => Promise<User>;
+  }) => Promise<{ user: User; welcomeEmailHint?: string | null }>;
   loginWithToken: (token: string) => Promise<User>;
   logout: () => void;
   refreshMe: () => Promise<User | null>;
@@ -54,7 +54,7 @@ export const useAuth = create<AuthState>((set) => ({
     const res = await ep.register(body);
     setToken(res.access_token);
     set({ token: res.access_token, user: res.user, ready: true });
-    return res.user;
+    return { user: res.user, welcomeEmailHint: res.welcome_email_hint ?? null };
   },
 
   logout() {

@@ -78,8 +78,18 @@ export async function register(body: {
   ref?: string | null;
   captcha_token?: string;
   captcha_answer?: string;
-}): Promise<{ access_token: string; user: User }> {
-  const { data } = await api.post<{ access_token: string; user: User }>(
+}): Promise<{
+  access_token: string;
+  user: User;
+  welcome_email_sent?: boolean;
+  welcome_email_hint?: string | null;
+}> {
+  const { data } = await api.post<{
+    access_token: string;
+    user: User;
+    welcome_email_sent?: boolean;
+    welcome_email_hint?: string | null;
+  }>(
     "/auth/register",
     body
   );

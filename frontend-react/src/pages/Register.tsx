@@ -46,7 +46,7 @@ export default function Register() {
     setLoading(true);
     setError("");
     try {
-      await register({
+      const { welcomeEmailHint } = await register({
         email,
         username,
         password,
@@ -56,7 +56,10 @@ export default function Register() {
         captcha_answer: captchaAnswer,
       });
       void trackEvent("register_done", { user_type: userType, ref });
-      notify(locale === "zh" ? "注册成功, 开始你的研究吧!" : "Welcome aboard!", "success");
+      notify(auth.registerSuccess, "success");
+      if (welcomeEmailHint) {
+        notify(welcomeEmailHint, "info");
+      }
       navigate("/onboarding", { replace: true });
     } catch (err) {
       setError(apiErrorMessage(err, auth.registerFailed));

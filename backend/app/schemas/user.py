@@ -91,3 +91,5 @@ class RegisterOut(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserOut
+    welcome_email_sent: bool = False
+    welcome_email_hint: str | None = None

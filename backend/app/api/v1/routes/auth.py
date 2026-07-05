@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from backend.app.auth.security import create_access_token
 from backend.app.core.config import get_settings
 from backend.app.core.database import get_db
+from backend.app.core.locale import RequestLocale
 from backend.app.core.request_ip import get_client_ip
 from backend.app.schemas.user import RegisterOut, Token, UserCreate, UserLogin, UserOut
 from backend.app.services import (
@@ -58,6 +59,7 @@ def register(
     payload: UserCreate,
     request: Request,
     db: Annotated[Session, Depends(get_db)],
+    locale: RequestLocale,
 ) -> RegisterOut:
     try:
         rate_limit.check_signup(get_client_ip(request))
@@ -74,10 +76,15 @@ def register(
     if payload.ref:
         referral_service.link_referral(db, user, payload.ref)
     growth_service.log_event(db, "register", user.id, {"user_type": user.user_type})
-    welcome_email_service.notify_welcome_email(db, user)
+    welcome_sent = welcome_email_service.notify_welcome_email(db, user, locale=locale)
     db.refresh(user)
     token = create_access_token(subject=str(user.id))
-    return RegisterOut(access_token=token, user=UserOut.model_validate(user))
+    return RegisterOut(
+        access_token=token,
+        user=UserOut.model_validate(user),
+        welcome_email_sent=welcome_sent,
+        welcome_email_hint=welcome_email_service.register_hint(locale) if welcome_sent else None,
+    )
 
 
 @router.post("/login", response_model=Token, summary="登录获取 JWT")
