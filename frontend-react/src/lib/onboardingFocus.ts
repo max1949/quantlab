@@ -35,3 +35,6 @@ export const FOLLOWING_REPORT_HANDOFF_KEY = "quantlab-following-report-handoff";
 export const FOLLOWING_TEMPLATE_HANDOFF_KEY = "quantlab-following-template-handoff";
 /** Project started from master replication — show replication coach on project page. */
 export const FOLLOWING_PROJECT_REPLICATION_KEY = "quantlab-following-project-replication";
+/** Report generated after replication OOS check — show publish/share handoff on report page. */
+export const REPLICATION_REPORT_PENDING_KEY = "quantlab-replication-report-pending";
+export const REPLICATION_REPORT_WELCOME_KEY = "quantlab-replication-report-welcome";

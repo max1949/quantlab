@@ -5,6 +5,7 @@ import { apiErrorMessage } from "../api/client";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import { ErrorBox, GradeBadge, PageTitle, Spinner } from "../components/ui";
+import ReplicationReportHandoffPanel from "../components/ReplicationReportHandoffPanel";
 import ReportPublishCoach from "../components/ReportPublishCoach";
 import FollowingReportHandoffPanel from "../components/FollowingReportHandoffPanel";
 import ReportDiscoverPanel from "../components/ReportDiscoverPanel";
@@ -61,11 +62,19 @@ export default function ReportDetail() {
 
       {isOwner && <FirstReportCoachPanel placement="report" reportId={id} />}
 
+      {isOwner && (
+        <ReplicationReportHandoffPanel reportId={id} projectId={r.project_id} />
+      )}
+
       {!isOwner && <FollowingReportHandoffPanel report={r} />}
 
       {!isOwner && <ReportDiscoverPanel report={r} />}
 
-      {isOwner && r.project_id && <ReportPublishCoach projectId={r.project_id} />}
+      {isOwner && r.project_id && (
+        <div id="report-publish">
+          <ReportPublishCoach projectId={r.project_id} />
+        </div>
+      )}
 
       <div className="space-y-4">
         {sections

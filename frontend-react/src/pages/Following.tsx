@@ -7,6 +7,7 @@ import { FOLLOWING_FEED_HIGHLIGHT_KEY } from "../lib/onboardingFocus";
 import { useLocale } from "../store/locale";
 import { EmptyState, ErrorBox, PageTitle, Spinner } from "../components/ui";
 import ReportCard from "../components/ReportCard";
+import FollowingFeedRhythmCoachPanel from "../components/FollowingFeedRhythmCoachPanel";
 import FollowingFeedWelcomePanel from "../components/FollowingFeedWelcomePanel";
 
 export default function Following() {
@@ -31,6 +32,10 @@ export default function Following() {
     <div>
       <PageTitle title={t.title} subtitle={t.subtitle} />
       <FollowingFeedWelcomePanel onHighlightReady={() => setHighlightFirst(true)} />
+      <FollowingFeedRhythmCoachPanel
+        hasReports={Boolean(q.data && q.data.length > 0)}
+        highlightActive={highlightFirst}
+      />
       {highlightFirst && q.data && q.data.length > 0 && (
         <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50/60 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200">
           {t.highlightFirst}

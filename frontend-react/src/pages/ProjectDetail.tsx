@@ -39,7 +39,13 @@ import VolRegimeBanner from "../components/VolRegimeBanner";
 import MasterReplicationBenchmarkPanel from "../components/MasterReplicationBenchmarkPanel";
 import ProjectIncubationCoachStack from "../components/ProjectIncubationCoachStack";
 import FactorCatalogPanel from "../components/FactorCatalogPanel";
-import { FIRST_BACKTEST_WELCOME_KEY, FIRST_REPORT_WELCOME_KEY, FIRST_VALIDATION_WELCOME_KEY } from "../lib/onboardingFocus";
+import {
+  FIRST_BACKTEST_WELCOME_KEY,
+  FIRST_REPORT_WELCOME_KEY,
+  FIRST_VALIDATION_WELCOME_KEY,
+  REPLICATION_REPORT_PENDING_KEY,
+  REPLICATION_REPORT_WELCOME_KEY,
+} from "../lib/onboardingFocus";
 import type { Graph } from "../api/types";
 
 type StepKey = "factor" | "backtest" | "validation" | "report" | "publish";
@@ -167,6 +173,10 @@ export default function ProjectDetail() {
         { confetti: false },
       );
       sessionStorage.setItem(FIRST_REPORT_WELCOME_KEY, r.id);
+      if (sessionStorage.getItem(REPLICATION_REPORT_PENDING_KEY) === id) {
+        sessionStorage.removeItem(REPLICATION_REPORT_PENDING_KEY);
+        sessionStorage.setItem(REPLICATION_REPORT_WELCOME_KEY, r.id);
+      }
       if (!first) {
         const msg = academyRewardMessage(r.academy_rewards, d.academyXpEarned, atl);
         if (msg) notify(msg, "success");

@@ -1477,6 +1477,26 @@ const en = {
     hint: "Pick one report below, read how they validated, then try a similar template on your desk.",
     scrollReports: "Scroll to reports ↓",
   },
+  followingFeedRhythm: {
+    badge: "Weekly mastery habit",
+    title: "Masters read one report a week",
+    message:
+      "Pick a report below, study how they validated, then mirror one template on your desk — that's the incubator loop.",
+    hint: "This reminder shows once per week while your following feed has fresh research.",
+    pickReport: "Pick a report ↓",
+    dismiss: "Got it",
+  },
+  replicationReportHandoff: {
+    badge: "Replication complete",
+    title: "You finished a master replication — now contribute back",
+    message:
+      "Publish to the research feed so campmates can follow your work, then create a share card to grow your network.",
+    hint: "Masters don't only consume — they ship validated research others can learn from.",
+    publish: "Publish to feed →",
+    share: "Create share card →",
+    backToFollowing: "Back to following feed",
+    dismiss: "Later",
+  },
   followingReportHandoff: {
     badge: "Learn from a master",
     title: "You opened a report from your following feed",
@@ -3128,6 +3148,24 @@ const zh = {
     message: "你已关注 3 位研究员 — 这个页面就是你的大师学习雷达。",
     hint: "从下方挑一篇报告细读：看他们如何验证，再回工作台用类似模板练手。",
     scrollReports: "往下看报告 ↓",
+  },
+  followingFeedRhythm: {
+    badge: "每周大师习惯",
+    title: "大师每周精读 1 篇报告",
+    message: "在下方挑一篇细读验证方法，再回工作台用类似模板练手 — 这就是孵化器闭环。",
+    hint: "关注流有更新时，每周提醒一次，帮你保持学习节奏。",
+    pickReport: "挑一篇报告 ↓",
+    dismiss: "知道了",
+  },
+  replicationReportHandoff: {
+    badge: "复现完成",
+    title: "你完成了一次大师复现 — 现在回馈社区",
+    message: "发布到研究广场让同伴关注你的成果，再生成分享卡片扩大人脉。",
+    hint: "大师不只学习 — 也会发布经得住验证的研究，供他人借鉴。",
+    publish: "发布到广场 →",
+    share: "生成分享卡片 →",
+    backToFollowing: "回关注动态",
+    dismiss: "稍后再说",
   },
   followingReportHandoff: {
     badge: "向大师学习",

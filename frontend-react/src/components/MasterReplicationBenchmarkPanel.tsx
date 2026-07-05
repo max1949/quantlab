@@ -8,6 +8,7 @@ import {
   replicationValidationDismissKey,
   type ReplicationBenchmark,
 } from "../lib/replicationBenchmark";
+import { REPLICATION_REPORT_PENDING_KEY } from "../lib/onboardingFocus";
 import { useLocale } from "../store/locale";
 
 type Props = {
@@ -183,6 +184,7 @@ export default function MasterReplicationBenchmarkPanel({
           type="button"
           className="btn-primary text-xs"
           onClick={() => {
+            sessionStorage.setItem(REPLICATION_REPORT_PENDING_KEY, projectId);
             finalizeReplication();
             onGenerateReport();
           }}
