@@ -28,6 +28,7 @@ export default function NetworkReadyCoachPanel() {
           </p>
           <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-50">{d.title}</p>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{d.message}</p>
+          <p className="mt-2 text-xs text-emerald-800/90 dark:text-emerald-100/90">{d.academyHint}</p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
           <Link to="/me/following" className="btn-primary whitespace-nowrap text-xs">

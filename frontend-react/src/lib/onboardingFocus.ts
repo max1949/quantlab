@@ -31,3 +31,5 @@ export const FIRST_FOLLOWING_FEED_WELCOME_KEY = "quantlab-first-following-feed-w
 export const FOLLOWING_FEED_HIGHLIGHT_KEY = "quantlab-following-feed-highlight-first";
 /** Opened highlighted report from following feed — show template handoff coach. */
 export const FOLLOWING_REPORT_HANDOFF_KEY = "quantlab-following-report-handoff";
+/** Landed on templates after following-feed report — show master replication coach. */
+export const FOLLOWING_TEMPLATE_HANDOFF_KEY = "quantlab-following-template-handoff";

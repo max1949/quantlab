@@ -4,7 +4,7 @@ import type { ReportDetail } from "../api/types";
 import { trackEvent } from "../api/endpoints";
 import { burstConfetti } from "../lib/confetti";
 import { primaryTemplateForSymbol } from "../lib/templateHints";
-import { FOLLOWING_REPORT_HANDOFF_KEY } from "../lib/onboardingFocus";
+import { FOLLOWING_REPORT_HANDOFF_KEY, FOLLOWING_TEMPLATE_HANDOFF_KEY } from "../lib/onboardingFocus";
 import { useLocale } from "../store/locale";
 
 type Props = {
@@ -39,6 +39,7 @@ export default function FollowingReportHandoffPanel({ report }: Props) {
       symbol: report.symbol,
       template_code: templateCode ?? "",
     });
+    sessionStorage.setItem(FOLLOWING_TEMPLATE_HANDOFF_KEY, report.symbol);
   };
 
   return (

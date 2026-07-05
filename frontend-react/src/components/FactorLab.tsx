@@ -49,6 +49,7 @@ export default function FactorLab({
   const notify = useUi((s) => s.notify);
   const fl = useLocale((s) => s.dict.factorLab);
   const d = useLocale((s) => s.dict.dashboard);
+  const atl = useLocale((s) => s.dict.academyTaskLabels);
   const c = useLocale((s) => s.dict.common);
 
   const templates = useQuery({
@@ -83,7 +84,7 @@ export default function FactorLab({
     mutationFn: (id: string) => previewFactor(id),
     onSuccess: async (p) => {
       setPreview((m) => ({ ...m, [p.factor_id]: p }));
-      const msg = academyRewardMessage(p.academy_rewards, d.academyXpEarned);
+      const msg = academyRewardMessage(p.academy_rewards, d.academyXpEarned, atl);
       if (msg) {
         notify(msg, "success");
         void qc.invalidateQueries({ queryKey: ["academy-tasks"] });

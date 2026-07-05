@@ -27,6 +27,7 @@ export default function QuickStartGuidePanel() {
   const handbook = useLocale((s) => s.dict.beginnerHandbook);
   const challengePage = useLocale((s) => s.dict.challengesPage);
   const dash = useLocale((s) => s.dict.dashboard);
+  const atl = useLocale((s) => s.dict.academyTaskLabels);
   const stages = useLocale((s) => s.dict.stages);
   const notify = useUi((s) => s.notify);
   const refreshMe = useAuth((s) => s.refreshMe);
@@ -68,7 +69,7 @@ export default function QuickStartGuidePanel() {
       void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
       celebrateChallengeEnroll(
         data,
-        { ...sprintLabels, academyXpEarned: dash.academyXpEarned },
+        { ...sprintLabels, academyXpEarned: dash.academyXpEarned, academyTaskLabels: atl },
         notify,
       );
       await refreshMe();

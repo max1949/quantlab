@@ -20,6 +20,7 @@ export default function ProfileView({
   const { dict } = useLocale();
   const t = dict.profile;
   const dash = dict.dashboard;
+  const atl = dict.academyTaskLabels;
   const qc = useQueryClient();
   const notify = useUi((s) => s.notify);
 
@@ -35,7 +36,7 @@ export default function ProfileView({
       void qc.invalidateQueries({ queryKey });
       void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
       if (!profile.is_following) {
-        const xpMsg = academyRewardMessage(result?.academy_rewards, dash.academyXpEarned);
+        const xpMsg = academyRewardMessage(result?.academy_rewards, dash.academyXpEarned, atl);
         notify(xpMsg ?? t.followed, "success");
       } else {
         notify(t.unfollowed, "success");

@@ -73,6 +73,11 @@ export default function FeedFollowCoachPanel({ onDiscoverMasters }: Props) {
               />
             </div>
           </div>
+          {followingCount === NETWORK_FOLLOW_TARGET - 1 && (
+            <p className="mt-2 text-xs font-medium text-sky-800 dark:text-sky-100">
+              {d.almostThere(NETWORK_FOLLOW_TARGET)}
+            </p>
+          )}
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
           <button

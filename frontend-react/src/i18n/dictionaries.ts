@@ -604,6 +604,11 @@ const en = {
     focusCoachHint: (title: string) => `Recommended for you — start 「${title}」 in one click.`,
     focusCoachStart: "Start now →",
     focusCoachBrowse: "Browse all",
+    masterHandoffBadge: "Master replication path",
+    masterHandoffTitle: (symbol: string) => `Replicate what you read on ${symbol}`,
+    masterHandoffHint:
+      "You followed a master's report — start this template to run the same validate → report loop.",
+    masterHandoffDismiss: "Got it",
   },
   projectRegime: {
     title: (symbol: string) => `Market regime · ${symbol}`,
@@ -1266,12 +1271,15 @@ const en = {
     progress: (n: number, target: number) => `${n} / ${target} researchers followed`,
     progressToast: (n: number, target: number) =>
       `Nice — ${n} of ${target} followed. Keep building your learning radar.`,
+    almostThere: (target: number) =>
+      `One more follow unlocks your learning radar — ${target} total (+60 Academy XP).`,
     networkReady: "Network ready — open your following feed to start learning from masters.",
   },
   networkReadyCoach: {
     badge: "Network milestone",
     title: "You followed 3 researchers — learning radar unlocked",
     message: "Open your following feed to read how masters validate factors, then mirror one template on your desk.",
+    academyHint: 'Academy task "Learning radar ready" (+60 XP) is now complete.',
     openFollowing: "Open following feed →",
     stayOnFeed: "Keep browsing feed",
   },
@@ -1478,6 +1486,72 @@ const en = {
     genericHint: "Pick a regime-matched template and run the same validate → report loop.",
     startTemplate: "Start similar template →",
     dismiss: "Keep reading",
+  },
+  academyTaskLabels: {
+    welcome: {
+      title: "Welcome to QuantLab",
+      description: "Learn what the incubator is for — skim the homepage intro to complete.",
+    },
+    "challenge-enroll": {
+      title: "Join the 30-day challenge",
+      description: "Auto-completes when you enroll — milestones light up as you research.",
+    },
+    "first-observation": {
+      title: "First observation",
+      description: "Auto-completes after previewing a factor or finishing your first backtest.",
+    },
+    "first-backtest": {
+      title: "First backtest",
+      description: "Auto-completes after your first factor backtest — check Sharpe and drawdown.",
+    },
+    "use-template-factor": {
+      title: "Use a template factor",
+      description: "Configure a platform template factor once (unlocks the combiner at L1).",
+    },
+    "first-validation": {
+      title: "First scientific validation",
+      description: "Auto-completes after your first OOS + walk-forward validation.",
+    },
+    "first-factor-scan": {
+      title: "First parameter scan",
+      description: "Auto-completes after your first template factor grid scan.",
+    },
+    "first-report": {
+      title: "First research report",
+      description: "Auto-completes when you generate your first mastery report.",
+    },
+    "first-publish": {
+      title: "First publish",
+      description: "Auto-completes when you publish a project to the research feed.",
+    },
+    "first-share": {
+      title: "First share card",
+      description: "Auto-completes when you create your first public share link.",
+    },
+    "first-paper-order": {
+      title: "First paper order",
+      description: "Auto-completes after your first paper-sim order past the graduation line.",
+    },
+    "paper-decay-review": {
+      title: "Decay review",
+      description: "Re-run validation after paper tracking when edge decays — guided automatically.",
+    },
+    "network-radar": {
+      title: "Learning radar ready",
+      description: "Follow 3 researchers on the feed — your following stream becomes a mastery learning radar.",
+    },
+    "write-formula-factor": {
+      title: "Write a formula factor",
+      description: "Create a formula factor in the lab (L2 + researcher membership).",
+    },
+    "combine-factors": {
+      title: "Combine factors",
+      description: "Build a multi-factor stack in the combiner (gateway to Python at L2).",
+    },
+    "write-python-factor": {
+      title: "Write a Python factor",
+      description: "Submit a custom Python factor in the sandbox (L3 advanced).",
+    },
   },
   share: {
     invalid: "Share not found or expired",
@@ -2153,6 +2227,10 @@ const zh = {
     focusCoachHint: (title: string) => `为你精选 — 一键开局「${title}」`,
     focusCoachStart: "立即开局 →",
     focusCoachBrowse: "浏览全部",
+    masterHandoffBadge: "大师复现路径",
+    masterHandoffTitle: (symbol: string) => `复现你在 ${symbol} 上读到的方法`,
+    masterHandoffHint: "你刚读完关注流中的大师报告 — 点「立即开局」走同样的验证 → 报告闭环。",
+    masterHandoffDismiss: "知道了",
   },
   projectRegime: {
     title: (symbol: string) => `Market regime · ${symbol}`,
@@ -2808,12 +2886,14 @@ const zh = {
     progress: (n: number, target: number) => `已关注 ${n} / ${target} 位研究员`,
     progressToast: (n: number, target: number) =>
       `很好 — 已关注 ${n}/${target} 位，继续搭建你的学习雷达。`,
+    almostThere: (target: number) => `再关注 1 位即可解锁学习雷达（满 ${target} 位 · 学院 +60 经验）。`,
     networkReady: "人脉就绪 — 打开「关注动态」向大师学习吧。",
   },
   networkReadyCoach: {
     badge: "人脉里程碑",
     title: "你已关注 3 位研究员 — 学习雷达已解锁",
     message: "打开关注动态，细读大师如何验证因子，再回工作台用类似模板练手。",
+    academyHint: "学院任务「学习雷达就绪」（+60 经验）已自动完成。",
     openFollowing: "打开关注动态 →",
     stayOnFeed: "继续逛广场",
   },
@@ -3016,6 +3096,72 @@ const zh = {
     genericHint: "选一个行情匹配的模板，完成同样的验证 → 报告闭环。",
     startTemplate: "用类似模板开局 →",
     dismiss: "继续阅读",
+  },
+  academyTaskLabels: {
+    welcome: {
+      title: "欢迎来到 QuantLab",
+      description: "了解平台定位：量化研究员孵化器。阅读首页介绍即可完成。",
+    },
+    "challenge-enroll": {
+      title: "报名 30 天挑战",
+      description: "首次报名 30 天研究挑战后自动完成 — 里程碑会随你的研究进度点亮。",
+    },
+    "first-observation": {
+      title: "第一次观察",
+      description: "预览因子或完成首次回测后自动完成（查看因子在样本行情上的统计）。",
+    },
+    "first-backtest": {
+      title: "第一次回测",
+      description: "完成首次因子回测后自动完成 — 查看夏普、回撤与胜率。",
+    },
+    "use-template-factor": {
+      title: "套用模板因子",
+      description: "使用平台模板因子完成一次配置（L1 解锁组合器的前置）。",
+    },
+    "first-validation": {
+      title: "第一次科学验证",
+      description: "完成首次样本外 + Walk-Forward 验证后自动完成。",
+    },
+    "first-factor-scan": {
+      title: "第一次参数扫描",
+      description: "完成首次模板因子参数网格扫描后自动完成。",
+    },
+    "first-report": {
+      title: "第一份研究报告",
+      description: "首次生成研究报告后自动完成 — 把因子、回测与验证写成结论。",
+    },
+    "first-publish": {
+      title: "首次发布研究",
+      description: "首次将项目发布到研究广场后自动完成。",
+    },
+    "first-share": {
+      title: "首次分享研究",
+      description: "首次生成研究分享卡片后自动完成。",
+    },
+    "first-paper-order": {
+      title: "第一笔 Paper 模拟单",
+      description: "通过 Paper 毕业线后提交首笔模拟订单，开启真实跟踪后自动完成。",
+    },
+    "paper-decay-review": {
+      title: "衰减后复查",
+      description: "已有 Paper 单后重新跑科学验证 — 纸面衰减时系统会指引你完成此步。",
+    },
+    "network-radar": {
+      title: "学习雷达就绪",
+      description: "在广场关注 3 位研究员后自动完成 — 关注流成为你的大师学习雷达。",
+    },
+    "write-formula-factor": {
+      title: "编写公式因子",
+      description: "在因子实验室创建公式因子后自动完成（L2 + 研究员会员）。",
+    },
+    "combine-factors": {
+      title: "组合你的因子",
+      description: "用因子组合器拼出一个多因子策略（L2 解锁 Python 的前置）。",
+    },
+    "write-python-factor": {
+      title: "编写 Python 因子",
+      description: "在沙箱中提交一个自定义 Python 因子（L3 进阶能力）。",
+    },
   },
   share: {
     invalid: "分享不存在或已失效",

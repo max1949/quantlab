@@ -19,6 +19,7 @@ export default function Challenges() {
   const t = dict.challengesPage;
   const sprintLabels = dict.beginnerSprint;
   const dash = dict.dashboard;
+  const atl = dict.academyTaskLabels;
   const notify = useUi((s) => s.notify);
   const refreshMe = useAuth((s) => s.refreshMe);
   const qc = useQueryClient();
@@ -55,6 +56,7 @@ export default function Challenges() {
           enrollSynced: sprintLabels.enrollSynced,
           enrollReward: sprintLabels.enrollReward,
           academyXpEarned: dash.academyXpEarned,
+          academyTaskLabels: atl,
         },
         notify,
       );

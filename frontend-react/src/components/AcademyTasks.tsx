@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { completeTask, listTasks } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
-import { AUTO_ACADEMY_TASK_CODES } from "../lib/academy";
+import { AUTO_ACADEMY_TASK_CODES, localizedAcademyTitle } from "../lib/academy";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
@@ -10,6 +10,7 @@ import { Spinner } from "./ui";
 export default function AcademyTasks() {
   const d = useLocale((s) => s.dict.dashboard);
   const mp = useLocale((s) => s.dict.masteryPath);
+  const atl = useLocale((s) => s.dict.academyTaskLabels);
   const setUser = useAuth((s) => s.setUser);
   const notify = useUi((s) => s.notify);
   const qc = useQueryClient();
@@ -51,14 +52,16 @@ export default function AcademyTasks() {
                 ? "border-emerald-200 bg-emerald-50/50 dark:border-emerald-900 dark:bg-emerald-950/30"
                 : t.locked
                   ? "border-slate-100 bg-slate-50/80 opacity-75 dark:border-slate-800 dark:bg-slate-900/40"
-                  : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+                  : t.code === "network-radar" && !t.completed
+                    ? "border-brand-200 bg-brand-50/40 dark:border-brand-900 dark:bg-brand-950/20"
+                    : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
             }`}
           >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
                 <p className="font-medium text-slate-800 dark:text-slate-100">
                   {t.completed && "✓ "}
-                  {t.title}
+                  {localizedAcademyTitle(t.code, t.title, atl)}
                   <span className="ml-2 text-xs font-normal text-brand-600">{d.academyXp(t.xp_reward)}</span>
                   {t.mastery_stage && (
                     <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-normal text-slate-500 dark:bg-slate-800 dark:text-slate-400">
@@ -68,7 +71,9 @@ export default function AcademyTasks() {
                     </span>
                   )}
                 </p>
-                <p className="text-sm text-slate-500">{t.description}</p>
+                <p className="text-sm text-slate-500">
+                  {atl[t.code as keyof typeof atl]?.description ?? t.description}
+                </p>
                 {t.locked && (
                   <p className="mt-1 text-xs text-amber-600">
                     {d.academyLocked} · {t.min_level_label}

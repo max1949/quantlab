@@ -51,6 +51,7 @@ export default function ProjectDetail() {
   const setUser = useAuth((s) => s.setUser);
   const p = useLocale((s) => s.dict.projectDetail);
   const d = useLocale((s) => s.dict.dashboard);
+  const atl = useLocale((s) => s.dict.academyTaskLabels);
   const firstReportCoach = useLocale((s) => s.dict.firstReportCoach);
   const lk = useLocale((s) => s.dict.locked);
 
@@ -116,7 +117,7 @@ export default function ProjectDetail() {
       if (bt.status === "success") {
         sessionStorage.setItem(FIRST_BACKTEST_WELCOME_KEY, id);
       }
-      const msg = academyRewardMessage(bt.academy_rewards, d.academyXpEarned);
+      const msg = academyRewardMessage(bt.academy_rewards, d.academyXpEarned, atl);
       if (msg) notify(msg, "success");
       void qc.invalidateQueries({ queryKey: ["backtests"] });
       void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
@@ -139,7 +140,7 @@ export default function ProjectDetail() {
       if (v.status === "success") {
         sessionStorage.setItem(FIRST_VALIDATION_WELCOME_KEY, id);
       }
-      const msg = academyRewardMessage(v.academy_rewards, d.academyXpEarned);
+      const msg = academyRewardMessage(v.academy_rewards, d.academyXpEarned, atl);
       if (msg) notify(msg, "success");
       void qc.invalidateQueries({ queryKey: ["validations"] });
       void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
@@ -160,13 +161,13 @@ export default function ProjectDetail() {
       notify(p.reportDone, "success");
       const first = celebrateFirstReport(
         r,
-        { celebrate: firstReportCoach.reportCelebrate, academyXpEarned: d.academyXpEarned },
+        { celebrate: firstReportCoach.reportCelebrate, academyXpEarned: d.academyXpEarned, academyTaskLabels: atl },
         notify,
         { confetti: false },
       );
       sessionStorage.setItem(FIRST_REPORT_WELCOME_KEY, r.id);
       if (!first) {
-        const msg = academyRewardMessage(r.academy_rewards, d.academyXpEarned);
+        const msg = academyRewardMessage(r.academy_rewards, d.academyXpEarned, atl);
         if (msg) notify(msg, "success");
       }
       void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
@@ -186,7 +187,7 @@ export default function ProjectDetail() {
     onSuccess: async (res) => {
       void trackEvent("project_published", { project: id });
       notify(p.publishDone, "success");
-      const msg = academyRewardMessage(res.academy_rewards, d.academyXpEarned);
+      const msg = academyRewardMessage(res.academy_rewards, d.academyXpEarned, atl);
       if (msg) notify(msg, "success");
       void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
       void qc.invalidateQueries({ queryKey: ["research-journey"] });

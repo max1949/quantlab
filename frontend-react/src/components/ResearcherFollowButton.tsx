@@ -37,6 +37,7 @@ export default function ResearcherFollowButton({
   const p = useLocale((s) => s.dict.profile);
   const fc = useLocale((s) => s.dict.feedFollowCoach);
   const dash = useLocale((s) => s.dict.dashboard);
+  const atl = useLocale((s) => s.dict.academyTaskLabels);
   const notify = useUi((s) => s.notify);
   const qc = useQueryClient();
 
@@ -71,7 +72,7 @@ export default function ResearcherFollowButton({
         const followingCount = journeyFollowingCount(journey);
         void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
         const xpMsg = !isFollowing
-          ? academyRewardMessage(result?.academy_rewards, dash.academyXpEarned)
+          ? academyRewardMessage(result?.academy_rewards, dash.academyXpEarned, atl)
           : null;
         if (followingCount >= NETWORK_FOLLOW_TARGET) {
           burstConfetti(3600);

@@ -15,6 +15,7 @@ type Props = {
 export default function ReportShareCoach({ reportId }: Props) {
   const t = useLocale((s) => s.dict.report);
   const d = useLocale((s) => s.dict.dashboard);
+  const atl = useLocale((s) => s.dict.academyTaskLabels);
   const notify = useUi((s) => s.notify);
   const refreshMe = useAuth((s) => s.refreshMe);
   const qc = useQueryClient();
@@ -29,7 +30,7 @@ export default function ReportShareCoach({ reportId }: Props) {
       setShareUrl(url);
       const first = celebrateFirstShare(
         res,
-        { celebrate: t.firstShareCelebrate, academyXpEarned: d.academyXpEarned },
+        { celebrate: t.firstShareCelebrate, academyXpEarned: d.academyXpEarned, academyTaskLabels: atl },
         notify,
       );
       if (!first) notify(t.shareCreated, "success");

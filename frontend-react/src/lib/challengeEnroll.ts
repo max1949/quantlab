@@ -1,4 +1,5 @@
 import type { ChallengeProgress } from "../api/types";
+import type { AcademyTaskLabel } from "./academy";
 import { academyRewardMessage } from "./academy";
 import { burstConfetti } from "./confetti";
 
@@ -9,6 +10,7 @@ export type ChallengeEnrollLabels = {
   enrollSynced: (lit: number, total: number) => string;
   enrollReward: (pts: number, lit: number, total: number) => string;
   academyXpEarned: (title: string, xp: number) => string;
+  academyTaskLabels?: Record<string, AcademyTaskLabel>;
 };
 
 export function celebrateChallengeEnroll(
@@ -28,6 +30,10 @@ export function celebrateChallengeEnroll(
     notify(labels.enrollSuccess, "success");
   }
 
-  const xpMsg = academyRewardMessage(data.academy_rewards, labels.academyXpEarned);
+  const xpMsg = academyRewardMessage(
+    data.academy_rewards,
+    labels.academyXpEarned,
+    labels.academyTaskLabels,
+  );
   if (xpMsg) notify(xpMsg, "success");
 }

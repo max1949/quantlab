@@ -34,6 +34,7 @@ export default function PaperExecutionPanel({
 } = {}) {
   const l4 = useLocale((s) => s.dict.l4Tools);
   const d = useLocale((s) => s.dict.dashboard);
+  const atl = useLocale((s) => s.dict.academyTaskLabels);
   const paperCoach = useLocale((s) => s.dict.firstPaperOrderCoach);
   const notify = useUi((s) => s.notify);
   const qc = useQueryClient();
@@ -78,12 +79,12 @@ export default function PaperExecutionPanel({
     onSuccess: async (o) => {
       const first = celebrateFirstPaperOrder(
         o,
-        { celebrate: paperCoach.celebrate, academyXpEarned: d.academyXpEarned },
+        { celebrate: paperCoach.celebrate, academyXpEarned: d.academyXpEarned, academyTaskLabels: atl },
         notify,
         { confetti: false },
       );
       if (!first) {
-        const msg = academyRewardMessage(o.academy_rewards, d.academyXpEarned);
+        const msg = academyRewardMessage(o.academy_rewards, d.academyXpEarned, atl);
         notify(msg ?? l4.execSubmitted(o.channel, o.status), "success");
       } else if (!o.academy_rewards?.length) {
         notify(l4.execSubmitted(o.channel, o.status), "success");

@@ -13,6 +13,7 @@ const DISMISS_KEY = "quantlab-mastery-overview-dismissed";
 export default function MasteryOverviewPanel() {
   const d = useLocale((s) => s.dict.masteryOverview);
   const dash = useLocale((s) => s.dict.dashboard);
+  const atl = useLocale((s) => s.dict.academyTaskLabels);
   const printRef = useRef<HTMLDivElement>(null);
   const notify = useUi((s) => s.notify);
   const qc = useQueryClient();
@@ -30,7 +31,7 @@ export default function MasteryOverviewPanel() {
       setFeedHref(href);
       const first = celebrateFirstShare(
         res,
-        { celebrate: dash.firstShareCelebrate, academyXpEarned: dash.academyXpEarned },
+        { celebrate: dash.firstShareCelebrate, academyXpEarned: dash.academyXpEarned, academyTaskLabels: atl },
         notify,
       );
       if (!first) notify(d.shareSuccess, "success");

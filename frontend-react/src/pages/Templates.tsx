@@ -6,7 +6,7 @@ import { apiErrorMessage } from "../api/client";
 import { useUi } from "../store/ui";
 import { useFlow } from "../store/flow";
 import { useLocale } from "../store/locale";
-import { FIRST_PROJECT_WELCOME_KEY } from "../lib/onboardingFocus";
+import { FIRST_PROJECT_WELCOME_KEY, FOLLOWING_TEMPLATE_HANDOFF_KEY } from "../lib/onboardingFocus";
 import { ErrorBox, PageTitle, Spinner } from "../components/ui";
 
 const REGIME_SYMBOLS = ["RB", "AU", "IF"] as const;
@@ -62,8 +62,25 @@ export default function Templates() {
   const focusedTpl = focus ? templates.data?.find((tpl) => tpl.code === focus) : undefined;
   const focusedPick = focus ? pickByCode[focus] : undefined;
   const [focusCoachDismissed, setFocusCoachDismissed] = useState(false);
+  const [masterHandoffDismissed, setMasterHandoffDismissed] = useState(false);
+  const [masterHandoffSymbol, setMasterHandoffSymbol] = useState<string | null>(() =>
+    typeof window !== "undefined" ? sessionStorage.getItem(FOLLOWING_TEMPLATE_HANDOFF_KEY) : null,
+  );
   const showFocusCoach =
     Boolean(focusedTpl && focusedTpl.allowed !== false && !focusCoachDismissed);
+  const showMasterHandoff =
+    Boolean(
+      masterHandoffSymbol &&
+        !masterHandoffDismissed &&
+        focus &&
+        masterHandoffSymbol.toUpperCase() === regimeSymbol,
+    );
+
+  const clearMasterHandoff = () => {
+    sessionStorage.removeItem(FOLLOWING_TEMPLATE_HANDOFF_KEY);
+    setMasterHandoffSymbol(null);
+    setMasterHandoffDismissed(true);
+  };
 
   const start = useMutation({
     mutationFn: (code: string) => startTemplate(code, true),
@@ -72,6 +89,8 @@ export default function Templates() {
       void trackEvent("template_start", { template: res.template_code });
       setProject(res.project_id, res.factor_id);
       sessionStorage.setItem(FIRST_PROJECT_WELCOME_KEY, res.project_id);
+      sessionStorage.removeItem(FOLLOWING_TEMPLATE_HANDOFF_KEY);
+      setMasterHandoffSymbol(null);
       void qc.invalidateQueries({ queryKey: ["projects"] });
       void qc.invalidateQueries({ queryKey: ["research-journey"] });
       notify(t.started, "success");
@@ -84,6 +103,21 @@ export default function Templates() {
   return (
     <div>
       <PageTitle title={t.title} subtitle={t.subtitle} />
+
+      {showMasterHandoff && masterHandoffSymbol && (
+        <div className="mb-4 rounded-xl border border-teal-300 bg-gradient-to-r from-teal-50/95 to-cyan-50/70 p-4 dark:border-teal-800 dark:from-teal-950/40 dark:to-cyan-950/30">
+          <p className="text-xs font-semibold uppercase tracking-wide text-teal-800 dark:text-teal-200">
+            📖 {t.masterHandoffBadge}
+          </p>
+          <p className="mt-1 font-semibold text-slate-800 dark:text-slate-100">
+            {t.masterHandoffTitle(masterHandoffSymbol)}
+          </p>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{t.masterHandoffHint}</p>
+          <button type="button" className="btn mt-3 text-xs" onClick={clearMasterHandoff}>
+            {t.masterHandoffDismiss}
+          </button>
+        </div>
+      )}
 
       {showFocusCoach && focusedTpl && focus && (
         <div className="mb-6 rounded-xl border border-brand-300 bg-gradient-to-r from-brand-50/90 to-violet-50/60 p-4 shadow-sm dark:border-brand-800 dark:from-brand-950/40 dark:to-violet-950/30">

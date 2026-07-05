@@ -14,6 +14,7 @@ type Props = {
 export default function ReportPublishCoach({ projectId }: Props) {
   const t = useLocale((s) => s.dict.report);
   const d = useLocale((s) => s.dict.dashboard);
+  const atl = useLocale((s) => s.dict.academyTaskLabels);
   const pd = useLocale((s) => s.dict.projectDetail);
   const notify = useUi((s) => s.notify);
   const setUser = useAuth((s) => s.setUser);
@@ -34,7 +35,7 @@ export default function ReportPublishCoach({ projectId }: Props) {
     onSuccess: async (res) => {
       void trackEvent("project_published", { project: projectId, from: "report" });
       notify(pd.publishDone, "success");
-      const msg = academyRewardMessage(res.academy_rewards, d.academyXpEarned);
+      const msg = academyRewardMessage(res.academy_rewards, d.academyXpEarned, atl);
       if (msg) notify(msg, "success");
       void qc.invalidateQueries({ queryKey: ["project", projectId] });
       void qc.invalidateQueries({ queryKey: ["project-quality", projectId] });
