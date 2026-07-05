@@ -482,10 +482,14 @@ def test_journey_includes_reputation_coaching_after_paper(client, db_session):
     assert j2.get("reputation_coaching") is None
     growth = j2.get("share_growth_coaching")
     assert growth is not None
-    assert growth["reason"] == "first_views"
+    assert growth["reason"] in ("first_views", "network_start")
     assert growth["views"] == 0
+    assert growth["followers"] == 0
+    assert growth["following"] == 0
     assert growth["share_url_path"] == f"/share/{share_resp.json()['token']}"
     assert growth["feed_path"] == f"/feed?highlight={report['id']}"
+    assert growth["profile_path"] == "/me"
+    assert growth["following_feed_path"] == "/me/following"
     assert len(growth.get("guide_steps") or []) == 3
 
 

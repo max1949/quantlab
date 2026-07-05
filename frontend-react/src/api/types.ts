@@ -276,8 +276,12 @@ export interface ShareGrowthCoaching {
   message: string;
   guide_title: string;
   views: number;
+  followers: number;
+  following: number;
   share_url_path: string;
   feed_path: string;
+  profile_path: string;
+  following_feed_path: string;
   report_title: string | null;
   guide_steps: FirstReportGuideStep[];
 }

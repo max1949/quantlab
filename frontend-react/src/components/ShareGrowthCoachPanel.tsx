@@ -34,10 +34,20 @@ export default function ShareGrowthCoachPanel() {
           <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
             {coach.badge}
           </p>
-          <p className="mt-1 text-sm font-medium text-slate-800 dark:text-slate-100">
-            {d.views(coach.views)}
-            {coach.report_title ? ` · ${coach.report_title}` : ""}
-          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-100">
+              {d.views(coach.views)}
+            </span>
+            <span className="rounded-full bg-teal-100 px-2.5 py-1 text-xs font-medium text-teal-900 dark:bg-teal-950/50 dark:text-teal-100">
+              {d.followers(coach.followers)}
+            </span>
+            <span className="rounded-full bg-cyan-100 px-2.5 py-1 text-xs font-medium text-cyan-900 dark:bg-cyan-950/50 dark:text-cyan-100">
+              {d.following(coach.following)}
+            </span>
+          </div>
+          {coach.report_title && (
+            <p className="mt-2 text-sm font-medium text-slate-800 dark:text-slate-100">{coach.report_title}</p>
+          )}
           <p className="mt-2 text-sm text-emerald-900/90 dark:text-emerald-100/90">{coach.message}</p>
 
           <div className="mt-4 rounded-lg border border-emerald-300/50 bg-white/60 p-3 dark:border-emerald-800 dark:bg-slate-900/40">
@@ -79,6 +89,14 @@ export default function ShareGrowthCoachPanel() {
           <Link to={coach.feed_path} className="btn-primary whitespace-nowrap text-xs">
             {d.viewFeed}
           </Link>
+          <Link to={coach.profile_path} className="btn whitespace-nowrap text-xs">
+            {d.viewProfile}
+          </Link>
+          {coach.following > 0 && (
+            <Link to={coach.following_feed_path} className="btn whitespace-nowrap text-xs">
+              {d.viewFollowing}
+            </Link>
+          )}
           <button type="button" className="btn whitespace-nowrap text-xs" onClick={copyLink}>
             {d.copyLink}
           </button>

@@ -588,11 +588,27 @@ def share_growth_coaching_payload(db: Session, user: User, locale: Locale, flags
         return None
 
     share, report = row
+    from backend.app.services import social_service
+
     labels = i18n.SHARE_GROWTH_COACH.get(locale) or i18n.SHARE_GROWTH_COACH["en"]
     views = int(share.views or 0)
+    follow_counts = social_service.counts(db, user.id)
+    followers = int(follow_counts["followers"])
+    following = int(follow_counts["following"])
     share_path = f"/share/{share.token}"
     feed_path = f"/feed?highlight={report.id}"
-    reason = "first_views" if views < 10 else "amplify"
+    if views >= 10:
+        reason = "amplify"
+    elif followers >= 1:
+        reason = "first_follower"
+    elif following == 0:
+        reason = "network_start"
+    else:
+        reason = "first_views"
+
+    step3_path = "/feed" if following == 0 else feed_path
+    step3_label = labels["step3_follow_label"] if following == 0 else labels["step3_label"]
+    step3_hint = labels["step3_follow_hint"] if following == 0 else labels["step3_hint"]
 
     return {
         "reason": reason,
@@ -600,8 +616,12 @@ def share_growth_coaching_payload(db: Session, user: User, locale: Locale, flags
         "message": labels[reason],
         "guide_title": labels["guide_title"],
         "views": views,
+        "followers": followers,
+        "following": following,
         "share_url_path": share_path,
         "feed_path": feed_path,
+        "profile_path": "/me",
+        "following_feed_path": "/me/following",
         "report_title": report.title,
         "guide_steps": [
             {
@@ -620,9 +640,9 @@ def share_growth_coaching_payload(db: Session, user: User, locale: Locale, flags
             },
             {
                 "step": 3,
-                "label": labels["step3_label"],
-                "hint": labels["step3_hint"],
-                "cta_path": feed_path,
+                "label": step3_label,
+                "hint": step3_hint,
+                "cta_path": step3_path,
                 "cta_action": "keep_going",
             },
         ],

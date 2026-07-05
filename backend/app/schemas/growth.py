@@ -193,8 +193,12 @@ class ShareGrowthCoachingOut(BaseModel):
     message: str
     guide_title: str
     views: int
+    followers: int
+    following: int
     share_url_path: str
     feed_path: str
+    profile_path: str
+    following_feed_path: str
     report_title: str | None = None
     guide_steps: list[FirstReportGuideStepOut] = Field(default_factory=list)
 

@@ -854,6 +854,8 @@ SHARE_GROWTH_COACH: dict[Locale, dict[str, str]] = {
         "badge": "Growth loop",
         "guide_title": "After-share growth routine",
         "first_views": "Your share card is live. Open the feed, copy the link, and watch the first views arrive.",
+        "first_follower": "Your first follower arrived — research reputation is compounding. Keep publishing and sharing.",
+        "network_start": "Views are building. Follow 2–3 active researchers on the feed — they'll notice your work too.",
         "amplify": "Your share card is getting traction. Keep the loop going with one follow-up post and one new research update.",
         "step1_label": "Open the live card",
         "step1_hint": "Preview the public card like a reader — the story should be clear in 30 seconds.",
@@ -861,11 +863,15 @@ SHARE_GROWTH_COACH: dict[Locale, dict[str, str]] = {
         "step2_hint": "Share it with one trading friend or cohort group and ask for one concrete question.",
         "step3_label": "Return to the feed",
         "step3_hint": "Track views, follow relevant researchers, then publish the next improvement.",
+        "step3_follow_label": "Follow researchers in your niche",
+        "step3_follow_hint": "Open the feed and follow authors you respect — your following feed becomes your learning radar.",
     },
     "zh": {
         "badge": "增长闭环",
         "guide_title": "分享后的增长动作",
         "first_views": "分享卡片已上线。打开广场、复制链接，观察第一批浏览。",
+        "first_follower": "第一位粉丝已关注你 — 研究声誉开始复利。继续发布和分享吧。",
+        "network_start": "浏览量在积累。去广场关注 2–3 位活跃研究员 — 他们也会注意到你的研究。",
         "amplify": "分享卡片开始有流量了。继续做一次转发跟进，并发布下一次研究改进。",
         "step1_label": "打开公开卡片",
         "step1_hint": "像读者一样预览卡片 — 30 秒内要看懂你的研究故事。",
@@ -873,6 +879,8 @@ SHARE_GROWTH_COACH: dict[Locale, dict[str, str]] = {
         "step2_hint": "发给一位交易朋友或学习小组，请对方提一个具体问题。",
         "step3_label": "回到研究广场",
         "step3_hint": "观察浏览量、关注相关研究员，然后发布下一次改进。",
+        "step3_follow_label": "关注同领域研究员",
+        "step3_follow_hint": "打开广场关注你认可的研究员 — 关注动态会成为你的学习雷达。",
     },
 }
 

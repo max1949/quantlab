@@ -141,7 +141,11 @@ const en = {
   },
   shareGrowthCoach: {
     views: (n: number) => `${n} public view${n === 1 ? "" : "s"}`,
+    followers: (n: number) => `${n} follower${n === 1 ? "" : "s"}`,
+    following: (n: number) => `Following ${n}`,
     viewFeed: "Open highlighted feed →",
+    viewProfile: "My researcher profile →",
+    viewFollowing: "Following feed →",
     copyLink: "Copy share link",
     copied: "Share link copied — send it to one focused reader.",
     dismiss: "Got it",
@@ -1487,7 +1491,11 @@ const zh = {
   },
   shareGrowthCoach: {
     views: (n: number) => `${n} 次公开浏览`,
+    followers: (n: number) => `${n} 位粉丝`,
+    following: (n: number) => `已关注 ${n} 人`,
     viewFeed: "打开广场高亮 →",
+    viewProfile: "我的研究员主页 →",
+    viewFollowing: "关注动态 →",
     copyLink: "复制分享链接",
     copied: "分享链接已复制 — 发给一个精准读者吧。",
     dismiss: "知道了",
