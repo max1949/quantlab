@@ -17,6 +17,7 @@ import ResearchJourneyRing from "../components/ResearchJourneyRing";
 import MasteryGoalPanel from "../components/MasteryGoalPanel";
 import DashboardCoachStack from "../components/DashboardCoachStack";
 import OrgMemberCoachPanel from "../components/OrgMemberCoachPanel";
+import ResearchRevisitCoachPanel from "../components/ResearchRevisitCoachPanel";
 import PostCheckoutCoachPanel from "../components/PostCheckoutCoachPanel";
 import QuickStartGuidePanel from "../components/QuickStartGuidePanel";
 import FirstDashboardMentorPanel from "../components/FirstDashboardMentorPanel";
@@ -61,6 +62,10 @@ export default function Dashboard() {
 
       <div className="mt-6">
         <OrgMemberCoachPanel />
+      </div>
+
+      <div className="mt-6">
+        <ResearchRevisitCoachPanel />
       </div>
 
       <div className="mt-6">

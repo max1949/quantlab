@@ -146,6 +146,19 @@ const en = {
     stepGo: "Go →",
     dismiss: "Got it",
   },
+  orgMemberPageCoach: {
+    pageHint: "Browse the team factor catalog below, or start your own guided path from a template.",
+    ctaDefault: "Start from template →",
+    browseCatalog: "Browse team catalog ↓",
+    openWorkspace: "Open workspace →",
+    dismiss: "Got it",
+  },
+  researchRevisitCoach: {
+    unlocked: (features: string) => `Path unlocks: ${features}`,
+    ctaDefault: "One-click start →",
+    stepGo: "Go →",
+    dismiss: "Remind me later",
+  },
   firstBacktestCoach: {
     unlocked: (features: string) => `Next unlocks: ${features}`,
     ctaDefault: "Run validation →",
@@ -1584,6 +1597,19 @@ const zh = {
     openOrg: (name: string) => `打开 ${name} →`,
     stepGo: "前往 →",
     dismiss: "知道了",
+  },
+  orgMemberPageCoach: {
+    pageHint: "先看下方团队因子库，或从模板一键开始你自己的大师路径。",
+    ctaDefault: "从模板开局 →",
+    browseCatalog: "浏览团队因子库 ↓",
+    openWorkspace: "打开工作台 →",
+    dismiss: "知道了",
+  },
+  researchRevisitCoach: {
+    unlocked: (features: string) => `路径解锁：${features}`,
+    ctaDefault: "一键开局 →",
+    stepGo: "前往 →",
+    dismiss: "稍后再说",
   },
   firstBacktestCoach: {
     unlocked: (features: string) => `下一步解锁：${features}`,

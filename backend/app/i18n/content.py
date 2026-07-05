@@ -719,6 +719,35 @@ BEGINNER_ONEPAGER: dict[Locale, dict[str, str]] = {
     },
 }
 
+RESEARCH_REVISIT_COACH: dict[Locale, dict[str, str]] = {
+    "en": {
+        "badge": "Welcome back",
+        "celebrate": "Your mastery coach is still here — pick up where you left off.",
+        "message": "It has been {days} days since you joined. One template click starts the full path: backtest → validation → report → Paper Masters.",
+        "unlock_features": "Regime-fit templates · auto-guided steps · masters board",
+        "guide_title": "Restart in 3 clicks",
+        "step1_label": "One-click template",
+        "step1_hint": "Vol-regime pick — same path institutional PMs use to start.",
+        "step2_label": "30-day challenge",
+        "step2_hint": "Enroll for daily milestones and XP — keeps you on track.",
+        "step3_label": "Open handbook",
+        "step3_hint": "2-minute refresher on validation and Paper Masters.",
+    },
+    "zh": {
+        "badge": "欢迎回来",
+        "celebrate": "你的大师教练还在 — 从上次停下的地方继续。",
+        "message": "你已加入 {days} 天，还没跑回测。点一次模板即可走完整路径：回测 → 验证 → 报告 → Paper 大师榜。",
+        "unlock_features": "行情感知模板 · 全自动引导 · 大师榜",
+        "guide_title": "三步重新上路",
+        "step1_label": "一键模板",
+        "step1_hint": "行情适配推荐 — 机构 PM 同款开局方式。",
+        "step2_label": "30 天挑战",
+        "step2_hint": "报名拿每日里程碑和学分 — 帮你保持节奏。",
+        "step3_label": "打开手册",
+        "step3_hint": "2 分钟重温验证与 Paper 大师榜。",
+    },
+}
+
 ORG_MEMBER_COACH: dict[Locale, dict[str, str]] = {
     "en": {
         "badge": "Team desk joined",

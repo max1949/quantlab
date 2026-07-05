@@ -471,6 +471,68 @@ def first_backtest_coaching_payload(
     }
 
 
+def research_revisit_coaching_payload(
+    db: Session,
+    user: User,
+    locale: Locale,
+    flags: dict[str, bool],
+) -> dict | None:
+    """注册 ≥3 天仍未回测 — 工作台回流提醒（非机构成员）。"""
+    if not user.onboarding_done:
+        return None
+    if flags.get("backtest") or flags.get("report"):
+        return None
+
+    from backend.app.services import org_service
+
+    if org_service.list_orgs_for_user(db, user.id):
+        return None
+
+    from datetime import datetime, timezone
+
+    created = user.created_at
+    if created.tzinfo is None:
+        created = created.replace(tzinfo=timezone.utc)
+    days = (datetime.now(timezone.utc) - created).days
+    if days < 3:
+        return None
+
+    labels = i18n.RESEARCH_REVISIT_COACH.get(locale) or i18n.RESEARCH_REVISIT_COACH["en"]
+    return {
+        "badge": labels["badge"],
+        "celebrate": labels["celebrate"],
+        "message": labels["message"].format(days=days),
+        "unlock_features": labels["unlock_features"],
+        "days_idle": days,
+        "cta_action": "create_project",
+        "cta_path": "/templates?focus=vol-regime",
+        "guide_title": labels["guide_title"],
+        "guide_steps": [
+            {
+                "step": 1,
+                "label": labels["step1_label"],
+                "hint": labels["step1_hint"],
+                "cta_path": "/templates?focus=vol-regime",
+                "cta_action": "create_project",
+            },
+            {
+                "step": 2,
+                "label": labels["step2_label"],
+                "hint": labels["step2_hint"],
+                "cta_path": "/challenges",
+                "cta_action": "enroll_challenge",
+            },
+            {
+                "step": 3,
+                "label": labels["step3_label"],
+                "hint": labels["step3_hint"],
+                "cta_path": "/handbook",
+                "cta_action": "keep_going",
+            },
+        ],
+    }
+
+
 def org_member_coaching_payload(
     db: Session,
     user: User,
@@ -1252,6 +1314,7 @@ def research_journey(
         active_project_id=active_id,
     )
     org_member_coaching = org_member_coaching_payload(db, user, locale, flags)
+    research_revisit_coaching = research_revisit_coaching_payload(db, user, locale, flags)
     first_backtest_coaching = first_backtest_coaching_payload(
         db,
         user,
@@ -1333,6 +1396,7 @@ def research_journey(
         "quickstart_guide": quickstart_guide,
         "first_project_coaching": first_project_coaching,
         "org_member_coaching": org_member_coaching,
+        "research_revisit_coaching": research_revisit_coaching,
         "first_backtest_coaching": first_backtest_coaching,
         "first_validation_coaching": first_validation_coaching,
         "first_paper_order_coaching": first_paper_order_coaching,

@@ -331,6 +331,33 @@ def test_beginner_handbook_pdf(client, db_session):
     assert resp.content[:4] == b"%PDF"
 
 
+def test_journey_includes_research_revisit_coaching(client, db_session):
+    from datetime import datetime, timedelta, timezone
+
+    from sqlalchemy import select
+
+    from backend.app.models.user import User
+
+    seed_default_templates(db_session)
+    h = _register(client, "stalled1")
+    client.post(f"{BASE}/onboarding/choose-type", headers=h, json={"user_type": "newbie"})
+    user = db_session.execute(select(User).where(User.username == "stalled1")).scalar_one()
+    user.created_at = datetime.now(timezone.utc) - timedelta(days=4)
+    db_session.add(user)
+    db_session.commit()
+
+    j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    revisit = j.get("research_revisit_coaching")
+    assert revisit is not None
+    assert revisit["days_idle"] >= 3
+    assert revisit["cta_path"] == "/templates?focus=vol-regime"
+    assert len(revisit["guide_steps"]) == 3
+
+    _full_research(client, h, db_session)
+    j2 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    assert j2.get("research_revisit_coaching") is None
+
+
 def test_journey_includes_beginner_sprint(client, db_session):
     seed_sample_market_data(db_session)
     seed_default_templates(db_session)

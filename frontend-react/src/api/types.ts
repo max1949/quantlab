@@ -250,6 +250,18 @@ export interface OrgMemberCoaching {
   guide_steps: FirstReportGuideStep[];
 }
 
+export interface ResearchRevisitCoaching {
+  badge: string;
+  celebrate: string;
+  message: string;
+  unlock_features: string;
+  days_idle: number;
+  cta_action: string;
+  cta_path: string;
+  guide_title: string;
+  guide_steps: FirstReportGuideStep[];
+}
+
 export interface FirstReportCoaching {
   reason: string;
   badge: string;
@@ -381,6 +393,7 @@ export interface ResearchJourney {
   quickstart_guide: QuickstartGuide | null;
   first_project_coaching: FirstProjectCoaching | null;
   org_member_coaching: OrgMemberCoaching | null;
+  research_revisit_coaching: ResearchRevisitCoaching | null;
   first_backtest_coaching: FirstBacktestCoaching | null;
   first_validation_coaching: FirstValidationCoaching | null;
   first_paper_order_coaching: FirstPaperOrderCoaching | null;

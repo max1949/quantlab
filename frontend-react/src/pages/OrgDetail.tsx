@@ -44,6 +44,7 @@ import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
 import { ErrorBox, PageTitle, Spinner } from "../components/ui";
 import OrgIncubationStrip from "../components/OrgIncubationStrip";
+import OrgMemberPageCoachPanel from "../components/OrgMemberPageCoachPanel";
 
 export default function OrgDetail() {
   const { id = "" } = useParams();
@@ -424,6 +425,7 @@ export default function OrgDetail() {
       </div>
 
       {canAdmin && <OrgIncubationStrip canInvite={canAdmin} />}
+      {!canAdmin && <OrgMemberPageCoachPanel orgId={id} />}
 
       {isOwner && billing.data && (
         <div className="mb-6 card">
@@ -655,7 +657,7 @@ export default function OrgDetail() {
         </div>
       )}
 
-      <div className="mb-6 card">
+      <div id="org-catalog" className="mb-6 card">
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <h2 className="font-semibold">{o.catalogTitle}</h2>
           <select className="input text-sm" value={symbol} onChange={(e) => setSymbol(e.target.value)}>

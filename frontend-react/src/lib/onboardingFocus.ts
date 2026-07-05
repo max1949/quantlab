@@ -21,3 +21,5 @@ export const FIRST_LEADERBOARD_PAPER_WELCOME_KEY = "quantlab-first-leaderboard-p
 export const FIRST_PAPER_GRADUATION_WELCOME_KEY = "quantlab-first-paper-graduation-welcome";
 /** First dashboard visit after joining a research org — team incubation coach. */
 export const FIRST_ORG_MEMBER_WELCOME_KEY = "quantlab-first-org-member-welcome";
+/** First org detail visit after joining — desk catalog coach. */
+export const FIRST_ORG_PAGE_WELCOME_KEY = "quantlab-first-org-page-welcome";

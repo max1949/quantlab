@@ -207,6 +207,18 @@ class OrgMemberCoachingOut(BaseModel):
     guide_steps: list[FirstReportGuideStepOut] = Field(default_factory=list)
 
 
+class ResearchRevisitCoachingOut(BaseModel):
+    badge: str
+    celebrate: str
+    message: str
+    unlock_features: str
+    days_idle: int
+    cta_action: str
+    cta_path: str
+    guide_title: str
+    guide_steps: list[FirstReportGuideStepOut] = Field(default_factory=list)
+
+
 class FirstReportGuideStepOut(BaseModel):
     step: int
     label: str
@@ -380,6 +392,7 @@ class ResearchJourneyOut(BaseModel):
     quickstart_guide: QuickstartGuideOut | None = None
     first_project_coaching: FirstProjectCoachingOut | None = None
     org_member_coaching: OrgMemberCoachingOut | None = None
+    research_revisit_coaching: ResearchRevisitCoachingOut | None = None
     first_backtest_coaching: FirstBacktestCoachingOut | None = None
     first_validation_coaching: FirstValidationCoachingOut | None = None
     first_paper_order_coaching: FirstPaperOrderCoachingOut | None = None
