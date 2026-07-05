@@ -1515,6 +1515,19 @@ const en = {
     masterNamed: (name: string) => `Re-read @${name}'s report`,
     masterGeneric: "Re-read master report",
     runValidation: "Run validation →",
+    oosBadge: "OOS mastery check",
+    oosTitle: "Apples-to-apples — your OOS vs the master report",
+    oosNoMetric: "Validation complete — generate your report to close the replication loop.",
+    oosBeat: (master: string, yours: string) =>
+      `Mastery bar cleared — your OOS Sharpe ${yours} meets or beats their ${master}. Write your report.`,
+    oosClose: (master: string, yours: string) =>
+      `Close enough — OOS ${yours} vs master ${master}. Document what you learned in your own report.`,
+    oosGap: (master: string, yours: string) =>
+      `OOS ${yours} vs master ${master} — iteration is normal. Note gaps honestly in your report; that's professional research.`,
+    yourOos: (v: string) => `Your OOS ${v}`,
+    oosNextStep: "Step 3 of replication: generate your report in your own words — that's how you become a master.",
+    generateReport: "Generate report →",
+    dismiss: "Later",
   },
   academyTaskLabels: {
     welcome: {
@@ -3152,6 +3165,19 @@ const zh = {
     masterNamed: (name: string) => `重读 @${name} 的报告`,
     masterGeneric: "重读大师报告",
     runValidation: "运行验证 →",
+    oosBadge: "样本外大师对照",
+    oosTitle: "同等口径 — 你的样本外 vs 大师报告",
+    oosNoMetric: "验证已完成 — 生成报告，完成复现闭环。",
+    oosBeat: (master: string, yours: string) =>
+      `达到大师线 — 你的样本外夏普 ${yours} 不低于他们的 ${master}，请写报告收束。`,
+    oosClose: (master: string, yours: string) =>
+      `差距可接受 — 样本外 ${yours} vs 大师 ${master}，用自己的话写报告总结所学。`,
+    oosGap: (master: string, yours: string) =>
+      `样本外 ${yours} vs 大师 ${master} — 迭代很正常，在报告中如实写差距，才是专业研究。`,
+    yourOos: (v: string) => `你的样本外 ${v}`,
+    oosNextStep: "复现第 3 步：用自己的话生成报告 — 这才是成为大师。",
+    generateReport: "生成报告 →",
+    dismiss: "稍后再说",
   },
   academyTaskLabels: {
     welcome: {

@@ -12,6 +12,14 @@ export function replicationBenchmarkKey(projectId: string) {
   return `quantlab-replication-benchmark-${projectId}`;
 }
 
+export function replicationBacktestDismissKey(projectId: string) {
+  return `quantlab-replication-bench-backtest-${projectId}`;
+}
+
+export function replicationValidationDismissKey(projectId: string) {
+  return `quantlab-replication-bench-validation-${projectId}`;
+}
+
 function parseBenchmark(raw: string | null): ReplicationBenchmark | null {
   if (!raw) return null;
   try {

@@ -370,9 +370,15 @@ export default function ProjectDetail() {
         projectId={id}
         backtestDone={done.backtest}
         validationDone={done.validation}
+        reportDone={done.report}
         yourBacktestSharpe={
           typeof quality.data?.scorecard?.backtest_sharpe === "number"
             ? quality.data.scorecard.backtest_sharpe
+            : null
+        }
+        yourOosSharpe={
+          typeof quality.data?.scorecard?.oos_sharpe === "number"
+            ? quality.data.scorecard.oos_sharpe
             : null
         }
         yourRobustness={
@@ -381,6 +387,7 @@ export default function ProjectDetail() {
             : null
         }
         onRunValidation={() => runValidation.mutate()}
+        onGenerateReport={() => genReport.mutate()}
       />
 
       {projectFactors.length > 1 && (
