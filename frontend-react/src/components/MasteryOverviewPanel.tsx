@@ -8,6 +8,7 @@ import { celebrateFirstShare } from "../lib/firstShare";
 import { burstConfetti } from "../lib/confetti";
 import { REPLICATION_SHARE_FOLLOWING_KEY } from "../lib/onboardingFocus";
 import { clearReplicationReportFlow, isReplicationReportFlow } from "../lib/replicationFlow";
+import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
 import HandbookExportButtons from "./HandbookExportButtons";
@@ -22,6 +23,7 @@ export default function MasteryOverviewPanel() {
   const printRef = useRef<HTMLDivElement>(null);
   const notify = useUi((s) => s.notify);
   const navigate = useNavigate();
+  const refreshMe = useAuth((s) => s.refreshMe);
   const qc = useQueryClient();
   const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISS_KEY) === "1");
   const [feedHref, setFeedHref] = useState<string | null>(null);
@@ -31,7 +33,7 @@ export default function MasteryOverviewPanel() {
 
   const shareToFeed = useMutation({
     mutationFn: (replicationLoop: boolean) => shareReport(overview!.share_report_id!, { replicationLoop }),
-    onSuccess: (res, replicationLoop) => {
+    onSuccess: async (res, replicationLoop) => {
       const reportId = overview!.share_report_id!;
       void qc.invalidateQueries({ queryKey: ["research-journey"] });
       void qc.invalidateQueries({ queryKey: ["public-feed"] });
@@ -51,6 +53,7 @@ export default function MasteryOverviewPanel() {
         if (!first) notify(d.shareSuccess, "success");
         if (!first) burstConfetti(2400);
         notify(rs.autoFollowingToast, "success");
+        await refreshMe();
         window.setTimeout(() => navigate("/me/following"), 600);
         return;
       }
@@ -63,6 +66,7 @@ export default function MasteryOverviewPanel() {
         notify,
       );
       if (!first) notify(d.shareSuccess, "success");
+      await refreshMe();
     },
     onError: (e) => notify(apiErrorMessage(e, d.shareToFeed), "error"),
   });

@@ -1,5 +1,6 @@
 import { useLocale } from "../store/locale";
 import type { ProjectQuality } from "../api/endpoints";
+import { localizedAcademyTitle } from "../lib/academy";
 
 type Props = {
   quality: ProjectQuality;
@@ -10,10 +11,14 @@ const STAGE_KEYS = ["start", "backtest", "validate", "graduate", "paper", "track
 
 export default function MasteryPathPanel({ quality, onAction }: Props) {
   const m = useLocale((s) => s.dict.masteryPath);
+  const atl = useLocale((s) => s.dict.academyTaskLabels);
   const mastery = quality.mastery;
   if (!mastery) return null;
 
   const currentIdx = mastery.stage_index ?? 0;
+  const academyTasks =
+    mastery.stage === "share" ? quality.academy_stage_tasks : quality.academy_next_tasks;
+  const pendingAcademyTasks = (academyTasks ?? []).filter((t) => !t.completed);
 
   return (
     <div className="mb-6 card border border-brand-100 bg-brand-50/30 dark:border-brand-900 dark:bg-brand-950/20">
@@ -49,14 +54,13 @@ export default function MasteryPathPanel({ quality, onAction }: Props) {
         })}
       </ol>
 
-      {quality.academy_next_tasks && quality.academy_next_tasks.some((t) => !t.completed) && (
+      {pendingAcademyTasks.length > 0 && (
         <div className="mb-3 rounded-lg border border-amber-100 bg-amber-50/60 px-3 py-2 text-xs text-amber-900 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
-          {quality.academy_next_tasks
-            .filter((t) => !t.completed)
-            .slice(0, 2)
+          {pendingAcademyTasks
+            .slice(0, mastery.stage === "share" ? 4 : 2)
             .map((t) => (
               <p key={t.code} className="mt-0.5 first:mt-0">
-                🏅 {m.academyStagePending(t.title, t.xp_reward)}
+                🏅 {m.academyStagePending(localizedAcademyTitle(t.code, t.title, atl), t.xp_reward)}
               </p>
             ))}
         </div>
