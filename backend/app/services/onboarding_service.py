@@ -120,7 +120,7 @@ def _mastery_path_phase_rows(
         "incubate": (project_path if active_project_id else "/templates", "run_validation" if active_project_id else "create_project"),
         "report": (project_path, "generate_report"),
         "paper": (project_path, "run_paper"),
-        "masters": ("/leaderboards/paper_mastery", "view_board"),
+        "masters": ("/leaderboards?kind=paper_mastery", "view_board"),
         "reputation": (project_path if active_project_id else "/feed", "publish_share"),
     }
     return [
@@ -396,7 +396,7 @@ def first_paper_order_coaching_payload(
         "message": labels["message"],
         "unlock_features": labels["unlock_features"],
         "cta_action": "keep_going",
-        "cta_path": "/leaderboards/paper_mastery",
+        "cta_path": "/leaderboards?kind=paper_mastery",
         "tracking_path": f"{project_path}#paper-tracking",
         "active_project_id": active_project_id,
         "project_title": project.title if project else None,
@@ -571,7 +571,7 @@ def first_report_coaching_payload(
                 "step": 3,
                 "label": labels["paper_step3_label"],
                 "hint": labels["paper_step3_hint"],
-                "cta_path": "/leaderboards/paper_mastery",
+                "cta_path": "/leaderboards?kind=paper_mastery",
                 "cta_action": "keep_going",
             },
         ]
@@ -846,7 +846,7 @@ def mastery_graduation_coaching_payload(
         "leaderboard_rank": rank,
         "followers": followers,
         "cta_action": "view_board",
-        "cta_path": "/leaderboards/paper_mastery",
+        "cta_path": "/leaderboards?kind=paper_mastery",
         "profile_path": "/me",
         "guide_steps": [
             {

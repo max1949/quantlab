@@ -73,13 +73,18 @@ class OrgInviteOut(BaseModel):
     invite_path: str
 
 
-class OrgInvitePreviewOut(BaseModel):
+class OrgInvitePublicPreviewOut(BaseModel):
+    """Unauthenticated invite preview — org name and role only."""
+
     org_id: uuid.UUID
     org_name: str
     role: str
     expires_at: datetime
     used_count: int
     max_uses: int
+
+
+class OrgInvitePreviewOut(OrgInvitePublicPreviewOut):
     already_member: bool
 
 

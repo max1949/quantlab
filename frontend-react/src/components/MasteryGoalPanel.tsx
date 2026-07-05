@@ -1,6 +1,8 @@
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getResearchJourney } from "../api/endpoints";
+import { FIRST_PAPER_GRADUATION_WELCOME_KEY } from "../lib/onboardingFocus";
 import { useLocale } from "../store/locale";
 import { Spinner } from "./ui";
 
@@ -8,6 +10,17 @@ export default function MasteryGoalPanel() {
   const d = useLocale((s) => s.dict.masteryGoal);
   const stages = useLocale((s) => s.dict.masteryPath.stages);
   const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
+  const prevGraduated = useRef<number | null>(null);
+
+  useEffect(() => {
+    const count = journey.data?.mastery_goal?.paper_graduated_count ?? 0;
+    if (prevGraduated.current != null && prevGraduated.current < 1 && count >= 1) {
+      sessionStorage.setItem(FIRST_PAPER_GRADUATION_WELCOME_KEY, "1");
+    }
+    if (journey.data?.mastery_goal) {
+      prevGraduated.current = count;
+    }
+  }, [journey.data?.mastery_goal?.paper_graduated_count, journey.data?.mastery_goal]);
 
   if (journey.isLoading) return <Spinner />;
   if (!journey.data?.mastery_goal) return null;

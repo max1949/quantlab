@@ -90,6 +90,23 @@ def test_non_member_denied(client, db_session):
     assert resp.status_code == 403
 
 
+def test_org_invite_public_preview_no_auth(client, db_session):
+    h_owner = _auth(client, OWNER)
+    org_id = client.post(f"{BASE}/orgs", headers=h_owner, json={"name": "Public Desk"}).json()["id"]
+    token = client.post(
+        f"{BASE}/orgs/{org_id}/invites",
+        headers=h_owner,
+        json={"role": "member", "expires_in_days": 7, "max_uses": 2},
+    ).json()["token"]
+
+    preview = client.get(f"{BASE}/orgs/invites/{token}/public")
+    assert preview.status_code == 200, preview.text
+    body = preview.json()
+    assert body["org_name"] == "Public Desk"
+    assert body["role"] == "member"
+    assert "already_member" not in body
+
+
 def test_org_invite_preview_and_accept(client, db_session):
     h_owner = _auth(client, OWNER)
     h_member = _auth(client, MEMBER)

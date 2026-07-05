@@ -9,6 +9,8 @@ import HandbookExportButtons from "../components/HandbookExportButtons";
 import {
   FIRST_MENTOR_WELCOME_KEY,
   FOCUS_QUICKSTART_KEY,
+  ORG_INVITE_ACCEPTED_ORG_KEY,
+  ORG_INVITE_PENDING_KEY,
 } from "../lib/onboardingFocus";
 import type { UserType } from "../api/types";
 
@@ -39,6 +41,17 @@ export default function Onboarding() {
       sessionStorage.setItem(FOCUS_QUICKSTART_KEY, "1");
       sessionStorage.setItem(FIRST_MENTOR_WELCOME_KEY, "1");
       notify(o.saved, "success");
+      const acceptedOrg = sessionStorage.getItem(ORG_INVITE_ACCEPTED_ORG_KEY);
+      if (acceptedOrg) {
+        sessionStorage.removeItem(ORG_INVITE_ACCEPTED_ORG_KEY);
+        navigate(`/orgs/${acceptedOrg}`, { replace: true });
+        return;
+      }
+      const pendingInvite = sessionStorage.getItem(ORG_INVITE_PENDING_KEY);
+      if (pendingInvite) {
+        navigate(`/org-invite/${pendingInvite}`, { replace: true });
+        return;
+      }
       navigate("/app", { replace: true });
     } catch (err) {
       notify(apiErrorMessage(err, o.saveFail), "error");

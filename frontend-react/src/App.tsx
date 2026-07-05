@@ -72,6 +72,7 @@ export default function App() {
           <Route path="/leaderboards" element={<Leaderboards />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/admin/ops" element={<AdminOps />} />
+          <Route path="/org-invite/:token" element={<OrgInvite />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/onboarding" element={<Onboarding />} />
@@ -84,7 +85,6 @@ export default function App() {
             <Route path="/experiments" element={<Experiments />} />
             <Route path="/orgs" element={<OrgLibrary />} />
             <Route path="/orgs/:id" element={<OrgDetail />} />
-            <Route path="/org-invite/:token" element={<OrgInvite />} />
             <Route path="/challenges" element={<Challenges />} />
             <Route path="/me" element={<MyProfile />} />
             <Route path="/me/referral" element={<Referral />} />

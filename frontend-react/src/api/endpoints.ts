@@ -35,6 +35,7 @@ import type {
   OrgFactorShare,
   OrgInvite,
   OrgInvitePreview,
+  OrgInvitePublicPreview,
   OrgMember,
   OrthogonalizeResult,
   ResearchOrg,
@@ -995,6 +996,11 @@ export async function createOrgInvite(
   body: { role?: string; expires_in_days?: number; max_uses?: number },
 ): Promise<OrgInvite> {
   const { data } = await api.post<OrgInvite>(`/orgs/${orgId}/invites`, body);
+  return data;
+}
+
+export async function previewOrgInvitePublic(token: string): Promise<OrgInvitePublicPreview> {
+  const { data } = await api.get<OrgInvitePublicPreview>(`/orgs/invites/${token}/public`);
   return data;
 }
 

@@ -17,7 +17,13 @@ export default function ProtectedRoute() {
   }
 
   // 未完成分流的用户, 强制去 onboarding (onboarding 页本身放行)。
-  if (!user.onboarding_done && location.pathname !== "/onboarding") {
+  // 机构邀请链路：允许先接受邀请 / 查看团队页，再走新手分流。
+  const onboardingExempt =
+    location.pathname === "/onboarding" ||
+    location.pathname.startsWith("/org-invite/") ||
+    location.pathname.startsWith("/orgs/");
+
+  if (!user.onboarding_done && !onboardingExempt) {
     return <Navigate to="/onboarding" replace />;
   }
 

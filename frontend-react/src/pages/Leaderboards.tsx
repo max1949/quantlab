@@ -2,6 +2,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getLeaderboard, getPaperMasteryMeta, getResearchJourney } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
+import ReputationCoachPanel from "../components/ReputationCoachPanel";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import { ErrorBox, PageTitle, Spinner } from "../components/ui";
@@ -88,6 +89,8 @@ export default function Leaderboards() {
           </button>
         ))}
       </div>
+
+      {kind === "paper_mastery" && user && <ReputationCoachPanel placement="leaderboards" />}
 
       {kind === "paper_mastery" && (
         <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50/60 px-4 py-3 text-sm dark:border-emerald-900 dark:bg-emerald-950/30">

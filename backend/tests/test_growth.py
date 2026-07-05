@@ -291,7 +291,7 @@ def test_journey_includes_first_report_coaching(client, db_session):
         assert coach.get("paper_guide_title")
         assert len(coach.get("guide_steps") or []) == 3
         assert coach["guide_steps"][0]["cta_action"] == "run_paper"
-        assert coach["guide_steps"][2]["cta_path"] == "/leaderboards/paper_mastery"
+        assert coach["guide_steps"][2]["cta_path"] == "/leaderboards?kind=paper_mastery"
     else:
         assert not coach.get("guide_steps")
 
@@ -439,7 +439,7 @@ def test_first_report_coaching_hides_after_paper_order(client, db_session):
     assert j2.get("first_report_coaching") is None
     coach = j2.get("first_paper_order_coaching")
     assert coach is not None
-    assert coach["cta_path"] == "/leaderboards/paper_mastery"
+    assert coach["cta_path"] == "/leaderboards?kind=paper_mastery"
     assert coach.get("tracking_path", "").endswith("#paper-tracking")
 
 

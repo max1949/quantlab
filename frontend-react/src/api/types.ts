@@ -916,13 +916,16 @@ export interface OrgInvite {
   active?: boolean;
 }
 
-export interface OrgInvitePreview {
+export interface OrgInvitePublicPreview {
   org_id: string;
   org_name: string;
   role: string;
   expires_at: string;
   used_count: number;
   max_uses: number;
+}
+
+export interface OrgInvitePreview extends OrgInvitePublicPreview {
   already_member: boolean;
 }
 

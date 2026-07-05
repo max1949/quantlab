@@ -342,6 +342,21 @@ const en = {
     inviteCta: "Create team invite →",
     memberDashboard: "Open member workspace →",
   },
+  orgInviteIncubation: {
+    badge: "Your mastery path preview",
+    title: "Join the desk — same guided path as solo researchers",
+    subtitle:
+      "After you accept, QuantLab auto-coaches you: template → backtest → validation → report → Paper Masters board.",
+    steps: [
+      "Sign up or log in, then accept the invite",
+      "Complete a 30-second profile — unlock your personalized coach",
+      "Follow one-click steps until you graduate on the Paper Masters leaderboard",
+    ],
+    loginHint: "Create an account or log in to accept this invite and start the guided path.",
+    registerCta: "Sign up & join →",
+    loginCta: "Log in",
+    handbookCta: "Read beginner handbook →",
+  },
   orgLibrary: {
     title: "Team factor library",
     subtitle: "Institutional workspace — share factors across your research desk.",
@@ -1757,6 +1772,20 @@ const zh = {
     ],
     inviteCta: "生成团队邀请 →",
     memberDashboard: "打开成员工作台 →",
+  },
+  orgInviteIncubation: {
+    badge: "你的大师路径预览",
+    title: "加入团队 — 与独立研究者相同的全自动引导",
+    subtitle: "接受邀请后，QuantLab 会一步步带你：模板 → 回测 → 验证 → 报告 → Paper 大师榜。",
+    steps: [
+      "注册或登录，然后接受邀请",
+      "完成 30 秒新手分流 — 解锁专属 AI 导师",
+      "按一键引导走到 Paper 大师榜毕业",
+    ],
+    loginHint: "注册或登录后即可接受邀请，开始全自动大师路径。",
+    registerCta: "注册并加入 →",
+    loginCta: "登录",
+    handbookCta: "阅读新手指南 →",
   },
   orgLibrary: {
     title: "团队因子库",

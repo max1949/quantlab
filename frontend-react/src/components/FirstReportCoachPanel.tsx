@@ -138,7 +138,7 @@ export default function FirstReportCoachPanel({ placement = "dashboard", reportI
           <Link to={coach.cta_path} className="btn-primary whitespace-nowrap text-xs">
             {ctaLabel}
           </Link>
-          <Link to="/leaderboards/paper_mastery" className="btn whitespace-nowrap text-xs">
+          <Link to="/leaderboards?kind=paper_mastery" className="btn whitespace-nowrap text-xs">
             {d.viewBoard}
           </Link>
           <button type="button" className="btn whitespace-nowrap text-xs" onClick={dismiss}>

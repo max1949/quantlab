@@ -27,6 +27,7 @@ from backend.app.schemas.organization import (
     OrgInviteListOut,
     OrgInviteOut,
     OrgInvitePreviewOut,
+    OrgInvitePublicPreviewOut,
     OrgMemberAdd,
     OrgMemberOut,
     OrgMemberUpdate,
@@ -69,6 +70,23 @@ def list_my_orgs(
     db: Annotated[Session, Depends(get_db)],
 ) -> list[OrgOut]:
     return [OrgOut(**o) for o in org_service.list_orgs_for_user(db, current_user.id)]
+
+
+@router.get(
+    "/invites/{token}/public",
+    response_model=OrgInvitePublicPreviewOut,
+    summary="公开预览机构邀请（无需登录）",
+)
+def preview_invite_public(
+    token: str,
+    db: Annotated[Session, Depends(get_db)],
+) -> OrgInvitePublicPreviewOut:
+    try:
+        return OrgInvitePublicPreviewOut(
+            **org_service.preview_invite_public(db, token)
+        )
+    except org_service.OrgInviteInvalidError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
 
 
 @router.get(

@@ -510,7 +510,7 @@ def _load_valid_invite(db: Session, token: str) -> OrgInvite:
     return invite
 
 
-def preview_invite(db: Session, token: str, user_id: uuid.UUID) -> dict:
+def preview_invite_public(db: Session, token: str) -> dict:
     invite = _load_valid_invite(db, token)
     org = db.get(ResearchOrg, invite.org_id)
     return {
@@ -520,7 +520,14 @@ def preview_invite(db: Session, token: str, user_id: uuid.UUID) -> dict:
         "expires_at": invite.expires_at,
         "used_count": invite.used_count,
         "max_uses": invite.max_uses,
-        "already_member": _member_row(db, invite.org_id, user_id) is not None,
+    }
+
+
+def preview_invite(db: Session, token: str, user_id: uuid.UUID) -> dict:
+    base = preview_invite_public(db, token)
+    return {
+        **base,
+        "already_member": _member_row(db, base["org_id"], user_id) is not None,
     }
 
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getResearchJourney } from "../api/endpoints";
-import { FIRST_PAPER_ORDER_WELCOME_KEY } from "../lib/onboardingFocus";
+import { FIRST_PAPER_ORDER_WELCOME_KEY, FIRST_LEADERBOARD_PAPER_WELCOME_KEY } from "../lib/onboardingFocus";
 import { burstConfetti } from "../lib/confetti";
 import { useLocale } from "../store/locale";
 import { stageToCtaLabel } from "../lib/nav";
@@ -88,7 +88,14 @@ export default function FirstPaperOrderCoachPanel({
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
-          <Link to={coach.cta_path} className="btn-primary whitespace-nowrap text-xs" onClick={dismiss}>
+          <Link
+            to={coach.cta_path}
+            className="btn-primary whitespace-nowrap text-xs"
+            onClick={() => {
+              sessionStorage.setItem(FIRST_LEADERBOARD_PAPER_WELCOME_KEY, "1");
+              dismiss();
+            }}
+          >
             {ctaLabel}
           </Link>
           {coach.tracking_path && (
