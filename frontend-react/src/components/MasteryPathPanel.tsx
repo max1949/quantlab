@@ -4,6 +4,7 @@ import { getResearchJourney } from "../api/endpoints";
 import { useLocale } from "../store/locale";
 import type { ProjectQuality } from "../api/endpoints";
 import { localizedAcademyTitle } from "../lib/academy";
+import { FIRST_FEED_FOLLOW_WELCOME_KEY } from "../lib/onboardingFocus";
 import { NETWORK_FOLLOW_TARGET } from "../lib/journeyFollowing";
 
 type Props = {
@@ -106,6 +107,9 @@ export default function MasteryPathPanel({
                 {m.shareReportCta}
               </button>
             )}
+            {hasReport && !isPublished && !publishReady && (
+              <p className="mt-2 text-xs text-amber-800 dark:text-amber-200">{m.shareQualityLocked}</p>
+            )}
             {hasReport && !isPublished && publishReady && (
               <button type="button" className="btn-primary text-xs" onClick={() => onAction("publish")}>
                 {m.sharePublishCta}
@@ -116,9 +120,17 @@ export default function MasteryPathPanel({
                 {m.shareCardCta}
               </Link>
             )}
-            {networkReady && (
+            {networkReady ? (
               <Link to="/me/following" className="btn text-xs">
                 {m.shareFollowingCta}
+              </Link>
+            ) : (
+              <Link
+                to="/feed?focus=follow"
+                className="btn text-xs"
+                onClick={() => sessionStorage.setItem(FIRST_FEED_FOLLOW_WELCOME_KEY, "1")}
+              >
+                {m.shareNetworkCta}
               </Link>
             )}
           </div>

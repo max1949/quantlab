@@ -17,6 +17,8 @@ import {
 import { apiErrorMessage } from "../api/client";
 import { academyRewardMessage } from "../lib/academy";
 import { celebrateFirstReport } from "../lib/celebrateFirstReport";
+import { burstConfetti } from "../lib/confetti";
+import { isReplicationReportFlow } from "../lib/replicationFlow";
 import { useAuth } from "../store/auth";
 import { useUi } from "../store/ui";
 import { useLocale } from "../store/locale";
@@ -44,6 +46,7 @@ import {
   FIRST_REPORT_WELCOME_KEY,
   FIRST_VALIDATION_WELCOME_KEY,
   REPLICATION_FLOW_REPORT_KEY,
+  REPLICATION_PUBLISH_FEED_KEY,
   REPLICATION_REPORT_PENDING_KEY,
   REPLICATION_REPORT_WELCOME_KEY,
 } from "../lib/onboardingFocus";
@@ -61,6 +64,7 @@ export default function ProjectDetail() {
   const d = useLocale((s) => s.dict.dashboard);
   const atl = useLocale((s) => s.dict.academyTaskLabels);
   const firstReportCoach = useLocale((s) => s.dict.firstReportCoach);
+  const rp = useLocale((s) => s.dict.replicationPublishCoach);
   const lk = useLocale((s) => s.dict.locked);
 
   const project = useQuery({ queryKey: ["project", id], queryFn: () => getProject(id) });
@@ -207,6 +211,16 @@ export default function ProjectDetail() {
       const me = await useAuth.getState().refreshMe();
       if (me) setUser(me);
       refreshAll();
+      const reportId = graph.data?.nodes.find((n) => n.ref_type === "report")?.ref_id ?? null;
+      if (reportId && isReplicationReportFlow(reportId)) {
+        sessionStorage.removeItem(REPLICATION_REPORT_WELCOME_KEY);
+        sessionStorage.removeItem(REPLICATION_FLOW_REPORT_KEY);
+        sessionStorage.setItem(REPLICATION_PUBLISH_FEED_KEY, reportId);
+        burstConfetti(2800);
+        notify(rp.publishedToast, "success");
+        void trackEvent("replication_published", { report_id: reportId, project_id: id, from: "project" });
+        window.setTimeout(() => navigate(`/feed?highlight=${reportId}`), 600);
+      }
     },
     onError: (e) => notify(apiErrorMessage(e, p.publishFail), "error"),
     onSettled: () => setBusy(null),
