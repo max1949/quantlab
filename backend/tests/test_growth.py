@@ -522,6 +522,7 @@ def test_journey_includes_reputation_coaching_after_paper(client, db_session):
     assert growth["profile_path"] == "/me"
     assert growth["following_feed_path"] == "/me/following"
     assert len(growth.get("guide_steps") or []) == 3
+    assert growth["guide_steps"][2]["cta_path"] == "/feed?focus=follow"
 
 
 def test_journey_includes_mastery_graduation_when_path_complete(client, db_session, monkeypatch):

@@ -918,7 +918,7 @@ def share_growth_coaching_payload(db: Session, user: User, locale: Locale, flags
     else:
         reason = "first_views"
 
-    step3_path = "/feed" if following == 0 else feed_path
+    step3_path = "/feed?focus=follow" if following == 0 else feed_path
     step3_label = labels["step3_follow_label"] if following == 0 else labels["step3_label"]
     step3_hint = labels["step3_follow_hint"] if following == 0 else labels["step3_hint"]
 

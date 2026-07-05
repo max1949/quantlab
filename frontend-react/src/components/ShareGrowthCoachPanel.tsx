@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getResearchJourney } from "../api/endpoints";
+import { FIRST_FEED_FOLLOW_WELCOME_KEY } from "../lib/onboardingFocus";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
 
@@ -26,6 +27,12 @@ export default function ShareGrowthCoachPanel() {
     const url = `${window.location.origin}${coach.share_url_path}`;
     await navigator.clipboard.writeText(url);
     notify(d.copied, "success");
+  };
+
+  const armFeedWelcome = () => {
+    if ((coach?.following ?? 0) < 3) {
+      sessionStorage.setItem(FIRST_FEED_FOLLOW_WELCOME_KEY, "1");
+    }
   };
 
   return (
@@ -75,6 +82,9 @@ export default function ShareGrowthCoachPanel() {
                       <Link
                         to={step.cta_path}
                         className="mt-2 inline-block text-[10px] font-semibold text-brand-600 hover:underline dark:text-brand-400"
+                        onClick={() => {
+                          if (step.cta_path.startsWith("/feed")) armFeedWelcome();
+                        }}
                       >
                         {d.stepGo}
                       </Link>
@@ -87,7 +97,7 @@ export default function ShareGrowthCoachPanel() {
         </div>
 
         <div className="flex shrink-0 flex-wrap gap-2">
-          <Link to={coach.feed_path} className="btn-primary whitespace-nowrap text-xs">
+          <Link to={coach.feed_path} className="btn-primary whitespace-nowrap text-xs" onClick={armFeedWelcome}>
             {d.viewFeed}
           </Link>
           <Link to={coach.profile_path} className="btn whitespace-nowrap text-xs">

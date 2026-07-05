@@ -1,5 +1,8 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import type { ReportDetail } from "../api/types";
+import { trackEvent } from "../api/endpoints";
+import { burstConfetti } from "../lib/confetti";
 import { primaryTemplateForSymbol } from "../lib/templateHints";
 import { FOLLOWING_REPORT_HANDOFF_KEY } from "../lib/onboardingFocus";
 import { useLocale } from "../store/locale";
@@ -14,6 +17,11 @@ export default function FollowingReportHandoffPanel({ report }: Props) {
   const show =
     typeof window !== "undefined" && sessionStorage.getItem(FOLLOWING_REPORT_HANDOFF_KEY) === report.id;
 
+  useEffect(() => {
+    if (!show) return;
+    burstConfetti(2200);
+  }, [show]);
+
   if (!show) return null;
 
   const templateCode = primaryTemplateForSymbol(report.symbol);
@@ -23,6 +31,15 @@ export default function FollowingReportHandoffPanel({ report }: Props) {
   const templatesPath = templateCode ? `/templates?focus=${templateCode}` : "/templates";
 
   const dismiss = () => sessionStorage.removeItem(FOLLOWING_REPORT_HANDOFF_KEY);
+
+  const startTemplate = () => {
+    dismiss();
+    void trackEvent("following_report_template_handoff", {
+      report_id: report.id,
+      symbol: report.symbol,
+      template_code: templateCode ?? "",
+    });
+  };
 
   return (
     <div className="mb-4 card border border-teal-200 bg-gradient-to-r from-teal-50/90 to-cyan-50/60 dark:border-teal-900 dark:from-teal-950/40 dark:to-cyan-950/30">
@@ -35,7 +52,7 @@ export default function FollowingReportHandoffPanel({ report }: Props) {
         {templateTitle ? d.templateHint(templateTitle) : d.genericHint}
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
-        <Link to={templatesPath} className="btn-primary text-xs" onClick={dismiss}>
+        <Link to={templatesPath} className="btn-primary text-xs" onClick={startTemplate}>
           {d.startTemplate}
         </Link>
         <button type="button" className="btn text-xs" onClick={dismiss}>
