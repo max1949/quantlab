@@ -85,6 +85,11 @@ export default function MasteryGraduationPanel() {
           {coach.report_title && (
             <p className="mt-2 text-sm font-medium text-slate-800 dark:text-slate-100">{coach.report_title}</p>
           )}
+          {coach.followers === 0 && (
+            <p className="mt-2 rounded-lg border border-fuchsia-200 bg-fuchsia-50/70 px-3 py-2 text-xs text-fuchsia-900 dark:border-fuchsia-900 dark:bg-fuchsia-950/30 dark:text-fuchsia-100">
+              {d.networkNudge}
+            </p>
+          )}
           <p className="mt-2 text-sm text-violet-900/90 dark:text-violet-100/90">{coach.message}</p>
 
           <div className="mt-4 rounded-lg border border-violet-300/50 bg-white/60 p-3 dark:border-violet-800 dark:bg-slate-900/40">
@@ -132,6 +137,11 @@ export default function MasteryGraduationPanel() {
           <Link to={coach.feed_path} className="btn-primary whitespace-nowrap text-xs">
             {d.viewFeed}
           </Link>
+          {coach.followers === 0 && (
+            <Link to="/feed" className="btn whitespace-nowrap text-xs">
+              {d.followResearchers}
+            </Link>
+          )}
           <button type="button" className="btn whitespace-nowrap text-xs" onClick={copyLink}>
             {d.copyLink}
           </button>

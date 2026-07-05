@@ -1,5 +1,7 @@
 export type Locale = "en" | "zh";
 
+import type { ResearchJourney } from "../api/types";
+
 const en = {
   brand: "QuantLab AI",
   brandTag: "QAI Lab",
@@ -221,6 +223,8 @@ const en = {
     viewFeed: "View on feed →",
     copyLink: "Copy share link",
     copied: "Graduation share link copied — send it to one focused reader.",
+    followResearchers: "Follow researchers on feed →",
+    networkNudge: "Your research is live — follow 2–3 active masters on the feed so your work gets discovered too.",
     dismiss: "Celebrate later",
     stepGo: "Go →",
   },
@@ -686,6 +690,22 @@ const en = {
     coachStackChallenge: (msg: string) => `Challenge · ${msg}`,
     coachStackUpgrade: (msg: string) => `Upgrade · ${msg}`,
     coachStackMarket: (msg: string) => `Market data · ${msg}`,
+    incubationCoachMore: (n: number) => `${n} more coaching tip(s) folded — one focus at a time`,
+    incubationCoachExpand: "Show all coaching tips →",
+    incubationCoachCollapse: "Focus on one tip ↑",
+  },
+  incubationCoachLabels: {
+    checkout: () => "Membership unlocked · your next research step",
+    graduation: (j: ResearchJourney) => j.mastery_graduation_coaching?.celebrate ?? "Mastery graduate",
+    first_paper_order: (j: ResearchJourney) => j.first_paper_order_coaching?.celebrate ?? "First paper order",
+    first_report: (j: ResearchJourney) => j.first_report_coaching?.celebrate ?? "First report",
+    org_member: (j: ResearchJourney) => j.org_member_coaching?.celebrate ?? "Team desk joined",
+    reputation: (j: ResearchJourney) => j.reputation_coaching?.celebrate ?? "Reputation loop",
+    share_growth: (j: ResearchJourney) => j.share_growth_coaching?.message ?? "Share growth",
+    first_mentor: () => "First workspace visit · AI mentor",
+    quickstart: (j: ResearchJourney) => j.quickstart_guide?.title ?? "Quick start",
+    revisit: (j: ResearchJourney) => j.research_revisit_coaching?.celebrate ?? "Welcome back",
+    mastery_overview: (j: ResearchJourney) => j.mastery_overview?.print_title ?? "Mastery path map",
   },
   jointAttentionCoach: {
     title: "Joint coaching · regime × paper",
@@ -1675,6 +1695,8 @@ const zh = {
     viewFeed: "在广场查看 →",
     copyLink: "复制毕业分享链接",
     copied: "毕业分享链接已复制 — 发给一个精准读者吧。",
+    followResearchers: "去广场关注研究员 →",
+    networkNudge: "研究已公开 — 在广场关注 2–3 位活跃大师，你的成果也更容易被看见。",
     dismiss: "稍后再看",
     stepGo: "去 →",
   },
@@ -2139,6 +2161,22 @@ const zh = {
     coachStackChallenge: (msg: string) => `挑战联动 · ${msg}`,
     coachStackUpgrade: (msg: string) => `升级教练 · ${msg}`,
     coachStackMarket: (msg: string) => `行情教练 · ${msg}`,
+    incubationCoachMore: (n: number) => `还有 ${n} 条教练提示已收起 — 一次只聚焦一条`,
+    incubationCoachExpand: "展开全部教练提示 →",
+    incubationCoachCollapse: "只显示当前重点 ↑",
+  },
+  incubationCoachLabels: {
+    checkout: () => "会员已开通 · 下一步研究指引",
+    graduation: (j: ResearchJourney) => j.mastery_graduation_coaching?.celebrate ?? "大师毕业",
+    first_paper_order: (j: ResearchJourney) => j.first_paper_order_coaching?.celebrate ?? "首笔 Paper 单",
+    first_report: (j: ResearchJourney) => j.first_report_coaching?.celebrate ?? "首份报告",
+    org_member: (j: ResearchJourney) => j.org_member_coaching?.celebrate ?? "已加入团队",
+    reputation: (j: ResearchJourney) => j.reputation_coaching?.celebrate ?? "声誉闭环",
+    share_growth: (j: ResearchJourney) => j.share_growth_coaching?.message ?? "分享增长",
+    first_mentor: () => "首次进入工作台 · AI 导师",
+    quickstart: (j: ResearchJourney) => j.quickstart_guide?.title ?? "快速上手",
+    revisit: (j: ResearchJourney) => j.research_revisit_coaching?.celebrate ?? "欢迎回来",
+    mastery_overview: (j: ResearchJourney) => j.mastery_overview?.print_title ?? "大师路径图",
   },
   jointAttentionCoach: {
     title: "联合教练 · 制度 × Paper",

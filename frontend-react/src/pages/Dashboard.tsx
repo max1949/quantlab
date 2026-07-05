@@ -16,17 +16,7 @@ import AcademyTasks from "../components/AcademyTasks";
 import ResearchJourneyRing from "../components/ResearchJourneyRing";
 import MasteryGoalPanel from "../components/MasteryGoalPanel";
 import DashboardCoachStack from "../components/DashboardCoachStack";
-import OrgMemberCoachPanel from "../components/OrgMemberCoachPanel";
-import ResearchRevisitCoachPanel from "../components/ResearchRevisitCoachPanel";
-import PostCheckoutCoachPanel from "../components/PostCheckoutCoachPanel";
-import QuickStartGuidePanel from "../components/QuickStartGuidePanel";
-import FirstDashboardMentorPanel from "../components/FirstDashboardMentorPanel";
-import FirstReportCoachPanel from "../components/FirstReportCoachPanel";
-import FirstPaperOrderCoachPanel from "../components/FirstPaperOrderCoachPanel";
-import MasteryOverviewPanel from "../components/MasteryOverviewPanel";
-import ReputationCoachPanel from "../components/ReputationCoachPanel";
-import ShareGrowthCoachPanel from "../components/ShareGrowthCoachPanel";
-import MasteryGraduationPanel from "../components/MasteryGraduationPanel";
+import DashboardIncubationCoachStack from "../components/DashboardIncubationCoachStack";
 import BeginnerHandbookStrip from "../components/BeginnerHandbookStrip";
 
 export default function Dashboard() {
@@ -57,51 +47,11 @@ export default function Dashboard() {
       </div>
 
       <div className="mt-6">
-        <PostCheckoutCoachPanel />
-      </div>
-
-      <div className="mt-6">
-        <OrgMemberCoachPanel />
-      </div>
-
-      <div className="mt-6">
-        <ResearchRevisitCoachPanel />
-      </div>
-
-      <div className="mt-6">
         <BeginnerHandbookStrip />
       </div>
 
       <div className="mt-6">
-        <FirstDashboardMentorPanel onVisibilityChange={setFirstMentorVisible} />
-      </div>
-
-      <div className="mt-6">
-        <QuickStartGuidePanel />
-      </div>
-
-      <div className="mt-6">
-        <FirstReportCoachPanel />
-      </div>
-
-      <div className="mt-6">
-        <FirstPaperOrderCoachPanel placement="dashboard" />
-      </div>
-
-      <div className="mt-6">
-        <MasteryOverviewPanel />
-      </div>
-
-      <div className="mt-6">
-        <ReputationCoachPanel />
-      </div>
-
-      <div className="mt-6">
-        <ShareGrowthCoachPanel />
-      </div>
-
-      <div className="mt-6">
-        <MasteryGraduationPanel />
+        <DashboardIncubationCoachStack onFirstMentorVisibilityChange={setFirstMentorVisible} />
       </div>
 
       {!firstMentorVisible && (
