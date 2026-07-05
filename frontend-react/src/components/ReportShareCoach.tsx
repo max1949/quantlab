@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { shareReport, trackEvent } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
 import { celebrateFirstShare } from "../lib/firstShare";
+import { REPLICATION_PUBLISH_FEED_KEY, REPLICATION_SHARE_FOLLOWING_KEY } from "../lib/onboardingFocus";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
@@ -14,12 +15,14 @@ type Props = {
 
 export default function ReportShareCoach({ reportId }: Props) {
   const t = useLocale((s) => s.dict.report);
+  const rs = useLocale((s) => s.dict.replicationShareCoach);
   const d = useLocale((s) => s.dict.dashboard);
   const atl = useLocale((s) => s.dict.academyTaskLabels);
   const notify = useUi((s) => s.notify);
   const refreshMe = useAuth((s) => s.refreshMe);
   const qc = useQueryClient();
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [fromReplicationShare, setFromReplicationShare] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
   const share = useMutation({
@@ -38,6 +41,12 @@ export default function ReportShareCoach({ reportId }: Props) {
       void qc.invalidateQueries({ queryKey: ["research-journey"] });
       void qc.invalidateQueries({ queryKey: ["public-feed"] });
       void trackEvent("share_success_feed_prompt", { report_id: reportId });
+      if (sessionStorage.getItem(REPLICATION_PUBLISH_FEED_KEY) === reportId) {
+        sessionStorage.removeItem(REPLICATION_PUBLISH_FEED_KEY);
+        sessionStorage.setItem(REPLICATION_SHARE_FOLLOWING_KEY, "1");
+        setFromReplicationShare(true);
+        void trackEvent("replication_share_created", { report_id: reportId });
+      }
       await refreshMe();
       requestAnimationFrame(() => {
         rootRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -69,17 +78,27 @@ export default function ReportShareCoach({ reportId }: Props) {
         ref={rootRef}
         className="mt-6 card border border-emerald-200 bg-gradient-to-br from-emerald-50/90 to-brand-50/40 dark:border-emerald-900 dark:from-emerald-950/40 dark:to-brand-950/20"
       >
-        <p className="font-semibold text-emerald-800 dark:text-emerald-200">{t.shareSuccessTitle}</p>
-        <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-300">{t.shareSuccessDesc}</p>
+        <p className="font-semibold text-emerald-800 dark:text-emerald-200">
+          {fromReplicationShare ? rs.successTitle : t.shareSuccessTitle}
+        </p>
+        <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-300">
+          {fromReplicationShare ? rs.successDesc : t.shareSuccessDesc}
+        </p>
 
         <div className="mt-4 flex flex-wrap gap-2">
-          <Link
-            to={feedHref}
-            className="btn-primary"
-            onClick={() => void trackEvent("share_goto_feed", { report_id: reportId })}
-          >
-            {t.shareViewOnFeed}
-          </Link>
+          {fromReplicationShare ? (
+            <Link to="/me/following" className="btn-primary">
+              {rs.openFollowing}
+            </Link>
+          ) : (
+            <Link
+              to={feedHref}
+              className="btn-primary"
+              onClick={() => void trackEvent("share_goto_feed", { report_id: reportId })}
+            >
+              {t.shareViewOnFeed}
+            </Link>
+          )}
           <button type="button" className="btn" onClick={copyLink}>
             {t.copyLink}
           </button>

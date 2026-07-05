@@ -7,6 +7,7 @@ import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import { EmptyState, ErrorBox, PageTitle, Spinner } from "../components/ui";
+import ReplicationFeedWelcomePanel from "../components/ReplicationFeedWelcomePanel";
 import ReportCard from "../components/ReportCard";
 import FeedFollowCoachPanel from "../components/FeedFollowCoachPanel";
 import NetworkReadyCoachPanel from "../components/NetworkReadyCoachPanel";
@@ -57,6 +58,7 @@ export default function Feed() {
   return (
     <div>
       <PageTitle title={f.title} subtitle={f.subtitle} />
+      <ReplicationFeedWelcomePanel />
 
       <div className="mb-4 flex flex-wrap gap-2">
         <button

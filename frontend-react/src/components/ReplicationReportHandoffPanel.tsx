@@ -33,11 +33,11 @@ export default function ReplicationReportHandoffPanel({ reportId, projectId }: P
       <p className="mt-2 text-xs text-violet-900/80 dark:text-violet-100/80">{d.hint}</p>
       <div className="mt-3 flex flex-wrap gap-2">
         {projectId && (
-          <a href="#report-publish" className="btn-primary text-xs" onClick={dismiss}>
+          <a href="#report-publish" className="btn-primary text-xs">
             {d.publish}
           </a>
         )}
-        <a href="#report-share" className="btn text-xs" onClick={dismiss}>
+        <a href="#report-share" className="btn text-xs">
           {d.share}
         </a>
         <Link to="/me/following" className="btn text-xs" onClick={dismiss}>

@@ -38,3 +38,7 @@ export const FOLLOWING_PROJECT_REPLICATION_KEY = "quantlab-following-project-rep
 /** Report generated after replication OOS check — show publish/share handoff on report page. */
 export const REPLICATION_REPORT_PENDING_KEY = "quantlab-replication-report-pending";
 export const REPLICATION_REPORT_WELCOME_KEY = "quantlab-replication-report-welcome";
+/** Replication report published — highlight on public feed. */
+export const REPLICATION_PUBLISH_FEED_KEY = "quantlab-replication-publish-feed";
+/** Replication share created — welcome back on following feed. */
+export const REPLICATION_SHARE_FOLLOWING_KEY = "quantlab-replication-share-following";

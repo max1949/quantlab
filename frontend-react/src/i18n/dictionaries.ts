@@ -1497,6 +1497,31 @@ const en = {
     backToFollowing: "Back to following feed",
     dismiss: "Later",
   },
+  replicationPublishCoach: {
+    publishedToast: "Replication published — your work is live on the research feed.",
+    publishedTitle: "Your replication is on the feed",
+    publishedDesc: "Campmates can now discover your validated research — create a share card next.",
+    viewOnFeed: "View on feed →",
+  },
+  replicationFeedWelcome: {
+    badge: "Replication live",
+    title: "Your replicated research is highlighted below",
+    message: "You published after mirroring a master — this is how the incubator loop grows.",
+    createShare: "Create share card →",
+    dismiss: "Got it",
+  },
+  replicationShareCoach: {
+    successTitle: "Share card ready — loop back to learning",
+    successDesc: "Copy the link if you like, then read peers on your following feed for the next replication.",
+    openFollowing: "Open following feed →",
+  },
+  followingReplicationReturn: {
+    badge: "Growth loop",
+    title: "You contributed — now keep learning from peers",
+    message: "You shipped a replication and shared it. Masters alternate between publishing and reading others' work.",
+    hint: "Pick one report below to study this week's validation ideas.",
+    readPeers: "Read peer reports ↓",
+  },
   followingReportHandoff: {
     badge: "Learn from a master",
     title: "You opened a report from your following feed",
@@ -3166,6 +3191,31 @@ const zh = {
     share: "生成分享卡片 →",
     backToFollowing: "回关注动态",
     dismiss: "稍后再说",
+  },
+  replicationPublishCoach: {
+    publishedToast: "复现已发布 — 你的成果已登上研究广场。",
+    publishedTitle: "你的复现成果已在广场",
+    publishedDesc: "同伴现在能看到你经得住验证的研究 — 下一步生成分享卡片。",
+    viewOnFeed: "在广场查看 →",
+  },
+  replicationFeedWelcome: {
+    badge: "复现已上线",
+    title: "你复现的研究已在下方高亮",
+    message: "跟着大师路径做完并发布 — 孵化器就是这样滚雪球长大的。",
+    createShare: "生成分享卡片 →",
+    dismiss: "知道了",
+  },
+  replicationShareCoach: {
+    successTitle: "分享卡片就绪 — 回到学习雷达",
+    successDesc: "链接可复制；接下来去关注动态，挑同伴报告准备下一次复现。",
+    openFollowing: "打开关注动态 →",
+  },
+  followingReplicationReturn: {
+    badge: "成长闭环",
+    title: "你已贡献成果 — 继续向同伴学习",
+    message: "你完成了复现并分享出去；大师会在「发布」和「精读他人」之间交替前进。",
+    hint: "在下方挑一篇，看看本周同伴的验证思路。",
+    readPeers: "阅读同伴报告 ↓",
   },
   followingReportHandoff: {
     badge: "向大师学习",

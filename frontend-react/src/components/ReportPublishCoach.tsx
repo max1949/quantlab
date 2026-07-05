@@ -3,16 +3,23 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getProject, getProjectQuality, publishProject, trackEvent } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
 import { academyRewardMessage } from "../lib/academy";
+import { burstConfetti } from "../lib/confetti";
+import {
+  REPLICATION_PUBLISH_FEED_KEY,
+  REPLICATION_REPORT_WELCOME_KEY,
+} from "../lib/onboardingFocus";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
 
 type Props = {
   projectId: string;
+  reportId?: string;
 };
 
-export default function ReportPublishCoach({ projectId }: Props) {
+export default function ReportPublishCoach({ projectId, reportId }: Props) {
   const t = useLocale((s) => s.dict.report);
+  const rp = useLocale((s) => s.dict.replicationPublishCoach);
   const d = useLocale((s) => s.dict.dashboard);
   const atl = useLocale((s) => s.dict.academyTaskLabels);
   const pd = useLocale((s) => s.dict.projectDetail);
@@ -43,6 +50,13 @@ export default function ReportPublishCoach({ projectId }: Props) {
       void qc.invalidateQueries({ queryKey: ["projects"] });
       const me = await useAuth.getState().refreshMe();
       if (me) setUser(me);
+      if (reportId && sessionStorage.getItem(REPLICATION_REPORT_WELCOME_KEY) === reportId) {
+        sessionStorage.removeItem(REPLICATION_REPORT_WELCOME_KEY);
+        sessionStorage.setItem(REPLICATION_PUBLISH_FEED_KEY, reportId);
+        burstConfetti(2800);
+        notify(rp.publishedToast, "success");
+        void trackEvent("replication_published", { report_id: reportId, project_id: projectId });
+      }
     },
     onError: (e) => notify(apiErrorMessage(e, pd.publishFail), "error"),
   });
@@ -50,17 +64,40 @@ export default function ReportPublishCoach({ projectId }: Props) {
   if (project.isLoading || !project.data) return null;
 
   if (project.data.status === "published") {
+    const replicationLive =
+      reportId && typeof window !== "undefined"
+        ? sessionStorage.getItem(REPLICATION_PUBLISH_FEED_KEY) === reportId
+        : false;
+    const feedHref = reportId ? `/feed?highlight=${reportId}` : "/feed";
+
     return (
       <div className="mb-6 card border border-emerald-200 bg-emerald-50/50 dark:border-emerald-900 dark:bg-emerald-950/30">
-        <p className="font-semibold text-emerald-800 dark:text-emerald-200">{t.publishedTitle}</p>
-        <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-300">{t.publishedDesc}</p>
+        <p className="font-semibold text-emerald-800 dark:text-emerald-200">
+          {replicationLive ? rp.publishedTitle : t.publishedTitle}
+        </p>
+        <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-300">
+          {replicationLive ? rp.publishedDesc : t.publishedDesc}
+        </p>
         <div className="mt-3 flex flex-wrap gap-2">
-          <a href="#report-share" className="btn-primary">
-            {t.publishedShareNext}
-          </a>
-          <Link to="/feed" className="btn-ghost">
-            {t.viewFeed}
-          </Link>
+          {replicationLive && reportId ? (
+            <>
+              <Link to={feedHref} className="btn-primary">
+                {rp.viewOnFeed}
+              </Link>
+              <a href="#report-share" className="btn">
+                {t.publishedShareNext}
+              </a>
+            </>
+          ) : (
+            <>
+              <a href="#report-share" className="btn-primary">
+                {t.publishedShareNext}
+              </a>
+              <Link to="/feed" className="btn-ghost">
+                {t.viewFeed}
+              </Link>
+            </>
+          )}
         </div>
       </div>
     );

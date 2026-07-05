@@ -72,7 +72,7 @@ export default function ReportDetail() {
 
       {isOwner && r.project_id && (
         <div id="report-publish">
-          <ReportPublishCoach projectId={r.project_id} />
+          <ReportPublishCoach projectId={r.project_id} reportId={id} />
         </div>
       )}
 
