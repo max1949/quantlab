@@ -7,3 +7,5 @@ export const FIRST_PROJECT_WELCOME_KEY = "quantlab-first-project-welcome";
 export const FIRST_BACKTEST_WELCOME_KEY = "quantlab-first-backtest-welcome";
 /** Set after first successful validation — consumed to highlight report step. */
 export const FIRST_VALIDATION_WELCOME_KEY = "quantlab-first-validation-welcome";
+/** Set after first report generation — consumed on report detail for celebration coach. */
+export const FIRST_REPORT_WELCOME_KEY = "quantlab-first-report-welcome";

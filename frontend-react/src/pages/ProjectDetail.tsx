@@ -16,6 +16,7 @@ import {
 } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
 import { academyRewardMessage } from "../lib/academy";
+import { celebrateFirstReport } from "../lib/celebrateFirstReport";
 import { useAuth } from "../store/auth";
 import { useUi } from "../store/ui";
 import { useLocale } from "../store/locale";
@@ -40,7 +41,7 @@ import FirstProjectCoachPanel from "../components/FirstProjectCoachPanel";
 import FirstBacktestCoachPanel from "../components/FirstBacktestCoachPanel";
 import FirstValidationCoachPanel from "../components/FirstValidationCoachPanel";
 import FactorCatalogPanel from "../components/FactorCatalogPanel";
-import { FIRST_BACKTEST_WELCOME_KEY, FIRST_VALIDATION_WELCOME_KEY } from "../lib/onboardingFocus";
+import { FIRST_BACKTEST_WELCOME_KEY, FIRST_REPORT_WELCOME_KEY, FIRST_VALIDATION_WELCOME_KEY } from "../lib/onboardingFocus";
 import type { Graph } from "../api/types";
 
 type StepKey = "factor" | "backtest" | "validation" | "report" | "publish";
@@ -53,6 +54,7 @@ export default function ProjectDetail() {
   const setUser = useAuth((s) => s.setUser);
   const p = useLocale((s) => s.dict.projectDetail);
   const d = useLocale((s) => s.dict.dashboard);
+  const firstReportCoach = useLocale((s) => s.dict.firstReportCoach);
   const lk = useLocale((s) => s.dict.locked);
 
   const project = useQuery({ queryKey: ["project", id], queryFn: () => getProject(id) });
@@ -159,10 +161,19 @@ export default function ProjectDetail() {
     onSuccess: async (r) => {
       void trackEvent("report_generated", { project: id });
       notify(p.reportDone, "success");
-      const msg = academyRewardMessage(r.academy_rewards, d.academyXpEarned);
-      if (msg) notify(msg, "success");
+      const first = celebrateFirstReport(
+        r,
+        { celebrate: firstReportCoach.reportCelebrate, academyXpEarned: d.academyXpEarned },
+        notify,
+        { confetti: false },
+      );
+      sessionStorage.setItem(FIRST_REPORT_WELCOME_KEY, r.id);
+      if (!first) {
+        const msg = academyRewardMessage(r.academy_rewards, d.academyXpEarned);
+        if (msg) notify(msg, "success");
+      }
       void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
-      void qc.invalidateQueries({ queryKey: ["research-journey"] });
+      await qc.refetchQueries({ queryKey: ["research-journey"] });
       const me = await useAuth.getState().refreshMe();
       if (me) setUser(me);
       refreshAll();

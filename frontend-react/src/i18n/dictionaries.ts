@@ -152,6 +152,9 @@ const en = {
     dismiss: "Got it",
   },
   firstReportCoach: {
+    reportPageBadge: "First report milestone",
+    reportCelebrate:
+      "Your first mastery report is live — Paper Masters path unlocked!",
     unlocked: (features: string) => `Next unlocks: ${features}`,
     ctaDefault: "Continue →",
     viewBoard: "Paper Masters board →",
@@ -1547,6 +1550,8 @@ const zh = {
     dismiss: "知道了",
   },
   firstReportCoach: {
+    reportPageBadge: "首份报告里程碑",
+    reportCelebrate: "第一份大师级报告已出炉 — Paper 大师路径已解锁！",
     unlocked: (features: string) => `下一步解锁：${features}`,
     ctaDefault: "继续 →",
     viewBoard: "Paper 大师榜 →",

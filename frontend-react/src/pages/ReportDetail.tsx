@@ -8,6 +8,7 @@ import { ErrorBox, GradeBadge, PageTitle, Spinner } from "../components/ui";
 import ReportPublishCoach from "../components/ReportPublishCoach";
 import ReportDiscoverPanel from "../components/ReportDiscoverPanel";
 import ReportShareCoach from "../components/ReportShareCoach";
+import FirstReportCoachPanel from "../components/FirstReportCoachPanel";
 
 export default function ReportDetail() {
   const { dict } = useLocale();
@@ -56,6 +57,8 @@ export default function ReportDetail() {
           </Link>
         )}
       </div>
+
+      {isOwner && <FirstReportCoachPanel placement="report" reportId={id} />}
 
       {!isOwner && <ReportDiscoverPanel report={r} />}
 
