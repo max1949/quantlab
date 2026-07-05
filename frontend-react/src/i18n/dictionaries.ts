@@ -545,6 +545,8 @@ const en = {
     academyAuto: "Auto-completes when you finish this step in your project",
     academyMasteryStage: (stage: string) => `Mastery · ${stage}`,
     academyXpEarned: (title: string, xp: number) => `Academy +${xp} XP · ${title}`,
+    firstShareCelebrate:
+      "First share milestone — your mastery path is live on the research square. Watch views and followers grow!",
     journeyTitle: "Research journey",
     journeySubtitle: "7 steps from template to sharing your work",
     journeyProgress: (done: number, total: number) => `${done}/${total} complete`,
@@ -1159,6 +1161,8 @@ const en = {
     shareGenerating: "Generating…",
     shareGenerate: "Create share card",
     shareCreated: "Share card created!",
+    firstShareCelebrate:
+      "First share milestone — your mastery path is live on the research square. Watch views and followers grow!",
     shareFail: "Failed to create share",
     copyLink: "Copy link",
     copied: "Link copied — share it!",
@@ -1879,6 +1883,8 @@ const zh = {
     academyAuto: "在项目里完成对应步骤后自动点亮",
     academyMasteryStage: (stage: string) => `大师路径 · ${stage}`,
     academyXpEarned: (title: string, xp: number) => `学院 +${xp} 经验 · ${title}`,
+    firstShareCelebrate:
+      "首次分享里程碑 — 你的大师路径已在研究广场上线，关注浏览量与涨粉吧！",
     journeyTitle: "研究闭环进度",
     journeySubtitle: "从模板到分享，共 7 步",
     journeyProgress: (done: number, total: number) => `已完成 ${done}/${total}`,
@@ -2486,6 +2492,8 @@ const zh = {
     shareGenerating: "生成中…",
     shareGenerate: "生成分享卡片",
     shareCreated: "分享卡片已生成!",
+    firstShareCelebrate:
+      "首次分享里程碑 — 你的大师路径已在研究广场上线，关注浏览量与涨粉吧！",
     shareFail: "生成分享失败",
     copyLink: "复制链接",
     copied: "链接已复制, 去分享吧!",

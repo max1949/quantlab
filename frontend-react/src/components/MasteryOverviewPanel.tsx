@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getResearchJourney, shareReport } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
-import { academyRewardMessage } from "../lib/academy";
+import { celebrateFirstShare } from "../lib/firstShare";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
 import HandbookExportButtons from "./HandbookExportButtons";
@@ -28,9 +28,12 @@ export default function MasteryOverviewPanel() {
       const reportId = overview!.share_report_id!;
       const href = `/feed?highlight=${reportId}`;
       setFeedHref(href);
-      notify(d.shareSuccess, "success");
-      const msg = academyRewardMessage(res.academy_rewards, dash.academyXpEarned);
-      if (msg) notify(msg, "success");
+      const first = celebrateFirstShare(
+        res,
+        { celebrate: dash.firstShareCelebrate, academyXpEarned: dash.academyXpEarned },
+        notify,
+      );
+      if (!first) notify(d.shareSuccess, "success");
       void qc.invalidateQueries({ queryKey: ["research-journey"] });
       void qc.invalidateQueries({ queryKey: ["public-feed"] });
       void qc.invalidateQueries({ queryKey: ["academy-tasks"] });

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { shareReport, trackEvent } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
-import { academyRewardMessage } from "../lib/academy";
+import { celebrateFirstShare } from "../lib/firstShare";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
@@ -27,9 +27,12 @@ export default function ReportShareCoach({ reportId }: Props) {
       void trackEvent("share_created", { report: reportId });
       const url = `${window.location.origin}/share/${res.token}`;
       setShareUrl(url);
-      notify(t.shareCreated, "success");
-      const msg = academyRewardMessage(res.academy_rewards, d.academyXpEarned);
-      if (msg) notify(msg, "success");
+      const first = celebrateFirstShare(
+        res,
+        { celebrate: t.firstShareCelebrate, academyXpEarned: d.academyXpEarned },
+        notify,
+      );
+      if (!first) notify(t.shareCreated, "success");
       void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
       void qc.invalidateQueries({ queryKey: ["research-journey"] });
       void qc.invalidateQueries({ queryKey: ["public-feed"] });
