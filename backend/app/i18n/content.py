@@ -728,6 +728,41 @@ BEGINNER_SPRINT: dict[Locale, dict[str, str]] = {
     },
 }
 
+MASTERY_OVERVIEW: dict[Locale, dict[str, str]] = {
+    "en": {
+        "title": "Your mastery path map",
+        "subtitle": "One page — from beginner to Paper Masters. We guide you at every step.",
+        "current_badge": "You are here",
+        "print_title": "QuantLab Mastery Path",
+        "phase_incubate": "Incubate & validate",
+        "phase_incubate_hint": "Template → factor → backtest → OOS validation.",
+        "phase_report": "First research report",
+        "phase_report_hint": "Institutional-grade report with Sharpe & next actions.",
+        "phase_paper": "Paper trading",
+        "phase_paper_hint": "Submit paper orders and track live NAV decay.",
+        "phase_masters": "Paper graduation",
+        "phase_masters_hint": "Pass the paper bar and climb the Masters board.",
+        "phase_reputation": "Publish & share",
+        "phase_reputation_hint": "Build reputation on the research feed.",
+    },
+    "zh": {
+        "title": "大师路径总览",
+        "subtitle": "一页看清 — 从新手到 Paper 大师，每一步都有全自动指引。",
+        "current_badge": "你在这里",
+        "print_title": "QuantLab 大师路径",
+        "phase_incubate": "孵化与验证",
+        "phase_incubate_hint": "模板 → 因子 → 回测 → 样本外验证。",
+        "phase_report": "首份研究报告",
+        "phase_report_hint": "机构级报告，含 Sharpe 与下一步建议。",
+        "phase_paper": "Paper 模拟盘",
+        "phase_paper_hint": "下模拟单并跟踪净值衰减。",
+        "phase_masters": "Paper 毕业",
+        "phase_masters_hint": "通过毕业线，冲击大师榜。",
+        "phase_reputation": "发布与分享",
+        "phase_reputation_hint": "在研究广场积累声誉。",
+    },
+}
+
 BILLING_RECEIPT_EMAIL: dict[Locale, dict[str, str]] = {
     "en": {
         "subject": "QuantLab receipt · {plan_name}",

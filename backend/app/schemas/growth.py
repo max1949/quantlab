@@ -175,6 +175,24 @@ class BeginnerSprintOut(BaseModel):
     cta_action: str
 
 
+class MasteryOverviewPhaseOut(BaseModel):
+    key: str
+    label: str
+    hint: str
+    done: bool
+
+
+class MasteryOverviewOut(BaseModel):
+    title: str
+    subtitle: str
+    current_badge: str
+    print_title: str
+    phases: list[MasteryOverviewPhaseOut]
+    done_count: int
+    total: int
+    current_index: int
+
+
 class DismissAttentionAlertRequest(BaseModel):
     alert_key: str = Field(min_length=1, max_length=128)
 
@@ -227,6 +245,7 @@ class ResearchJourneyOut(BaseModel):
     quickstart_guide: QuickstartGuideOut | None = None
     first_report_coaching: FirstReportCoachingOut | None = None
     beginner_sprint: BeginnerSprintOut | None = None
+    mastery_overview: MasteryOverviewOut | None = None
 
 
 # ---- 研究模板 ----

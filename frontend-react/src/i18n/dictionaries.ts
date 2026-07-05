@@ -134,6 +134,15 @@ const en = {
     viewCta: "View challenge progress →",
     enrolling: "Enrolling…",
     enrollSuccess: "Challenge enrolled — milestones sync with your research progress.",
+    enrollSynced: (lit: number, total: number) =>
+      `Challenge enrolled — ${lit}/${total} milestone(s) already lit from your research.`,
+    enrollReward: (pts: number, lit: number, total: number) =>
+      `Challenge enrolled · +${pts} reward pts · ${lit}/${total} milestones lit.`,
+  },
+  masteryOverview: {
+    progress: (done: number, total: number) => `${done}/${total} phases`,
+    print: "Print path map →",
+    dismiss: "Hide map",
   },
   marketDataCoach: {
     badge: (symbol: string, tf: string) => `Market data · ${symbol} · ${tf}`,
@@ -1410,6 +1419,15 @@ const zh = {
     viewCta: "查看挑战进度 →",
     enrolling: "报名中…",
     enrollSuccess: "已报名挑战 — 里程碑会随你的研究进度自动点亮。",
+    enrollSynced: (lit: number, total: number) =>
+      `已报名挑战 — 你已有 ${lit}/${total} 个里程碑被点亮。`,
+    enrollReward: (pts: number, lit: number, total: number) =>
+      `已报名挑战 · +${pts} 奖励积分 · ${lit}/${total} 里程碑已点亮。`,
+  },
+  masteryOverview: {
+    progress: (done: number, total: number) => `已完成 ${done}/${total} 阶段`,
+    print: "打印路径图 →",
+    dismiss: "收起总览",
   },
   marketDataCoach: {
     badge: (symbol: string, tf: string) => `行情数据 · ${symbol} · ${tf}`,

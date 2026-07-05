@@ -306,6 +306,26 @@ def test_journey_includes_beginner_sprint(client, db_session):
     assert j2.get("beginner_sprint") is None
 
 
+def test_journey_includes_mastery_overview(client, db_session):
+    seed_sample_market_data(db_session)
+    h = _register(client, "moview")
+    j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    ov = j.get("mastery_overview")
+    assert ov is not None
+    assert ov["total"] == 5
+    assert ov["done_count"] == 0
+    assert len(ov["phases"]) == 5
+    assert ov["phases"][0]["key"] == "incubate"
+
+    _full_research(client, h, db_session)
+    j2 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    ov2 = j2["mastery_overview"]
+    assert ov2 is not None
+    assert ov2["done_count"] >= 2
+    assert ov2["phases"][0]["done"] is True
+    assert ov2["phases"][1]["done"] is True
+
+
 def test_first_report_coaching_hides_after_paper_order(client, db_session):
     from backend.app.models.user import User, UserLevel
     from backend.app.services import membership_service as ms

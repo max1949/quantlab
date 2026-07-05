@@ -385,6 +385,54 @@ def beginner_sprint_payload(
     }
 
 
+def mastery_overview_payload(
+    locale: Locale,
+    flags: dict[str, bool],
+    *,
+    mastery_goal: dict,
+) -> dict | None:
+    """新手大师路径一页纸总览 — 五阶段全部完成前展示。"""
+    labels = i18n.MASTERY_OVERVIEW.get(locale) or i18n.MASTERY_OVERVIEW["en"]
+    phase_keys = ("incubate", "report", "paper", "masters", "reputation")
+    incubate_done = bool(flags.get("backtest") and flags.get("validation"))
+    report_done = bool(flags.get("report"))
+    paper_active = int(mastery_goal.get("paper_tracking_count") or 0) > 0
+    paper_graduated = int(mastery_goal.get("paper_graduated_count") or 0) > 0
+    reputation_done = bool(flags.get("share") or flags.get("publish"))
+
+    done_map = {
+        "incubate": incubate_done,
+        "report": report_done,
+        "paper": paper_active,
+        "masters": paper_graduated,
+        "reputation": reputation_done,
+    }
+    phases = [
+        {
+            "key": key,
+            "label": labels[f"phase_{key}"],
+            "hint": labels[f"phase_{key}_hint"],
+            "done": done_map[key],
+        }
+        for key in phase_keys
+    ]
+    done_count = sum(1 for p in phases if p["done"])
+    if done_count >= len(phases):
+        return None
+
+    current_index = next((i for i, p in enumerate(phases) if not p["done"]), len(phases) - 1)
+    return {
+        "title": labels["title"],
+        "subtitle": labels["subtitle"],
+        "current_badge": labels["current_badge"],
+        "print_title": labels["print_title"],
+        "phases": phases,
+        "done_count": done_count,
+        "total": len(phases),
+        "current_index": current_index,
+    }
+
+
 def _mastery_goal_hint(
     locale: Locale,
     *,
@@ -657,6 +705,11 @@ def research_journey(
         challenge_enrolled=challenge_enrolled,
         quickstart_guide=quickstart_guide,
     )
+    mastery_overview = mastery_overview_payload(
+        locale,
+        flags,
+        mastery_goal=mastery_goal,
+    )
 
     return {
         "done_count": done_count,
@@ -676,4 +729,5 @@ def research_journey(
         "quickstart_guide": quickstart_guide,
         "first_report_coaching": first_report_coaching,
         "beginner_sprint": beginner_sprint,
+        "mastery_overview": mastery_overview,
     }

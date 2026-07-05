@@ -37,10 +37,21 @@ export default function QuickStartGuidePanel() {
 
   const enroll = useMutation({
     mutationFn: () => enrollChallenge(sprint!.challenge_code),
-    onSuccess: () => {
+    onSuccess: (data) => {
       void qc.invalidateQueries({ queryKey: ["research-journey"] });
       void qc.invalidateQueries({ queryKey: ["challenge-progress", sprint?.challenge_code] });
-      notify(sprintLabels.enrollSuccess, "success");
+      void qc.invalidateQueries({ queryKey: ["researcher"] });
+      const lit = data.milestones.filter((m) => m.completed).length;
+      if (data.newly_awarded_points > 0) {
+        notify(
+          sprintLabels.enrollReward(data.newly_awarded_points, lit, data.total),
+          "success",
+        );
+      } else if (lit > 0) {
+        notify(sprintLabels.enrollSynced(lit, data.total), "success");
+      } else {
+        notify(sprintLabels.enrollSuccess, "success");
+      }
     },
     onError: (e) => notify(apiErrorMessage(e, challengePage.enrollFail), "error"),
   });

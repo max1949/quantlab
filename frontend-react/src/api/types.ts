@@ -210,6 +210,24 @@ export interface BeginnerSprint {
   cta_action: string;
 }
 
+export interface MasteryOverviewPhase {
+  key: string;
+  label: string;
+  hint: string;
+  done: boolean;
+}
+
+export interface MasteryOverview {
+  title: string;
+  subtitle: string;
+  current_badge: string;
+  print_title: string;
+  phases: MasteryOverviewPhase[];
+  done_count: number;
+  total: number;
+  current_index: number;
+}
+
 export interface ResearchJourney {
   done_count: number;
   total: number;
@@ -228,6 +246,7 @@ export interface ResearchJourney {
   quickstart_guide: QuickstartGuide | null;
   first_report_coaching: FirstReportCoaching | null;
   beginner_sprint: BeginnerSprint | null;
+  mastery_overview: MasteryOverview | null;
 }
 
 export interface Mentor {
