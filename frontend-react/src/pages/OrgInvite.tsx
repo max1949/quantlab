@@ -11,6 +11,7 @@ import { useAuth } from "../store/auth";
 import {
   ORG_INVITE_ACCEPTED_ORG_KEY,
   ORG_INVITE_PENDING_KEY,
+  FIRST_ORG_MEMBER_WELCOME_KEY,
 } from "../lib/onboardingFocus";
 import OrgInviteIncubationPreview from "../components/OrgInviteIncubationPreview";
 import { useLocale } from "../store/locale";
@@ -45,6 +46,7 @@ export default function OrgInvite() {
     onSuccess: (org) => {
       void qc.invalidateQueries({ queryKey: ["orgs"] });
       sessionStorage.removeItem(ORG_INVITE_PENDING_KEY);
+      sessionStorage.setItem(FIRST_ORG_MEMBER_WELCOME_KEY, org.id);
       notify(o.inviteAccepted, "success");
       if (!user?.onboarding_done) {
         sessionStorage.setItem(ORG_INVITE_ACCEPTED_ORG_KEY, org.id);

@@ -11,6 +11,7 @@ import {
   FOCUS_QUICKSTART_KEY,
   ORG_INVITE_ACCEPTED_ORG_KEY,
   ORG_INVITE_PENDING_KEY,
+  FIRST_ORG_MEMBER_WELCOME_KEY,
 } from "../lib/onboardingFocus";
 import type { UserType } from "../api/types";
 
@@ -44,6 +45,7 @@ export default function Onboarding() {
       const acceptedOrg = sessionStorage.getItem(ORG_INVITE_ACCEPTED_ORG_KEY);
       if (acceptedOrg) {
         sessionStorage.removeItem(ORG_INVITE_ACCEPTED_ORG_KEY);
+        sessionStorage.setItem(FIRST_ORG_MEMBER_WELCOME_KEY, acceptedOrg);
         navigate(`/orgs/${acceptedOrg}`, { replace: true });
         return;
       }

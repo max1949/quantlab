@@ -19,3 +19,5 @@ export const ORG_INVITE_ACCEPTED_ORG_KEY = "quantlab-org-invite-accepted-org";
 export const FIRST_LEADERBOARD_PAPER_WELCOME_KEY = "quantlab-first-leaderboard-paper-welcome";
 /** First paper graduation — hand off to leaderboards reputation coach. */
 export const FIRST_PAPER_GRADUATION_WELCOME_KEY = "quantlab-first-paper-graduation-welcome";
+/** First dashboard visit after joining a research org — team incubation coach. */
+export const FIRST_ORG_MEMBER_WELCOME_KEY = "quantlab-first-org-member-welcome";

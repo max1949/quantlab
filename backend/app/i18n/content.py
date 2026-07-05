@@ -719,6 +719,35 @@ BEGINNER_ONEPAGER: dict[Locale, dict[str, str]] = {
     },
 }
 
+ORG_MEMBER_COACH: dict[Locale, dict[str, str]] = {
+    "en": {
+        "badge": "Team desk joined",
+        "celebrate": "Welcome to {org_name} — your institutional research desk is ready.",
+        "message": "Your team shares the same mastery path: template → validation → Paper Masters. Start with one click — the coach handles the rest.",
+        "unlock_features": "Team factor library · shared handbook · masters board",
+        "guide_title": "Your first 3 steps on the desk",
+        "step1_label": "Pick a template",
+        "step1_hint": "Same guided path as solo researchers — regime-aware one-click start.",
+        "step2_label": "Browse team library",
+        "step2_hint": "See factors your PM already shared — learn from institutional alpha.",
+        "step3_label": "Read the handbook",
+        "step3_hint": "30-second orientation — what validation and Paper Masters mean.",
+    },
+    "zh": {
+        "badge": "已加入团队研究组",
+        "celebrate": "欢迎加入 {org_name} — 你的机构级研究工位已就绪。",
+        "message": "团队共用同一条大师路径：模板 → 验证 → Paper 大师榜。一键开局，其余由教练全自动带你走。",
+        "unlock_features": "团队因子库 · 共享手册 · 大师榜",
+        "guide_title": "在团队工位上的前三步",
+        "step1_label": "选一个模板",
+        "step1_hint": "与独立研究者相同的全自动路径 — 行情感知一键开局。",
+        "step2_label": "浏览团队因子库",
+        "step2_hint": "看 PM 已共享的因子 — 从机构级 alpha 学起。",
+        "step3_label": "读新手指南",
+        "step3_hint": "30 秒入门 — 搞懂验证与 Paper 大师榜意味着什么。",
+    },
+}
+
 FIRST_PAPER_ORDER_COACH: dict[Locale, dict[str, str]] = {
     "en": {
         "badge": "First paper order live",

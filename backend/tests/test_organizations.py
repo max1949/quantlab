@@ -138,6 +138,13 @@ def test_org_invite_preview_and_accept(client, db_session):
     assert preview_again.status_code == 200
     assert preview_again.json()["already_member"] is True
 
+    journey = client.get(f"{BASE}/onboarding/journey", headers=h_member).json()
+    coach = journey.get("org_member_coaching")
+    assert coach is not None
+    assert coach["org_name"] == "Invite Desk"
+    assert coach["cta_path"] == "/templates"
+    assert len(coach["guide_steps"]) == 3
+
 
 def test_non_admin_cannot_create_invite(client, db_session):
     h_owner = _auth(client, OWNER)

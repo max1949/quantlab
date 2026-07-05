@@ -112,7 +112,7 @@ export default function Leaderboards() {
             </p>
           )}
           {user && !onBoard && (
-            <Link to="/dashboard" className="mt-2 inline-block text-xs font-medium text-brand-600 hover:underline">
+            <Link to="/app" className="mt-2 inline-block text-xs font-medium text-brand-600 hover:underline">
               {l.goDashboard}
             </Link>
           )}

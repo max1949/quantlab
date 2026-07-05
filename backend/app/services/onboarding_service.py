@@ -471,6 +471,64 @@ def first_backtest_coaching_payload(
     }
 
 
+def org_member_coaching_payload(
+    db: Session,
+    user: User,
+    locale: Locale,
+    flags: dict[str, bool],
+) -> dict | None:
+    """加入研究机构后 — 工作台团队孵化教练（尚无回测时）。"""
+    if flags.get("backtest") or flags.get("share"):
+        return None
+
+    from backend.app.services import org_service
+
+    orgs = org_service.list_orgs_for_user(db, user.id)
+    if not orgs:
+        return None
+
+    org = orgs[0]
+    org_id = org["id"]
+    org_name = org["name"]
+    labels = i18n.ORG_MEMBER_COACH.get(locale) or i18n.ORG_MEMBER_COACH["en"]
+    org_path = f"/orgs/{org_id}"
+    return {
+        "badge": labels["badge"],
+        "celebrate": labels["celebrate"].format(org_name=org_name),
+        "message": labels["message"].format(org_name=org_name),
+        "unlock_features": labels["unlock_features"],
+        "org_id": org_id,
+        "org_name": org_name,
+        "cta_action": "create_project",
+        "cta_path": "/templates",
+        "org_path": org_path,
+        "guide_title": labels["guide_title"],
+        "guide_steps": [
+            {
+                "step": 1,
+                "label": labels["step1_label"],
+                "hint": labels["step1_hint"],
+                "cta_path": "/templates",
+                "cta_action": "create_project",
+            },
+            {
+                "step": 2,
+                "label": labels["step2_label"],
+                "hint": labels["step2_hint"],
+                "cta_path": org_path,
+                "cta_action": "keep_going",
+            },
+            {
+                "step": 3,
+                "label": labels["step3_label"],
+                "hint": labels["step3_hint"],
+                "cta_path": "/handbook",
+                "cta_action": "keep_going",
+            },
+        ],
+    }
+
+
 def first_project_coaching_payload(
     db: Session,
     user: User,
@@ -1193,6 +1251,7 @@ def research_journey(
         flags,
         active_project_id=active_id,
     )
+    org_member_coaching = org_member_coaching_payload(db, user, locale, flags)
     first_backtest_coaching = first_backtest_coaching_payload(
         db,
         user,
@@ -1273,6 +1332,7 @@ def research_journey(
         "checkout_coaching": checkout_coaching,
         "quickstart_guide": quickstart_guide,
         "first_project_coaching": first_project_coaching,
+        "org_member_coaching": org_member_coaching,
         "first_backtest_coaching": first_backtest_coaching,
         "first_validation_coaching": first_validation_coaching,
         "first_paper_order_coaching": first_paper_order_coaching,

@@ -139,6 +139,13 @@ const en = {
     running: "Running…",
     dismiss: "Got it",
   },
+  orgMemberCoach: {
+    unlocked: (features: string) => `Unlocked: ${features}`,
+    ctaDefault: "Start from template →",
+    openOrg: (name: string) => `Open ${name} →`,
+    stepGo: "Go →",
+    dismiss: "Got it",
+  },
   firstBacktestCoach: {
     unlocked: (features: string) => `Next unlocks: ${features}`,
     ctaDefault: "Run validation →",
@@ -1569,6 +1576,13 @@ const zh = {
     unlocked: (features: string) => `下一步解锁：${features}`,
     ctaDefault: "跑回测 →",
     running: "运行中…",
+    dismiss: "知道了",
+  },
+  orgMemberCoach: {
+    unlocked: (features: string) => `已解锁：${features}`,
+    ctaDefault: "从模板开局 →",
+    openOrg: (name: string) => `打开 ${name} →`,
+    stepGo: "前往 →",
     dismiss: "知道了",
   },
   firstBacktestCoach: {
