@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { shareReport, trackEvent } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
 import { celebrateFirstShare } from "../lib/firstShare";
-import { REPLICATION_PUBLISH_FEED_KEY, REPLICATION_SHARE_FOLLOWING_KEY } from "../lib/onboardingFocus";
+import { REPLICATION_FLOW_REPORT_KEY, REPLICATION_PUBLISH_FEED_KEY, REPLICATION_SHARE_FOLLOWING_KEY } from "../lib/onboardingFocus";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
@@ -43,6 +43,11 @@ export default function ReportShareCoach({ reportId }: Props) {
       void trackEvent("share_success_feed_prompt", { report_id: reportId });
       if (sessionStorage.getItem(REPLICATION_PUBLISH_FEED_KEY) === reportId) {
         sessionStorage.removeItem(REPLICATION_PUBLISH_FEED_KEY);
+        sessionStorage.setItem(REPLICATION_SHARE_FOLLOWING_KEY, "1");
+        setFromReplicationShare(true);
+        void trackEvent("replication_share_created", { report_id: reportId });
+      } else if (sessionStorage.getItem(REPLICATION_FLOW_REPORT_KEY) === reportId) {
+        sessionStorage.removeItem(REPLICATION_FLOW_REPORT_KEY);
         sessionStorage.setItem(REPLICATION_SHARE_FOLLOWING_KEY, "1");
         setFromReplicationShare(true);
         void trackEvent("replication_share_created", { report_id: reportId });

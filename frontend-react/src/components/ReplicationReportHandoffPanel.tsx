@@ -1,8 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { burstConfetti } from "../lib/confetti";
 import { REPLICATION_REPORT_WELCOME_KEY } from "../lib/onboardingFocus";
 import { useLocale } from "../store/locale";
+
+function handoffDismissKey(reportId: string) {
+  return `quantlab-replication-report-handoff-dismissed-${reportId}`;
+}
 
 type Props = {
   reportId: string;
@@ -11,8 +15,12 @@ type Props = {
 
 export default function ReplicationReportHandoffPanel({ reportId, projectId }: Props) {
   const d = useLocale((s) => s.dict.replicationReportHandoff);
-  const show =
+  const welcome =
     typeof window !== "undefined" && sessionStorage.getItem(REPLICATION_REPORT_WELCOME_KEY) === reportId;
+  const [dismissed, setDismissed] = useState(
+    () => typeof window !== "undefined" && localStorage.getItem(handoffDismissKey(reportId)) === "1",
+  );
+  const show = welcome && !dismissed;
 
   useEffect(() => {
     if (!show) return;
@@ -21,7 +29,10 @@ export default function ReplicationReportHandoffPanel({ reportId, projectId }: P
 
   if (!show) return null;
 
-  const dismiss = () => sessionStorage.removeItem(REPLICATION_REPORT_WELCOME_KEY);
+  const dismiss = () => {
+    localStorage.setItem(handoffDismissKey(reportId), "1");
+    setDismissed(true);
+  };
 
   return (
     <div className="mb-4 card border border-violet-200 bg-gradient-to-r from-violet-50/90 to-indigo-50/60 dark:border-violet-900 dark:from-violet-950/40 dark:to-indigo-950/30">

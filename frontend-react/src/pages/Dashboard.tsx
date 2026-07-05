@@ -17,6 +17,7 @@ import ResearchJourneyRing from "../components/ResearchJourneyRing";
 import MasteryGoalPanel from "../components/MasteryGoalPanel";
 import DashboardCoachStack from "../components/DashboardCoachStack";
 import DashboardIncubationCoachStack from "../components/DashboardIncubationCoachStack";
+import DashboardMasteryLoopPanel from "../components/DashboardMasteryLoopPanel";
 import BeginnerHandbookStrip from "../components/BeginnerHandbookStrip";
 
 export default function Dashboard() {
@@ -52,6 +53,10 @@ export default function Dashboard() {
 
       <div className="mt-6">
         <DashboardIncubationCoachStack onFirstMentorVisibilityChange={setFirstMentorVisible} />
+      </div>
+
+      <div className="mt-6">
+        <DashboardMasteryLoopPanel />
       </div>
 
       {!firstMentorVisible && (

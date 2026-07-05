@@ -1486,6 +1486,17 @@ const en = {
     pickReport: "Pick a report ↓",
     dismiss: "Got it",
   },
+  dashboardMasteryLoop: {
+    badge: "Mastery loop",
+    title: "You're in the network — keep the loop spinning",
+    message:
+      "Read a master report → replicate on your desk → publish → share → return to following feed. That's how incubators turn beginners into masters.",
+    steps: ["Read & follow", "Replicate", "Publish", "Share back"],
+    openFollowing: "Following feed →",
+    browseFeed: "Research feed →",
+    shareGrowth: "My share card →",
+    dismiss: "Got it",
+  },
   replicationReportHandoff: {
     badge: "Replication complete",
     title: "You finished a master replication — now contribute back",
@@ -3180,6 +3191,17 @@ const zh = {
     message: "在下方挑一篇细读验证方法，再回工作台用类似模板练手 — 这就是孵化器闭环。",
     hint: "关注流有更新时，每周提醒一次，帮你保持学习节奏。",
     pickReport: "挑一篇报告 ↓",
+    dismiss: "知道了",
+  },
+  dashboardMasteryLoop: {
+    badge: "大师循环",
+    title: "人脉已接通 — 保持这条成长闭环",
+    message:
+      "读大师报告 → 在工位复现 → 发布 → 分享 → 回关注流动态精读。孵化器就是这样把新手带成大师。",
+    steps: ["读 & 关注", "复现验证", "发布成果", "分享回馈"],
+    openFollowing: "关注动态 →",
+    browseFeed: "研究广场 →",
+    shareGrowth: "我的分享卡 →",
     dismiss: "知道了",
   },
   replicationReportHandoff: {

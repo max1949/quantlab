@@ -1,10 +1,11 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getProject, getProjectQuality, publishProject, trackEvent } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
 import { academyRewardMessage } from "../lib/academy";
 import { burstConfetti } from "../lib/confetti";
 import {
+  REPLICATION_FLOW_REPORT_KEY,
   REPLICATION_PUBLISH_FEED_KEY,
   REPLICATION_REPORT_WELCOME_KEY,
 } from "../lib/onboardingFocus";
@@ -24,6 +25,7 @@ export default function ReportPublishCoach({ projectId, reportId }: Props) {
   const atl = useLocale((s) => s.dict.academyTaskLabels);
   const pd = useLocale((s) => s.dict.projectDetail);
   const notify = useUi((s) => s.notify);
+  const navigate = useNavigate();
   const setUser = useAuth((s) => s.setUser);
   const qc = useQueryClient();
 
@@ -50,12 +52,18 @@ export default function ReportPublishCoach({ projectId, reportId }: Props) {
       void qc.invalidateQueries({ queryKey: ["projects"] });
       const me = await useAuth.getState().refreshMe();
       if (me) setUser(me);
-      if (reportId && sessionStorage.getItem(REPLICATION_REPORT_WELCOME_KEY) === reportId) {
+      const replicationFlow =
+        reportId &&
+        (sessionStorage.getItem(REPLICATION_FLOW_REPORT_KEY) === reportId ||
+          sessionStorage.getItem(REPLICATION_REPORT_WELCOME_KEY) === reportId);
+      if (replicationFlow && reportId) {
         sessionStorage.removeItem(REPLICATION_REPORT_WELCOME_KEY);
+        sessionStorage.removeItem(REPLICATION_FLOW_REPORT_KEY);
         sessionStorage.setItem(REPLICATION_PUBLISH_FEED_KEY, reportId);
         burstConfetti(2800);
         notify(rp.publishedToast, "success");
         void trackEvent("replication_published", { report_id: reportId, project_id: projectId });
+        window.setTimeout(() => navigate(`/feed?highlight=${reportId}`), 600);
       }
     },
     onError: (e) => notify(apiErrorMessage(e, pd.publishFail), "error"),
