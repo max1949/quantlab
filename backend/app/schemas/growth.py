@@ -114,6 +114,19 @@ class MarketDataCoachingOut(BaseModel):
     stripe_available: bool = False
 
 
+class CheckoutCoachingOut(BaseModel):
+    plan_code: str
+    plan_name: str
+    tier: int
+    tier_name: str
+    reason: str
+    message: str
+    unlock_features: str
+    cta_action: str
+    cta_path: str
+    active_project_id: uuid.UUID | None = None
+
+
 class DismissAttentionAlertRequest(BaseModel):
     alert_key: str = Field(min_length=1, max_length=128)
 
@@ -162,6 +175,7 @@ class ResearchJourneyOut(BaseModel):
     challenge_paper_coaching: ChallengePaperCoachingOut | None = None
     upgrade_coaching: UpgradeCoachingOut | None = None
     market_data_coaching: MarketDataCoachingOut | None = None
+    checkout_coaching: CheckoutCoachingOut | None = None
 
 
 # ---- 研究模板 ----

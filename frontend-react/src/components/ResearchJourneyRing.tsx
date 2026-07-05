@@ -6,7 +6,7 @@ import { Spinner } from "./ui";
 
 export default function ResearchJourneyRing() {
   const d = useLocale((s) => s.dict.dashboard);
-  const journey = useQuery({ queryKey: ["research-journey"], queryFn: getResearchJourney });
+  const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
 
   if (journey.isLoading) return <Spinner />;
   if (!journey.data) return null;

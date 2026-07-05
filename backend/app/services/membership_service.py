@@ -377,7 +377,7 @@ def start_checkout(db: Session, user: User, plan_code: str) -> dict:
             "plan_code": plan_code,
             "user_id": str(user.id),
         },
-        success_url=f"{origin}/pricing?checkout=success&plan={plan_code}",
+        success_url=f"{origin}/app?checkout=success&plan={plan_code}",
         cancel_url=f"{origin}/pricing?checkout=cancel",
     )
     return {
@@ -438,4 +438,73 @@ def upgrade_coaching_payload(
         "cta_path": "/pricing",
         "stripe_available": payment_service.stripe_configured(),
         "unlock_features": labels["unlock_features"],
+    }
+
+
+def post_checkout_coaching_payload(
+    db: Session,
+    user: User,
+    locale: str,
+    plan_code: str | None,
+    *,
+    mastery_goal: dict,
+    active_project_id: uuid.UUID | None,
+    done_count: int = 0,
+) -> dict | None:
+    """支付成功回跳 — 解锁指引与大师路径下一步 (新手友好)。"""
+    from backend.app.core.locale import Locale
+    from backend.app.i18n import content as i18n
+
+    if not plan_code:
+        return None
+    plan = PLAN_BY_CODE.get(plan_code)
+    if not plan or plan.get("kind") == "org" or plan["tier"] == 0:
+        return None
+
+    tier = current_tier(db, user)
+    if plan["tier"] != tier:
+        return None
+
+    loc: Locale = "zh" if locale == "zh" else "en"
+    labels = i18n.CHECKOUT_COACH.get(loc) or i18n.CHECKOUT_COACH["en"]
+    next_act = mastery_goal.get("mastery_next_action")
+
+    if tier == TIER_PRO:
+        if mastery_goal.get("paper_ready"):
+            reason, cta_action = "pro_paper_ready", "run_paper"
+        elif next_act == "paper":
+            reason, cta_action = "pro_start_paper", "run_paper"
+        else:
+            reason = "pro_welcome"
+            cta_action = next_act or ("create_project" if done_count < 1 else "run_backtest")
+    elif next_act == "validation":
+        reason, cta_action = "plus_validate", "run_validation"
+    elif next_act in ("factor", "backtest") or done_count < 2:
+        reason, cta_action = "plus_formula", "create_factor"
+    else:
+        reason = "plus_welcome"
+        cta_action = next_act or "create_factor"
+
+    skip = ("全部", "all", "研究员卡", "Researcher")
+    feats = [f for f in plan["features"] if not any(s in f for s in skip)]
+    unlock = labels["unlock_joiner"].join(feats[:3])
+
+    if cta_action == "create_project":
+        cta_path = "/templates"
+    elif active_project_id:
+        cta_path = f"/projects/{active_project_id}"
+    else:
+        cta_path = "/projects"
+
+    return {
+        "plan_code": plan_code,
+        "plan_name": plan["name"],
+        "tier": tier,
+        "tier_name": TIER_NAMES.get(tier, ""),
+        "reason": reason,
+        "message": labels[reason],
+        "unlock_features": unlock,
+        "cta_action": cta_action,
+        "cta_path": cta_path,
+        "active_project_id": active_project_id,
     }

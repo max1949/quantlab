@@ -149,6 +149,19 @@ export interface MarketDataCoaching {
   stripe_available: boolean;
 }
 
+export interface CheckoutCoaching {
+  plan_code: string;
+  plan_name: string;
+  tier: number;
+  tier_name: string;
+  reason: string;
+  message: string;
+  unlock_features: string;
+  cta_action: string;
+  cta_path: string;
+  active_project_id: string | null;
+}
+
 export interface ResearchJourney {
   done_count: number;
   total: number;
@@ -163,6 +176,7 @@ export interface ResearchJourney {
   challenge_paper_coaching: ChallengePaperCoaching | null;
   upgrade_coaching: UpgradeCoaching | null;
   market_data_coaching: MarketDataCoaching | null;
+  checkout_coaching: CheckoutCoaching | null;
 }
 
 export interface Mentor {

@@ -7,7 +7,7 @@ import { Spinner } from "./ui";
 export default function MasteryGoalPanel() {
   const d = useLocale((s) => s.dict.masteryGoal);
   const stages = useLocale((s) => s.dict.masteryPath.stages);
-  const journey = useQuery({ queryKey: ["research-journey"], queryFn: getResearchJourney });
+  const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
 
   if (journey.isLoading) return <Spinner />;
   if (!journey.data?.mastery_goal) return null;

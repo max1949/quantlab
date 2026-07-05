@@ -7,7 +7,7 @@ import { useUi } from "../store/ui";
 export default function UpgradeCoachPanel() {
   const u = useLocale((s) => s.dict.upgradeCoach);
   const notify = useUi((s) => s.notify);
-  const journey = useQuery({ queryKey: ["research-journey"], queryFn: getResearchJourney });
+  const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
 
   const coach = journey.data?.upgrade_coaching;
   const doCheckout = useMutation({

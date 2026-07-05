@@ -306,7 +306,9 @@ def _mastery_goal_payload(db: Session, user: User, locale: Locale) -> dict:
     }
 
 
-def research_journey(db: Session, user: User, locale: Locale = "en") -> dict:
+def research_journey(
+    db: Session, user: User, locale: Locale = "en", checkout_plan: str | None = None
+) -> dict:
     """七步研究闭环进度 (工作台进度环)。"""
     from backend.app.models.growth import ResearchShare
 
@@ -425,6 +427,19 @@ def research_journey(db: Session, user: User, locale: Locale = "en") -> dict:
         if upgrade_coaching["target_tier"] >= market_data_coaching["target_tier"]:
             market_data_coaching = None
 
+    checkout_coaching = ms.post_checkout_coaching_payload(
+        db,
+        user,
+        locale,
+        checkout_plan,
+        mastery_goal=mastery_goal,
+        active_project_id=active_id,
+        done_count=done_count,
+    )
+    if checkout_coaching:
+        upgrade_coaching = None
+        market_data_coaching = None
+
     return {
         "done_count": done_count,
         "total": len(steps),
@@ -439,4 +454,5 @@ def research_journey(db: Session, user: User, locale: Locale = "en") -> dict:
         "challenge_paper_coaching": challenge_paper_coaching,
         "upgrade_coaching": upgrade_coaching,
         "market_data_coaching": market_data_coaching,
+        "checkout_coaching": checkout_coaching,
     }

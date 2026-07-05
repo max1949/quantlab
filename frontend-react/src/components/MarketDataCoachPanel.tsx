@@ -7,7 +7,7 @@ import { useUi } from "../store/ui";
 export default function MarketDataCoachPanel() {
   const d = useLocale((s) => s.dict.marketDataCoach);
   const notify = useUi((s) => s.notify);
-  const journey = useQuery({ queryKey: ["research-journey"], queryFn: getResearchJourney });
+  const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
 
   const coach = journey.data?.market_data_coaching;
   const doCheckout = useMutation({

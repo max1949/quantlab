@@ -67,7 +67,7 @@ export default function AttentionAlertsPanel() {
   const d = useLocale((s) => s.dict.attentionAlerts);
   const notify = useUi((s) => s.notify);
   const qc = useQueryClient();
-  const journey = useQuery({ queryKey: ["research-journey"], queryFn: getResearchJourney });
+  const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
 
   const dismiss = useMutation({
     mutationFn: dismissAttentionAlert,

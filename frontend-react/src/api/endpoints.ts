@@ -119,8 +119,12 @@ export async function getNextStep(): Promise<NextStep> {
   return data;
 }
 
-export async function getResearchJourney(): Promise<ResearchJourney> {
-  const { data } = await api.get<ResearchJourney>("/onboarding/journey");
+export async function getResearchJourney(opts?: {
+  checkoutPlan?: string;
+}): Promise<ResearchJourney> {
+  const { data } = await api.get<ResearchJourney>("/onboarding/journey", {
+    params: opts?.checkoutPlan ? { checkout_plan: opts.checkoutPlan } : undefined,
+  });
   return data;
 }
 

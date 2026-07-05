@@ -18,6 +18,7 @@ import AttentionAlertsPanel from "../components/AttentionAlertsPanel";
 import ChallengePaperCoachPanel from "../components/ChallengePaperCoachPanel";
 import UpgradeCoachPanel from "../components/UpgradeCoachPanel";
 import MarketDataCoachPanel from "../components/MarketDataCoachPanel";
+import PostCheckoutCoachPanel from "../components/PostCheckoutCoachPanel";
 
 export default function Dashboard() {
   const user = useAuth((s) => s.user)!;
@@ -43,6 +44,10 @@ export default function Dashboard() {
         <Stat label={d.rewardPoints} value={user.reward_points} />
         <Stat label={d.arenaScore} value={user.research_score.toFixed(1)} />
         <Stat label={d.level} value={levelName} />
+      </div>
+
+      <div className="mt-6">
+        <PostCheckoutCoachPanel />
       </div>
 
       <div className="mt-6 rounded-2xl bg-gradient-to-r from-brand-600 to-brand-500 p-6 text-white shadow-md">

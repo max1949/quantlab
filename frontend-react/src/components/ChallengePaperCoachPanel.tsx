@@ -7,7 +7,7 @@ import { stageToCtaLabel } from "../lib/nav";
 export default function ChallengePaperCoachPanel() {
   const d = useLocale((s) => s.dict.challengePaperCoach);
   const stages = useLocale((s) => s.dict.stages);
-  const journey = useQuery({ queryKey: ["research-journey"], queryFn: getResearchJourney });
+  const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
 
   const coach = journey.data?.challenge_paper_coaching;
   if (!coach) return null;

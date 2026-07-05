@@ -240,6 +240,28 @@ def test_journey_includes_market_data_coaching(client, db_session):
         assert "stripe_available" in md
 
 
+def test_journey_includes_checkout_coaching(client, db_session):
+    from backend.app.models.user import User
+    from backend.app.services import membership_service as ms
+    from sqlalchemy import select
+
+    seed_sample_market_data(db_session)
+    h = _register(client, "chkcoach")
+    user = db_session.execute(select(User).where(User.username == "chkcoach")).scalar_one()
+    ms.grant(db_session, user, ms.TIER_PLUS, 30, "plus_monthly")
+    client.post(f"{BASE}/projects", headers=h, json={"title": "p", "symbol": "RB"})
+    j = client.get(
+        f"{BASE}/onboarding/journey",
+        headers=h,
+        params={"checkout_plan": "plus_monthly"},
+    ).json()
+    cc = j.get("checkout_coaching")
+    assert cc is not None
+    assert cc["plan_code"] == "plus_monthly"
+    assert j.get("upgrade_coaching") is None
+    assert j.get("market_data_coaching") is None
+
+
 def test_journey_suppresses_market_data_when_upgrade_coaching_wins(client, db_session):
     from backend.app.core.config import get_settings
     from backend.app.models.user import User, UserLevel

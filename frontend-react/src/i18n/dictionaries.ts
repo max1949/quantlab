@@ -106,6 +106,14 @@ const en = {
     viewPlans: "View plans →",
     redeemHint: "Online pay not configured — redeem a card on the plans page.",
   },
+  postCheckoutCoach: {
+    badge: (tier: string, plan: string) => `Unlocked · ${tier} · ${plan}`,
+    unlocked: (features: string) => `Now available: ${features}`,
+    successToast: "Payment successful — your plan is active.",
+    ctaDefault: "Continue research →",
+    viewPlans: "View plans →",
+    dismiss: "Got it",
+  },
   marketDataCoach: {
     badge: (symbol: string, tf: string) => `Market data · ${symbol} · ${tf}`,
     currentPlan: (summary: string) => `Now: ${summary}`,
@@ -1316,6 +1324,14 @@ const zh = {
     checkoutCta: "Stripe 在线升级 →",
     viewPlans: "查看套餐 →",
     redeemHint: "在线支付未开通 — 请在会员页输入卡密兑换。",
+  },
+  postCheckoutCoach: {
+    badge: (tier: string, plan: string) => `已解锁 · ${tier} · ${plan}`,
+    unlocked: (features: string) => `现已可用：${features}`,
+    successToast: "支付成功 — 套餐已生效。",
+    ctaDefault: "继续研究 →",
+    viewPlans: "查看套餐 →",
+    dismiss: "知道了",
   },
   marketDataCoach: {
     badge: (symbol: string, tf: string) => `行情数据 · ${symbol} · ${tf}`,

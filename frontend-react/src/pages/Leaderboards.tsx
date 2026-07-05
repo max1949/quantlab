@@ -54,7 +54,7 @@ export default function Leaderboards() {
 
   const journey = useQuery({
     queryKey: ["research-journey"],
-    queryFn: getResearchJourney,
+    queryFn: () => getResearchJourney(),
     enabled: Boolean(user) && kind === "paper_mastery",
   });
 

@@ -667,6 +667,27 @@ UPGRADE_COACH: dict[Locale, dict[str, str]] = {
     },
 }
 
+CHECKOUT_COACH: dict[Locale, dict[str, str]] = {
+    "en": {
+        "plus_welcome": "Researcher plan is live — formula factors and deeper bars are unlocked.",
+        "plus_formula": "Next: write your own formula factor — expression factors are now available.",
+        "plus_validate": "Run deeper OOS validation with 2-year daily + minute bars on your project.",
+        "pro_welcome": "Pro plan is live — full history, portfolio optimization, and paper trading unlocked.",
+        "pro_paper_ready": "Paper bar passed — go to your project and submit your first paper order.",
+        "pro_start_paper": "Paper trading unlocked — graduate your factor, then submit a paper order.",
+        "unlock_joiner": " · ",
+    },
+    "zh": {
+        "plus_welcome": "研究员月卡已生效 — 公式因子与更深行情已解锁。",
+        "plus_formula": "下一步：写自己的公式因子 — 表达式因子现已可用。",
+        "plus_validate": "用 2 年日线 + 分钟线对当前项目做更深样本外验证。",
+        "pro_welcome": "专业档已生效 — 全历史行情、组合优化、Paper 模拟盘均已解锁。",
+        "pro_paper_ready": "已过 Paper 毕业线 — 去项目页下第一笔模拟单。",
+        "pro_start_paper": "Paper 模拟盘已解锁 — 推过毕业线后提交模拟单。",
+        "unlock_joiner": " · ",
+    },
+}
+
 DATA_COACH: dict[Locale, dict[str, str]] = {
     "en": {
         "free_history_cap": "{symbol}: your plan uses {effective}/{total} daily bars — longer history improves OOS validation.",

@@ -54,8 +54,11 @@ def research_journey(
     current_user: CurrentUser,
     db: Annotated[Session, Depends(get_db)],
     locale: RequestLocale,
+    checkout_plan: str | None = None,
 ) -> ResearchJourneyOut:
-    return ResearchJourneyOut(**onboarding_service.research_journey(db, current_user, locale))
+    return ResearchJourneyOut(
+        **onboarding_service.research_journey(db, current_user, locale, checkout_plan=checkout_plan)
+    )
 
 
 @router.post(
