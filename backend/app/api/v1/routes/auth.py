@@ -132,6 +132,7 @@ def sso_login(request: Request) -> RedirectResponse:
 def sso_callback(
     request: Request,
     db: Annotated[Session, Depends(get_db)],
+    locale: RequestLocale,
     code: str | None = None,
     state: str | None = None,
     error: str | None = None,
@@ -147,9 +148,16 @@ def sso_callback(
     try:
         tokens = sso_service.exchange_code(code, _sso_redirect_uri(request))
         userinfo = sso_service.fetch_userinfo(tokens.get("access_token", ""))
-        user = sso_service.get_or_create_user(db, userinfo)
+        user, created = sso_service.get_or_create_user(db, userinfo)
     except sso_service.SsoError:
         return RedirectResponse(url=f"{origin}/app/login?sso_error=exchange")
-    growth_service.log_event(db, "sso_login", user.id, {})
+    if created:
+        growth_service.log_event(db, "sso_register", user.id, {})
+        welcome_email_service.notify_welcome_email(db, user, locale=locale)
+    else:
+        growth_service.log_event(db, "sso_login", user.id, {})
     token = create_access_token(subject=str(user.id))
-    return RedirectResponse(url=f"{origin}/app/login?sso_token={token}")
+    redirect = f"{origin}/app/login?sso_token={token}"
+    if created:
+        redirect += "&sso_new=1"
+    return RedirectResponse(url=redirect)

@@ -58,7 +58,6 @@ def create_user(db: Session, payload: UserCreate) -> User:
     )
     if payload.user_type is not None:
         user.user_type = payload.user_type.value
-        user.onboarding_done = True
     db.add(user)
     db.commit()
     db.refresh(user)

@@ -128,14 +128,14 @@ def _unique_username(db: Session, base: str) -> str:
     return candidate
 
 
-def get_or_create_user(db: Session, userinfo: dict) -> User:
+def get_or_create_user(db: Session, userinfo: dict) -> tuple[User, bool]:
     email = (userinfo.get("email") or "").strip().lower()
     if not email:
         raise SsoError("身份提供商未返回邮箱")
 
     user = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
     if user is not None:
-        return user
+        return user, False
 
     base = userinfo.get("preferred_username") or email.split("@")[0]
     username = _unique_username(db, str(base))
@@ -144,8 +144,7 @@ def get_or_create_user(db: Session, userinfo: dict) -> User:
         username=username,
         hashed_password=hash_password(uuid.uuid4().hex),
     )
-    user.onboarding_done = True
     db.add(user)
     db.commit()
     db.refresh(user)
-    return user
+    return user, True

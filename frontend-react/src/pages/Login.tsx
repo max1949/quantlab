@@ -32,11 +32,17 @@ export default function Login() {
     const params = new URLSearchParams(window.location.search);
     const ssoToken = params.get("sso_token");
     const ssoError = params.get("sso_error");
+    const ssoNew = params.get("sso_new");
     if (ssoToken) {
       window.history.replaceState({}, "", window.location.pathname);
       void loginWithToken(ssoToken)
         .then((user) => {
-          notify(auth.welcomeBack(user.username), "success");
+          if (ssoNew === "1") {
+            notify(auth.ssoWelcomeNew(user.username), "success");
+            notify(auth.registerEmailHint, "info");
+          } else {
+            notify(auth.welcomeBack(user.username), "success");
+          }
           navigate(user.onboarding_done ? from : "/onboarding", { replace: true });
         })
         .catch((err) => setError(apiErrorMessage(err, auth.loginFailed)));

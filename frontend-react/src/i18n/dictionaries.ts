@@ -64,6 +64,7 @@ const en = {
     ssoDivider: "or",
     ssoSignIn: "Sign in with company SSO",
     ssoFailed: "SSO sign-in failed. Please try again.",
+    ssoWelcomeNew: (name: string) => `Welcome, ${name} — let's set up your research path.`,
   },
   pricing: {
     title: "Membership / Unlock research tools",
@@ -510,6 +511,10 @@ const en = {
     regimeSymbol: (sym: string) =>
       ({ RB: "Rebar RB", AU: "Gold AU", IF: "Index IF" })[sym] ?? sym,
     regimeSymbolMatch: "This symbol",
+    focusCoachBadge: "Mentor pick",
+    focusCoachHint: (title: string) => `Recommended for you — start 「${title}」 in one click.`,
+    focusCoachStart: "Start now →",
+    focusCoachBrowse: "Browse all",
   },
   projectRegime: {
     title: (symbol: string) => `Market regime · ${symbol}`,
@@ -1437,6 +1442,7 @@ const zh = {
     ssoDivider: "或",
     ssoSignIn: "使用企业 SSO 登录",
     ssoFailed: "SSO 登录失败，请重试。",
+    ssoWelcomeNew: (name: string) => `欢迎，${name} — 先选一下你的研究身份吧。`,
   },
   pricing: {
     title: "会员 / 解锁更多研究能力",
@@ -1881,6 +1887,10 @@ const zh = {
     regimeSymbol: (sym: string) =>
       ({ RB: "螺纹钢 RB", AU: "黄金 AU", IF: "股指 IF" })[sym] ?? sym,
     regimeSymbolMatch: "本标的",
+    focusCoachBadge: "导师推荐",
+    focusCoachHint: (title: string) => `为你精选 — 一键开局「${title}」`,
+    focusCoachStart: "立即开局 →",
+    focusCoachBrowse: "浏览全部",
   },
   projectRegime: {
     title: (symbol: string) => `Market regime · ${symbol}`,

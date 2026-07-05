@@ -31,12 +31,15 @@ def test_get_or_create_user_by_email(db_session):
     from backend.app.models.user import User
 
     info = {"email": "SSO.User@Corp.com", "preferred_username": "ssouser"}
-    user = sso_service.get_or_create_user(db_session, info)
+    user, created = sso_service.get_or_create_user(db_session, info)
+    assert created is True
     assert user.email == "sso.user@corp.com"
     assert user.username == "ssouser"
+    assert user.onboarding_done is False
 
     # 再次调用同邮箱应复用同一账号。
-    again = sso_service.get_or_create_user(db_session, info)
+    again, again_created = sso_service.get_or_create_user(db_session, info)
+    assert again_created is False
     assert again.id == user.id
 
     count = db_session.execute(

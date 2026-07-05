@@ -58,6 +58,11 @@ export default function Templates() {
 
   const recommendedCodes = new Set(regimePicks.data?.picks.map((p) => p.code) ?? []);
   const pickByCode = Object.fromEntries((regimePicks.data?.picks ?? []).map((p) => [p.code, p]));
+  const focusedTpl = focus ? templates.data?.find((tpl) => tpl.code === focus) : undefined;
+  const focusedPick = focus ? pickByCode[focus] : undefined;
+  const [focusCoachDismissed, setFocusCoachDismissed] = useState(false);
+  const showFocusCoach =
+    Boolean(focusedTpl && focusedTpl.allowed !== false && !focusCoachDismissed);
 
   const start = useMutation({
     mutationFn: (code: string) => startTemplate(code, true),
@@ -76,6 +81,46 @@ export default function Templates() {
   return (
     <div>
       <PageTitle title={t.title} subtitle={t.subtitle} />
+
+      {showFocusCoach && focusedTpl && focus && (
+        <div className="mb-6 rounded-xl border border-brand-300 bg-gradient-to-r from-brand-50/90 to-violet-50/60 p-4 shadow-sm dark:border-brand-800 dark:from-brand-950/40 dark:to-violet-950/30">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-wide text-brand-700 dark:text-brand-300">
+                🤖 {t.focusCoachBadge}
+              </p>
+              <p className="mt-1 font-semibold text-slate-800 dark:text-slate-100">{focusedTpl.title}</p>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                {t.focusCoachHint(focusedTpl.title)}
+              </p>
+              {focusedPick && (
+                <p className="mt-1 text-xs text-violet-700 dark:text-violet-300">
+                  {t.regimeFit(focusedPick.fit_verdict, focusedPick.fit_score)}
+                  {" · "}
+                  {focusedPick.fit_hint}
+                </p>
+              )}
+            </div>
+            <div className="flex shrink-0 flex-wrap gap-2">
+              <button
+                type="button"
+                className="btn-primary whitespace-nowrap"
+                disabled={start.isPending}
+                onClick={() => start.mutate(focus)}
+              >
+                {starting === focus ? c.starting : t.focusCoachStart}
+              </button>
+              <button
+                type="button"
+                className="btn whitespace-nowrap"
+                onClick={() => setFocusCoachDismissed(true)}
+              >
+                {t.focusCoachBrowse}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mb-6 rounded-xl border border-brand-100 bg-brand-50/50 p-4 dark:border-brand-900 dark:bg-brand-950/30">
         <p className="font-medium text-brand-800 dark:text-brand-200">{t.pathTitle}</p>
