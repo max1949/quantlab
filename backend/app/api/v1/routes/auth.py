@@ -20,6 +20,7 @@ from backend.app.services import (
     rate_limit,
     sso_service,
     user_service,
+    welcome_email_service,
 )
 
 router = APIRouter()
@@ -73,6 +74,7 @@ def register(
     if payload.ref:
         referral_service.link_referral(db, user, payload.ref)
     growth_service.log_event(db, "register", user.id, {"user_type": user.user_type})
+    welcome_email_service.notify_welcome_email(db, user)
     db.refresh(user)
     token = create_access_token(subject=str(user.id))
     return RegisterOut(access_token=token, user=UserOut.model_validate(user))

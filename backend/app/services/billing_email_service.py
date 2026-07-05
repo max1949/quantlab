@@ -87,6 +87,10 @@ def build_receipt_email(
 
 
 def send_receipt_email(to_email: str, subject: str, body: str) -> None:
+    send_plain_email(to_email, subject, body)
+
+
+def send_plain_email(to_email: str, subject: str, body: str) -> None:
     settings = get_settings()
     msg = MIMEMultipart()
     msg["Subject"] = subject

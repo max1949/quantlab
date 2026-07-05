@@ -913,6 +913,39 @@ SHARE_GROWTH_COACH: dict[Locale, dict[str, str]] = {
     },
 }
 
+WELCOME_EMAIL: dict[Locale, dict[str, str]] = {
+    "en": {
+        "subject": "Welcome to QuantLab — your mastery path starts here",
+        "body": (
+            "Hello {username},\n\n"
+            "Welcome to QuantLab — the research incubator that guides you from template to Paper Masters.\n\n"
+            "Your beginner handbook (print or save as PDF):\n{handbook_link}\n\n"
+            "Open your dashboard — we auto-plan your next step:\n{dashboard_link}\n\n"
+            "Quick start (3 steps):\n"
+            "1. Pick a template and run validation\n"
+            "2. Generate your first research report\n"
+            "3. Join the 30-day challenge — milestones light up as you progress\n\n"
+            "See you on the research square.\n"
+            "— QuantLab\n"
+        ),
+    },
+    "zh": {
+        "subject": "欢迎加入 QuantLab — 你的大师路径从这里开始",
+        "body": (
+            "你好，{username}：\n\n"
+            "欢迎加入 QuantLab — 从模板到 Paper 大师的全自动研究孵化器。\n\n"
+            "新手大师一页纸（可打印或另存为 PDF）：\n{handbook_link}\n\n"
+            "打开工作台 — 系统会自动规划你的下一步：\n{dashboard_link}\n\n"
+            "3 步快速上手：\n"
+            "1. 选一个模板并完成样本外验证\n"
+            "2. 生成你的第一份研究报告\n"
+            "3. 报名 30 天挑战 — 里程碑会随研究进度自动点亮\n\n"
+            "研究广场上见。\n"
+            "— QuantLab\n"
+        ),
+    },
+}
+
 BILLING_RECEIPT_EMAIL: dict[Locale, dict[str, str]] = {
     "en": {
         "subject": "QuantLab receipt · {plan_name}",
