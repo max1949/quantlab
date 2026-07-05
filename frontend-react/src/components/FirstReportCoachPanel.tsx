@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getResearchJourney } from "../api/endpoints";
 import { useLocale } from "../store/locale";
 import { stageToCtaLabel } from "../lib/nav";
+import HandbookExportButtons from "./HandbookExportButtons";
 
 const DISMISS_KEY = "quantlab-first-report-dismissed";
 
@@ -91,6 +92,12 @@ export default function FirstReportCoachPanel() {
               </ol>
             </div>
           )}
+          <div className="mt-4 rounded-lg border border-amber-300/40 bg-white/50 p-2.5 dark:bg-slate-900/30">
+            <p className="mb-2 text-[10px] font-semibold uppercase text-amber-800 dark:text-amber-200">
+              {d.saveHandbook}
+            </p>
+            <HandbookExportButtons compact />
+          </div>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
           <Link to={coach.cta_path} className="btn-primary whitespace-nowrap text-xs">

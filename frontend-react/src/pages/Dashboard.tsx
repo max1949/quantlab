@@ -19,6 +19,7 @@ import PostCheckoutCoachPanel from "../components/PostCheckoutCoachPanel";
 import QuickStartGuidePanel from "../components/QuickStartGuidePanel";
 import FirstReportCoachPanel from "../components/FirstReportCoachPanel";
 import MasteryOverviewPanel from "../components/MasteryOverviewPanel";
+import BeginnerHandbookStrip from "../components/BeginnerHandbookStrip";
 
 export default function Dashboard() {
   const user = useAuth((s) => s.user)!;
@@ -48,6 +49,10 @@ export default function Dashboard() {
 
       <div className="mt-6">
         <PostCheckoutCoachPanel />
+      </div>
+
+      <div className="mt-6">
+        <BeginnerHandbookStrip />
       </div>
 
       <div className="mt-6">

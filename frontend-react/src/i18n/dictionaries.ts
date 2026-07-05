@@ -129,6 +129,7 @@ const en = {
     academyEarned: (title: string, xp: number) => `Academy task lit · +${xp} XP · ${title}`,
     challengeMilestone: "30-day challenge D30 milestone lit — first report complete.",
     stepGo: "Go →",
+    saveHandbook: "Save your progress map →",
   },
   beginnerSprint: {
     enrollCta: "Join 30-day challenge →",
@@ -181,6 +182,8 @@ const en = {
     step2Hint: "Run backtest, then validation — institutional checks built in.",
     step3Label: "Generate your research report",
     step3Hint: "Auto-report summarizes Sharpe, OOS, and next actions.",
+    stripHint: "Keep this one-pager handy — print or download your live mastery map anytime.",
+    stripDismiss: "Hide",
   },
   marketDataCoach: {
     badge: (symbol: string, tf: string) => `Market data · ${symbol} · ${tf}`,
@@ -1452,6 +1455,7 @@ const zh = {
     academyEarned: (title: string, xp: number) => `学院任务已点亮 · +${xp} 经验 · ${title}`,
     challengeMilestone: "30 天挑战 D30 里程碑已点亮 — 首份报告完成。",
     stepGo: "去 →",
+    saveHandbook: "保存进度路径图 →",
   },
   beginnerSprint: {
     enrollCta: "报名 30 天挑战 →",
@@ -1504,6 +1508,8 @@ const zh = {
     step2Hint: "先回测再验证 — 机构级检查已内置。",
     step3Label: "生成研究报告",
     step3Hint: "自动报告汇总 Sharpe、样本外与下一步。",
+    stripHint: "随身带着这份一页纸 — 随时打印或下载你的实时大师路径图。",
+    stripDismiss: "收起",
   },
   marketDataCoach: {
     badge: (symbol: string, tf: string) => `行情数据 · ${symbol} · ${tf}`,
