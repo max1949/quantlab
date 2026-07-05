@@ -6,6 +6,10 @@ import { useLocale } from "../store/locale";
 import { chooseType, trackEvent } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
 import HandbookExportButtons from "../components/HandbookExportButtons";
+import {
+  FIRST_MENTOR_WELCOME_KEY,
+  FOCUS_QUICKSTART_KEY,
+} from "../lib/onboardingFocus";
 import type { UserType } from "../api/types";
 
 const TYPE_META: { value: UserType; key: "newbie" | "python" | "trader"; emoji: string }[] = [
@@ -32,7 +36,8 @@ export default function Onboarding() {
       const updated = await chooseType(selected);
       setUser(updated);
       void trackEvent("onboarding_done", { user_type: selected });
-      sessionStorage.setItem("quantlab-focus-quickstart", "1");
+      sessionStorage.setItem(FOCUS_QUICKSTART_KEY, "1");
+      sessionStorage.setItem(FIRST_MENTOR_WELCOME_KEY, "1");
       notify(o.saved, "success");
       navigate("/app", { replace: true });
     } catch (err) {

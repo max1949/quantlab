@@ -123,6 +123,13 @@ const en = {
     ctaDefault: "Continue →",
     dismiss: "Hide guide",
   },
+  firstMentorWelcome: {
+    badge: "First workspace visit",
+    firstStep: (label: string) => `Your first step: ${label}`,
+    openQuickstart: "3-step guide →",
+    gotIt: "Got it",
+    ctaDefault: "Start →",
+  },
   firstReportCoach: {
     unlocked: (features: string) => `Next unlocks: ${features}`,
     ctaDefault: "Continue →",
@@ -1485,6 +1492,13 @@ const zh = {
     progress: (done: number, total: number) => `已完成 ${done}/${total}`,
     ctaDefault: "继续 →",
     dismiss: "收起引导",
+  },
+  firstMentorWelcome: {
+    badge: "首次进入工作台",
+    firstStep: (label: string) => `你的第一步：${label}`,
+    openQuickstart: "3 步引导 →",
+    gotIt: "知道了",
+    ctaDefault: "开始 →",
   },
   firstReportCoach: {
     unlocked: (features: string) => `下一步解锁：${features}`,

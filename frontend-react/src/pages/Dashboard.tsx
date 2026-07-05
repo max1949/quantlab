@@ -17,6 +17,7 @@ import MasteryGoalPanel from "../components/MasteryGoalPanel";
 import DashboardCoachStack from "../components/DashboardCoachStack";
 import PostCheckoutCoachPanel from "../components/PostCheckoutCoachPanel";
 import QuickStartGuidePanel from "../components/QuickStartGuidePanel";
+import FirstDashboardMentorPanel from "../components/FirstDashboardMentorPanel";
 import FirstReportCoachPanel from "../components/FirstReportCoachPanel";
 import MasteryOverviewPanel from "../components/MasteryOverviewPanel";
 import ReputationCoachPanel from "../components/ReputationCoachPanel";
@@ -56,6 +57,10 @@ export default function Dashboard() {
 
       <div className="mt-6">
         <BeginnerHandbookStrip />
+      </div>
+
+      <div className="mt-6">
+        <FirstDashboardMentorPanel />
       </div>
 
       <div className="mt-6">

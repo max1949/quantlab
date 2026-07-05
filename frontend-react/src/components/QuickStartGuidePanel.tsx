@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { enrollChallenge, getResearchJourney } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
 import { celebrateChallengeEnroll } from "../lib/challengeEnroll";
+import { FOCUS_QUICKSTART_KEY } from "../lib/onboardingFocus";
 import { useLocale } from "../store/locale";
 import { useAuth } from "../store/auth";
 import { useUi } from "../store/ui";
@@ -12,7 +13,6 @@ import { stageToCtaLabel } from "../lib/nav";
 import { Spinner } from "./ui";
 
 const DISMISS_KEY = "quantlab-quickstart-dismissed";
-const FOCUS_KEY = "quantlab-focus-quickstart";
 
 function readDismissedProgress(): number {
   const raw = localStorage.getItem(DISMISS_KEY);
@@ -39,8 +39,8 @@ export default function QuickStartGuidePanel() {
   const sprint = journey.data?.beginner_sprint;
 
   useEffect(() => {
-    if (!guide || sessionStorage.getItem(FOCUS_KEY) !== "1") return;
-    sessionStorage.removeItem(FOCUS_KEY);
+    if (!guide || sessionStorage.getItem(FOCUS_QUICKSTART_KEY) !== "1") return;
+    sessionStorage.removeItem(FOCUS_QUICKSTART_KEY);
     const scrollTimer = window.setTimeout(() => {
       rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       setHighlighted(true);
