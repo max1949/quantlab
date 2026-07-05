@@ -139,6 +139,14 @@ const en = {
     onBoard: "On Paper Masters board",
     stepGo: "Go →",
   },
+  shareGrowthCoach: {
+    views: (n: number) => `${n} public view${n === 1 ? "" : "s"}`,
+    viewFeed: "Open highlighted feed →",
+    copyLink: "Copy share link",
+    copied: "Share link copied — send it to one focused reader.",
+    dismiss: "Got it",
+    stepGo: "Open →",
+  },
   beginnerSprint: {
     enrollCta: "Join 30-day challenge →",
     viewCta: "View challenge progress →",
@@ -1476,6 +1484,14 @@ const zh = {
     dismiss: "知道了",
     onBoard: "已上 Paper 大师榜",
     stepGo: "去 →",
+  },
+  shareGrowthCoach: {
+    views: (n: number) => `${n} 次公开浏览`,
+    viewFeed: "打开广场高亮 →",
+    copyLink: "复制分享链接",
+    copied: "分享链接已复制 — 发给一个精准读者吧。",
+    dismiss: "知道了",
+    stepGo: "打开 →",
   },
   beginnerSprint: {
     enrollCta: "报名 30 天挑战 →",

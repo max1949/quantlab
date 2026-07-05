@@ -849,6 +849,33 @@ REPUTATION_COACH: dict[Locale, dict[str, str]] = {
     },
 }
 
+SHARE_GROWTH_COACH: dict[Locale, dict[str, str]] = {
+    "en": {
+        "badge": "Growth loop",
+        "guide_title": "After-share growth routine",
+        "first_views": "Your share card is live. Open the feed, copy the link, and watch the first views arrive.",
+        "amplify": "Your share card is getting traction. Keep the loop going with one follow-up post and one new research update.",
+        "step1_label": "Open the live card",
+        "step1_hint": "Preview the public card like a reader — the story should be clear in 30 seconds.",
+        "step2_label": "Send one focused link",
+        "step2_hint": "Share it with one trading friend or cohort group and ask for one concrete question.",
+        "step3_label": "Return to the feed",
+        "step3_hint": "Track views, follow relevant researchers, then publish the next improvement.",
+    },
+    "zh": {
+        "badge": "增长闭环",
+        "guide_title": "分享后的增长动作",
+        "first_views": "分享卡片已上线。打开广场、复制链接，观察第一批浏览。",
+        "amplify": "分享卡片开始有流量了。继续做一次转发跟进，并发布下一次研究改进。",
+        "step1_label": "打开公开卡片",
+        "step1_hint": "像读者一样预览卡片 — 30 秒内要看懂你的研究故事。",
+        "step2_label": "发送一个精准链接",
+        "step2_hint": "发给一位交易朋友或学习小组，请对方提一个具体问题。",
+        "step3_label": "回到研究广场",
+        "step3_hint": "观察浏览量、关注相关研究员，然后发布下一次改进。",
+    },
+}
+
 BILLING_RECEIPT_EMAIL: dict[Locale, dict[str, str]] = {
     "en": {
         "subject": "QuantLab receipt · {plan_name}",

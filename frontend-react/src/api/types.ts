@@ -270,6 +270,18 @@ export interface ReputationCoaching {
   guide_steps: FirstReportGuideStep[];
 }
 
+export interface ShareGrowthCoaching {
+  reason: string;
+  badge: string;
+  message: string;
+  guide_title: string;
+  views: number;
+  share_url_path: string;
+  feed_path: string;
+  report_title: string | null;
+  guide_steps: FirstReportGuideStep[];
+}
+
 export interface ResearchJourney {
   done_count: number;
   total: number;
@@ -290,6 +302,7 @@ export interface ResearchJourney {
   beginner_sprint: BeginnerSprint | null;
   mastery_overview: MasteryOverview | null;
   reputation_coaching: ReputationCoaching | null;
+  share_growth_coaching: ShareGrowthCoaching | null;
 }
 
 export interface Mentor {

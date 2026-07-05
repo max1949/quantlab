@@ -476,9 +476,17 @@ def test_journey_includes_reputation_coaching_after_paper(client, db_session):
     assert len(coach.get("guide_steps") or []) >= 2
     assert coach["cta_action"] == "publish_share"
 
-    client.post(f"{BASE}/research/reports/{report['id']}/share", headers=h)
+    share_resp = client.post(f"{BASE}/research/reports/{report['id']}/share", headers=h)
+    assert share_resp.status_code == 201, share_resp.text
     j2 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
     assert j2.get("reputation_coaching") is None
+    growth = j2.get("share_growth_coaching")
+    assert growth is not None
+    assert growth["reason"] == "first_views"
+    assert growth["views"] == 0
+    assert growth["share_url_path"] == f"/share/{share_resp.json()['token']}"
+    assert growth["feed_path"] == f"/feed?highlight={report['id']}"
+    assert len(growth.get("guide_steps") or []) == 3
 
 
 def test_journey_includes_checkout_coaching(client, db_session):

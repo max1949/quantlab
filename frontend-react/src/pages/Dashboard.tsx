@@ -20,6 +20,7 @@ import QuickStartGuidePanel from "../components/QuickStartGuidePanel";
 import FirstReportCoachPanel from "../components/FirstReportCoachPanel";
 import MasteryOverviewPanel from "../components/MasteryOverviewPanel";
 import ReputationCoachPanel from "../components/ReputationCoachPanel";
+import ShareGrowthCoachPanel from "../components/ShareGrowthCoachPanel";
 import BeginnerHandbookStrip from "../components/BeginnerHandbookStrip";
 
 export default function Dashboard() {
@@ -70,6 +71,10 @@ export default function Dashboard() {
 
       <div className="mt-6">
         <ReputationCoachPanel />
+      </div>
+
+      <div className="mt-6">
+        <ShareGrowthCoachPanel />
       </div>
 
       <div className="mt-6 rounded-2xl bg-gradient-to-r from-brand-600 to-brand-500 p-6 text-white shadow-md">

@@ -570,6 +570,65 @@ def reputation_coaching_payload(
     }
 
 
+def share_growth_coaching_payload(db: Session, user: User, locale: Locale, flags: dict[str, bool]) -> dict | None:
+    """分享完成后的增长教练 — 浏览复盘、复制链接、回广场互动。"""
+    if not flags.get("share"):
+        return None
+
+    from backend.app.models.growth import ResearchShare
+
+    row = db.execute(
+        select(ResearchShare, ResearchReport)
+        .join(ResearchReport, ResearchReport.id == ResearchShare.report_id)
+        .where(ResearchShare.owner_id == user.id)
+        .order_by(ResearchShare.created_at.desc())
+        .limit(1)
+    ).first()
+    if row is None:
+        return None
+
+    share, report = row
+    labels = i18n.SHARE_GROWTH_COACH.get(locale) or i18n.SHARE_GROWTH_COACH["en"]
+    views = int(share.views or 0)
+    share_path = f"/share/{share.token}"
+    feed_path = f"/feed?highlight={report.id}"
+    reason = "first_views" if views < 10 else "amplify"
+
+    return {
+        "reason": reason,
+        "badge": labels["badge"],
+        "message": labels[reason],
+        "guide_title": labels["guide_title"],
+        "views": views,
+        "share_url_path": share_path,
+        "feed_path": feed_path,
+        "report_title": report.title,
+        "guide_steps": [
+            {
+                "step": 1,
+                "label": labels["step1_label"],
+                "hint": labels["step1_hint"],
+                "cta_path": share_path,
+                "cta_action": "keep_going",
+            },
+            {
+                "step": 2,
+                "label": labels["step2_label"],
+                "hint": labels["step2_hint"],
+                "cta_path": share_path,
+                "cta_action": "keep_going",
+            },
+            {
+                "step": 3,
+                "label": labels["step3_label"],
+                "hint": labels["step3_hint"],
+                "cta_path": feed_path,
+                "cta_action": "keep_going",
+            },
+        ],
+    }
+
+
 def beginner_sprint_payload(
     user: User,
     locale: Locale,
@@ -913,6 +972,7 @@ def research_journey(
         mastery_goal=mastery_goal,
         active_project_id=active_id,
     )
+    share_growth_coaching = share_growth_coaching_payload(db, user, locale, flags)
 
     return {
         "done_count": done_count,
@@ -934,4 +994,5 @@ def research_journey(
         "beginner_sprint": beginner_sprint,
         "mastery_overview": mastery_overview,
         "reputation_coaching": reputation_coaching,
+        "share_growth_coaching": share_growth_coaching,
     }
