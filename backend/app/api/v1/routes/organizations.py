@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from backend.app.auth.deps import CurrentUser
 from backend.app.core.database import get_db
+from backend.app.core.locale import RequestLocale
 from backend.app.schemas.membership import CheckoutIn, CheckoutOut
 from backend.app.schemas.organization import (
     OrgActivityOut,
@@ -32,11 +33,12 @@ from backend.app.schemas.organization import (
     OrgOut,
     OrgAlertWebhookIn,
     OrgAlertWebhookOut,
+    OrgTeamAttentionRollupOut,
     OrgSsoDomainsIn,
     OrgSsoDomainsOut,
 )
 from backend.app.schemas.execution import ExecutionComplianceOut, GatewayRefreshOut, OrgPaperOrderOut, SlaAlertDeliveryOut
-from backend.app.services import audit_service, execution_compliance_service as ecs, execution_alert_service as eas, execution_service as exs, org_billing_service, org_service
+from backend.app.services import audit_service, execution_compliance_service as ecs, execution_alert_service as eas, execution_service as exs, org_attention_service, org_billing_service, org_service
 from backend.app.services import billing_ledger_service as bls
 
 router = APIRouter()
@@ -660,6 +662,28 @@ def set_org_sso_domains(
     except org_service.OrgAccessDeniedError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     return OrgSsoDomainsOut(domains=domains)
+
+
+@router.get(
+    "/{org_id}/research/attention-alerts",
+    response_model=OrgTeamAttentionRollupOut,
+    summary="机构团队研究提醒汇总 (管理员)",
+)
+def org_team_attention_alerts(
+    org_id: str,
+    current_user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+    locale: RequestLocale,
+) -> OrgTeamAttentionRollupOut:
+    try:
+        data = org_attention_service.team_attention_rollup(
+            db, uuid.UUID(org_id), current_user.id, locale
+        )
+    except org_service.OrgNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="机构不存在")
+    except org_service.OrgAccessDeniedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    return OrgTeamAttentionRollupOut(**data)
 
 
 @router.get(

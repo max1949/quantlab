@@ -650,6 +650,19 @@ ATTENTION_HISTORY_KIND: dict[Locale, dict[str, str]] = {
     },
 }
 
+TEAM_ATTENTION_COACH: dict[Locale, dict[str, str]] = {
+    "en": {
+        "none": "No active research alerts — team projects look healthy.",
+        "one_member": "{count} research alert(s) from 1 member — follow up on regime fit and paper decay.",
+        "many_members": "{members} members have {count} research alert(s) — coach them before escalation.",
+    },
+    "zh": {
+        "none": "暂无活跃研究提醒 — 团队项目状态良好。",
+        "one_member": "1 位成员有 {count} 条研究提醒 — 请跟进制度适配与 Paper 衰减。",
+        "many_members": "{members} 位成员共 {count} 条研究提醒 — 请辅导后再升级处理。",
+    },
+}
+
 UPGRADE_COACH: dict[Locale, dict[str, str]] = {
     "en": {
         "paper_ready": "Paper bar passed — upgrade to Pro to submit paper orders and start the masters tracking loop.",

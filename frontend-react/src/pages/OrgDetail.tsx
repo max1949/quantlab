@@ -22,6 +22,7 @@ import {
   setOrgSsoDomains,
   listOrgExecutionOrders,
   fetchOrgExecutionCompliance,
+  fetchOrgTeamAttentionRollup,
   getOrgAlertWebhook,
   setOrgAlertWebhook,
   dispatchOrgSlaAlerts,
@@ -108,6 +109,11 @@ export default function OrgDetail() {
   const execCompliance = useQuery({
     queryKey: ["org-exec-compliance", id],
     queryFn: () => fetchOrgExecutionCompliance(id),
+    enabled: Boolean(id) && (org.data?.my_role === "owner" || org.data?.my_role === "admin"),
+  });
+  const teamAttention = useQuery({
+    queryKey: ["org-team-attention", id],
+    queryFn: () => fetchOrgTeamAttentionRollup(id),
     enabled: Boolean(id) && (org.data?.my_role === "owner" || org.data?.my_role === "admin"),
   });
   const alertWebhookQuery = useQuery({
@@ -638,6 +644,60 @@ export default function OrgDetail() {
           </>
         )}
       </div>
+
+      {canAdmin && (
+        <div className="mb-6 card border border-violet-100 bg-gradient-to-r from-violet-50/50 to-white dark:border-violet-900 dark:from-violet-950/20 dark:to-slate-900">
+          <h2 className="mb-1 font-semibold">{o.teamAttentionTitle}</h2>
+          <p className="mb-3 text-xs text-slate-500">{o.teamAttentionSubtitle}</p>
+          {teamAttention.isLoading ? (
+            <Spinner />
+          ) : teamAttention.data ? (
+            <>
+              <p
+                className={`mb-3 text-sm ${
+                  teamAttention.data.total_alerts > 0
+                    ? "text-violet-800 dark:text-violet-200"
+                    : "text-slate-500"
+                }`}
+              >
+                {teamAttention.data.summary}
+              </p>
+              {teamAttention.data.items.length > 0 ? (
+                <ul className="space-y-2">
+                  {teamAttention.data.items.slice(0, 8).map((item) => (
+                    <li
+                      key={`${item.user_id}-${item.alert_key}`}
+                      className={`rounded-lg border px-3 py-2.5 text-sm ${
+                        item.severity === "alert"
+                          ? "border-rose-200 bg-rose-50/70 dark:border-rose-900 dark:bg-rose-950/30"
+                          : item.severity === "watch"
+                            ? "border-amber-200 bg-amber-50/70 dark:border-amber-900 dark:bg-amber-950/30"
+                            : "border-sky-200 bg-sky-50/70 dark:border-sky-900 dark:bg-sky-950/30"
+                      }`}
+                    >
+                      <p className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                        {o.teamAttentionMember(item.username, item.kind_label)}
+                      </p>
+                      <p className="mt-0.5 font-medium text-slate-800 dark:text-slate-100">{item.title}</p>
+                      <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">{item.message}</p>
+                      {item.cta_path && (
+                        <Link
+                          to={item.cta_path}
+                          className="mt-2 inline-block text-xs font-medium text-brand-600 hover:underline"
+                        >
+                          {o.teamAttentionViewProject}
+                        </Link>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-xs text-slate-500">{o.teamAttentionEmpty}</p>
+              )}
+            </>
+          ) : null}
+        </div>
+      )}
 
       {canAdmin && (
         <div className="mb-6 card">

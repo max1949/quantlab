@@ -1186,6 +1186,34 @@ export async function fetchOrgExecutionCompliance(orgId: string): Promise<OrgExe
   return data;
 }
 
+export interface OrgTeamAttentionItem {
+  user_id: string;
+  username: string;
+  role: string;
+  alert_key: string;
+  kind: string;
+  kind_label: string;
+  title: string;
+  message: string;
+  severity: string;
+  symbol: string | null;
+  project_id: string | null;
+  cta_path: string;
+}
+
+export interface OrgTeamAttentionRollup {
+  member_count: number;
+  members_with_alerts: number;
+  total_alerts: number;
+  summary: string;
+  items: OrgTeamAttentionItem[];
+}
+
+export async function fetchOrgTeamAttentionRollup(orgId: string): Promise<OrgTeamAttentionRollup> {
+  const { data } = await api.get<OrgTeamAttentionRollup>(`/orgs/${orgId}/research/attention-alerts`);
+  return data;
+}
+
 export async function getOrgAlertWebhook(
   orgId: string,
 ): Promise<{ webhook_url: string; secret_configured: boolean }> {

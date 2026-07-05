@@ -160,6 +160,29 @@ class OrgAlertWebhookOut(BaseModel):
     secret_configured: bool = False
 
 
+class OrgTeamAttentionItemOut(BaseModel):
+    user_id: uuid.UUID
+    username: str
+    role: str
+    alert_key: str
+    kind: str
+    kind_label: str
+    title: str
+    message: str
+    severity: str = "info"
+    symbol: str | None = None
+    project_id: uuid.UUID | None = None
+    cta_path: str
+
+
+class OrgTeamAttentionRollupOut(BaseModel):
+    member_count: int
+    members_with_alerts: int
+    total_alerts: int
+    summary: str
+    items: list[OrgTeamAttentionItemOut] = Field(default_factory=list)
+
+
 class OrgBillingProfileIn(BaseModel):
     company_name: str = Field(default="", max_length=200)
     tax_id: str = Field(default="", max_length=64)
