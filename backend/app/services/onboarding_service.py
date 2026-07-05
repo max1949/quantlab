@@ -190,6 +190,63 @@ JOURNEY_STEP_KEYS = (
 )
 
 
+def quickstart_guide_payload(
+    locale: Locale,
+    flags: dict[str, bool],
+    *,
+    active_project_id: uuid.UUID | None,
+    recommended_template: str | None = None,
+) -> dict | None:
+    """新手 3 步快速上手 — 首份报告前展示。"""
+    if flags.get("report"):
+        return None
+
+    labels = i18n.QUICKSTART_GUIDE.get(locale) or i18n.QUICKSTART_GUIDE["en"]
+    project_path = f"/projects/{active_project_id}" if active_project_id else "/projects"
+    template_path = (
+        f"/templates?focus={recommended_template}" if recommended_template else "/templates"
+    )
+
+    steps = [
+        {
+            "key": "start",
+            "done": bool(flags.get("template") and flags.get("factor")),
+            "label": labels["step1_label"],
+            "hint": labels["step1_hint"],
+            "cta_path": template_path,
+            "cta_action": "create_project",
+        },
+        {
+            "key": "validate",
+            "done": bool(flags.get("backtest") and flags.get("validation")),
+            "label": labels["step2_label"],
+            "hint": labels["step2_hint"],
+            "cta_path": project_path,
+            "cta_action": "run_validation",
+        },
+        {
+            "key": "report",
+            "done": bool(flags.get("report")),
+            "label": labels["step3_label"],
+            "hint": labels["step3_hint"],
+            "cta_path": project_path,
+            "cta_action": "generate_report",
+        },
+    ]
+    current_index = next((i for i, s in enumerate(steps) if not s["done"]), len(steps) - 1)
+    progress = sum(1 for s in steps if s["done"])
+
+    return {
+        "title": labels["title"],
+        "subtitle": labels["subtitle"],
+        "current_badge": labels["current_badge"],
+        "steps": steps,
+        "current_index": current_index,
+        "progress": progress,
+        "total": len(steps),
+    }
+
+
 def _mastery_goal_hint(
     locale: Locale,
     *,
@@ -440,6 +497,14 @@ def research_journey(
         upgrade_coaching = None
         market_data_coaching = None
 
+    nxt = next_step(db, user, locale)
+    quickstart_guide = quickstart_guide_payload(
+        locale,
+        flags,
+        active_project_id=active_id,
+        recommended_template=nxt.get("recommended_template"),
+    )
+
     return {
         "done_count": done_count,
         "total": len(steps),
@@ -455,4 +520,5 @@ def research_journey(
         "upgrade_coaching": upgrade_coaching,
         "market_data_coaching": market_data_coaching,
         "checkout_coaching": checkout_coaching,
+        "quickstart_guide": quickstart_guide,
     }

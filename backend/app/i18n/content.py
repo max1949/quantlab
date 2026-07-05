@@ -663,6 +663,31 @@ TEAM_ATTENTION_COACH: dict[Locale, dict[str, str]] = {
     },
 }
 
+QUICKSTART_GUIDE: dict[Locale, dict[str, str]] = {
+    "en": {
+        "title": "3-step quick start",
+        "subtitle": "Follow these three steps — we'll guide you automatically to your first mastery report.",
+        "step1_label": "Pick a template & create a project",
+        "step1_hint": "Start from a regime-matched template — one click.",
+        "step2_label": "Backtest + out-of-sample validation",
+        "step2_hint": "Run backtest, then validation — institutional checks built in.",
+        "step3_label": "Generate your research report",
+        "step3_hint": "Auto-report summarizes Sharpe, OOS, and next actions.",
+        "current_badge": "You are here",
+    },
+    "zh": {
+        "title": "3 步快速上手",
+        "subtitle": "跟着这三步走 — 平台会全自动带你完成第一份大师级研究报告。",
+        "step1_label": "选模板并创建项目",
+        "step1_hint": "从制度推荐模板一键开始。",
+        "step2_label": "回测 + 样本外验证",
+        "step2_hint": "先回测再验证 — 机构级检查已内置。",
+        "step3_label": "生成研究报告",
+        "step3_hint": "自动报告汇总 Sharpe、样本外与下一步。",
+        "current_badge": "你在这里",
+    },
+}
+
 BILLING_RECEIPT_EMAIL: dict[Locale, dict[str, str]] = {
     "en": {
         "subject": "QuantLab receipt · {plan_name}",

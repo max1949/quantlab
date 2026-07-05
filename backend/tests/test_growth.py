@@ -240,6 +240,36 @@ def test_journey_includes_market_data_coaching(client, db_session):
         assert "stripe_available" in md
 
 
+def test_journey_includes_quickstart_guide(client, db_session):
+    seed_sample_market_data(db_session)
+    seed_default_templates(db_session)
+    h = _register(client, "qsguide")
+    j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    qs = j.get("quickstart_guide")
+    assert qs is not None
+    assert qs["total"] == 3
+    assert qs["progress"] == 0
+    assert qs["current_index"] == 0
+    assert len(qs["steps"]) == 3
+    assert qs["steps"][0]["cta_action"] == "create_project"
+    assert qs["steps"][0]["done"] is False
+
+    client.post(
+        f"{BASE}/research/templates/gold-trend/start",
+        headers=h,
+        json={"with_factor": True},
+    )
+    j2 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    qs2 = j2["quickstart_guide"]
+    assert qs2["progress"] == 1
+    assert qs2["steps"][0]["done"] is True
+    assert qs2["current_index"] == 1
+
+    _full_research(client, h, db_session)
+    j3 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    assert j3.get("quickstart_guide") is None
+
+
 def test_journey_includes_checkout_coaching(client, db_session):
     from backend.app.models.user import User
     from backend.app.services import membership_service as ms

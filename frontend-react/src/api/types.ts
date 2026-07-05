@@ -163,6 +163,25 @@ export interface CheckoutCoaching {
   receipt_email_hint: string | null;
 }
 
+export interface QuickstartGuideStep {
+  key: string;
+  done: boolean;
+  label: string;
+  hint: string;
+  cta_path: string;
+  cta_action: string;
+}
+
+export interface QuickstartGuide {
+  title: string;
+  subtitle: string;
+  current_badge: string;
+  steps: QuickstartGuideStep[];
+  current_index: number;
+  progress: number;
+  total: number;
+}
+
 export interface ResearchJourney {
   done_count: number;
   total: number;
@@ -178,6 +197,7 @@ export interface ResearchJourney {
   upgrade_coaching: UpgradeCoaching | null;
   market_data_coaching: MarketDataCoaching | null;
   checkout_coaching: CheckoutCoaching | null;
+  quickstart_guide: QuickstartGuide | null;
 }
 
 export interface Mentor {

@@ -116,6 +116,11 @@ const en = {
     viewPlans: "View plans →",
     dismiss: "Got it",
   },
+  quickstartGuide: {
+    progress: (done: number, total: number) => `${done}/${total} done`,
+    ctaDefault: "Continue →",
+    dismiss: "Hide guide",
+  },
   marketDataCoach: {
     badge: (symbol: string, tf: string) => `Market data · ${symbol} · ${tf}`,
     currentPlan: (summary: string) => `Now: ${summary}`,
@@ -1355,6 +1360,11 @@ const zh = {
     ctaDefault: "继续研究 →",
     viewPlans: "查看套餐 →",
     dismiss: "知道了",
+  },
+  quickstartGuide: {
+    progress: (done: number, total: number) => `已完成 ${done}/${total}`,
+    ctaDefault: "继续 →",
+    dismiss: "收起引导",
   },
   marketDataCoach: {
     badge: (symbol: string, tf: string) => `行情数据 · ${symbol} · ${tf}`,

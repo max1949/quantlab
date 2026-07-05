@@ -128,6 +128,25 @@ class CheckoutCoachingOut(BaseModel):
     receipt_email_hint: str | None = None
 
 
+class QuickstartGuideStepOut(BaseModel):
+    key: str
+    done: bool
+    label: str
+    hint: str
+    cta_path: str
+    cta_action: str
+
+
+class QuickstartGuideOut(BaseModel):
+    title: str
+    subtitle: str
+    current_badge: str
+    steps: list[QuickstartGuideStepOut]
+    current_index: int
+    progress: int
+    total: int
+
+
 class DismissAttentionAlertRequest(BaseModel):
     alert_key: str = Field(min_length=1, max_length=128)
 
@@ -177,6 +196,7 @@ class ResearchJourneyOut(BaseModel):
     upgrade_coaching: UpgradeCoachingOut | None = None
     market_data_coaching: MarketDataCoachingOut | None = None
     checkout_coaching: CheckoutCoachingOut | None = None
+    quickstart_guide: QuickstartGuideOut | None = None
 
 
 # ---- 研究模板 ----
