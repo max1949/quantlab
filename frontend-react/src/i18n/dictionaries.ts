@@ -1482,9 +1482,10 @@ const en = {
     title: "Masters read one report a week",
     message:
       "Pick a report below, study how they validated, then mirror one template on your desk — that's the incubator loop.",
-    hint: "This reminder shows once per week while your following feed has fresh research.",
+    hint: "Shows on each visit until you dismiss for the week — one focused read at a time.",
     pickReport: "Pick a report ↓",
     dismiss: "Got it",
+    dismissForever: "Don't remind again",
   },
   dashboardMasteryLoop: {
     badge: "Mastery loop",
@@ -3195,9 +3196,10 @@ const zh = {
     badge: "每周大师习惯",
     title: "大师每周精读 1 篇报告",
     message: "在下方挑一篇细读验证方法，再回工作台用类似模板练手 — 这就是孵化器闭环。",
-    hint: "关注流有更新时，每周提醒一次，帮你保持学习节奏。",
+    hint: "本周内每次进关注动态都会看到，点「知道了」后下周再提醒。",
     pickReport: "挑一篇报告 ↓",
     dismiss: "知道了",
+    dismissForever: "不再提醒",
   },
   dashboardMasteryLoop: {
     badge: "大师循环",

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getFollowingFeed } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
-import { FOLLOWING_FEED_HIGHLIGHT_KEY } from "../lib/onboardingFocus";
+import { FOLLOWING_FEED_HIGHLIGHT_KEY, REPLICATION_SHARE_FOLLOWING_KEY } from "../lib/onboardingFocus";
 import { useLocale } from "../store/locale";
 import { EmptyState, ErrorBox, PageTitle, Spinner } from "../components/ui";
 import ReportCard from "../components/ReportCard";
@@ -16,6 +16,9 @@ export default function Following() {
   const t = dict.following;
   const [highlightFirst, setHighlightFirst] = useState(
     () => typeof window !== "undefined" && sessionStorage.getItem(FOLLOWING_FEED_HIGHLIGHT_KEY) === "1",
+  );
+  const [replicationReturnActive] = useState(
+    () => typeof window !== "undefined" && sessionStorage.getItem(REPLICATION_SHARE_FOLLOWING_KEY) === "1",
   );
   const firstCardRef = useRef<HTMLDivElement>(null);
   const q = useQuery({ queryKey: ["following-feed"], queryFn: getFollowingFeed });
@@ -37,6 +40,7 @@ export default function Following() {
       <FollowingFeedRhythmCoachPanel
         hasReports={Boolean(q.data && q.data.length > 0)}
         highlightActive={highlightFirst}
+        replicationReturnActive={replicationReturnActive}
       />
       {highlightFirst && q.data && q.data.length > 0 && (
         <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50/60 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200">

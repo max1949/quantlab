@@ -1,29 +1,28 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getResearchJourney } from "../api/endpoints";
 import { FIRST_FOLLOWING_FEED_WELCOME_KEY } from "../lib/onboardingFocus";
 import { NETWORK_FOLLOW_TARGET } from "../lib/journeyFollowing";
+import { currentIsoWeek } from "../lib/isoWeek";
 import { useLocale } from "../store/locale";
 
 const DISMISS_KEY = "quantlab-following-rhythm-coach-dismissed";
 const WEEK_KEY = "quantlab-following-rhythm-week";
 
-function currentIsoWeek(): string {
-  const d = new Date();
-  const onejan = new Date(d.getFullYear(), 0, 1);
-  const week = Math.ceil(((d.getTime() - onejan.getTime()) / 86400000 + onejan.getDay() + 1) / 7);
-  return `${d.getFullYear()}-W${week}`;
-}
-
 type Props = {
   hasReports: boolean;
   highlightActive: boolean;
+  replicationReturnActive?: boolean;
 };
 
-export default function FollowingFeedRhythmCoachPanel({ hasReports, highlightActive }: Props) {
+export default function FollowingFeedRhythmCoachPanel({
+  hasReports,
+  highlightActive,
+  replicationReturnActive = false,
+}: Props) {
   const d = useLocale((s) => s.dict.followingFeedRhythm);
-  const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISS_KEY) === "1");
-  const [weekShown, setWeekShown] = useState(
+  const [dismissedForever, setDismissedForever] = useState(() => localStorage.getItem(DISMISS_KEY) === "1");
+  const [weekDismissed, setWeekDismissed] = useState(
     () => typeof window !== "undefined" && localStorage.getItem(WEEK_KEY) === currentIsoWeek(),
   );
 
@@ -33,25 +32,25 @@ export default function FollowingFeedRhythmCoachPanel({ hasReports, highlightAct
     typeof window !== "undefined" && sessionStorage.getItem(FIRST_FOLLOWING_FEED_WELCOME_KEY) === "1";
 
   const matches =
-    !dismissed &&
+    !dismissedForever &&
+    !weekDismissed &&
     !highlightActive &&
     !freshMilestone &&
-    !weekShown &&
+    !replicationReturnActive &&
     following >= NETWORK_FOLLOW_TARGET &&
     hasReports &&
     !journey.isLoading;
 
-  useEffect(() => {
-    if (!matches) return;
-    localStorage.setItem(WEEK_KEY, currentIsoWeek());
-    setWeekShown(true);
-  }, [matches]);
-
   if (!matches) return null;
 
-  const dismiss = () => {
+  const dismissWeek = () => {
+    localStorage.setItem(WEEK_KEY, currentIsoWeek());
+    setWeekDismissed(true);
+  };
+
+  const dismissForever = () => {
     localStorage.setItem(DISMISS_KEY, "1");
-    setDismissed(true);
+    setDismissedForever(true);
   };
 
   return (
@@ -66,8 +65,11 @@ export default function FollowingFeedRhythmCoachPanel({ hasReports, highlightAct
         <a href="#following-feed-grid" className="btn-primary text-xs">
           {d.pickReport}
         </a>
-        <button type="button" className="btn text-xs" onClick={dismiss}>
+        <button type="button" className="btn text-xs" onClick={dismissWeek}>
           {d.dismiss}
+        </button>
+        <button type="button" className="btn-ghost text-xs" onClick={dismissForever}>
+          {d.dismissForever}
         </button>
       </div>
     </div>

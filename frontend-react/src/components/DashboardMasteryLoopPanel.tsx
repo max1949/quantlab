@@ -3,16 +3,10 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getResearchJourney } from "../api/endpoints";
 import { NETWORK_FOLLOW_TARGET } from "../lib/journeyFollowing";
+import { currentIsoWeek } from "../lib/isoWeek";
 import { useLocale } from "../store/locale";
 
 const WEEK_KEY = "quantlab-dashboard-mastery-loop-week";
-
-function currentIsoWeek(): string {
-  const d = new Date();
-  const onejan = new Date(d.getFullYear(), 0, 1);
-  const week = Math.ceil(((d.getTime() - onejan.getTime()) / 86400000 + onejan.getDay() + 1) / 7);
-  return `${d.getFullYear()}-W${week}`;
-}
 
 export default function DashboardMasteryLoopPanel() {
   const d = useLocale((s) => s.dict.dashboardMasteryLoop);

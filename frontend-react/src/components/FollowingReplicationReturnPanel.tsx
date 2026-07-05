@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { burstConfetti } from "../lib/confetti";
 import { REPLICATION_SHARE_FOLLOWING_KEY } from "../lib/onboardingFocus";
@@ -6,13 +6,14 @@ import { useLocale } from "../store/locale";
 
 export default function FollowingReplicationReturnPanel() {
   const d = useLocale((s) => s.dict.followingReplicationReturn);
-  const show =
-    typeof window !== "undefined" && sessionStorage.getItem(REPLICATION_SHARE_FOLLOWING_KEY) === "1";
+  const [show] = useState(
+    () => typeof window !== "undefined" && sessionStorage.getItem(REPLICATION_SHARE_FOLLOWING_KEY) === "1",
+  );
 
   useEffect(() => {
     if (!show) return;
-    sessionStorage.removeItem(REPLICATION_SHARE_FOLLOWING_KEY);
     burstConfetti(2000);
+    return () => sessionStorage.removeItem(REPLICATION_SHARE_FOLLOWING_KEY);
   }, [show]);
 
   if (!show) return null;

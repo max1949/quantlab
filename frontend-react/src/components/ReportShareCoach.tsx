@@ -26,7 +26,6 @@ export default function ReportShareCoach({ reportId }: Props) {
   const refreshMe = useAuth((s) => s.refreshMe);
   const qc = useQueryClient();
   const [shareUrl, setShareUrl] = useState<string | null>(null);
-  const [fromReplicationShare, setFromReplicationShare] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
   const share = useMutation({
@@ -34,6 +33,31 @@ export default function ReportShareCoach({ reportId }: Props) {
     onSuccess: async (res, replicationLoop) => {
       void trackEvent("share_created", { report: reportId });
       const url = `${window.location.origin}/share/${res.token}`;
+      void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
+      void qc.invalidateQueries({ queryKey: ["research-journey"] });
+      void qc.invalidateQueries({ queryKey: ["public-feed"] });
+      void trackEvent("share_success_feed_prompt", { report_id: reportId });
+
+      if (replicationLoop) {
+        clearReplicationReportFlow(reportId);
+        sessionStorage.setItem(REPLICATION_SHARE_FOLLOWING_KEY, "1");
+        void trackEvent("replication_share_created", { report_id: reportId });
+        const replicationRewards = (res.academy_rewards ?? []).filter((r) => r.code === "master-replication");
+        const replMsg = academyRewardMessage(replicationRewards, d.academyXpEarned, atl);
+        if (replMsg) notify(replMsg, "success");
+        const first = celebrateFirstShare(
+          res,
+          { celebrate: t.firstShareCelebrate, academyXpEarned: d.academyXpEarned, academyTaskLabels: atl },
+          notify,
+        );
+        if (!first) notify(t.shareCreated, "success");
+        if (!first) burstConfetti(2400);
+        notify(rs.autoFollowingToast, "success");
+        await refreshMe();
+        window.setTimeout(() => navigate("/me/following"), 600);
+        return;
+      }
+
       setShareUrl(url);
       const first = celebrateFirstShare(
         res,
@@ -41,23 +65,6 @@ export default function ReportShareCoach({ reportId }: Props) {
         notify,
       );
       if (!first) notify(t.shareCreated, "success");
-      void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
-      void qc.invalidateQueries({ queryKey: ["research-journey"] });
-      void qc.invalidateQueries({ queryKey: ["public-feed"] });
-      void trackEvent("share_success_feed_prompt", { report_id: reportId });
-      if (replicationLoop) {
-        clearReplicationReportFlow(reportId);
-        sessionStorage.setItem(REPLICATION_SHARE_FOLLOWING_KEY, "1");
-        setFromReplicationShare(true);
-        void trackEvent("replication_share_created", { report_id: reportId });
-        const replicationRewards = (res.academy_rewards ?? []).filter((r) => r.code === "master-replication");
-        const replMsg = academyRewardMessage(replicationRewards, d.academyXpEarned, atl);
-        if (replMsg) notify(replMsg, "success");
-        if (!first) burstConfetti(2400);
-        notify(rs.autoFollowingToast, "success");
-        window.setTimeout(() => navigate("/me/following"), 600);
-      }
-      await refreshMe();
       requestAnimationFrame(() => {
         rootRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
       });
@@ -88,27 +95,17 @@ export default function ReportShareCoach({ reportId }: Props) {
         ref={rootRef}
         className="mt-6 card border border-emerald-200 bg-gradient-to-br from-emerald-50/90 to-brand-50/40 dark:border-emerald-900 dark:from-emerald-950/40 dark:to-brand-950/20"
       >
-        <p className="font-semibold text-emerald-800 dark:text-emerald-200">
-          {fromReplicationShare ? rs.successTitle : t.shareSuccessTitle}
-        </p>
-        <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-300">
-          {fromReplicationShare ? rs.successDesc : t.shareSuccessDesc}
-        </p>
+        <p className="font-semibold text-emerald-800 dark:text-emerald-200">{t.shareSuccessTitle}</p>
+        <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-300">{t.shareSuccessDesc}</p>
 
         <div className="mt-4 flex flex-wrap gap-2">
-          {fromReplicationShare ? (
-            <Link to="/me/following" className="btn-primary">
-              {rs.openFollowing}
-            </Link>
-          ) : (
-            <Link
-              to={feedHref}
-              className="btn-primary"
-              onClick={() => void trackEvent("share_goto_feed", { report_id: reportId })}
-            >
-              {t.shareViewOnFeed}
-            </Link>
-          )}
+          <Link
+            to={feedHref}
+            className="btn-primary"
+            onClick={() => void trackEvent("share_goto_feed", { report_id: reportId })}
+          >
+            {t.shareViewOnFeed}
+          </Link>
           <button type="button" className="btn" onClick={copyLink}>
             {t.copyLink}
           </button>
