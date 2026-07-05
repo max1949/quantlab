@@ -1,10 +1,10 @@
-"""注册后长期未开始研究 — 登录时一次性回流邮件。"""
+"""注册后长期未开始研究 — 登录时或定时任务一次性回流邮件。"""
 
 from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -38,6 +38,48 @@ def _already_sent(db: Session, user_id: uuid.UUID) -> bool:
     return row is not None
 
 
+def revisit_idle_days(user: User) -> int | None:
+    if not user.onboarding_done:
+        return None
+    created = user.created_at
+    if created.tzinfo is None:
+        created = created.replace(tzinfo=timezone.utc)
+    days = (datetime.now(timezone.utc) - created).days
+    if days < 3:
+        return None
+    return days
+
+
+def is_revisit_email_eligible(
+    db: Session,
+    user: User,
+    *,
+    flags: dict[str, bool] | None = None,
+) -> int | None:
+    """Return idle days when user should receive revisit email, else None."""
+    days = revisit_idle_days(user)
+    if days is None:
+        return None
+    if _already_sent(db, user.id):
+        return None
+    to_email = (user.email or "").strip().lower()
+    if not to_email:
+        return None
+
+    if flags is None:
+        from backend.app.services import onboarding_service as obs
+
+        flags = obs._journey_flags(db, user)
+    if flags.get("backtest") or flags.get("report"):
+        return None
+
+    from backend.app.services import org_service
+
+    if org_service.list_orgs_for_user(db, user.id):
+        return None
+    return days
+
+
 def build_revisit_email(user: User, *, days: int, locale: Locale = "zh") -> tuple[str, str]:
     labels = i18n.REVISIT_EMAIL.get(locale) or i18n.REVISIT_EMAIL["en"]
     subject = labels["subject"]
@@ -50,40 +92,8 @@ def build_revisit_email(user: User, *, days: int, locale: Locale = "zh") -> tupl
     return subject, body
 
 
-def maybe_send_revisit_email(
-    db: Session,
-    user: User,
-    *,
-    locale: Locale = "zh",
-) -> bool:
-    """登录时发送一次回流邮件；条件与 research_revisit_coaching 对齐。"""
-    if not bes.smtp_configured():
-        return False
-    if not user.onboarding_done:
-        return False
-    if _already_sent(db, user.id):
-        return False
-
+def _send_revisit_email(db: Session, user: User, *, days: int, locale: Locale) -> bool:
     to_email = (user.email or "").strip().lower()
-    if not to_email:
-        return False
-
-    from backend.app.services import onboarding_service as obs
-    from backend.app.services import org_service
-
-    flags = obs._journey_flags(db, user)
-    if flags.get("backtest") or flags.get("report"):
-        return False
-    if org_service.list_orgs_for_user(db, user.id):
-        return False
-
-    created = user.created_at
-    if created.tzinfo is None:
-        created = created.replace(tzinfo=timezone.utc)
-    days = (datetime.now(timezone.utc) - created).days
-    if days < 3:
-        return False
-
     subject, body = build_revisit_email(user, days=days, locale=locale)
     try:
         bes.send_plain_email(to_email, subject, body)
@@ -93,3 +103,58 @@ def maybe_send_revisit_email(
     except Exception as exc:
         logger.warning("revisit email failed user=%s: %s", user.id, exc)
         return False
+
+
+def maybe_send_revisit_email(
+    db: Session,
+    user: User,
+    *,
+    locale: Locale = "zh",
+) -> bool:
+    """登录时发送一次回流邮件；条件与 research_revisit_coaching 对齐。"""
+    if not bes.smtp_configured():
+        return False
+    days = is_revisit_email_eligible(db, user)
+    if days is None:
+        return False
+    return _send_revisit_email(db, user, days=days, locale=locale)
+
+
+def run_scheduled_revisit_batch(
+    db: Session,
+    *,
+    limit: int = 100,
+    locale: Locale = "zh",
+) -> dict[str, int | str]:
+    """Cron: 给注册 ≥3 天仍未开始研究、且尚未收到回流邮件的用户发信。"""
+    if not bes.smtp_configured():
+        return {"sent": 0, "failed": 0, "scanned": 0, "reason": "smtp_disabled"}
+
+    cutoff = datetime.now(timezone.utc) - timedelta(days=3)
+    candidates = db.execute(
+        select(User)
+        .where(
+            User.onboarding_done.is_(True),
+            User.created_at <= cutoff,
+            User.email.isnot(None),
+            User.email != "",
+        )
+        .order_by(User.created_at.asc())
+        .limit(max(limit * 5, limit))
+    ).scalars().all()
+
+    sent = failed = 0
+    scanned = 0
+    for user in candidates:
+        if sent >= limit:
+            break
+        scanned += 1
+        days = is_revisit_email_eligible(db, user)
+        if days is None:
+            continue
+        if _send_revisit_email(db, user, days=days, locale=locale):
+            sent += 1
+        else:
+            failed += 1
+
+    return {"sent": sent, "failed": failed, "scanned": scanned}

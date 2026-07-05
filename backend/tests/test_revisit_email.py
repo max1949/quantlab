@@ -69,3 +69,38 @@ def test_maybe_send_revisit_when_eligible(db_session, monkeypatch):
         select(UserEvent).where(UserEvent.user_id == user.id, UserEvent.event == "revisit_email")
     ).scalar_one()
     assert ev.props.get("days") == 5
+
+
+def test_run_scheduled_revisit_batch(db_session, monkeypatch):
+    from backend.app.core.config import get_settings
+
+    settings = get_settings()
+    monkeypatch.setattr(settings, "smtp_host", "smtp.example.com")
+    monkeypatch.setattr(settings, "smtp_from", "hello@quantlab.ai")
+    monkeypatch.setattr(settings, "smtp_port", 587)
+    monkeypatch.setattr(settings, "smtp_user", "")
+    monkeypatch.setattr(settings, "smtp_password", "")
+
+    user = User(
+        email="cron@x.com",
+        username="cronuser",
+        hashed_password="x",
+        onboarding_done=True,
+        created_at=datetime.now(timezone.utc) - timedelta(days=4),
+    )
+    db_session.add(user)
+    db_session.commit()
+
+    mock_smtp = MagicMock()
+    mock_server = MagicMock()
+    mock_smtp.return_value.__enter__ = MagicMock(return_value=mock_server)
+    mock_smtp.return_value.__exit__ = MagicMock(return_value=False)
+
+    with patch("backend.app.services.billing_email_service.smtplib.SMTP", mock_smtp):
+        result = res.run_scheduled_revisit_batch(db_session, limit=10)
+        assert result["sent"] == 1
+        assert result["failed"] == 0
+        result2 = res.run_scheduled_revisit_batch(db_session, limit=10)
+        assert result2["sent"] == 0
+
+    mock_server.sendmail.assert_called_once()

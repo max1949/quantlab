@@ -74,6 +74,12 @@ if ! crontab -l 2>/dev/null | grep -qF materialize-derived-timeframes; then
   echo "==> installed derived timeframe cron"
 fi
 
+REVISIT_CRON="30 9 * * * bash ${INSTALL_DIR}/scripts/run-revisit-emails.sh >> /var/log/quantlab-revisit.log 2>&1"
+if ! crontab -l 2>/dev/null | grep -qF run-revisit-emails; then
+  (crontab -l 2>/dev/null; echo "$REVISIT_CRON") | crontab -
+  echo "==> installed revisit email cron"
+fi
+
 echo "==> public feed (first 120 chars)"
 curl -sf "http://127.0.0.1:${QUANTLAB_PORT:-8010}/api/v1/public/feed" | head -c 120
 echo ""
