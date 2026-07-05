@@ -669,6 +669,7 @@ const en = {
   onboarding: {
     title: "Tell us about you",
     subtitle: "Pick the profile that fits — we'll tailor templates and guide you to the Paper Masters board.",
+    handbookHint: "Save your mastery map now — print or download the beginner handbook before you start.",
     confirm: "Confirm & start →",
     saving: "Saving…",
     saved: "Profile saved — your research path is ready",
@@ -2030,6 +2031,7 @@ const zh = {
   onboarding: {
     title: "先了解一下你",
     subtitle: "选择最符合你的身份 — 我们会定制模板，并指引你走上 Paper 大师之路。",
+    handbookHint: "开始前先保存大师路径图 — 打印或下载新手一页纸，随时对照进度。",
     confirm: "确认, 开始研究 →",
     saving: "保存中…",
     saved: "身份已确认, 给你定制好了研究路线",
