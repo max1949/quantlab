@@ -8,6 +8,7 @@ import { useFlow } from "../store/flow";
 import { useLocale } from "../store/locale";
 import { FIRST_PROJECT_WELCOME_KEY, FOLLOWING_PROJECT_REPLICATION_KEY, FOLLOWING_TEMPLATE_HANDOFF_KEY } from "../lib/onboardingFocus";
 import { REGIME_TEMPLATE_SYMBOLS } from "../lib/templateHints";
+import { attachReplicationBenchmarkToProject } from "../lib/replicationBenchmark";
 import { ErrorBox, PageTitle, Spinner } from "../components/ui";
 
 const REGIME_SYMBOLS = ["RB", "AU", "IF"] as const;
@@ -100,6 +101,7 @@ export default function Templates() {
       sessionStorage.setItem(FIRST_PROJECT_WELCOME_KEY, res.project_id);
       if (fromReplication) {
         sessionStorage.setItem(FOLLOWING_PROJECT_REPLICATION_KEY, res.project_id);
+        attachReplicationBenchmarkToProject(res.project_id);
       }
       sessionStorage.removeItem(FOLLOWING_TEMPLATE_HANDOFF_KEY);
       setMasterHandoffSymbol(null);

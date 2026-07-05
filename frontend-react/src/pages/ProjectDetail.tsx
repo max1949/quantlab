@@ -36,6 +36,7 @@ import ProjectQualityCoachStack from "../components/ProjectQualityCoachStack";
 import PublishFeedPreview from "../components/PublishFeedPreview";
 import DataQualityBanner from "../components/DataQualityBanner";
 import VolRegimeBanner from "../components/VolRegimeBanner";
+import MasterReplicationBenchmarkPanel from "../components/MasterReplicationBenchmarkPanel";
 import ProjectIncubationCoachStack from "../components/ProjectIncubationCoachStack";
 import FactorCatalogPanel from "../components/FactorCatalogPanel";
 import { FIRST_BACKTEST_WELCOME_KEY, FIRST_REPORT_WELCOME_KEY, FIRST_VALIDATION_WELCOME_KEY } from "../lib/onboardingFocus";
@@ -363,6 +364,23 @@ export default function ProjectDetail() {
         onRunBacktest={() => runBacktest.mutate()}
         onRunValidation={() => runValidation.mutate()}
         onGenerateReport={() => genReport.mutate()}
+      />
+
+      <MasterReplicationBenchmarkPanel
+        projectId={id}
+        backtestDone={done.backtest}
+        validationDone={done.validation}
+        yourBacktestSharpe={
+          typeof quality.data?.scorecard?.backtest_sharpe === "number"
+            ? quality.data.scorecard.backtest_sharpe
+            : null
+        }
+        yourRobustness={
+          typeof quality.data?.scorecard?.robustness_score === "number"
+            ? quality.data.scorecard.robustness_score
+            : null
+        }
+        onRunValidation={() => runValidation.mutate()}
       />
 
       {projectFactors.length > 1 && (

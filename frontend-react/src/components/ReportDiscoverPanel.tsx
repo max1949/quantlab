@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { ReportDetail } from "../api/types";
 import { getResearcher, trackEvent } from "../api/endpoints";
 import { armFollowingTemplateHandoff, buildTemplatesHandoffPath, primaryTemplateForSymbol } from "../lib/templateHints";
+import { replicationBenchmarkFromReport, savePendingReplicationBenchmark } from "../lib/replicationBenchmark";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import ResearcherFollowButton from "./ResearcherFollowButton";
@@ -103,6 +104,7 @@ export default function ReportDiscoverPanel({ report }: Props) {
                   template: templateCode,
                 });
                 armFollowingTemplateHandoff(report.symbol);
+                savePendingReplicationBenchmark(replicationBenchmarkFromReport(report));
               }}
             >
               {t.startTemplate}

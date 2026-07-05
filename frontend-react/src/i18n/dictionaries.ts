@@ -1497,6 +1497,25 @@ const en = {
     running: "Running…",
     dismiss: "Got it",
   },
+  masterReplicationBenchmark: {
+    badge: "Mastery benchmark",
+    title: "How your backtest compares to the master report",
+    noMasterMetric:
+      "Your backtest is in — run scientific validation next to see if you match their OOS bar.",
+    beat: (master: string, yours: string) =>
+      `Strong start — your backtest Sharpe ${yours} is above their published OOS ${master}. Validate to confirm it holds.`,
+    close: (master: string, yours: string) =>
+      `On track — backtest Sharpe ${yours} vs their OOS ${master}. Scientific validation is the real mastery check.`,
+    gap: (master: string, yours: string) =>
+      `Backtest Sharpe ${yours} vs their OOS ${master} — gaps are normal before validation. Masters also iterated; run validation next.`,
+    masterOos: (v: string) => `Master OOS ${v}`,
+    yourBacktest: (v: string) => `Your backtest ${v}`,
+    robustnessCompare: (master: string, yours: string) => `Robustness ${yours} vs ${master}`,
+    nextStep: "Step 2 of replication: run validation, then write your report in your own words.",
+    masterNamed: (name: string) => `Re-read @${name}'s report`,
+    masterGeneric: "Re-read master report",
+    runValidation: "Run validation →",
+  },
   academyTaskLabels: {
     welcome: {
       title: "Welcome to QuantLab",
@@ -3115,6 +3134,24 @@ const zh = {
     runBacktest: "运行回测 →",
     running: "运行中…",
     dismiss: "知道了",
+  },
+  masterReplicationBenchmark: {
+    badge: "大师对照",
+    title: "你的回测 vs 大师报告",
+    noMasterMetric: "回测已完成 — 下一步跑科学验证，看能否达到他们的样本外水准。",
+    beat: (master: string, yours: string) =>
+      `开局不错 — 回测夏普 ${yours} 已高于他们公布的样本外 ${master}，请用验证确认能否站稳。`,
+    close: (master: string, yours: string) =>
+      `节奏正常 — 回测夏普 ${yours} vs 大师样本外 ${master}，科学验证才是大师级试金石。`,
+    gap: (master: string, yours: string) =>
+      `回测夏普 ${yours} vs 大师样本外 ${master} — 验证前存在差距很正常，大师也迭代过；请先跑验证。`,
+    masterOos: (v: string) => `大师样本外 ${v}`,
+    yourBacktest: (v: string) => `你的回测 ${v}`,
+    robustnessCompare: (master: string, yours: string) => `稳健 ${yours} vs ${master}`,
+    nextStep: "复现第 2 步：跑验证，再用自己的话写报告。",
+    masterNamed: (name: string) => `重读 @${name} 的报告`,
+    masterGeneric: "重读大师报告",
+    runValidation: "运行验证 →",
   },
   academyTaskLabels: {
     welcome: {

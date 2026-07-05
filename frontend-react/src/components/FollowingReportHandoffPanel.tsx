@@ -8,6 +8,7 @@ import {
   buildTemplatesHandoffPath,
   primaryTemplateForSymbol,
 } from "../lib/templateHints";
+import { replicationBenchmarkFromReport, savePendingReplicationBenchmark } from "../lib/replicationBenchmark";
 import { FOLLOWING_REPORT_HANDOFF_KEY } from "../lib/onboardingFocus";
 import { useLocale } from "../store/locale";
 
@@ -44,6 +45,7 @@ export default function FollowingReportHandoffPanel({ report }: Props) {
       template_code: templateCode ?? "",
     });
     armFollowingTemplateHandoff(report.symbol);
+    savePendingReplicationBenchmark(replicationBenchmarkFromReport(report));
   };
 
   return (
