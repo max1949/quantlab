@@ -1,12 +1,11 @@
 import { Link } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { ReportDetail } from "../api/types";
-import { follow, getResearcher, trackEvent, unfollow } from "../api/endpoints";
-import { apiErrorMessage } from "../api/client";
+import { getResearcher, trackEvent } from "../api/endpoints";
 import { primaryTemplateForSymbol } from "../lib/templateHints";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
-import { useUi } from "../store/ui";
+import ResearcherFollowButton from "./ResearcherFollowButton";
 import { Spinner } from "./ui";
 
 type Props = {
@@ -18,8 +17,6 @@ export default function ReportDiscoverPanel({ report }: Props) {
   const { dict } = useLocale();
   const t = dict.reportDiscover;
   const p = dict.profile;
-  const notify = useUi((s) => s.notify);
-  const qc = useQueryClient();
 
   const templateCode = primaryTemplateForSymbol(report.symbol);
   const templateTitle = templateCode ? t.templateNames[templateCode as keyof typeof t.templateNames] : null;
@@ -28,20 +25,6 @@ export default function ReportDiscoverPanel({ report }: Props) {
   const researcher = useQuery({
     queryKey: ["researcher", report.owner_id],
     queryFn: () => getResearcher(report.owner_id),
-  });
-
-  const toggleFollow = useMutation({
-    mutationFn: () => {
-      const prof = researcher.data!;
-      return prof.is_following ? unfollow(prof.user_id) : follow(prof.user_id);
-    },
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ["researcher", report.owner_id] });
-      const prof = researcher.data!;
-      notify(prof.is_following ? p.unfollowed : p.followed, "success");
-      void trackEvent("report_discover_follow", { report_id: report.id, owner_id: report.owner_id });
-    },
-    onError: (e) => notify(apiErrorMessage(e, p.followFail), "error"),
   });
 
   if (researcher.isLoading) return <Spinner />;
@@ -76,14 +59,13 @@ export default function ReportDiscoverPanel({ report }: Props) {
               </Link>
               {!isSelf &&
                 (user ? (
-                  <button
-                    type="button"
-                    className={prof.is_following ? "btn-ghost text-xs" : "btn-primary text-xs"}
-                    disabled={toggleFollow.isPending}
-                    onClick={() => toggleFollow.mutate()}
-                  >
-                    {prof.is_following ? p.followingBtn : p.follow}
-                  </button>
+                  <ResearcherFollowButton
+                    ownerId={report.owner_id}
+                    isFollowing={prof.is_following}
+                    reportId={report.id}
+                    followEvent="report_discover_follow"
+                    unfollowEvent="report_discover_unfollow"
+                  />
                 ) : (
                   <Link
                     to="/login"

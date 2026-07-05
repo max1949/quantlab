@@ -5,6 +5,7 @@ import { apiErrorMessage } from "../api/client";
 import { useLocale } from "../store/locale";
 import { EmptyState, ErrorBox, PageTitle, Spinner } from "../components/ui";
 import ReportCard from "../components/ReportCard";
+import FollowingFeedWelcomePanel from "../components/FollowingFeedWelcomePanel";
 
 export default function Following() {
   const { dict } = useLocale();
@@ -14,6 +15,7 @@ export default function Following() {
   return (
     <div>
       <PageTitle title={t.title} subtitle={t.subtitle} />
+      <FollowingFeedWelcomePanel />
       {q.isLoading ? (
         <Spinner />
       ) : q.isError ? (

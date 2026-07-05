@@ -3,7 +3,10 @@ import { follow, trackEvent, unfollow } from "../api/endpoints";
 import type { ResearchJourney } from "../api/types";
 import { apiErrorMessage } from "../api/client";
 import { burstConfetti } from "../lib/confetti";
-import { FIRST_FEED_FOLLOW_WELCOME_KEY } from "../lib/onboardingFocus";
+import {
+  FIRST_FEED_FOLLOW_WELCOME_KEY,
+  FIRST_FOLLOWING_FEED_WELCOME_KEY,
+} from "../lib/onboardingFocus";
 import { journeyFollowingCount, NETWORK_FOLLOW_TARGET } from "../lib/journeyFollowing";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
@@ -16,6 +19,8 @@ type Props = {
   isFollowing?: boolean | null;
   reportId?: string;
   compact?: boolean;
+  followEvent?: string;
+  unfollowEvent?: string;
 };
 
 export default function ResearcherFollowButton({
@@ -23,6 +28,8 @@ export default function ResearcherFollowButton({
   isFollowing,
   reportId,
   compact = false,
+  followEvent = "feed_card_follow",
+  unfollowEvent = "feed_card_unfollow",
 }: Props) {
   const user = useAuth((s) => s.user);
   const p = useLocale((s) => s.dict.profile);
@@ -49,13 +56,14 @@ export default function ResearcherFollowButton({
           burstConfetti(1800);
           sessionStorage.removeItem(FIRST_FEED_FOLLOW_WELCOME_KEY);
         }
-        void trackEvent("feed_card_follow", { owner_id: ownerId, report_id: reportId });
+        void trackEvent(followEvent, { owner_id: ownerId, report_id: reportId });
 
         const journey = qc.getQueryData<ResearchJourney>(["research-journey"]);
         const followingCount = journeyFollowingCount(journey);
         if (followingCount >= NETWORK_FOLLOW_TARGET) {
           burstConfetti(3600);
           localStorage.setItem(DISMISS_KEY, "1");
+          sessionStorage.setItem(FIRST_FOLLOWING_FEED_WELCOME_KEY, "1");
           notify(fc.networkReady, "success");
         } else if (followingCount > 0) {
           notify(fc.progressToast(followingCount, NETWORK_FOLLOW_TARGET), "success");
@@ -64,7 +72,7 @@ export default function ResearcherFollowButton({
         }
       } else {
         notify(p.unfollowed, "success");
-        void trackEvent("feed_card_unfollow", { owner_id: ownerId, report_id: reportId });
+        void trackEvent(unfollowEvent, { owner_id: ownerId, report_id: reportId });
       }
     },
     onError: (e) => notify(apiErrorMessage(e, p.followFail), "error"),

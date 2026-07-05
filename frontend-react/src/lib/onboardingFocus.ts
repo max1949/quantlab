@@ -25,3 +25,5 @@ export const FIRST_ORG_MEMBER_WELCOME_KEY = "quantlab-first-org-member-welcome";
 export const FIRST_ORG_PAGE_WELCOME_KEY = "quantlab-first-org-page-welcome";
 /** First feed visit after graduation — follow researchers coach. */
 export const FIRST_FEED_FOLLOW_WELCOME_KEY = "quantlab-first-feed-follow-welcome";
+/** First following-feed visit after 3-follow network milestone. */
+export const FIRST_FOLLOWING_FEED_WELCOME_KEY = "quantlab-first-following-feed-welcome";

@@ -71,6 +71,16 @@ def test_maybe_send_revisit_when_eligible(db_session, monkeypatch):
     assert ev.props.get("days") == 5
 
 
+def test_preferred_locale_from_welcome_email(db_session):
+    from backend.app.services import growth_service
+
+    user = User(email="loc@x.com", username="locuser", hashed_password="x", onboarding_done=True)
+    db_session.add(user)
+    db_session.commit()
+    growth_service.log_event(db_session, "welcome_email", user.id, {"locale": "en"})
+    assert res.preferred_locale(db_session, user.id) == "en"
+
+
 def test_run_scheduled_revisit_batch(db_session, monkeypatch):
     from backend.app.core.config import get_settings
 

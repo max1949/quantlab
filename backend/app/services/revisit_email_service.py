@@ -50,6 +50,22 @@ def revisit_idle_days(user: User) -> int | None:
     return days
 
 
+def preferred_locale(db: Session, user_id: uuid.UUID) -> Locale:
+    """从欢迎邮件等历史事件推断用户语言偏好。"""
+    for event in ("welcome_email", "revisit_email", "beginner_handbook_pdf"):
+        props = db.execute(
+            select(UserEvent.props)
+            .where(UserEvent.user_id == user_id, UserEvent.event == event)
+            .order_by(UserEvent.created_at.desc())
+            .limit(1)
+        ).scalar_one_or_none()
+        if isinstance(props, dict):
+            loc = props.get("locale")
+            if loc in ("en", "zh"):
+                return loc
+    return "zh"
+
+
 def is_revisit_email_eligible(
     db: Session,
     user: User,
@@ -124,7 +140,6 @@ def run_scheduled_revisit_batch(
     db: Session,
     *,
     limit: int = 100,
-    locale: Locale = "zh",
 ) -> dict[str, int | str]:
     """Cron: 给注册 ≥3 天仍未开始研究、且尚未收到回流邮件的用户发信。"""
     if not bes.smtp_configured():
@@ -152,7 +167,8 @@ def run_scheduled_revisit_batch(
         days = is_revisit_email_eligible(db, user)
         if days is None:
             continue
-        if _send_revisit_email(db, user, days=days, locale=locale):
+        user_locale = preferred_locale(db, user.id)
+        if _send_revisit_email(db, user, days=days, locale=user_locale):
             sent += 1
         else:
             failed += 1

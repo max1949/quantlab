@@ -1258,7 +1258,7 @@ const en = {
     progress: (n: number, target: number) => `${n} / ${target} researchers followed`,
     progressToast: (n: number, target: number) =>
       `Nice — ${n} of ${target} followed. Keep building your learning radar.`,
-    networkReady: "Network ready — your following feed is live. Peers can discover you too.",
+    networkReady: "Network ready — open your following feed to start learning from masters.",
   },
   l2Analysis: {
     title: "L2 Advanced analysis",
@@ -1435,6 +1435,13 @@ const en = {
     emptyTitle: "Nothing yet",
     emptyHint: "Follow researchers from the feed",
     goFeed: "Browse feed",
+  },
+  followingFeedWelcome: {
+    badge: "Network live",
+    title: "Your following feed is ready",
+    message:
+      "You followed 3 researchers — this page is now your learning radar for mastery-style research.",
+    hint: "Pick one report below, read how they validated, then try a similar template on your desk.",
   },
   share: {
     invalid: "Share not found or expired",
@@ -2757,7 +2764,7 @@ const zh = {
     progress: (n: number, target: number) => `已关注 ${n} / ${target} 位研究员`,
     progressToast: (n: number, target: number) =>
       `很好 — 已关注 ${n}/${target} 位，继续搭建你的学习雷达。`,
-    networkReady: "人脉就绪 — 关注流已激活，同行也更容易发现你。",
+    networkReady: "人脉就绪 — 打开「关注动态」向大师学习吧。",
   },
   l2Analysis: {
     title: "L2 进阶分析",
@@ -2931,6 +2938,12 @@ const zh = {
     emptyTitle: "还没有关注动态",
     emptyHint: "去研究广场关注一些研究员吧",
     goFeed: "去研究广场",
+  },
+  followingFeedWelcome: {
+    badge: "人脉已激活",
+    title: "你的关注流已就绪",
+    message: "你已关注 3 位研究员 — 这个页面就是你的大师学习雷达。",
+    hint: "从下方挑一篇报告细读：看他们如何验证，再回工作台用类似模板练手。",
   },
   share: {
     invalid: "分享不存在或已失效",
