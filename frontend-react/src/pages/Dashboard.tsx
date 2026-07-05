@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../store/auth";
@@ -36,6 +37,7 @@ export default function Dashboard() {
   const mentor = useQuery({ queryKey: ["mentor"], queryFn: getMentor });
   const projects = useQuery({ queryKey: ["projects"], queryFn: listProjects });
   const reports = useQuery({ queryKey: ["my-reports"], queryFn: listMyReports });
+  const [firstMentorVisible, setFirstMentorVisible] = useState(false);
 
   return (
     <div>
@@ -60,7 +62,7 @@ export default function Dashboard() {
       </div>
 
       <div className="mt-6">
-        <FirstDashboardMentorPanel />
+        <FirstDashboardMentorPanel onVisibilityChange={setFirstMentorVisible} />
       </div>
 
       <div className="mt-6">
@@ -87,6 +89,7 @@ export default function Dashboard() {
         <MasteryGraduationPanel />
       </div>
 
+      {!firstMentorVisible && (
       <div className="mt-6 rounded-2xl bg-gradient-to-r from-brand-600 to-brand-500 p-6 text-white shadow-md">
         {nextStep.isLoading ? (
           <p>{d.planning}</p>
@@ -126,6 +129,7 @@ export default function Dashboard() {
           </div>
         ) : null}
       </div>
+      )}
 
       <div className="mt-6">
         <DashboardCoachStack />
@@ -139,7 +143,7 @@ export default function Dashboard() {
         <ResearchJourneyRing />
       </div>
 
-      {mentor.data && (
+      {mentor.data && !firstMentorVisible && (
         <div className="mt-4 card border-brand-100 bg-brand-50/40">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex items-start gap-3">

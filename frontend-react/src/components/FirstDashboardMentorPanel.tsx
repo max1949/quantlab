@@ -9,7 +9,11 @@ import { stageToCtaLabel, stageToRoute } from "../lib/nav";
 
 const DISMISS_KEY = "quantlab-first-mentor-welcome-dismissed";
 
-export default function FirstDashboardMentorPanel() {
+type Props = {
+  onVisibilityChange?: (visible: boolean) => void;
+};
+
+export default function FirstDashboardMentorPanel({ onVisibilityChange }: Props) {
   const user = useAuth((s) => s.user);
   const navigate = useNavigate();
   const d = useLocale((s) => s.dict.firstMentorWelcome);
@@ -29,11 +33,17 @@ export default function FirstDashboardMentorPanel() {
     }
   }, [dismissed]);
 
-  if (!active || dismissed || mentor.isLoading || journey.isLoading) return null;
+  const visible =
+    active && !dismissed && !mentor.isLoading && !journey.isLoading && Boolean(mentor.data);
+
+  useEffect(() => {
+    onVisibilityChange?.(visible);
+  }, [visible, onVisibilityChange]);
+
+  if (!visible) return null;
 
   const guide = journey.data?.quickstart_guide;
-  const m = mentor.data;
-  if (!m) return null;
+  const m = mentor.data!;
 
   const current = guide?.steps[guide.current_index];
   const templateStart = m.stage === "create_project" && Boolean(m.recommended_template);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { listTemplates, getTemplateRegimePicks, startTemplate, trackEvent } from "../api/endpoints";
@@ -27,6 +27,7 @@ export default function Templates() {
       : "RB";
   const [regimeSymbol, setRegimeSymbol] = useState<RegimeSymbol>(initialSymbol);
   const [starting, setStarting] = useState<string | null>(null);
+  const [highlightedFocus, setHighlightedFocus] = useState<string | null>(null);
 
   const setSymbol = (sym: RegimeSymbol) => {
     setRegimeSymbol(sym);
@@ -41,6 +42,19 @@ export default function Templates() {
     queryKey: ["template-regime-picks", regimeSymbol],
     queryFn: () => getTemplateRegimePicks(regimeSymbol),
   });
+
+  useEffect(() => {
+    if (!focus || !templates.data?.some((tpl) => tpl.code === focus)) return;
+    const scrollTimer = window.setTimeout(() => {
+      document.getElementById(`tpl-${focus}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setHighlightedFocus(focus);
+    }, 120);
+    const clearTimer = window.setTimeout(() => setHighlightedFocus(null), 3200);
+    return () => {
+      window.clearTimeout(scrollTimer);
+      window.clearTimeout(clearTimer);
+    };
+  }, [focus, templates.data]);
 
   const recommendedCodes = new Set(regimePicks.data?.picks.map((p) => p.code) ?? []);
   const pickByCode = Object.fromEntries((regimePicks.data?.picks ?? []).map((p) => [p.code, p]));
@@ -150,7 +164,9 @@ export default function Templates() {
                 key={tpl.code}
                 id={`tpl-${tpl.code}`}
                 className={`card relative flex flex-col ${
-                  focus === tpl.code ? "ring-2 ring-brand-400" : ""
+                  focus === tpl.code || highlightedFocus === tpl.code
+                    ? "ring-2 ring-brand-400 shadow-lg shadow-brand-200/50 dark:shadow-brand-900/30"
+                    : ""
                 } ${locked ? "opacity-90" : ""} ${
                   recommendedCodes.has(tpl.code) ? "ring-2 ring-violet-300 dark:ring-violet-800" : ""
                 }`}
