@@ -16,7 +16,7 @@ function currentIsoWeek(): string {
 
 export default function DashboardMasteryLoopPanel() {
   const d = useLocale((s) => s.dict.dashboardMasteryLoop);
-  const [weekShown, setWeekShown] = useState(
+  const [weekDismissed, setWeekDismissed] = useState(
     () => typeof window !== "undefined" && localStorage.getItem(WEEK_KEY) === currentIsoWeek(),
   );
   const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
@@ -24,13 +24,13 @@ export default function DashboardMasteryLoopPanel() {
   const coach = journey.data?.share_growth_coaching;
   const hasShare = Boolean(coach);
 
-  const matches = !weekShown && following >= NETWORK_FOLLOW_TARGET && !journey.isLoading;
+  const matches = !weekDismissed && following >= NETWORK_FOLLOW_TARGET && !journey.isLoading;
 
   if (!matches) return null;
 
   const dismiss = () => {
     localStorage.setItem(WEEK_KEY, currentIsoWeek());
-    setWeekShown(true);
+    setWeekDismissed(true);
   };
 
   return (
@@ -40,6 +40,7 @@ export default function DashboardMasteryLoopPanel() {
       </p>
       <p className="mt-1 font-semibold text-slate-800 dark:text-slate-100">{d.title}</p>
       <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{d.message}</p>
+      <p className="mt-2 text-xs text-indigo-900/80 dark:text-indigo-100/80">{d.hint}</p>
       <ol className="mt-3 grid gap-2 text-xs sm:grid-cols-4">
         {d.steps.map((step, index) => (
           <li

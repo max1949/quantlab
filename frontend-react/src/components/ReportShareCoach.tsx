@@ -1,15 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { shareReport, trackEvent } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
+import { academyRewardMessage } from "../lib/academy";
 import { celebrateFirstShare } from "../lib/firstShare";
-import {
-  REPLICATION_FLOW_REPORT_KEY,
-  REPLICATION_PUBLISH_FEED_KEY,
-  REPLICATION_REPORT_WELCOME_KEY,
-  REPLICATION_SHARE_FOLLOWING_KEY,
-} from "../lib/onboardingFocus";
+import { burstConfetti } from "../lib/confetti";
+import { REPLICATION_SHARE_FOLLOWING_KEY } from "../lib/onboardingFocus";
+import { clearReplicationReportFlow, isReplicationReportFlow } from "../lib/replicationFlow";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
@@ -24,6 +22,7 @@ export default function ReportShareCoach({ reportId }: Props) {
   const d = useLocale((s) => s.dict.dashboard);
   const atl = useLocale((s) => s.dict.academyTaskLabels);
   const notify = useUi((s) => s.notify);
+  const navigate = useNavigate();
   const refreshMe = useAuth((s) => s.refreshMe);
   const qc = useQueryClient();
   const [shareUrl, setShareUrl] = useState<string | null>(null);
@@ -31,8 +30,8 @@ export default function ReportShareCoach({ reportId }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
 
   const share = useMutation({
-    mutationFn: () => shareReport(reportId),
-    onSuccess: async (res) => {
+    mutationFn: (replicationLoop: boolean) => shareReport(reportId, { replicationLoop }),
+    onSuccess: async (res, replicationLoop) => {
       void trackEvent("share_created", { report: reportId });
       const url = `${window.location.origin}/share/${res.token}`;
       setShareUrl(url);
@@ -46,19 +45,17 @@ export default function ReportShareCoach({ reportId }: Props) {
       void qc.invalidateQueries({ queryKey: ["research-journey"] });
       void qc.invalidateQueries({ queryKey: ["public-feed"] });
       void trackEvent("share_success_feed_prompt", { report_id: reportId });
-      if (sessionStorage.getItem(REPLICATION_PUBLISH_FEED_KEY) === reportId) {
-        sessionStorage.removeItem(REPLICATION_PUBLISH_FEED_KEY);
-        sessionStorage.removeItem(REPLICATION_REPORT_WELCOME_KEY);
-        sessionStorage.removeItem(REPLICATION_FLOW_REPORT_KEY);
+      if (replicationLoop) {
+        clearReplicationReportFlow(reportId);
         sessionStorage.setItem(REPLICATION_SHARE_FOLLOWING_KEY, "1");
         setFromReplicationShare(true);
         void trackEvent("replication_share_created", { report_id: reportId });
-      } else if (sessionStorage.getItem(REPLICATION_FLOW_REPORT_KEY) === reportId) {
-        sessionStorage.removeItem(REPLICATION_FLOW_REPORT_KEY);
-        sessionStorage.removeItem(REPLICATION_REPORT_WELCOME_KEY);
-        sessionStorage.setItem(REPLICATION_SHARE_FOLLOWING_KEY, "1");
-        setFromReplicationShare(true);
-        void trackEvent("replication_share_created", { report_id: reportId });
+        const replicationRewards = (res.academy_rewards ?? []).filter((r) => r.code === "master-replication");
+        const replMsg = academyRewardMessage(replicationRewards, d.academyXpEarned, atl);
+        if (replMsg) notify(replMsg, "success");
+        if (!first) burstConfetti(2400);
+        notify(rs.autoFollowingToast, "success");
+        window.setTimeout(() => navigate("/me/following"), 600);
       }
       await refreshMe();
       requestAnimationFrame(() => {
@@ -135,7 +132,7 @@ export default function ReportShareCoach({ reportId }: Props) {
       <button
         className="btn-primary mt-3"
         disabled={share.isPending}
-        onClick={() => share.mutate()}
+        onClick={() => share.mutate(isReplicationReportFlow(reportId))}
       >
         {share.isPending ? t.shareGenerating : t.shareGenerate}
       </button>

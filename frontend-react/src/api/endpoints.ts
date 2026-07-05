@@ -807,8 +807,10 @@ export async function getReportForViewer(id: string, loggedIn: boolean): Promise
   }
 }
 
-export async function shareReport(id: string): Promise<ShareOut> {
-  const { data } = await api.post<ShareOut>(`/research/reports/${id}/share`);
+export async function shareReport(id: string, opts?: { replicationLoop?: boolean }): Promise<ShareOut> {
+  const { data } = await api.post<ShareOut>(`/research/reports/${id}/share`, {
+    replication_loop: opts?.replicationLoop ?? false,
+  });
   return data;
 }
 

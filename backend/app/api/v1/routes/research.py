@@ -26,6 +26,7 @@ from backend.app.schemas.research import (
     GenerateReportRequest,
     ReportDetail,
     ReportSummary,
+    ShareCreateIn,
 )
 from backend.app.services import membership_service as ms, research_service, share_service, template_service
 from backend.app.i18n import content as i18n
@@ -224,9 +225,16 @@ def share_report(
     report_id: str,
     current_user: CurrentUser,
     db: Annotated[Session, Depends(get_db)],
+    body: ShareCreateIn | None = None,
 ) -> ShareOut:
+    replication_loop = body.replication_loop if body is not None else False
     try:
-        share = share_service.create_share(db, current_user, uuid.UUID(report_id))
+        share = share_service.create_share(
+            db,
+            current_user,
+            uuid.UUID(report_id),
+            replication_loop=replication_loop,
+        )
     except (share_service.ReportNotFoundError, ValueError):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="报告不存在")
     return ShareOut(

@@ -43,7 +43,13 @@ def _build_card(report: ResearchReport, owner: User, *, mastery_path: dict | Non
     return card
 
 
-def create_share(db: Session, owner: User, report_id: uuid.UUID) -> ResearchShare:
+def create_share(
+    db: Session,
+    owner: User,
+    report_id: uuid.UUID,
+    *,
+    replication_loop: bool = False,
+) -> ResearchShare:
     from backend.app.services import research_quality_service as rq
     from backend.app.services.research_quality_service import ResearchQualityError
 
@@ -69,7 +75,12 @@ def create_share(db: Session, owner: User, report_id: uuid.UUID) -> ResearchShar
         existing.card = _build_card(report, owner, mastery_path=mastery_path)
         db.commit()
         db.refresh(existing)
-        existing.academy_rewards = []
+        from backend.app.services import academy_hooks
+
+        rewards: list[dict] = []
+        if replication_loop:
+            rewards.extend(academy_hooks.on_master_replication_share(db, owner))
+        existing.academy_rewards = rewards
         return existing
 
     share = ResearchShare(
@@ -89,7 +100,10 @@ def create_share(db: Session, owner: User, report_id: uuid.UUID) -> ResearchShar
     growth_service.log_event(db, "share", owner.id, {"report_id": str(report_id), "token": share.token})
     from backend.app.services import academy_hooks
 
-    share.academy_rewards = academy_hooks.on_first_share(db, owner)
+    rewards = academy_hooks.on_first_share(db, owner)
+    if replication_loop:
+        rewards.extend(academy_hooks.on_master_replication_share(db, owner))
+    share.academy_rewards = rewards
     return share
 
 

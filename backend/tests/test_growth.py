@@ -931,6 +931,27 @@ def test_network_radar_academy_on_third_follow(client, db_session):
     assert any(r.get("code") == "network-radar" for r in rewards)
 
 
+def test_master_replication_academy_on_replication_share(client, db_session):
+    from backend.app.services.task_service import seed_default_tasks
+
+    seed_default_tasks(db_session)
+    h = _register(client, "repl_acad")
+    proj, rep = _full_research(client, h, db_session)
+    client.post(f"{BASE}/projects/{proj['id']}/publish", headers=h)
+    out = client.post(
+        f"{BASE}/research/reports/{rep['id']}/share",
+        headers=h,
+        json={"replication_loop": True},
+    ).json()
+    assert any(r.get("code") == "master-replication" for r in out.get("academy_rewards") or [])
+    again = client.post(
+        f"{BASE}/research/reports/{rep['id']}/share",
+        headers=h,
+        json={"replication_loop": True},
+    ).json()
+    assert not any(r.get("code") == "master-replication" for r in again.get("academy_rewards") or [])
+
+
 def test_cannot_follow_self(client, db_session):
     h = _register(client, "vera")
     uid = client.get(f"{BASE}/researchers/me", headers=h).json()["user_id"]

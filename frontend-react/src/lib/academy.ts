@@ -45,4 +45,5 @@ export const AUTO_ACADEMY_TASK_CODES = new Set([
   "first-paper-order",
   "paper-decay-review",
   "network-radar",
+  "master-replication",
 ]);

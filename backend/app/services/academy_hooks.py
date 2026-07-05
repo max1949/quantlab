@@ -84,3 +84,8 @@ def on_challenge_enrolled(db: Session, user: User) -> list[dict]:
 def on_network_radar(db: Session, user: User) -> list[dict]:
     task_service.seed_default_tasks(db)
     return _collect(db, user, ["network-radar"])
+
+
+def on_master_replication_share(db: Session, user: User) -> list[dict]:
+    task_service.seed_default_tasks(db)
+    return _collect(db, user, ["master-replication"])

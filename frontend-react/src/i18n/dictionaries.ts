@@ -1491,6 +1491,7 @@ const en = {
     title: "You're in the network — keep the loop spinning",
     message:
       "Read a master report → replicate on your desk → publish → share → return to following feed. That's how incubators turn beginners into masters.",
+    hint: "This card returns each week until you dismiss it — one focused loop at a time.",
     steps: ["Read & follow", "Replicate", "Publish", "Share back"],
     openFollowing: "Following feed →",
     browseFeed: "Research feed →",
@@ -1525,6 +1526,7 @@ const en = {
     successTitle: "Share card ready — loop back to learning",
     successDesc: "Copy the link if you like, then read peers on your following feed for the next replication.",
     openFollowing: "Open following feed →",
+    autoFollowingToast: "Replication shared — opening your following feed to keep the loop going.",
   },
   followingReplicationReturn: {
     badge: "Growth loop",
@@ -1637,6 +1639,10 @@ const en = {
     "network-radar": {
       title: "Learning radar ready",
       description: "Follow 3 researchers on the feed — your following stream becomes a mastery learning radar.",
+    },
+    "master-replication": {
+      title: "Master replication loop",
+      description: "Auto-completes when you share a finished master replication — publish and give back to the network.",
     },
     "write-formula-factor": {
       title: "Write a formula factor",
@@ -3198,6 +3204,7 @@ const zh = {
     title: "人脉已接通 — 保持这条成长闭环",
     message:
       "读大师报告 → 在工位复现 → 发布 → 分享 → 回关注流动态精读。孵化器就是这样把新手带成大师。",
+    hint: "本周内每次进工作台都会看到这张卡，点「知道了」后下周再提醒。",
     steps: ["读 & 关注", "复现验证", "发布成果", "分享回馈"],
     openFollowing: "关注动态 →",
     browseFeed: "研究广场 →",
@@ -3231,6 +3238,7 @@ const zh = {
     successTitle: "分享卡片就绪 — 回到学习雷达",
     successDesc: "链接可复制；接下来去关注动态，挑同伴报告准备下一次复现。",
     openFollowing: "打开关注动态 →",
+    autoFollowingToast: "复现已分享 — 正在打开关注动态，继续你的大师闭环。",
   },
   followingReplicationReturn: {
     badge: "成长闭环",
@@ -3341,6 +3349,10 @@ const zh = {
     "network-radar": {
       title: "学习雷达就绪",
       description: "在广场关注 3 位研究员后自动完成 — 关注流成为你的大师学习雷达。",
+    },
+    "master-replication": {
+      title: "大师复现闭环",
+      description: "完成一次大师复现并分享成果后自动完成 — 发布并回馈社区的关键一步。",
     },
     "write-formula-factor": {
       title: "编写公式因子",

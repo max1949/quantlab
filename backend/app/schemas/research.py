@@ -69,3 +69,9 @@ class GenerateReportRequest(BaseModel):
 
     project_id: uuid.UUID | None = None
     factor_id: uuid.UUID | None = None
+
+
+class ShareCreateIn(BaseModel):
+    """分享卡片创建参数 — replication_loop 表示大师复现闭环分享。"""
+
+    replication_loop: bool = False
