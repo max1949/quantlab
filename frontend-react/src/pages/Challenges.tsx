@@ -12,6 +12,7 @@ import { useLocale } from "../store/locale";
 import { useAuth } from "../store/auth";
 import { useUi } from "../store/ui";
 import { ErrorBox, PageTitle, Spinner } from "../components/ui";
+import ChallengeNetworkCoachPanel from "../components/ChallengeNetworkCoachPanel";
 
 export default function Challenges() {
   const { dict } = useLocale();
@@ -71,6 +72,7 @@ export default function Challenges() {
   return (
     <div>
       <PageTitle title={t.title} subtitle={t.subtitle} />
+      <ChallengeNetworkCoachPanel />
 
       {challenges.isLoading ? (
         <Spinner />

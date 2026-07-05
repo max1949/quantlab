@@ -1401,6 +1401,10 @@ def research_journey(
     if mastery_graduation_coaching:
         share_growth_coaching = None
 
+    from backend.app.services import social_service
+
+    follow_counts = social_service.counts(db, user.id)
+
     return {
         "done_count": done_count,
         "total": len(steps),
@@ -1429,4 +1433,6 @@ def research_journey(
         "reputation_coaching": reputation_coaching,
         "share_growth_coaching": share_growth_coaching,
         "mastery_graduation_coaching": mastery_graduation_coaching,
+        "social_following_count": int(follow_counts["following"]),
+        "social_followers_count": int(follow_counts["followers"]),
     }

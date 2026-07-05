@@ -407,6 +407,8 @@ export interface ResearchJourney {
   reputation_coaching: ReputationCoaching | null;
   share_growth_coaching: ShareGrowthCoaching | null;
   mastery_graduation_coaching: MasteryGraduationCoaching | null;
+  social_following_count: number;
+  social_followers_count: number;
 }
 
 export interface Mentor {

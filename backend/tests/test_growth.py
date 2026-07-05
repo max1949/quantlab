@@ -563,6 +563,8 @@ def test_journey_includes_mastery_graduation_when_path_complete(client, db_sessi
     assert grad["feed_path"].startswith("/feed")
     assert j.get("share_growth_coaching") is None
     assert len(grad.get("guide_steps") or []) == 3
+    assert "social_following_count" in j
+    assert j["social_following_count"] == 0
 
 
 def test_journey_includes_checkout_coaching(client, db_session):

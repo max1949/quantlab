@@ -406,6 +406,8 @@ class ResearchJourneyOut(BaseModel):
     reputation_coaching: ReputationCoachingOut | None = None
     share_growth_coaching: ShareGrowthCoachingOut | None = None
     mastery_graduation_coaching: MasteryGraduationCoachingOut | None = None
+    social_following_count: int = 0
+    social_followers_count: int = 0
 
 
 # ---- 研究模板 ----

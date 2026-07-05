@@ -9,6 +9,7 @@ import { useLocale } from "../store/locale";
 import { EmptyState, ErrorBox, PageTitle, Spinner } from "../components/ui";
 import ReportCard from "../components/ReportCard";
 import FeedFollowCoachPanel from "../components/FeedFollowCoachPanel";
+import NetworkReadyCoachPanel from "../components/NetworkReadyCoachPanel";
 
 export default function Feed() {
   const user = useAuth((s) => s.user);
@@ -100,6 +101,7 @@ export default function Feed() {
       </div>
 
       {user && <FeedFollowCoachPanel onDiscoverMasters={discoverMasters} />}
+      {user && <NetworkReadyCoachPanel />}
 
       {!user && (
         <div className="mb-4 flex flex-col gap-3 rounded-xl border border-brand-200 bg-brand-50/60 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-brand-900 dark:bg-brand-950/40">

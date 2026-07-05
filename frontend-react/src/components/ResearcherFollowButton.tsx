@@ -64,6 +64,7 @@ export default function ResearcherFollowButton({
           burstConfetti(3600);
           localStorage.setItem(DISMISS_KEY, "1");
           sessionStorage.setItem(FIRST_FOLLOWING_FEED_WELCOME_KEY, "1");
+          window.dispatchEvent(new Event("quantlab-network-milestone"));
           notify(fc.networkReady, "success");
         } else if (followingCount > 0) {
           notify(fc.progressToast(followingCount, NETWORK_FOLLOW_TARGET), "success");

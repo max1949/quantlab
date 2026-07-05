@@ -21,7 +21,7 @@ export default function Following() {
       ) : q.isError ? (
         <ErrorBox message={apiErrorMessage(q.error)} />
       ) : q.data && q.data.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div id="following-feed-grid" className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {q.data.map((r) => (
             <ReportCard key={r.id} report={r} />
           ))}

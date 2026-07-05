@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import { burstConfetti } from "../lib/confetti";
 import { FIRST_FOLLOWING_FEED_WELCOME_KEY } from "../lib/onboardingFocus";
 import { useLocale } from "../store/locale";
@@ -24,6 +25,9 @@ export default function FollowingFeedWelcomePanel() {
       <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-50">{d.title}</p>
       <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{d.message}</p>
       <p className="mt-2 text-xs text-emerald-800/90 dark:text-emerald-100/90">{d.hint}</p>
+      <Link to="#following-feed-grid" className="btn-primary mt-3 inline-block text-xs">
+        {d.scrollReports}
+      </Link>
     </div>
   );
 }

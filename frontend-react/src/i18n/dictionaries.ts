@@ -1260,6 +1260,22 @@ const en = {
       `Nice — ${n} of ${target} followed. Keep building your learning radar.`,
     networkReady: "Network ready — open your following feed to start learning from masters.",
   },
+  networkReadyCoach: {
+    badge: "Network milestone",
+    title: "You followed 3 researchers — learning radar unlocked",
+    message: "Open your following feed to read how masters validate factors, then mirror one template on your desk.",
+    openFollowing: "Open following feed →",
+    stayOnFeed: "Keep browsing feed",
+  },
+  challengeNetworkCoach: {
+    badge: "Challenge peer network",
+    title: "Follow sprint peers who are shipping research",
+    message:
+      "Campmates who publish on the feed often share timing and validation habits worth copying — follow 2–3 before your next milestone.",
+    progress: (n: number, target: number) => `${n} / ${target} researchers followed`,
+    browseFeed: "Find peers on feed →",
+    dismiss: "Later",
+  },
   l2Analysis: {
     title: "L2 Advanced analysis",
     subtitle: "Move from single-symbol research to cross-section comparison and cost stress tests.",
@@ -1442,6 +1458,7 @@ const en = {
     message:
       "You followed 3 researchers — this page is now your learning radar for mastery-style research.",
     hint: "Pick one report below, read how they validated, then try a similar template on your desk.",
+    scrollReports: "Scroll to reports ↓",
   },
   share: {
     invalid: "Share not found or expired",
@@ -2766,6 +2783,22 @@ const zh = {
       `很好 — 已关注 ${n}/${target} 位，继续搭建你的学习雷达。`,
     networkReady: "人脉就绪 — 打开「关注动态」向大师学习吧。",
   },
+  networkReadyCoach: {
+    badge: "人脉里程碑",
+    title: "你已关注 3 位研究员 — 学习雷达已解锁",
+    message: "打开关注动态，细读大师如何验证因子，再回工作台用类似模板练手。",
+    openFollowing: "打开关注动态 →",
+    stayOnFeed: "继续逛广场",
+  },
+  challengeNetworkCoach: {
+    badge: "挑战营人脉",
+    title: "关注正在出成果的挑战营同伴",
+    message:
+      "在广场持续发布的营友，往往有值得借鉴的验证节奏 — 下一里程碑前请先关注 2～3 位。",
+    progress: (n: number, target: number) => `已关注 ${n} / ${target} 位研究员`,
+    browseFeed: "去广场找同伴 →",
+    dismiss: "稍后再说",
+  },
   l2Analysis: {
     title: "L2 进阶分析",
     subtitle: "从单标的研究升级到多标的截面比较, 并检查交易成本是否会吃掉收益。",
@@ -2944,6 +2977,7 @@ const zh = {
     title: "你的关注流已就绪",
     message: "你已关注 3 位研究员 — 这个页面就是你的大师学习雷达。",
     hint: "从下方挑一篇报告细读：看他们如何验证，再回工作台用类似模板练手。",
+    scrollReports: "往下看报告 ↓",
   },
   share: {
     invalid: "分享不存在或已失效",
