@@ -1,9 +1,13 @@
 import { useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getResearchJourney, shareReport } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
+import { academyRewardMessage } from "../lib/academy";
 import { celebrateFirstShare } from "../lib/firstShare";
+import { burstConfetti } from "../lib/confetti";
+import { REPLICATION_SHARE_FOLLOWING_KEY } from "../lib/onboardingFocus";
+import { clearReplicationReportFlow, isReplicationReportFlow } from "../lib/replicationFlow";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
 import HandbookExportButtons from "./HandbookExportButtons";
@@ -13,9 +17,11 @@ const DISMISS_KEY = "quantlab-mastery-overview-dismissed";
 export default function MasteryOverviewPanel() {
   const d = useLocale((s) => s.dict.masteryOverview);
   const dash = useLocale((s) => s.dict.dashboard);
+  const rs = useLocale((s) => s.dict.replicationShareCoach);
   const atl = useLocale((s) => s.dict.academyTaskLabels);
   const printRef = useRef<HTMLDivElement>(null);
   const notify = useUi((s) => s.notify);
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISS_KEY) === "1");
   const [feedHref, setFeedHref] = useState<string | null>(null);
@@ -24,9 +30,31 @@ export default function MasteryOverviewPanel() {
   const overview = journey.data?.mastery_overview;
 
   const shareToFeed = useMutation({
-    mutationFn: () => shareReport(overview!.share_report_id!),
-    onSuccess: (res) => {
+    mutationFn: (replicationLoop: boolean) => shareReport(overview!.share_report_id!, { replicationLoop }),
+    onSuccess: (res, replicationLoop) => {
       const reportId = overview!.share_report_id!;
+      void qc.invalidateQueries({ queryKey: ["research-journey"] });
+      void qc.invalidateQueries({ queryKey: ["public-feed"] });
+      void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
+
+      if (replicationLoop) {
+        clearReplicationReportFlow(reportId);
+        sessionStorage.setItem(REPLICATION_SHARE_FOLLOWING_KEY, "1");
+        const replicationRewards = (res.academy_rewards ?? []).filter((r) => r.code === "master-replication");
+        const replMsg = academyRewardMessage(replicationRewards, dash.academyXpEarned, atl);
+        if (replMsg) notify(replMsg, "success");
+        const first = celebrateFirstShare(
+          res,
+          { celebrate: dash.firstShareCelebrate, academyXpEarned: dash.academyXpEarned, academyTaskLabels: atl },
+          notify,
+        );
+        if (!first) notify(d.shareSuccess, "success");
+        if (!first) burstConfetti(2400);
+        notify(rs.autoFollowingToast, "success");
+        window.setTimeout(() => navigate("/me/following"), 600);
+        return;
+      }
+
       const href = `/feed?highlight=${reportId}`;
       setFeedHref(href);
       const first = celebrateFirstShare(
@@ -35,9 +63,6 @@ export default function MasteryOverviewPanel() {
         notify,
       );
       if (!first) notify(d.shareSuccess, "success");
-      void qc.invalidateQueries({ queryKey: ["research-journey"] });
-      void qc.invalidateQueries({ queryKey: ["public-feed"] });
-      void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
     },
     onError: (e) => notify(apiErrorMessage(e, d.shareToFeed), "error"),
   });
@@ -52,6 +77,8 @@ export default function MasteryOverviewPanel() {
     localStorage.setItem(DISMISS_KEY, "1");
     setDismissed(true);
   };
+
+  const shareReportId = overview.share_report_id;
 
   return (
     <div
@@ -119,13 +146,13 @@ export default function MasteryOverviewPanel() {
         </div>
 
         <div className="flex shrink-0 flex-wrap gap-2 print:hidden">
-          {overview.share_ready && overview.share_report_id && (
+          {overview.share_ready && shareReportId && (
             <>
               <button
                 type="button"
                 className="btn-primary text-xs"
                 disabled={shareToFeed.isPending}
-                onClick={() => shareToFeed.mutate()}
+                onClick={() => shareToFeed.mutate(isReplicationReportFlow(shareReportId))}
               >
                 {shareToFeed.isPending ? d.sharing : overview.share_cta || d.shareToFeed}
               </button>

@@ -65,6 +65,7 @@ export default function ReportShareCoach({ reportId }: Props) {
         notify,
       );
       if (!first) notify(t.shareCreated, "success");
+      await refreshMe();
       requestAnimationFrame(() => {
         rootRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
       });

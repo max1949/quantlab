@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { completeTask, listTasks } from "../api/endpoints";
+import { Link } from "react-router-dom";
+import { completeTask, getResearchJourney, listTasks } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
 import { AUTO_ACADEMY_TASK_CODES, localizedAcademyTitle } from "../lib/academy";
+import { NETWORK_FOLLOW_TARGET } from "../lib/journeyFollowing";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
@@ -16,6 +18,9 @@ export default function AcademyTasks() {
   const qc = useQueryClient();
 
   const tasks = useQuery({ queryKey: ["academy-tasks"], queryFn: listTasks });
+  const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
+  const following = journey.data?.social_following_count ?? 0;
+  const networkReady = following >= NETWORK_FOLLOW_TARGET;
 
   const claim = useMutation({
     mutationFn: (code: string) => completeTask(code),
@@ -44,61 +49,77 @@ export default function AcademyTasks() {
         </span>
       </div>
       <ul className="space-y-2">
-        {rows.map((t) => (
-          <li
-            key={t.id}
-            className={`rounded-xl border px-3 py-2.5 ${
-              t.completed
-                ? "border-emerald-200 bg-emerald-50/50 dark:border-emerald-900 dark:bg-emerald-950/30"
-                : t.locked
-                  ? "border-slate-100 bg-slate-50/80 opacity-75 dark:border-slate-800 dark:bg-slate-900/40"
-                  : t.code === "network-radar" && !t.completed
-                    ? "border-brand-200 bg-brand-50/40 dark:border-brand-900 dark:bg-brand-950/20"
-                    : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
-            }`}
-          >
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <p className="font-medium text-slate-800 dark:text-slate-100">
-                  {t.completed && "✓ "}
-                  {localizedAcademyTitle(t.code, t.title, atl)}
-                  <span className="ml-2 text-xs font-normal text-brand-600">{d.academyXp(t.xp_reward)}</span>
-                  {t.mastery_stage && (
-                    <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-normal text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-                      {d.academyMasteryStage(
-                        mp.stages[t.mastery_stage as keyof typeof mp.stages] ?? t.mastery_stage,
-                      )}
-                    </span>
-                  )}
-                </p>
-                <p className="text-sm text-slate-500">
-                  {atl[t.code as keyof typeof atl]?.description ?? t.description}
-                </p>
-                {t.locked && (
-                  <p className="mt-1 text-xs text-amber-600">
-                    {d.academyLocked} · {t.min_level_label}
+        {rows.map((t) => {
+          const networkRadarHighlight = t.code === "network-radar" && !t.completed && !t.locked;
+          const masterReplicationHighlight =
+            t.code === "master-replication" && !t.completed && !t.locked && networkReady;
+          const networkHighlight = networkRadarHighlight || masterReplicationHighlight;
+          return (
+            <li
+              key={t.id}
+              className={`rounded-xl border px-3 py-2.5 ${
+                t.completed
+                  ? "border-emerald-200 bg-emerald-50/50 dark:border-emerald-900 dark:bg-emerald-950/30"
+                  : t.locked
+                    ? "border-slate-100 bg-slate-50/80 opacity-75 dark:border-slate-800 dark:bg-slate-900/40"
+                    : networkHighlight
+                      ? "border-brand-200 bg-brand-50/40 dark:border-brand-900 dark:bg-brand-950/20"
+                      : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+              }`}
+            >
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <p className="font-medium text-slate-800 dark:text-slate-100">
+                    {t.completed && "✓ "}
+                    {localizedAcademyTitle(t.code, t.title, atl)}
+                    <span className="ml-2 text-xs font-normal text-brand-600">{d.academyXp(t.xp_reward)}</span>
+                    {t.mastery_stage && (
+                      <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-normal text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                        {d.academyMasteryStage(
+                          mp.stages[t.mastery_stage as keyof typeof mp.stages] ?? t.mastery_stage,
+                        )}
+                      </span>
+                    )}
                   </p>
+                  <p className="text-sm text-slate-500">
+                    {atl[t.code as keyof typeof atl]?.description ?? t.description}
+                  </p>
+                  {networkRadarHighlight && (
+                    <Link to="/feed?focus=follow" className="mt-1 inline-block text-xs font-medium text-brand-600">
+                      {d.academyNetworkCta}
+                    </Link>
+                  )}
+                  {masterReplicationHighlight && (
+                    <Link to="/me/following" className="mt-1 inline-block text-xs font-medium text-brand-600">
+                      {d.academyReplicationCta}
+                    </Link>
+                  )}
+                  {t.locked && (
+                    <p className="mt-1 text-xs text-amber-600">
+                      {d.academyLocked} · {t.min_level_label}
+                    </p>
+                  )}
+                </div>
+                {!t.completed && !t.locked && AUTO_ACADEMY_TASK_CODES.has(t.code) && (
+                  <span className="text-sm text-brand-600">{d.academyAuto}</span>
+                )}
+                {!t.completed && !t.locked && !AUTO_ACADEMY_TASK_CODES.has(t.code) && (
+                  <button
+                    type="button"
+                    className="btn-primary w-full shrink-0 sm:w-auto"
+                    disabled={claim.isPending}
+                    onClick={() => claim.mutate(t.code)}
+                  >
+                    {d.academyClaim}
+                  </button>
+                )}
+                {t.completed && (
+                  <span className="text-sm font-medium text-emerald-600">{d.academyDone}</span>
                 )}
               </div>
-              {!t.completed && !t.locked && AUTO_ACADEMY_TASK_CODES.has(t.code) && (
-                <span className="text-sm text-brand-600">{d.academyAuto}</span>
-              )}
-              {!t.completed && !t.locked && !AUTO_ACADEMY_TASK_CODES.has(t.code) && (
-                <button
-                  type="button"
-                  className="btn-primary w-full shrink-0 sm:w-auto"
-                  disabled={claim.isPending}
-                  onClick={() => claim.mutate(t.code)}
-                >
-                  {d.academyClaim}
-                </button>
-              )}
-              {t.completed && (
-                <span className="text-sm font-medium text-emerald-600">{d.academyDone}</span>
-              )}
-            </div>
-          </li>
-        ))}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

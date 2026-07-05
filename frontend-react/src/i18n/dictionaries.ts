@@ -674,6 +674,8 @@ const en = {
     academyClaim: "Claim reward",
     academyClaimed: "Reward claimed",
     academyAuto: "Auto-completes when you finish this step in your project",
+    academyNetworkCta: "Open feed & follow researchers →",
+    academyReplicationCta: "Read masters on following feed →",
     academyMasteryStage: (stage: string) => `Mastery · ${stage}`,
     academyXpEarned: (title: string, xp: number) => `Academy +${xp} XP · ${title}`,
     firstShareCelebrate:
@@ -2401,6 +2403,8 @@ const zh = {
     academyClaim: "领取奖励",
     academyClaimed: "已领取",
     academyAuto: "在项目里完成对应步骤后自动点亮",
+    academyNetworkCta: "去广场关注研究员 →",
+    academyReplicationCta: "去关注动态读大师报告 →",
     academyMasteryStage: (stage: string) => `大师路径 · ${stage}`,
     academyXpEarned: (title: string, xp: number) => `学院 +${xp} 经验 · ${title}`,
     firstShareCelebrate:
