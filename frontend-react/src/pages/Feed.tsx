@@ -136,7 +136,7 @@ export default function Feed() {
                   : undefined
               }
             >
-              <ReportCard report={r} />
+              <ReportCard report={r} showFollow />
             </div>
           ))}
         </div>

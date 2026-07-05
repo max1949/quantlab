@@ -348,7 +348,14 @@ def feed_summary(
     return out
 
 
-def feed(db: Session, sort: str = "latest", limit: int = 30, *, graduated_only: bool = False) -> list[dict]:
+def feed(
+    db: Session,
+    sort: str = "latest",
+    limit: int = 30,
+    *,
+    graduated_only: bool = False,
+    viewer_id: uuid.UUID | None = None,
+) -> list[dict]:
     """研究 Feed: 公开报告。sort=latest(最新) | top(高评分优先)。"""
     limit = max(1, min(int(limit), 50))
     rows = list(
@@ -415,4 +422,28 @@ def feed(db: Session, sort: str = "latest", limit: int = 30, *, graduated_only: 
         out_rows.append(
             feed_summary(db, r, metrics_by_report.get(r.id), badges_by_report.get(r.id), mastery_path=mp)
         )
+
+    owner_ids = list({row["owner_id"] for row in out_rows if row.get("owner_id")})
+    usernames: dict[uuid.UUID, str] = {}
+    if owner_ids:
+        usernames = {
+            u.id: u.username
+            for u in db.execute(select(User).where(User.id.in_(owner_ids))).scalars().all()
+        }
+    following_ids: set[uuid.UUID] = set()
+    if viewer_id and owner_ids:
+        from backend.app.services import social_service
+
+        targets = [oid for oid in owner_ids if oid != viewer_id]
+        following_ids = social_service.following_target_ids(db, viewer_id, targets)
+
+    for row in out_rows:
+        oid = row.get("owner_id")
+        if oid in usernames:
+            row["owner_username"] = usernames[oid]
+        if viewer_id and oid == viewer_id:
+            row["is_following"] = None
+        elif viewer_id and oid:
+            row["is_following"] = oid in following_ids
+
     return out_rows

@@ -2,11 +2,15 @@ import { Link } from "react-router-dom";
 import type { ReportSummary } from "../api/types";
 import { useLocale } from "../store/locale";
 import MasteryPathMini from "./MasteryPathMini";
+import ResearcherFollowButton from "./ResearcherFollowButton";
 import { GradeBadge } from "./ui";
 
-export default function ReportCard({ report }: { report: ReportSummary }) {
+export default function ReportCard({ report, showFollow = false }: { report: ReportSummary; showFollow?: boolean }) {
   const { dict } = useLocale();
   const rc = dict.reportCard;
+  const researcherLabel = report.owner_username
+    ? rc.researcherName(report.owner_username)
+    : rc.viewResearcher;
 
   return (
     <div className="card flex h-full flex-col hover:shadow-md">
@@ -60,13 +64,23 @@ export default function ReportCard({ report }: { report: ReportSummary }) {
       {report.mastery_path && report.mastery_path.done_count > 0 && (
         <MasteryPathMini path={report.mastery_path} compact />
       )}
-      <div className="mt-auto flex items-center justify-between pt-3 text-sm">
+      <div className="mt-auto flex items-center justify-between gap-2 pt-3 text-sm">
         <Link to={`/reports/${report.id}`} className="font-medium text-brand-600 hover:underline">
           {rc.readFull} →
         </Link>
-        <Link to={`/u/${report.owner_id}`} className="text-xs text-slate-500 hover:text-brand-600">
-          {rc.viewResearcher}
-        </Link>
+        <div className="flex items-center gap-2">
+          {showFollow && (
+            <ResearcherFollowButton
+              ownerId={report.owner_id}
+              isFollowing={report.is_following}
+              reportId={report.id}
+              compact
+            />
+          )}
+          <Link to={`/u/${report.owner_id}`} className="text-xs text-slate-500 hover:text-brand-600">
+            {researcherLabel}
+          </Link>
+        </div>
       </div>
     </div>
   );

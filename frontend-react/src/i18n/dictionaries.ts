@@ -1251,7 +1251,7 @@ const en = {
     badge: "Grow your network",
     title: "Follow active researchers — they'll notice your work too",
     message:
-      "Pick 2–3 masters on the feed whose style you respect. Your following feed becomes a learning radar and helps others discover your share card.",
+      "Pick 2–3 masters below and tap + Follow on their cards. Your following feed becomes a learning radar and helps others discover your share card.",
     browseFeed: "Show graduated masters →",
     openFollowing: "My following feed",
     dismiss: "Later",
@@ -1450,6 +1450,8 @@ const en = {
   },
   reportCard: {
     viewResearcher: "View researcher",
+    researcherName: (name: string) => `@${name}`,
+    followLogin: "Sign in to follow",
     readFull: "Read full report",
     oosSharpe: "OOS Sharpe",
     robustness: "Robustness",
@@ -2744,7 +2746,7 @@ const zh = {
     badge: "扩展人脉",
     title: "关注活跃研究员 — 他们也会注意到你的成果",
     message:
-      "在广场上挑 2～3 位你欣赏风格的大师关注。关注流会变成学习雷达，也更容易让别人发现你的分享卡片。",
+      "在下方挑 2～3 位大师，直接点卡片上的「+ 关注」。关注流会变成学习雷达，也更容易让别人发现你的分享卡片。",
     browseFeed: "筛选已毕业大师 →",
     openFollowing: "我的关注流",
     dismiss: "稍后再说",
@@ -2940,6 +2942,8 @@ const zh = {
   },
   reportCard: {
     viewResearcher: "查看研究员",
+    researcherName: (name: string) => `@${name}`,
+    followLogin: "登录后关注",
     readFull: "阅读全文",
     oosSharpe: "样本外夏普",
     robustness: "稳健性",

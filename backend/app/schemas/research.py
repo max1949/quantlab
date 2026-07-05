@@ -35,6 +35,8 @@ class ReportSummary(BaseModel):
     paper_tracking: bool = False
     mastery_badge: str | None = None
     mastery_path: MasteryPathSnapshotOut | None = None
+    owner_username: str | None = None
+    is_following: bool | None = None
 
 
 class ReportDetail(BaseModel):

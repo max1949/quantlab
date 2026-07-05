@@ -7,6 +7,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
+from backend.app.auth.deps import OptionalUser
 from backend.app.core.database import get_db
 from backend.app.schemas.research import ReportDetail, ReportSummary
 from backend.app.services import research_service
@@ -17,13 +18,17 @@ router = APIRouter()
 @router.get("/feed", response_model=list[ReportSummary], summary="研究广场 (免登录)")
 def public_research_feed(
     db: Annotated[Session, Depends(get_db)],
+    viewer: OptionalUser,
     sort: str = Query(default="latest", pattern="^(latest|top)$"),
     limit: int = Query(default=30, ge=1, le=50),
     graduated_only: bool = Query(default=False, description="仅展示 Paper 毕业研究"),
 ) -> list[ReportSummary]:
+    viewer_id = viewer.id if viewer else None
     return [
         ReportSummary(**r)
-        for r in research_service.feed(db, sort, limit, graduated_only=graduated_only)
+        for r in research_service.feed(
+            db, sort, limit, graduated_only=graduated_only, viewer_id=viewer_id
+        )
     ]
 
 

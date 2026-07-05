@@ -858,6 +858,31 @@ def test_public_feed_no_auth(client, db_session):
     assert len(mp["phases"]) == 5
 
 
+def test_public_feed_includes_follow_state_when_authed(client, db_session):
+    seed_sample_market_data(db_session)
+    ha = _register(client, "feed_a")
+    hb = _register(client, "feed_b")
+    proj, rep = _full_research(client, ha, db_session)
+    client.post(f"{BASE}/projects/{proj['id']}/publish", headers=ha)
+    client.post(f"{BASE}/research/reports/{rep['id']}/share", headers=ha)
+    owner_id = client.get(f"{BASE}/researchers/me", headers=ha).json()["user_id"]
+    feed_guest = client.get(f"{BASE}/public/feed").json()
+    card_guest = next(r for r in feed_guest if r["id"] == rep["id"])
+    assert card_guest.get("owner_username") == "feed_a"
+    assert card_guest.get("is_following") is None
+
+    feed_viewer = client.get(f"{BASE}/public/feed", headers=hb).json()
+    card_viewer = next(r for r in feed_viewer if r["id"] == rep["id"])
+    assert card_viewer["owner_username"] == "feed_a"
+    assert card_viewer["is_following"] is False
+    assert card_viewer["owner_id"] == owner_id
+
+    client.post(f"{BASE}/researchers/{owner_id}/follow", headers=hb)
+    feed_following = client.get(f"{BASE}/public/feed", headers=hb).json()
+    card_following = next(r for r in feed_following if r["id"] == rep["id"])
+    assert card_following["is_following"] is True
+
+
 def test_share_missing_report_404(client, db_session):
     import uuid
     h = _register(client, "seth")

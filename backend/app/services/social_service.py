@@ -80,6 +80,21 @@ def is_following(db: Session, follower_id: uuid.UUID, followee_id: uuid.UUID) ->
     ).first() is not None
 
 
+def following_target_ids(
+    db: Session, follower_id: uuid.UUID, followee_ids: list[uuid.UUID]
+) -> set[uuid.UUID]:
+    """批量查询 viewer 已关注的 owner_id 集合。"""
+    if not followee_ids:
+        return set()
+    rows = db.execute(
+        select(UserFollow.followee_id).where(
+            UserFollow.follower_id == follower_id,
+            UserFollow.followee_id.in_(followee_ids),
+        )
+    ).scalars().all()
+    return set(rows)
+
+
 def feed(db: Session, follower_id: uuid.UUID, limit: int = 30) -> list[ResearchReport]:
     """我关注的研究员的最新公开研究报告。"""
     followee_ids = list(

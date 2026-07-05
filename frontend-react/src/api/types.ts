@@ -1049,6 +1049,8 @@ export interface ReportSummary {
   paper_tracking?: boolean;
   mastery_badge?: string | null;
   mastery_path?: MasteryPathSnapshot | null;
+  owner_username?: string | null;
+  is_following?: boolean | null;
 }
 
 export interface ReportDetail extends ReportSummary {
