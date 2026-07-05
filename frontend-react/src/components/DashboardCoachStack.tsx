@@ -9,6 +9,7 @@ import UpgradeCoachPanel from "./UpgradeCoachPanel";
 import MarketDataCoachPanel from "./MarketDataCoachPanel";
 
 const MAX_VISIBLE = 2;
+const EXPAND_KEY = "quantlab-coach-stack-expanded";
 
 type CoachKind = "attention" | "challenge" | "upgrade" | "market";
 
@@ -37,7 +38,7 @@ function CoachPanel({ kind }: { kind: CoachKind }) {
 
 export default function DashboardCoachStack() {
   const d = useLocale((s) => s.dict.dashboard);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(() => localStorage.getItem(EXPAND_KEY) === "1");
   const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
 
   const kinds = coachKindsFromJourney(journey.data);
@@ -80,7 +81,14 @@ export default function DashboardCoachStack() {
               </li>
             ))}
           </ul>
-          <button type="button" className="btn mt-3 text-xs" onClick={() => setExpanded(true)}>
+          <button
+            type="button"
+            className="btn mt-3 text-xs"
+            onClick={() => {
+              setExpanded(true);
+              localStorage.setItem(EXPAND_KEY, "1");
+            }}
+          >
             {d.coachStackExpand}
           </button>
         </div>
@@ -90,7 +98,10 @@ export default function DashboardCoachStack() {
         <button
           type="button"
           className="text-xs font-medium text-slate-500 hover:text-brand-600"
-          onClick={() => setExpanded(false)}
+          onClick={() => {
+            setExpanded(false);
+            localStorage.removeItem(EXPAND_KEY);
+          }}
         >
           {d.coachStackCollapse}
         </button>
