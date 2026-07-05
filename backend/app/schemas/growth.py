@@ -180,6 +180,8 @@ class MasteryOverviewPhaseOut(BaseModel):
     label: str
     hint: str
     done: bool
+    cta_path: str
+    cta_action: str
 
 
 class MasteryOverviewOut(BaseModel):

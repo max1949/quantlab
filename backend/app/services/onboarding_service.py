@@ -390,6 +390,7 @@ def mastery_overview_payload(
     flags: dict[str, bool],
     *,
     mastery_goal: dict,
+    active_project_id: uuid.UUID | None,
 ) -> dict | None:
     """新手大师路径一页纸总览 — 五阶段全部完成前展示。"""
     labels = i18n.MASTERY_OVERVIEW.get(locale) or i18n.MASTERY_OVERVIEW["en"]
@@ -407,12 +408,22 @@ def mastery_overview_payload(
         "masters": paper_graduated,
         "reputation": reputation_done,
     }
+    project_path = f"/projects/{active_project_id}" if active_project_id else "/projects"
+    cta_map = {
+        "incubate": (project_path if active_project_id else "/templates", "run_validation" if active_project_id else "create_project"),
+        "report": (project_path, "generate_report"),
+        "paper": (project_path, "run_paper"),
+        "masters": ("/leaderboards/paper_mastery", "view_board"),
+        "reputation": (project_path if active_project_id else "/feed", "publish_share"),
+    }
     phases = [
         {
             "key": key,
             "label": labels[f"phase_{key}"],
             "hint": labels[f"phase_{key}_hint"],
             "done": done_map[key],
+            "cta_path": cta_map[key][0],
+            "cta_action": cta_map[key][1],
         }
         for key in phase_keys
     ]
@@ -709,6 +720,7 @@ def research_journey(
         locale,
         flags,
         mastery_goal=mastery_goal,
+        active_project_id=active_id,
     )
 
     return {

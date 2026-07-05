@@ -215,6 +215,8 @@ export interface MasteryOverviewPhase {
   label: string;
   hint: string;
   done: boolean;
+  cta_path: string;
+  cta_action: string;
 }
 
 export interface MasteryOverview {

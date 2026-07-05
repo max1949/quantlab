@@ -143,6 +143,7 @@ const en = {
     progress: (done: number, total: number) => `${done}/${total} phases`,
     print: "Print path map →",
     dismiss: "Hide map",
+    open: "Open this step →",
   },
   marketDataCoach: {
     badge: (symbol: string, tf: string) => `Market data · ${symbol} · ${tf}`,
@@ -1428,6 +1429,7 @@ const zh = {
     progress: (done: number, total: number) => `已完成 ${done}/${total} 阶段`,
     print: "打印路径图 →",
     dismiss: "收起总览",
+    open: "打开这一步 →",
   },
   marketDataCoach: {
     badge: (symbol: string, tf: string) => `行情数据 · ${symbol} · ${tf}`,

@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getResearchJourney } from "../api/endpoints";
 import { useLocale } from "../store/locale";
@@ -44,6 +45,23 @@ export default function MasteryOverviewPanel() {
           <ol className="mt-4 grid gap-2 sm:grid-cols-5 print:grid-cols-5">
             {overview.phases.map((phase, i) => {
               const isCurrent = i === overview.current_index && !phase.done;
+              const content = (
+                <>
+                  {phase.done && "✓ "}
+                  {phase.label}
+                  {isCurrent && (
+                    <span className="mt-1 block text-[10px] font-normal uppercase text-violet-600">
+                      {overview.current_badge}
+                    </span>
+                  )}
+                  <span className="mt-1 block text-[10px] font-normal opacity-80">{phase.hint}</span>
+                  {!phase.done && (
+                    <span className="mt-2 block text-[10px] font-semibold text-brand-600 print:hidden">
+                      {d.open}
+                    </span>
+                  )}
+                </>
+              );
               return (
                 <li
                   key={phase.key}
@@ -55,14 +73,13 @@ export default function MasteryOverviewPanel() {
                         : "border-slate-200 bg-white/50 text-slate-400 dark:border-slate-700 dark:bg-slate-900/30"
                   }`}
                 >
-                  {phase.done && "✓ "}
-                  {phase.label}
-                  {isCurrent && (
-                    <span className="mt-1 block text-[10px] font-normal uppercase text-violet-600">
-                      {overview.current_badge}
-                    </span>
+                  {phase.done ? (
+                    content
+                  ) : (
+                    <Link to={phase.cta_path} className="block hover:opacity-90">
+                      {content}
+                    </Link>
                   )}
-                  <span className="mt-1 block text-[10px] font-normal opacity-80">{phase.hint}</span>
                 </li>
               );
             })}

@@ -316,6 +316,8 @@ def test_journey_includes_mastery_overview(client, db_session):
     assert ov["done_count"] == 0
     assert len(ov["phases"]) == 5
     assert ov["phases"][0]["key"] == "incubate"
+    assert ov["phases"][0]["cta_path"] == "/templates"
+    assert ov["phases"][0]["cta_action"] == "create_project"
 
     _full_research(client, h, db_session)
     j2 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
@@ -324,6 +326,9 @@ def test_journey_includes_mastery_overview(client, db_session):
     assert ov2["done_count"] >= 2
     assert ov2["phases"][0]["done"] is True
     assert ov2["phases"][1]["done"] is True
+    paper_phase = next(p for p in ov2["phases"] if p["key"] == "paper")
+    assert paper_phase["cta_path"] == f"/projects/{j2['active_project_id']}"
+    assert paper_phase["cta_action"] == "run_paper"
 
 
 def test_first_report_coaching_hides_after_paper_order(client, db_session):
