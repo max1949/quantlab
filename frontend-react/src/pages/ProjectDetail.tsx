@@ -40,6 +40,7 @@ import VolRegimeBanner from "../components/VolRegimeBanner";
 import FirstProjectCoachPanel from "../components/FirstProjectCoachPanel";
 import FirstBacktestCoachPanel from "../components/FirstBacktestCoachPanel";
 import FirstValidationCoachPanel from "../components/FirstValidationCoachPanel";
+import FirstPaperOrderCoachPanel from "../components/FirstPaperOrderCoachPanel";
 import FactorCatalogPanel from "../components/FactorCatalogPanel";
 import { FIRST_BACKTEST_WELCOME_KEY, FIRST_REPORT_WELCOME_KEY, FIRST_VALIDATION_WELCOME_KEY } from "../lib/onboardingFocus";
 import type { Graph } from "../api/types";
@@ -677,6 +678,8 @@ export default function ProjectDetail() {
           symbol={symbol}
         />
       </div>
+
+      <FirstPaperOrderCoachPanel projectId={id} />
 
       <div className="mt-4" id="paper-tracking">
         <PaperTrackingPanel

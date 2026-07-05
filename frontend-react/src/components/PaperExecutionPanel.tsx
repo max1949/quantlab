@@ -9,6 +9,8 @@ import {
 } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
 import { academyRewardMessage } from "../lib/academy";
+import { celebrateFirstPaperOrder } from "../lib/celebrateFirstPaperOrder";
+import { FIRST_PAPER_ORDER_WELCOME_KEY } from "../lib/onboardingFocus";
 import { useUi } from "../store/ui";
 import { useLocale } from "../store/locale";
 import type { Dictionary } from "../i18n/dictionaries";
@@ -32,6 +34,7 @@ export default function PaperExecutionPanel({
 } = {}) {
   const l4 = useLocale((s) => s.dict.l4Tools);
   const d = useLocale((s) => s.dict.dashboard);
+  const paperCoach = useLocale((s) => s.dict.firstPaperOrderCoach);
   const notify = useUi((s) => s.notify);
   const qc = useQueryClient();
 
@@ -72,15 +75,29 @@ export default function PaperExecutionPanel({
         acknowledge_risk: isGatewayChannel(channel),
         note: factorId ? "mastery-path" : "",
       }),
-    onSuccess: (o) => {
-      const msg = academyRewardMessage(o.academy_rewards, d.academyXpEarned);
-      notify(msg ?? l4.execSubmitted(o.channel, o.status), "success");
+    onSuccess: async (o) => {
+      const first = celebrateFirstPaperOrder(
+        o,
+        { celebrate: paperCoach.celebrate, academyXpEarned: d.academyXpEarned },
+        notify,
+        { confetti: false },
+      );
+      if (!first) {
+        const msg = academyRewardMessage(o.academy_rewards, d.academyXpEarned);
+        notify(msg ?? l4.execSubmitted(o.channel, o.status), "success");
+      } else if (!o.academy_rewards?.length) {
+        notify(l4.execSubmitted(o.channel, o.status), "success");
+      }
+      if (projectId) {
+        sessionStorage.setItem(FIRST_PAPER_ORDER_WELCOME_KEY, projectId);
+      }
       void qc.invalidateQueries({ queryKey: ["paper-orders"] });
       if (projectId) {
         void qc.invalidateQueries({ queryKey: ["project-quality", projectId] });
       }
       void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
       void qc.invalidateQueries({ queryKey: ["next-step"] });
+      await qc.refetchQueries({ queryKey: ["research-journey"] });
     },
     onError: (e) => notify(apiErrorMessage(e, l4.execSubmitFail), "error"),
   });

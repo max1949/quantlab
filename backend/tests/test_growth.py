@@ -437,6 +437,10 @@ def test_first_report_coaching_hides_after_paper_order(client, db_session):
 
     j2 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
     assert j2.get("first_report_coaching") is None
+    coach = j2.get("first_paper_order_coaching")
+    assert coach is not None
+    assert coach["cta_path"] == "/leaderboards/paper_mastery"
+    assert coach.get("tracking_path", "").endswith("#paper-tracking")
 
 
 def test_journey_includes_reputation_coaching_after_paper(client, db_session):

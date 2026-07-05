@@ -358,6 +358,51 @@ def quickstart_guide_payload(
     }
 
 
+def first_paper_order_coaching_payload(
+    db: Session,
+    user: User,
+    locale: Locale,
+    flags: dict[str, bool],
+    *,
+    mastery_goal: dict,
+    active_project_id: uuid.UUID | None,
+) -> dict | None:
+    """首笔 Paper 模拟单后 — 引导上大师榜跟踪净值。"""
+    if not flags.get("report"):
+        return None
+    if flags.get("share"):
+        return None
+
+    from backend.app.models.execution import PaperOrder
+
+    uid = user.id
+    paper_orders = _count(
+        db,
+        select(func.count(PaperOrder.id)).where(PaperOrder.user_id == uid),
+    )
+    if paper_orders <= 0:
+        return None
+
+    graduated = int(mastery_goal.get("paper_graduated_count") or 0)
+    if graduated > 0:
+        return None
+
+    project_path = f"/projects/{active_project_id}" if active_project_id else "/projects"
+    labels = i18n.FIRST_PAPER_ORDER_COACH.get(locale) or i18n.FIRST_PAPER_ORDER_COACH["en"]
+    project = db.get(ResearchProject, active_project_id) if active_project_id else None
+    return {
+        "badge": labels["badge"],
+        "celebrate": labels["celebrate"],
+        "message": labels["message"],
+        "unlock_features": labels["unlock_features"],
+        "cta_action": "keep_going",
+        "cta_path": "/leaderboards/paper_mastery",
+        "tracking_path": f"{project_path}#paper-tracking",
+        "active_project_id": active_project_id,
+        "project_title": project.title if project else None,
+    }
+
+
 def first_validation_coaching_payload(
     db: Session,
     user: User,
@@ -1162,6 +1207,14 @@ def research_journey(
         flags,
         active_project_id=active_id,
     )
+    first_paper_order_coaching = first_paper_order_coaching_payload(
+        db,
+        user,
+        locale,
+        flags,
+        mastery_goal=mastery_goal,
+        active_project_id=active_id,
+    )
     first_report_coaching = first_report_coaching_payload(
         db,
         user,
@@ -1222,6 +1275,7 @@ def research_journey(
         "first_project_coaching": first_project_coaching,
         "first_backtest_coaching": first_backtest_coaching,
         "first_validation_coaching": first_validation_coaching,
+        "first_paper_order_coaching": first_paper_order_coaching,
         "first_report_coaching": first_report_coaching,
         "beginner_sprint": beginner_sprint,
         "mastery_overview": mastery_overview,

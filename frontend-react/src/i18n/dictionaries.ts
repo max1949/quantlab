@@ -151,6 +151,13 @@ const en = {
     running: "Generating…",
     dismiss: "Got it",
   },
+  firstPaperOrderCoach: {
+    unlocked: (features: string) => `Next unlocks: ${features}`,
+    ctaDefault: "Paper Masters board →",
+    viewTracking: "Track NAV →",
+    celebrate: "First paper order in — welcome to the Masters tracking loop!",
+    dismiss: "Got it",
+  },
   firstReportCoach: {
     reportPageBadge: "First report milestone",
     reportCelebrate:
@@ -1547,6 +1554,13 @@ const zh = {
     unlocked: (features: string) => `下一步解锁：${features}`,
     ctaDefault: "生成报告 →",
     running: "生成中…",
+    dismiss: "知道了",
+  },
+  firstPaperOrderCoach: {
+    unlocked: (features: string) => `下一步解锁：${features}`,
+    ctaDefault: "Paper 大师榜 →",
+    viewTracking: "跟踪净值 →",
+    celebrate: "首笔 Paper 模拟单已提交 — 欢迎进入大师跟踪闭环！",
     dismiss: "知道了",
   },
   firstReportCoach: {

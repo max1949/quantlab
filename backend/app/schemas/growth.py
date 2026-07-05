@@ -147,6 +147,18 @@ class QuickstartGuideOut(BaseModel):
     total: int
 
 
+class FirstPaperOrderCoachingOut(BaseModel):
+    badge: str
+    celebrate: str
+    message: str
+    unlock_features: str
+    cta_action: str
+    cta_path: str
+    tracking_path: str | None = None
+    active_project_id: uuid.UUID | None = None
+    project_title: str | None = None
+
+
 class FirstValidationCoachingOut(BaseModel):
     badge: str
     celebrate: str
@@ -355,6 +367,7 @@ class ResearchJourneyOut(BaseModel):
     first_project_coaching: FirstProjectCoachingOut | None = None
     first_backtest_coaching: FirstBacktestCoachingOut | None = None
     first_validation_coaching: FirstValidationCoachingOut | None = None
+    first_paper_order_coaching: FirstPaperOrderCoachingOut | None = None
     first_report_coaching: FirstReportCoachingOut | None = None
     beginner_sprint: BeginnerSprintOut | None = None
     mastery_overview: MasteryOverviewOut | None = None

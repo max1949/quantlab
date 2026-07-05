@@ -719,6 +719,21 @@ BEGINNER_ONEPAGER: dict[Locale, dict[str, str]] = {
     },
 }
 
+FIRST_PAPER_ORDER_COACH: dict[Locale, dict[str, str]] = {
+    "en": {
+        "badge": "First paper order live",
+        "celebrate": "Your simulated order is in — you are now on the Paper Masters tracking loop.",
+        "message": "Watch NAV and rank on the masters board. Iterate like an institutional PM: track, re-validate, refine.",
+        "unlock_features": "Paper Masters board · live NAV · rank tracking",
+    },
+    "zh": {
+        "badge": "首笔 Paper 模拟单已提交",
+        "celebrate": "模拟单已进入系统 — 你已站上 Paper 大师跟踪闭环。",
+        "message": "在大师榜查看净值与排名。像机构 PM 一样迭代：跟踪、再验证、持续打磨。",
+        "unlock_features": "Paper 大师榜 · 净值跟踪 · 排名变化",
+    },
+}
+
 FIRST_VALIDATION_COACH: dict[Locale, dict[str, str]] = {
     "en": {
         "badge": "Validation passed",
