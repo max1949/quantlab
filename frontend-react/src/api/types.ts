@@ -256,6 +256,20 @@ export interface MasteryOverview {
   share_cta: string;
 }
 
+export interface ReputationCoaching {
+  reason: string;
+  badge: string;
+  message: string;
+  celebrate: string;
+  unlock_features: string;
+  cta_action: string;
+  cta_path: string;
+  active_project_id: string | null;
+  on_leaderboard: boolean;
+  guide_title: string | null;
+  guide_steps: FirstReportGuideStep[];
+}
+
 export interface ResearchJourney {
   done_count: number;
   total: number;
@@ -275,6 +289,7 @@ export interface ResearchJourney {
   first_report_coaching: FirstReportCoaching | null;
   beginner_sprint: BeginnerSprint | null;
   mastery_overview: MasteryOverview | null;
+  reputation_coaching: ReputationCoaching | null;
 }
 
 export interface Mentor {

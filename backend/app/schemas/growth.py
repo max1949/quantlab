@@ -173,6 +173,20 @@ class FirstReportCoachingOut(BaseModel):
     guide_steps: list[FirstReportGuideStepOut] = Field(default_factory=list)
 
 
+class ReputationCoachingOut(BaseModel):
+    reason: str
+    badge: str
+    message: str
+    celebrate: str
+    unlock_features: str
+    cta_action: str
+    cta_path: str
+    active_project_id: uuid.UUID | None = None
+    on_leaderboard: bool = False
+    guide_title: str | None = None
+    guide_steps: list[FirstReportGuideStepOut] = Field(default_factory=list)
+
+
 class BeginnerSprintOut(BaseModel):
     sprint_day: int
     sprint_total: int
@@ -274,6 +288,7 @@ class ResearchJourneyOut(BaseModel):
     first_report_coaching: FirstReportCoachingOut | None = None
     beginner_sprint: BeginnerSprintOut | None = None
     mastery_overview: MasteryOverviewOut | None = None
+    reputation_coaching: ReputationCoachingOut | None = None
 
 
 # ---- 研究模板 ----

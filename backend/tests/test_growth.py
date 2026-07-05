@@ -439,6 +439,48 @@ def test_first_report_coaching_hides_after_paper_order(client, db_session):
     assert j2.get("first_report_coaching") is None
 
 
+def test_journey_includes_reputation_coaching_after_paper(client, db_session):
+    from backend.app.models.user import User, UserLevel
+    from backend.app.services import membership_service as ms
+    from sqlalchemy import select
+
+    seed_sample_market_data(db_session)
+    h = _register(client, "repcoach")
+    proj, report = _full_research(client, h, db_session)
+    user = db_session.execute(select(User).where(User.username == "repcoach")).scalar_one()
+    user.level = UserLevel.L4
+    db_session.add(user)
+    db_session.commit()
+    ms.grant(db_session, user, ms.TIER_PRO, 30, "pro_monthly")
+
+    factors = client.get(f"{BASE}/factors", headers=h).json()
+    fid = next(f["id"] for f in factors if f.get("project_id") == proj["id"])
+    created = client.post(
+        f"{BASE}/execution/paper/orders",
+        headers=h,
+        json={
+            "symbol": "RB",
+            "side": "buy",
+            "notional_cny": 50000,
+            "factor_id": fid,
+            "signal_value": 0.82,
+        },
+    )
+    assert created.status_code == 201, created.text
+
+    j = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    coach = j.get("reputation_coaching")
+    assert coach is not None
+    assert coach["badge"]
+    assert coach["guide_title"]
+    assert len(coach.get("guide_steps") or []) >= 2
+    assert coach["cta_action"] == "publish_share"
+
+    client.post(f"{BASE}/research/reports/{report['id']}/share", headers=h)
+    j2 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
+    assert j2.get("reputation_coaching") is None
+
+
 def test_journey_includes_checkout_coaching(client, db_session):
     from backend.app.models.user import User
     from backend.app.services import membership_service as ms

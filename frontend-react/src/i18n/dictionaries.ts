@@ -131,6 +131,14 @@ const en = {
     stepGo: "Go →",
     saveHandbook: "Save your progress map →",
   },
+  reputationCoach: {
+    unlocked: (features: string) => `Unlocks: ${features}`,
+    ctaDefault: "Continue →",
+    viewFeed: "Research feed →",
+    dismiss: "Got it",
+    onBoard: "On Paper Masters board",
+    stepGo: "Go →",
+  },
   beginnerSprint: {
     enrollCta: "Join 30-day challenge →",
     viewCta: "View challenge progress →",
@@ -1456,6 +1464,14 @@ const zh = {
     challengeMilestone: "30 天挑战 D30 里程碑已点亮 — 首份报告完成。",
     stepGo: "去 →",
     saveHandbook: "保存进度路径图 →",
+  },
+  reputationCoach: {
+    unlocked: (features: string) => `下一步解锁：${features}`,
+    ctaDefault: "继续 →",
+    viewFeed: "研究广场 →",
+    dismiss: "知道了",
+    onBoard: "已上 Paper 大师榜",
+    stepGo: "去 →",
   },
   beginnerSprint: {
     enrollCta: "报名 30 天挑战 →",

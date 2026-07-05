@@ -814,6 +814,41 @@ MASTERY_OVERVIEW: dict[Locale, dict[str, str]] = {
     },
 }
 
+REPUTATION_COACH: dict[Locale, dict[str, str]] = {
+    "en": {
+        "badge": "Reputation phase",
+        "celebrate": "Paper Masters milestone — your simulated edge is proven. Build public research reputation next.",
+        "on_board": "You're on the Paper Masters board — share your graduated research with the community.",
+        "publish_first": "Publish your study to the research feed — quality gate passed, you're ready to go public.",
+        "share_next": "Project is live on the feed — create a share card and drive views & followers.",
+        "masters_intro": "Final mastery phase: publish, share, and grow on the research square.",
+        "unlock": "Public feed · share cards · follower growth · research reputation",
+        "guide_title": "3-step reputation loop",
+        "step1_label": "Publish to the feed",
+        "step1_hint": "Open your project and publish — your study joins the public research square.",
+        "step2_label": "Share your report card",
+        "step2_hint": "Generate a share link — your mastery path appears on every card.",
+        "step3_label": "Grow on the square",
+        "step3_hint": "Watch views climb, gain followers, and inspire the next cohort of researchers.",
+    },
+    "zh": {
+        "badge": "声誉阶段",
+        "celebrate": "Paper 大师里程碑已达成 — 模拟盘优势已验证，下一步在研究广场建立声誉。",
+        "on_board": "你已登上 Paper 大师榜 — 把毕业研究分享给社区吧。",
+        "publish_first": "把研究发布到广场 — 质量闸门已通过，可以公开了。",
+        "share_next": "项目已在广场上线 — 生成分享卡片，带来浏览与涨粉。",
+        "masters_intro": "大师路径最后一环：发布、分享、在研究广场积累声誉。",
+        "unlock": "公开广场 · 分享卡片 · 涨粉 · 研究声誉",
+        "guide_title": "3 步声誉闭环",
+        "step1_label": "发布到研究广场",
+        "step1_hint": "打开项目并发布 — 你的研究会出现在公开广场。",
+        "step2_label": "分享研究报告卡片",
+        "step2_hint": "生成分享链接 — 每张卡片都会带上你的大师路径进度。",
+        "step3_label": "在广场上成长",
+        "step3_hint": "看浏览量上涨、收获关注，激励下一批研究员。",
+    },
+}
+
 BILLING_RECEIPT_EMAIL: dict[Locale, dict[str, str]] = {
     "en": {
         "subject": "QuantLab receipt · {plan_name}",

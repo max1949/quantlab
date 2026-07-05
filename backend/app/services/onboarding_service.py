@@ -478,6 +478,98 @@ def first_report_coaching_payload(
     }
 
 
+def reputation_coaching_payload(
+    db: Session,
+    user: User,
+    locale: Locale,
+    flags: dict[str, bool],
+    *,
+    mastery_goal: dict,
+    active_project_id: uuid.UUID | None,
+) -> dict | None:
+    """Paper 大师榜后声誉阶段 — 发布 → 分享 → 涨粉闭环。"""
+    if flags.get("share"):
+        return None
+
+    graduated = int(mastery_goal.get("paper_graduated_count") or 0)
+    on_board = bool(mastery_goal.get("on_leaderboard"))
+    tracking = int(mastery_goal.get("paper_tracking_count") or 0)
+    if not flags.get("report"):
+        return None
+    if graduated <= 0 and not on_board and tracking <= 0:
+        return None
+
+    labels = i18n.REPUTATION_COACH.get(locale) or i18n.REPUTATION_COACH["en"]
+    project_path = f"/projects/{active_project_id}" if active_project_id else "/projects"
+    report_id = _latest_report_id(db, user)
+    report_path = f"/reports/{report_id}" if report_id else project_path
+    share_path = f"{project_path}#report-share" if active_project_id else report_path
+    publish_ready = bool(mastery_goal.get("publish_ready"))
+
+    full_guide = [
+        {
+            "step": 1,
+            "label": labels["step1_label"],
+            "hint": labels["step1_hint"],
+            "cta_path": project_path,
+            "cta_action": "publish_share",
+        },
+        {
+            "step": 2,
+            "label": labels["step2_label"],
+            "hint": labels["step2_hint"],
+            "cta_path": share_path,
+            "cta_action": "publish_share",
+        },
+        {
+            "step": 3,
+            "label": labels["step3_label"],
+            "hint": labels["step3_hint"],
+            "cta_path": "/feed",
+            "cta_action": "keep_going",
+        },
+    ]
+
+    if flags.get("publish") and not flags.get("share"):
+        reason = "share_next"
+        message = labels["share_next"]
+        celebrate = labels["celebrate"]
+        cta_action = "publish_share"
+        cta_path = share_path
+        guide_title = labels["guide_title"]
+        guide_steps = full_guide[1:]
+    elif publish_ready and not flags.get("publish"):
+        reason = "publish_first"
+        message = labels["publish_first"]
+        celebrate = labels["on_board"] if on_board else labels["celebrate"]
+        cta_action = "publish_share"
+        cta_path = project_path
+        guide_title = labels["guide_title"]
+        guide_steps = full_guide
+    else:
+        reason = "masters_reputation"
+        message = labels["masters_intro"]
+        celebrate = labels["on_board"] if on_board else labels["celebrate"]
+        cta_action = "publish_share"
+        cta_path = project_path
+        guide_title = labels["guide_title"]
+        guide_steps = full_guide
+
+    return {
+        "reason": reason,
+        "badge": labels["badge"],
+        "message": message,
+        "celebrate": celebrate,
+        "unlock_features": labels["unlock"],
+        "cta_action": cta_action,
+        "cta_path": cta_path,
+        "active_project_id": active_project_id,
+        "on_leaderboard": on_board,
+        "guide_title": guide_title,
+        "guide_steps": guide_steps,
+    }
+
+
 def beginner_sprint_payload(
     user: User,
     locale: Locale,
@@ -813,6 +905,14 @@ def research_journey(
         mastery_goal=mastery_goal,
         active_project_id=active_id,
     )
+    reputation_coaching = reputation_coaching_payload(
+        db,
+        user,
+        locale,
+        flags,
+        mastery_goal=mastery_goal,
+        active_project_id=active_id,
+    )
 
     return {
         "done_count": done_count,
@@ -833,4 +933,5 @@ def research_journey(
         "first_report_coaching": first_report_coaching,
         "beginner_sprint": beginner_sprint,
         "mastery_overview": mastery_overview,
+        "reputation_coaching": reputation_coaching,
     }
