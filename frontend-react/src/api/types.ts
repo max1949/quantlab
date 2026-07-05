@@ -369,6 +369,7 @@ export interface MasteryGraduationCoaching {
   on_leaderboard: boolean;
   leaderboard_rank: number | null;
   followers: number;
+  following: number;
   cta_action: string;
   cta_path: string;
   profile_path: string;

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getResearchJourney } from "../api/endpoints";
 import { FIRST_FEED_FOLLOW_WELCOME_KEY } from "../lib/onboardingFocus";
 import { burstConfetti } from "../lib/confetti";
+import { journeyFollowingCount, NETWORK_FOLLOW_TARGET } from "../lib/journeyFollowing";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 
@@ -26,14 +27,14 @@ export default function FeedFollowCoachPanel({ onDiscoverMasters }: Props) {
 
   const share = journey.data?.share_growth_coaching;
   const grad = journey.data?.mastery_graduation_coaching;
-  const following = share?.following ?? grad?.followers ?? null;
+  const followingCount = journeyFollowingCount(journey.data);
   const freshWelcome =
     typeof window !== "undefined" && sessionStorage.getItem(FIRST_FEED_FOLLOW_WELCOME_KEY) === "1";
 
   const matches =
     Boolean(user) &&
     !dismissed &&
-    (following ?? 0) === 0 &&
+    followingCount < NETWORK_FOLLOW_TARGET &&
     (share != null || grad != null || freshWelcome);
 
   useEffect(() => {
@@ -49,6 +50,8 @@ export default function FeedFollowCoachPanel({ onDiscoverMasters }: Props) {
     setDismissed(true);
   };
 
+  const progressPct = Math.min(100, Math.round((followingCount / NETWORK_FOLLOW_TARGET) * 100));
+
   return (
     <div className="mb-4 card border border-sky-200 bg-gradient-to-r from-sky-50/90 to-indigo-50/50 dark:border-sky-900 dark:from-sky-950/40 dark:to-indigo-950/30">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -58,6 +61,18 @@ export default function FeedFollowCoachPanel({ onDiscoverMasters }: Props) {
           </p>
           <p className="mt-1 text-sm font-medium text-slate-800 dark:text-slate-100">{d.title}</p>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{d.message}</p>
+          <div className="mt-3">
+            <div className="mb-1 flex items-center justify-between text-xs text-sky-900/80 dark:text-sky-100/80">
+              <span>{d.progress(followingCount, NETWORK_FOLLOW_TARGET)}</span>
+              <span>{progressPct}%</span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-sky-100 dark:bg-sky-950">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-sky-500 to-indigo-500 transition-all duration-500"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+          </div>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
           <button

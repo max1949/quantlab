@@ -25,7 +25,7 @@ export default function Feed() {
   const [graduatedOnly, setGraduatedOnly] = useState(focusFollow);
   useDocumentTitle(`${f.title} · QuantLab AI`);
   const feed = useQuery({
-    queryKey: ["public-feed", sort, graduatedOnly],
+    queryKey: ["public-feed", sort, graduatedOnly, user?.id ?? "guest"],
     queryFn: () => getPublicFeed(sort, graduatedOnly),
   });
 

@@ -286,6 +286,7 @@ class MasteryGraduationCoachingOut(BaseModel):
     on_leaderboard: bool
     leaderboard_rank: int | None = None
     followers: int
+    following: int
     cta_action: str
     cta_path: str
     profile_path: str

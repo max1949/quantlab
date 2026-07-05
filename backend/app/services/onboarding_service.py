@@ -965,7 +965,9 @@ def mastery_graduation_coaching_payload(
     labels = i18n.MASTERY_GRADUATION_COACH.get(locale) or i18n.MASTERY_GRADUATION_COACH["en"]
     on_board = bool(mastery_goal.get("on_leaderboard"))
     rank = mastery_goal.get("leaderboard_rank")
-    followers = int(social_service.counts(db, user.id)["followers"])
+    follow_counts = social_service.counts(db, user.id)
+    followers = int(follow_counts["followers"])
+    following = int(follow_counts["following"])
     graduated = int(mastery_goal.get("paper_graduated_count") or 0)
     project_path = f"/projects/{active_project_id}" if active_project_id else "/projects"
 
@@ -980,6 +982,7 @@ def mastery_graduation_coaching_payload(
         "on_leaderboard": on_board,
         "leaderboard_rank": rank,
         "followers": followers,
+        "following": following,
         "cta_action": "view_board",
         "cta_path": "/leaderboards?kind=paper_mastery",
         "profile_path": "/me",

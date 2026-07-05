@@ -1255,6 +1255,10 @@ const en = {
     browseFeed: "Show graduated masters →",
     openFollowing: "My following feed",
     dismiss: "Later",
+    progress: (n: number, target: number) => `${n} / ${target} researchers followed`,
+    progressToast: (n: number, target: number) =>
+      `Nice — ${n} of ${target} followed. Keep building your learning radar.`,
+    networkReady: "Network ready — your following feed is live. Peers can discover you too.",
   },
   l2Analysis: {
     title: "L2 Advanced analysis",
@@ -2750,6 +2754,10 @@ const zh = {
     browseFeed: "筛选已毕业大师 →",
     openFollowing: "我的关注流",
     dismiss: "稍后再说",
+    progress: (n: number, target: number) => `已关注 ${n} / ${target} 位研究员`,
+    progressToast: (n: number, target: number) =>
+      `很好 — 已关注 ${n}/${target} 位，继续搭建你的学习雷达。`,
+    networkReady: "人脉就绪 — 关注流已激活，同行也更容易发现你。",
   },
   l2Analysis: {
     title: "L2 进阶分析",
