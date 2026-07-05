@@ -1036,6 +1036,7 @@ export interface ChallengeProgress {
   reward_points: number;
   certificate_code: string | null;
   completed_at: string | null;
+  academy_rewards?: AcademyReward[];
 }
 
 export interface ChallengeOut {

@@ -153,6 +153,15 @@ DEFAULT_TASKS: list[dict] = [
         "order_index": 10,
     },
     {
+        "code": "challenge-enroll",
+        "title": "报名 30 天挑战",
+        "description": "首次报名 30 天研究挑战后自动完成 — 里程碑会随你的研究进度点亮。",
+        "category": "onboarding",
+        "min_level": UserLevel.L0.value,
+        "xp_reward": 60,
+        "order_index": 15,
+    },
+    {
         "code": "first-observation",
         "title": "第一次观察",
         "description": "预览因子或完成首次回测后自动完成 (查看因子在样本行情上的统计)。",
@@ -275,6 +284,7 @@ DEFAULT_TASKS: list[dict] = [
 # 学院任务 ↔ 大师路径阶段映射 (供 UI 联动高亮)。
 MASTERY_STAGE_BY_TASK_CODE: dict[str, str] = {
     "welcome": "start",
+    "challenge-enroll": "start",
     "first-observation": "start",
     "first-backtest": "backtest",
     "first-validation": "validate",
@@ -291,7 +301,7 @@ MASTERY_STAGE_BY_TASK_CODE: dict[str, str] = {
 }
 
 MASTERY_STAGE_TASK_CODES: dict[str, list[str]] = {
-    "start": ["welcome", "first-observation", "use-template-factor"],
+    "start": ["welcome", "challenge-enroll", "first-observation", "use-template-factor"],
     "backtest": ["first-backtest"],
     "validate": ["first-validation", "first-factor-scan"],
     "graduate": ["combine-factors", "write-formula-factor"],

@@ -21,6 +21,7 @@ export const AUTO_ACADEMY_TASK_CODES = new Set([
   "first-report",
   "first-publish",
   "first-share",
+  "challenge-enroll",
   "use-template-factor",
   "first-factor-scan",
   "combine-factors",

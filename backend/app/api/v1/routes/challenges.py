@@ -37,8 +37,16 @@ def enroll(
     db: Annotated[Session, Depends(get_db)],
 ) -> ProgressOut:
     try:
+        was_enrolled = challenge_service.is_enrolled(db, current_user, code)
         challenge_service.enroll(db, current_user, code)
-        return ProgressOut(**localize_progress(challenge_service.evaluate(db, current_user, code), locale))
+        result = challenge_service.evaluate(db, current_user, code)
+        if not was_enrolled:
+            from backend.app.services import academy_hooks
+
+            result["academy_rewards"] = academy_hooks.on_challenge_enrolled(db, current_user)
+        else:
+            result["academy_rewards"] = []
+        return ProgressOut(**localize_progress(result, locale))
     except challenge_service.ChallengeNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="挑战不存在")
 

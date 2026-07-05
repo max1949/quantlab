@@ -74,6 +74,9 @@ def test_challenge_progress_auto(client, db_session):
     prog = client.post(f"{BASE}/challenges/30d-research/enroll", headers=h).json()
     assert prog["total"] == 6
     assert prog["completed_count"] == 0
+    assert any(r["code"] == "challenge-enroll" for r in prog.get("academy_rewards", []))
+    again = client.post(f"{BASE}/challenges/30d-research/enroll", headers=h).json()
+    assert not again.get("academy_rewards")
 
     # 造因子 -> first_factor 自动完成
     fid = client.post(

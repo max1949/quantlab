@@ -3,7 +3,9 @@ import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { enrollChallenge, getResearchJourney } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
+import { celebrateChallengeEnroll } from "../lib/challengeEnroll";
 import { useLocale } from "../store/locale";
+import { useAuth } from "../store/auth";
 import { useUi } from "../store/ui";
 import { stageToCtaLabel } from "../lib/nav";
 import { Spinner } from "./ui";
@@ -21,8 +23,10 @@ export default function QuickStartGuidePanel() {
   const d = useLocale((s) => s.dict.quickstartGuide);
   const sprintLabels = useLocale((s) => s.dict.beginnerSprint);
   const challengePage = useLocale((s) => s.dict.challengesPage);
+  const dash = useLocale((s) => s.dict.dashboard);
   const stages = useLocale((s) => s.dict.stages);
   const notify = useUi((s) => s.notify);
+  const refreshMe = useAuth((s) => s.refreshMe);
   const qc = useQueryClient();
   const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
 
@@ -37,21 +41,17 @@ export default function QuickStartGuidePanel() {
 
   const enroll = useMutation({
     mutationFn: () => enrollChallenge(sprint!.challenge_code),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       void qc.invalidateQueries({ queryKey: ["research-journey"] });
       void qc.invalidateQueries({ queryKey: ["challenge-progress", sprint?.challenge_code] });
       void qc.invalidateQueries({ queryKey: ["researcher"] });
-      const lit = data.milestones.filter((m) => m.completed).length;
-      if (data.newly_awarded_points > 0) {
-        notify(
-          sprintLabels.enrollReward(data.newly_awarded_points, lit, data.total),
-          "success",
-        );
-      } else if (lit > 0) {
-        notify(sprintLabels.enrollSynced(lit, data.total), "success");
-      } else {
-        notify(sprintLabels.enrollSuccess, "success");
-      }
+      void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
+      celebrateChallengeEnroll(
+        data,
+        { ...sprintLabels, academyXpEarned: dash.academyXpEarned },
+        notify,
+      );
+      await refreshMe();
     },
     onError: (e) => notify(apiErrorMessage(e, challengePage.enrollFail), "error"),
   });

@@ -5,7 +5,9 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+
+from backend.app.schemas.task import AcademyRewardOut
 
 
 class ChallengeOut(BaseModel):
@@ -44,6 +46,7 @@ class ProgressOut(BaseModel):
     reward_points: int = 0
     certificate_code: str | None = None
     completed_at: datetime | None = None
+    academy_rewards: list[AcademyRewardOut] = Field(default_factory=list)
 
 
 class CertificateOut(BaseModel):

@@ -74,3 +74,8 @@ def on_project_published(db: Session, user: User) -> list[dict]:
 
 def on_first_share(db: Session, user: User) -> list[dict]:
     return _collect(db, user, ["first-share"])
+
+
+def on_challenge_enrolled(db: Session, user: User) -> list[dict]:
+    task_service.seed_default_tasks(db)
+    return _collect(db, user, ["challenge-enroll"])

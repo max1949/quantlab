@@ -7,14 +7,19 @@ import {
   listChallenges,
 } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
+import { celebrateChallengeEnroll } from "../lib/challengeEnroll";
 import { useLocale } from "../store/locale";
+import { useAuth } from "../store/auth";
 import { useUi } from "../store/ui";
 import { ErrorBox, PageTitle, Spinner } from "../components/ui";
 
 export default function Challenges() {
   const { dict } = useLocale();
   const t = dict.challengesPage;
+  const sprintLabels = dict.beginnerSprint;
+  const dash = dict.dashboard;
   const notify = useUi((s) => s.notify);
+  const refreshMe = useAuth((s) => s.refreshMe);
   const qc = useQueryClient();
   const [code, setCode] = useState<string | null>(null);
 
@@ -38,10 +43,21 @@ export default function Challenges() {
 
   const enroll = useMutation({
     mutationFn: () => enrollChallenge(code!),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       qc.setQueryData(["challenge-progress", code], data);
       void qc.invalidateQueries({ queryKey: ["research-journey"] });
-      notify(t.enrollSuccess, "success");
+      void qc.invalidateQueries({ queryKey: ["academy-tasks"] });
+      celebrateChallengeEnroll(
+        data,
+        {
+          enrollSuccess: t.enrollSuccess,
+          enrollSynced: sprintLabels.enrollSynced,
+          enrollReward: sprintLabels.enrollReward,
+          academyXpEarned: dash.academyXpEarned,
+        },
+        notify,
+      );
+      await refreshMe();
     },
     onError: (e) => notify(apiErrorMessage(e, t.enrollFail), "error"),
   });
