@@ -1226,6 +1226,27 @@ const en = {
     qualityHintsTitle: "Publish tips (non-blocking)",
     orthogonalTitle: "Factor overlap check",
     orthogonalVerdict: (v: string) => v,
+    projectCoachMore: (n: number) => `${n} more project coach tip(s) folded — focus on one step`,
+    projectCoachExpand: "Show all project tips →",
+    projectCoachCollapse: "Focus on current step ↑",
+  },
+  projectCoachLabels: {
+    first_paper_order: (j: ResearchJourney) =>
+      j.first_paper_order_coaching?.celebrate ?? "Paper tracking coach",
+    first_validation: (j: ResearchJourney) =>
+      j.first_validation_coaching?.celebrate ?? "Generate first report",
+    first_backtest: (j: ResearchJourney) =>
+      j.first_backtest_coaching?.celebrate ?? "Run validation",
+    first_project: (j: ResearchJourney) =>
+      j.first_project_coaching?.celebrate ?? "Run first backtest",
+  },
+  feedFollowCoach: {
+    badge: "Grow your network",
+    title: "Follow active researchers — they'll notice your work too",
+    message:
+      "Pick 2–3 masters on the feed whose style you respect. Your following feed becomes a learning radar and helps others discover your share card.",
+    openFollowing: "Open following feed →",
+    dismiss: "Later",
   },
   l2Analysis: {
     title: "L2 Advanced analysis",
@@ -2690,6 +2711,27 @@ const zh = {
     qualityHintsTitle: "发布建议（不阻断发布）",
     orthogonalTitle: "因子重叠度检查",
     orthogonalVerdict: (v: string) => v,
+    projectCoachMore: (n: number) => `还有 ${n} 条项目教练提示已折叠 — 先专注当前一步`,
+    projectCoachExpand: "展开全部项目提示 →",
+    projectCoachCollapse: "收起，专注当前步骤 ↑",
+  },
+  projectCoachLabels: {
+    first_paper_order: (j: ResearchJourney) =>
+      j.first_paper_order_coaching?.celebrate ?? "模拟盘跟踪教练",
+    first_validation: (j: ResearchJourney) =>
+      j.first_validation_coaching?.celebrate ?? "生成首份报告",
+    first_backtest: (j: ResearchJourney) =>
+      j.first_backtest_coaching?.celebrate ?? "运行验证",
+    first_project: (j: ResearchJourney) =>
+      j.first_project_coaching?.celebrate ?? "运行首次回测",
+  },
+  feedFollowCoach: {
+    badge: "扩展人脉",
+    title: "关注活跃研究员 — 他们也会注意到你的成果",
+    message:
+      "在广场上挑 2～3 位你欣赏风格的大师关注。关注流会变成学习雷达，也更容易让别人发现你的分享卡片。",
+    openFollowing: "打开关注流 →",
+    dismiss: "稍后再说",
   },
   l2Analysis: {
     title: "L2 进阶分析",

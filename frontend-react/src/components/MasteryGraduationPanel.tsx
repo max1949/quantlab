@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getResearchJourney } from "../api/endpoints";
+import { FIRST_FEED_FOLLOW_WELCOME_KEY } from "../lib/onboardingFocus";
 import { burstConfetti } from "../lib/confetti";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
@@ -138,7 +139,11 @@ export default function MasteryGraduationPanel() {
             {d.viewFeed}
           </Link>
           {coach.followers === 0 && (
-            <Link to="/feed" className="btn whitespace-nowrap text-xs">
+            <Link
+              to="/feed"
+              className="btn whitespace-nowrap text-xs"
+              onClick={() => sessionStorage.setItem(FIRST_FEED_FOLLOW_WELCOME_KEY, "1")}
+            >
               {d.followResearchers}
             </Link>
           )}

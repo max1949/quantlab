@@ -37,10 +37,7 @@ import AttentionCoachPanel from "../components/AttentionCoachPanel";
 import PublishFeedPreview from "../components/PublishFeedPreview";
 import DataQualityBanner from "../components/DataQualityBanner";
 import VolRegimeBanner from "../components/VolRegimeBanner";
-import FirstProjectCoachPanel from "../components/FirstProjectCoachPanel";
-import FirstBacktestCoachPanel from "../components/FirstBacktestCoachPanel";
-import FirstValidationCoachPanel from "../components/FirstValidationCoachPanel";
-import FirstPaperOrderCoachPanel from "../components/FirstPaperOrderCoachPanel";
+import ProjectIncubationCoachStack from "../components/ProjectIncubationCoachStack";
 import FactorCatalogPanel from "../components/FactorCatalogPanel";
 import { FIRST_BACKTEST_WELCOME_KEY, FIRST_REPORT_WELCOME_KEY, FIRST_VALIDATION_WELCOME_KEY } from "../lib/onboardingFocus";
 import type { Graph } from "../api/types";
@@ -355,30 +352,18 @@ export default function ProjectDetail() {
         ))}
       </div>
 
-      <FirstProjectCoachPanel
+      <ProjectIncubationCoachStack
         projectId={id}
         backtestDone={done.backtest}
-        backtestPending={busy === "backtest"}
-        onRunBacktest={() => runBacktest.mutate()}
-      />
-
-      <FirstBacktestCoachPanel
-        projectId={id}
-        backtestDone={done.backtest}
-        validationDone={done.validation}
-        validationPending={busy === "validation"}
-        onRunValidation={() => runValidation.mutate()}
-      />
-
-      <FirstValidationCoachPanel
-        projectId={id}
         validationDone={done.validation}
         reportDone={done.report}
+        backtestPending={busy === "backtest"}
+        validationPending={busy === "validation"}
         reportPending={busy === "report"}
+        onRunBacktest={() => runBacktest.mutate()}
+        onRunValidation={() => runValidation.mutate()}
         onGenerateReport={() => genReport.mutate()}
       />
-
-      <FirstPaperOrderCoachPanel projectId={id} placement="project" />
 
       {projectFactors.length > 1 && (
         <div className="mb-4 flex items-center gap-2 text-sm">
