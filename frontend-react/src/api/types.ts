@@ -182,6 +182,14 @@ export interface QuickstartGuide {
   total: number;
 }
 
+export interface FirstReportGuideStep {
+  step: number;
+  label: string;
+  hint: string;
+  cta_path: string;
+  cta_action: string;
+}
+
 export interface FirstReportCoaching {
   reason: string;
   badge: string;
@@ -196,6 +204,8 @@ export interface FirstReportCoaching {
   academy_xp: number | null;
   academy_completed: boolean;
   challenge_milestone_done: boolean;
+  paper_guide_title: string | null;
+  guide_steps: FirstReportGuideStep[];
 }
 
 export interface BeginnerSprint {

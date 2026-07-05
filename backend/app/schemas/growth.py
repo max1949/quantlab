@@ -147,6 +147,14 @@ class QuickstartGuideOut(BaseModel):
     total: int
 
 
+class FirstReportGuideStepOut(BaseModel):
+    step: int
+    label: str
+    hint: str
+    cta_path: str
+    cta_action: str
+
+
 class FirstReportCoachingOut(BaseModel):
     reason: str
     badge: str
@@ -161,6 +169,8 @@ class FirstReportCoachingOut(BaseModel):
     academy_xp: int | None = None
     academy_completed: bool = False
     challenge_milestone_done: bool = False
+    paper_guide_title: str | None = None
+    guide_steps: list[FirstReportGuideStepOut] = Field(default_factory=list)
 
 
 class BeginnerSprintOut(BaseModel):

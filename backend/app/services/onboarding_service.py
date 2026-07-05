@@ -275,12 +275,38 @@ def first_report_coaching_payload(
     paper_ready = bool(mastery_goal.get("paper_ready"))
     publish_ready = bool(mastery_goal.get("publish_ready"))
 
+    guide_steps: list[dict] = []
+    paper_guide_title = None
     if paper_ready:
         reason = "paper_ready"
         message = labels["paper_ready"]
         unlock = labels["unlock_paper"]
         cta_action = "run_paper"
         cta_path = project_path
+        paper_guide_title = labels["paper_guide_title"]
+        guide_steps = [
+            {
+                "step": 1,
+                "label": labels["paper_step1_label"],
+                "hint": labels["paper_step1_hint"],
+                "cta_path": project_path,
+                "cta_action": "run_paper",
+            },
+            {
+                "step": 2,
+                "label": labels["paper_step2_label"],
+                "hint": labels["paper_step2_hint"],
+                "cta_path": project_path,
+                "cta_action": "run_paper",
+            },
+            {
+                "step": 3,
+                "label": labels["paper_step3_label"],
+                "hint": labels["paper_step3_hint"],
+                "cta_path": "/leaderboards/paper_mastery",
+                "cta_action": "keep_going",
+            },
+        ]
     elif publish_ready:
         reason = "publish_share"
         message = labels["publish_next"]
@@ -336,6 +362,8 @@ def first_report_coaching_payload(
         "academy_xp": academy_xp,
         "academy_completed": academy_completed,
         "challenge_milestone_done": challenge_milestone_done,
+        "paper_guide_title": paper_guide_title,
+        "guide_steps": guide_steps,
     }
 
 

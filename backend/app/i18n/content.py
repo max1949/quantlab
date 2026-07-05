@@ -697,6 +697,13 @@ FIRST_REPORT_COACH: dict[Locale, dict[str, str]] = {
         "continue_mastery": "Keep sharpening your factor — run validation again or explore paper readiness.",
         "unlock_paper": "Paper trading · live NAV tracking · Paper Masters board",
         "unlock_share": "Public feed · follower growth · research reputation",
+        "paper_guide_title": "30-second Paper walkthrough",
+        "paper_step1_label": "Open your project",
+        "paper_step1_hint": "The Paper bar shows your graduated factor and live signal.",
+        "paper_step2_label": "Submit a paper order",
+        "paper_step2_hint": "Pick symbol, side, and notional — simulated capital only.",
+        "paper_step3_label": "Track on Masters board",
+        "paper_step3_hint": "Watch NAV and rank climb as you iterate like a pro.",
     },
     "zh": {
         "badge": "首份报告已达成",
@@ -706,6 +713,13 @@ FIRST_REPORT_COACH: dict[Locale, dict[str, str]] = {
         "continue_mastery": "继续打磨因子 — 补跑验证或向 Paper 毕业线迈进。",
         "unlock_paper": "Paper 模拟盘 · 净值跟踪 · Paper 大师榜",
         "unlock_share": "公开广场 · 涨粉 · 研究声誉",
+        "paper_guide_title": "30 秒 Paper 上手",
+        "paper_step1_label": "打开项目页",
+        "paper_step1_hint": "Paper 栏会显示已毕业因子与实时信号。",
+        "paper_step2_label": "提交 Paper 模拟单",
+        "paper_step2_hint": "选品种、方向与名义金额 — 全程模拟资金。",
+        "paper_step3_label": "上 Paper 大师榜跟踪",
+        "paper_step3_hint": "看净值与排名变化，像机构研究员一样迭代。",
     },
 }
 

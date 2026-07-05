@@ -128,6 +128,7 @@ const en = {
     dismiss: "Got it",
     academyEarned: (title: string, xp: number) => `Academy task lit · +${xp} XP · ${title}`,
     challengeMilestone: "30-day challenge D30 milestone lit — first report complete.",
+    stepGo: "Go →",
   },
   beginnerSprint: {
     enrollCta: "Join 30-day challenge →",
@@ -1414,6 +1415,7 @@ const zh = {
     dismiss: "知道了",
     academyEarned: (title: string, xp: number) => `学院任务已点亮 · +${xp} 经验 · ${title}`,
     challengeMilestone: "30 天挑战 D30 里程碑已点亮 — 首份报告完成。",
+    stepGo: "去 →",
   },
   beginnerSprint: {
     enrollCta: "报名 30 天挑战 →",

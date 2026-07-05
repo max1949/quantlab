@@ -287,6 +287,39 @@ def test_journey_includes_first_report_coaching(client, db_session):
     assert coach.get("academy_completed") is True
     assert coach.get("academy_xp") == 125
     assert j2.get("quickstart_guide") is None
+    if coach.get("paper_ready"):
+        assert coach.get("paper_guide_title")
+        assert len(coach.get("guide_steps") or []) == 3
+        assert coach["guide_steps"][0]["cta_action"] == "run_paper"
+        assert coach["guide_steps"][2]["cta_path"] == "/leaderboards/paper_mastery"
+    else:
+        assert not coach.get("guide_steps")
+
+
+def test_first_report_paper_guide_steps(client, db_session):
+    from backend.app.models.user import User
+    from backend.app.services.onboarding_service import first_report_coaching_payload
+    from sqlalchemy import select
+
+    seed_sample_market_data(db_session)
+    h = _register(client, "papguide")
+    proj, _ = _full_research(client, h, db_session)
+    user = db_session.execute(select(User).where(User.username == "papguide")).scalar_one()
+
+    coach = first_report_coaching_payload(
+        db_session,
+        user,
+        "zh",
+        flags={"report": True},
+        mastery_goal={"paper_ready": True, "publish_ready": False},
+        active_project_id=proj["id"],
+    )
+    assert coach is not None
+    assert coach["reason"] == "paper_ready"
+    assert coach["paper_guide_title"]
+    assert len(coach["guide_steps"]) == 3
+    assert coach["guide_steps"][0]["label"]
+    assert coach["guide_steps"][1]["cta_path"] == f"/projects/{proj['id']}"
 
 
 def test_journey_includes_beginner_sprint(client, db_session):
