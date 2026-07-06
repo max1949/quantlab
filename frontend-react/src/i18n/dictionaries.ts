@@ -124,12 +124,13 @@ const en = {
   quickstartGuide: {
     progress: (done: number, total: number) => `${done}/${total} done`,
     ctaDefault: "Continue →",
+    oneClickStart: "One-click start →",
     dismiss: "Hide guide",
   },
   firstMentorWelcome: {
     badge: "First workspace visit",
     firstStep: (label: string) => `Your first step: ${label}`,
-    templatePick: (title: string) => `Regime-fit pick: start with 「${title}」 — one click to open templates.`,
+    templatePick: (title: string) => `Regime-fit pick: 「${title}」 — one click to start your first study.`,
     openQuickstart: "3-step guide →",
     gotIt: "Got it",
     ctaDefault: "Start →",
@@ -609,6 +610,13 @@ const en = {
     masterHandoffHint:
       "You followed a master's report — start this template to run the same validate → report loop.",
     masterHandoffDismiss: "Got it",
+    oneClickBadge: "Beginner auto-start",
+    oneClickTitle: "Don't know which to pick? Start here",
+    oneClickMessage: (title: string) =>
+      `Mentor picked 「${title}」 for you — one click creates project + factor. You can browse all templates below.`,
+    oneClickStart: "One-click start →",
+    oneClickBrowse: "Browse all templates",
+    catalogNote: "11 templates · 6 beginner · 3 markets (RB / AU / IF)",
   },
   projectRegime: {
     title: (symbol: string) => `Market regime · ${symbol}`,
@@ -1895,12 +1903,13 @@ const zh = {
   quickstartGuide: {
     progress: (done: number, total: number) => `已完成 ${done}/${total}`,
     ctaDefault: "继续 →",
+    oneClickStart: "一键开局 →",
     dismiss: "收起引导",
   },
   firstMentorWelcome: {
     badge: "首次进入工作台",
     firstStep: (label: string) => `你的第一步：${label}`,
-    templatePick: (title: string) => `行情适配推荐：从「${title}」模板一键开局。`,
+    templatePick: (title: string) => `行情适配推荐：「${title}」— 点一下直接开局，不用自己挑。`,
     openQuickstart: "3 步引导 →",
     gotIt: "知道了",
     ctaDefault: "开始 →",
@@ -2377,6 +2386,13 @@ const zh = {
     masterHandoffTitle: (symbol: string) => `复现你在 ${symbol} 上读到的方法`,
     masterHandoffHint: "你刚读完关注流中的大师报告 — 点「立即开局」走同样的验证 → 报告闭环。",
     masterHandoffDismiss: "知道了",
+    oneClickBadge: "新手一键开局",
+    oneClickTitle: "不知道选哪个？从这里开始",
+    oneClickMessage: (title: string) =>
+      `导师已为你选好「${title}」— 点一下自动建好项目 + 因子，下面仍可浏览全部模板。`,
+    oneClickStart: "一键开局 →",
+    oneClickBrowse: "浏览全部模板",
+    catalogNote: "共 11 套模板 · 6 套新手 · 覆盖 RB / AU / IF 三大市场",
   },
   projectRegime: {
     title: (symbol: string) => `Market regime · ${symbol}`,

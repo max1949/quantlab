@@ -146,6 +146,8 @@ class QuickstartGuideOut(BaseModel):
     current_index: int
     progress: int
     total: int
+    recommended_template: str | None = None
+    recommended_template_title: str | None = None
 
 
 class FirstPaperOrderCoachingOut(BaseModel):

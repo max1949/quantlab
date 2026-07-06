@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { listTemplates, getTemplateRegimePicks, startTemplate, trackEvent } from "../api/endpoints";
+import { listTemplates, getTemplateRegimePicks, startTemplate, trackEvent, getResearchJourney } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
 import { useUi } from "../store/ui";
 import { useFlow } from "../store/flow";
@@ -9,6 +9,7 @@ import { useLocale } from "../store/locale";
 import { FIRST_PROJECT_WELCOME_KEY, FOLLOWING_PROJECT_REPLICATION_KEY, FOLLOWING_TEMPLATE_HANDOFF_KEY } from "../lib/onboardingFocus";
 import { REGIME_TEMPLATE_SYMBOLS } from "../lib/templateHints";
 import { attachReplicationBenchmarkToProject } from "../lib/replicationBenchmark";
+import { useStartTemplateFlow } from "../lib/useStartTemplateFlow";
 import { ErrorBox, PageTitle, Spinner } from "../components/ui";
 
 const REGIME_SYMBOLS = ["RB", "AU", "IF"] as const;
@@ -40,14 +41,15 @@ export default function Templates() {
     setParams(next, { replace: true });
   };
 
-  const templates = useQuery({ queryKey: ["templates"], queryFn: listTemplates });
+  const templateList = useQuery({ queryKey: ["templates"], queryFn: listTemplates });
+  const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
   const regimePicks = useQuery({
     queryKey: ["template-regime-picks", regimeSymbol],
     queryFn: () => getTemplateRegimePicks(regimeSymbol),
   });
 
   useEffect(() => {
-    if (!focus || !templates.data?.some((tpl) => tpl.code === focus)) return;
+    if (!focus || !templateList.data?.some((tpl) => tpl.code === focus)) return;
     const scrollTimer = window.setTimeout(() => {
       document.getElementById(`tpl-${focus}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
       setHighlightedFocus(focus);
@@ -57,11 +59,11 @@ export default function Templates() {
       window.clearTimeout(scrollTimer);
       window.clearTimeout(clearTimer);
     };
-  }, [focus, templates.data]);
+  }, [focus, templateList.data]);
 
   const recommendedCodes = new Set(regimePicks.data?.picks.map((p) => p.code) ?? []);
   const pickByCode = Object.fromEntries((regimePicks.data?.picks ?? []).map((p) => [p.code, p]));
-  const focusedTpl = focus ? templates.data?.find((tpl) => tpl.code === focus) : undefined;
+  const focusedTpl = focus ? templateList.data?.find((tpl) => tpl.code === focus) : undefined;
   const focusedPick = focus ? pickByCode[focus] : undefined;
   const [focusCoachDismissed, setFocusCoachDismissed] = useState(false);
   const [masterHandoffDismissed, setMasterHandoffDismissed] = useState(false);
@@ -91,6 +93,21 @@ export default function Templates() {
     setSymbol(sym as RegimeSymbol);
   }, [masterHandoffSymbol, regimeSymbol]);
 
+  const oneClickStart = useStartTemplateFlow({
+    startedMessage: t.started,
+    failMessage: t.startFail,
+    from: "templates-banner",
+  });
+
+  const templateStepDone = journey.data?.steps.find((s) => s.key === "template")?.done ?? false;
+  const quickstartPick = journey.data?.quickstart_guide?.recommended_template;
+  const regimeTopPick = regimePicks.data?.picks[0];
+  const oneClickCode = quickstartPick ?? regimeTopPick?.code ?? null;
+  const oneClickTitle =
+    journey.data?.quickstart_guide?.recommended_template_title ?? regimeTopPick?.title ?? null;
+  const showOneClickBanner =
+    !templateStepDone && Boolean(oneClickCode && oneClickTitle) && !showMasterHandoff && !showFocusCoach;
+
   const start = useMutation({
     mutationFn: (code: string) => startTemplate(code, true),
     onMutate: (code) => setStarting(code),
@@ -117,6 +134,36 @@ export default function Templates() {
   return (
     <div>
       <PageTitle title={t.title} subtitle={t.subtitle} />
+      <p className="-mt-4 mb-4 text-xs text-slate-500 dark:text-slate-400">{t.catalogNote}</p>
+
+      {showOneClickBanner && oneClickCode && oneClickTitle && (
+        <div className="mb-6 rounded-xl border border-emerald-300 bg-gradient-to-r from-emerald-50/95 to-teal-50/70 p-4 shadow-sm dark:border-emerald-800 dark:from-emerald-950/40 dark:to-teal-950/30">
+          <p className="text-xs font-semibold uppercase tracking-wide text-emerald-800 dark:text-emerald-200">
+            🚀 {t.oneClickBadge}
+          </p>
+          <p className="mt-1 font-semibold text-slate-800 dark:text-slate-100">{t.oneClickTitle}</p>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{t.oneClickMessage(oneClickTitle)}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="btn-primary text-xs"
+              disabled={oneClickStart.isPending}
+              onClick={() => oneClickStart.mutate(oneClickCode)}
+            >
+              {oneClickStart.isPending ? c.starting : t.oneClickStart}
+            </button>
+            <button
+              type="button"
+              className="btn text-xs"
+              onClick={() => {
+                document.getElementById(`tpl-${oneClickCode}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+              }}
+            >
+              {t.oneClickBrowse}
+            </button>
+          </div>
+        </div>
+      )}
 
       {showMasterHandoff && masterHandoffSymbol && (
         <div className="mb-4 rounded-xl border border-teal-300 bg-gradient-to-r from-teal-50/95 to-cyan-50/70 p-4 dark:border-teal-800 dark:from-teal-950/40 dark:to-cyan-950/30">
@@ -233,13 +280,13 @@ export default function Templates() {
         </div>
       )}
 
-      {templates.isLoading ? (
+      {templateList.isLoading ? (
         <Spinner />
-      ) : templates.isError ? (
-        <ErrorBox message={apiErrorMessage(templates.error)} />
+      ) : templateList.isError ? (
+        <ErrorBox message={apiErrorMessage(templateList.error)} />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {[...(templates.data ?? [])]
+          {[...(templateList.data ?? [])]
             .sort((a, b) => {
               const aSym = a.symbol === regimeSymbol ? 0 : 1;
               const bSym = b.symbol === regimeSymbol ? 0 : 1;

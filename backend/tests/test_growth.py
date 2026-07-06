@@ -257,6 +257,8 @@ def test_journey_includes_quickstart_guide(client, db_session):
     assert len(qs["steps"]) == 3
     assert qs["steps"][0]["cta_action"] == "create_project"
     assert qs["steps"][0]["done"] is False
+    assert qs.get("recommended_template")
+    assert qs.get("recommended_template_title")
 
     client.post(
         f"{BASE}/research/templates/gold-trend/start",

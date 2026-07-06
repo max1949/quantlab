@@ -181,6 +181,8 @@ export interface QuickstartGuide {
   current_index: number;
   progress: number;
   total: number;
+  recommended_template?: string | null;
+  recommended_template_title?: string | null;
 }
 
 export interface FirstReportGuideStep {

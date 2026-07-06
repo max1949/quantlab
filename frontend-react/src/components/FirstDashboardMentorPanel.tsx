@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getMentor, getResearchJourney } from "../api/endpoints";
 import { FIRST_MENTOR_WELCOME_KEY } from "../lib/onboardingFocus";
+import { useStartTemplateFlow } from "../lib/useStartTemplateFlow";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import { stageToCtaLabel, stageToRoute } from "../lib/nav";
@@ -15,15 +16,22 @@ type Props = {
 
 export default function FirstDashboardMentorPanel({ onVisibilityChange }: Props) {
   const user = useAuth((s) => s.user);
-  const navigate = useNavigate();
   const d = useLocale((s) => s.dict.firstMentorWelcome);
   const dash = useLocale((s) => s.dict.dashboard);
+  const templates = useLocale((s) => s.dict.templates);
   const stages = useLocale((s) => s.dict.stages);
+  const c = useLocale((s) => s.dict.common);
   const [active, setActive] = useState(false);
   const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISS_KEY) === "1");
 
   const mentor = useQuery({ queryKey: ["mentor"], queryFn: getMentor });
   const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
+
+  const startTemplate = useStartTemplateFlow({
+    startedMessage: templates.started,
+    failMessage: templates.startFail,
+    from: "mentor",
+  });
 
   useEffect(() => {
     if (dismissed) return;
@@ -111,18 +119,19 @@ export default function FirstDashboardMentorPanel({ onVisibilityChange }: Props)
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
           {primaryRoute && (
-            templateStart ? (
+            templateStart && m.recommended_template ? (
               <button
                 type="button"
                 className="btn-primary whitespace-nowrap text-xs"
+                disabled={startTemplate.isPending}
                 onClick={() => {
                   dismiss();
-                  navigate(primaryRoute);
+                  startTemplate.mutate(m.recommended_template!);
                 }}
               >
-                {primaryLabel}
+                {startTemplate.isPending ? c.starting : primaryLabel}
               </button>
-            ) : (
+            ) : primaryRoute ? (
               <Link
                 to={primaryRoute}
                 className="btn-primary whitespace-nowrap text-xs"
@@ -130,7 +139,7 @@ export default function FirstDashboardMentorPanel({ onVisibilityChange }: Props)
               >
                 {primaryLabel}
               </Link>
-            )
+            ) : null
           )}
           {guide && (
             <a href="#quickstart" className="btn whitespace-nowrap text-xs">

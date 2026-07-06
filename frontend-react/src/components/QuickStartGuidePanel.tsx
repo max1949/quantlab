@@ -5,6 +5,7 @@ import { enrollChallenge, getResearchJourney } from "../api/endpoints";
 import { apiErrorMessage } from "../api/client";
 import { celebrateChallengeEnroll } from "../lib/challengeEnroll";
 import { FOCUS_QUICKSTART_KEY } from "../lib/onboardingFocus";
+import { useStartTemplateFlow } from "../lib/useStartTemplateFlow";
 import { useLocale } from "../store/locale";
 import { useAuth } from "../store/auth";
 import { useUi } from "../store/ui";
@@ -27,6 +28,8 @@ export default function QuickStartGuidePanel() {
   const handbook = useLocale((s) => s.dict.beginnerHandbook);
   const challengePage = useLocale((s) => s.dict.challengesPage);
   const dash = useLocale((s) => s.dict.dashboard);
+  const c = useLocale((s) => s.dict.common);
+  const templates = useLocale((s) => s.dict.templates);
   const atl = useLocale((s) => s.dict.academyTaskLabels);
   const stages = useLocale((s) => s.dict.stages);
   const notify = useUi((s) => s.notify);
@@ -35,6 +38,12 @@ export default function QuickStartGuidePanel() {
   const rootRef = useRef<HTMLDivElement>(null);
   const [highlighted, setHighlighted] = useState(false);
   const journey = useQuery({ queryKey: ["research-journey"], queryFn: () => getResearchJourney() });
+
+  const startTemplate = useStartTemplateFlow({
+    startedMessage: templates.started,
+    failMessage: templates.startFail,
+    from: "quickstart",
+  });
 
   const guide = journey.data?.quickstart_guide;
   const sprint = journey.data?.beginner_sprint;
@@ -164,9 +173,25 @@ export default function QuickStartGuidePanel() {
 
         {current && !current.done && (
           <div className="flex shrink-0 flex-wrap gap-2 sm:flex-col sm:items-stretch">
-            <Link to={current.cta_path} className="btn-primary whitespace-nowrap text-xs">
-              {ctaLabel}
-            </Link>
+            {current.key === "start" && guide.recommended_template ? (
+              <button
+                type="button"
+                className="btn-primary whitespace-nowrap text-xs"
+                disabled={startTemplate.isPending}
+                onClick={() => startTemplate.mutate(guide.recommended_template!)}
+              >
+                {startTemplate.isPending ? c.starting : d.oneClickStart}
+              </button>
+            ) : (
+              <Link to={current.cta_path} className="btn-primary whitespace-nowrap text-xs">
+                {ctaLabel}
+              </Link>
+            )}
+            {current.key === "start" && guide.recommended_template && (
+              <Link to={current.cta_path} className="btn whitespace-nowrap text-xs">
+                {templates.oneClickBrowse}
+              </Link>
+            )}
             <button type="button" className="btn whitespace-nowrap text-xs" onClick={dismiss}>
               {d.dismiss}
             </button>

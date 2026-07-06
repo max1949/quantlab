@@ -12,6 +12,12 @@ RESEARCH_TEMPLATES: dict[str, dict[Locale, dict]] = {
             "description": "Test whether gold (AU) trends can be captured with a momentum factor.",
             "tags": ["trend", "precious metals"],
             "suitable_for": "Complete beginners · trend-first study",
+            "learning_steps": [
+                "One-click start — AU project + momentum factor auto-created",
+                "Backtest — check if Sharpe looks promising",
+                "Scientific validation — does OOS still hold?",
+                "Report → publish when quality passes, then grow your network",
+            ],
         },
         "zh": {
             "title": "黄金趋势研究",
@@ -19,6 +25,12 @@ RESEARCH_TEMPLATES: dict[str, dict[Locale, dict]] = {
             "description": "用动量因子检验黄金 (AU) 的趋势是否可被捕捉。",
             "tags": ["趋势", "贵金属"],
             "suitable_for": "完全新手 · 从趋势思路入门",
+            "learning_steps": [
+                "一键开局 → 系统自动建好 AU 项目与动量因子",
+                "运行回测 → 看夏普是不是「看起来很美」",
+                "科学验证 → 样本外还能不能站住脚",
+                "生成报告 → 达标后发布，开始你的人脉闭环",
+            ],
         },
     },
     "commodity-momentum": {
@@ -27,14 +39,26 @@ RESEARCH_TEMPLATES: dict[str, dict[Locale, dict]] = {
             "hypothesis": "Is momentum effective on rebar (RB)?",
             "description": "Study trend inertia in commodity futures with a momentum factor.",
             "tags": ["momentum", "commodity"],
-            "suitable_for": "Python users · commodity futures",
+            "suitable_for": "Complete beginners · commodity futures",
+            "learning_steps": [
+                "One-click start — RB project + momentum factor auto-created",
+                "Backtest — check if Sharpe looks promising",
+                "Scientific validation — does OOS still hold?",
+                "Report → publish when quality passes, then grow your network",
+            ],
         },
         "zh": {
             "title": "商品动量研究",
             "hypothesis": "螺纹钢 (RB) 的动量效应是否有效?",
             "description": "用动量因子研究商品期货的趋势惯性。",
             "tags": ["动量", "商品"],
-            "suitable_for": "有 Python 基础 · 商品期货",
+            "suitable_for": "完全新手 · 国内商品期货入门",
+            "learning_steps": [
+                "一键开局 → 系统自动建好 RB 项目与动量因子",
+                "运行回测 → 看夏普是不是「看起来很美」",
+                "科学验证 → 样本外还能不能站住脚",
+                "生成报告 → 达标后发布，开始你的人脉闭环",
+            ],
         },
     },
     "vol-regime": {
@@ -60,6 +84,12 @@ RESEARCH_TEMPLATES: dict[str, dict[Locale, dict]] = {
             "description": "Test mean-reversion behavior with a dedicated factor.",
             "tags": ["mean reversion"],
             "suitable_for": "Beginners · contrarian / reversion logic",
+            "learning_steps": [
+                "One-click start — RB project + mean-reversion factor",
+                "Backtest — compare with momentum templates",
+                "Scientific validation — reversion often fails OOS; learn why",
+                "Report → publish and share your findings",
+            ],
         },
         "zh": {
             "title": "均值回归研究",
@@ -67,6 +97,12 @@ RESEARCH_TEMPLATES: dict[str, dict[Locale, dict]] = {
             "description": "用均值回归因子检验价格的回归特性。",
             "tags": ["均值回归"],
             "suitable_for": "新手 · 逆势/回归思路",
+            "learning_steps": [
+                "一键开局 → 系统自动建好 RB 项目与均值回归因子",
+                "运行回测 → 和动量模板对比，感受思路差异",
+                "科学验证 → 回归因子常过不了 OOS，这正是要学的事",
+                "生成报告 → 发布并分享你的结论",
+            ],
         },
     },
     "rsi-study": {

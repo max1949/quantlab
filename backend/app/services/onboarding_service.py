@@ -355,6 +355,12 @@ def quickstart_guide_payload(
         "current_index": current_index,
         "progress": progress,
         "total": len(steps),
+        "recommended_template": recommended_template,
+        "recommended_template_title": (
+            i18n.localize_research_template(recommended_template, locale).get("title")
+            if recommended_template
+            else None
+        ),
     }
 
 
