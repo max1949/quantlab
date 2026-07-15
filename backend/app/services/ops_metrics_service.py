@@ -18,7 +18,10 @@ from backend.app.models.execution import PaperOrder
 from backend.app.models.user import User
 from backend.app.models.validation import Validation, ValidationStatus
 
-TEST_PATTERN = re.compile(r"^(s9btester|uitester|smoke|test|demo|quantlab_examples)", re.IGNORECASE)
+TEST_PATTERN = re.compile(
+    r"^(s9btester|uitester|smoke|test|demo|quantlab_examples|ql_seed)",
+    re.IGNORECASE,
+)
 
 
 def _pct(n: int, d: int) -> float:

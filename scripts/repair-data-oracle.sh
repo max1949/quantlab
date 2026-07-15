@@ -74,6 +74,8 @@ try:
     print('market:', seed_real_market_data(db))
     from backend.app.services.example_studies_service import seed_public_example_studies
     print('examples:', seed_public_example_studies(db))
+    from backend.app.services.virtual_community_service import seed_virtual_community
+    print('community:', seed_virtual_community(db))
 finally:
     db.close()
 "
