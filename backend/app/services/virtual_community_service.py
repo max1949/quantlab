@@ -158,10 +158,10 @@ COMMUNITY_PROFILES: list[dict] = [
             {
                 "title": "螺纹钢 RSI 超买超卖初验",
                 "symbol": "RB",
-                "template_type": "rsi",
+                "template_type": "mean_reversion",
                 "params": {"window": 14},
-                "question": "RSI 极端区对黑色系短期反转有无统计优势？",
-                "tags": ["RSI", "螺纹钢", "新手"],
+                "question": "价格偏离均值后, 黑色系短期反转有无统计优势？",
+                "tags": ["均值回归", "螺纹钢", "新手"],
                 "days_ago": 9,
                 "share_views": 73,
             }
@@ -284,12 +284,12 @@ COMMUNITY_PROFILES: list[dict] = [
         "days_ago": 10,
         "studies": [
             {
-                "title": "黄金 RSI 入门对照",
+                "title": "黄金强弱偏离入门对照",
                 "symbol": "AU",
-                "template_type": "rsi",
+                "template_type": "sma_ratio",
                 "params": {"window": 14},
-                "question": "同一 RSI 参数在贵金属与黑色系上结论一样吗？",
-                "tags": ["RSI", "黄金", "新手"],
+                "question": "同一偏离思路在贵金属与黑色系上结论一样吗？",
+                "tags": ["均线", "黄金", "新手"],
                 "days_ago": 4,
                 "share_views": 52,
             }
@@ -460,7 +460,7 @@ def _build_study(db: Session, user: User, spec: dict) -> dict:
     project.created_at = stamp
     db.commit()
 
-    factor_name = f"{spec['template_type']}-{symbol}-{user.username[-6:]}"
+    factor_name = f"{spec['template_type']}-{symbol}-w{spec['params'].get('window', 20)}-{user.username[-6:]}"
     try:
         factor = factor_service.create_template_factor(
             db,
