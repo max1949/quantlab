@@ -40,7 +40,7 @@ SEED_PASSWORD = os.environ.get("VIRTUAL_COMMUNITY_PASSWORD", "Demo-Camp-2026!")
 COMMUNITY_PROFILES: list[dict] = [
     {
         "username": "demo_linyi",
-        "email": "demo_linyi@seed.quantlab.local",
+        "email": "demo_linyi@demo.quantlab.ai",
         "display_hint": "林屿",
         "level": UserLevel.L3,
         "user_type": UserType.TRADER.value,
@@ -73,7 +73,7 @@ COMMUNITY_PROFILES: list[dict] = [
     },
     {
         "username": "demo_chenhao",
-        "email": "demo_chenhao@seed.quantlab.local",
+        "email": "demo_chenhao@demo.quantlab.ai",
         "level": UserLevel.L2,
         "user_type": UserType.PYTHON.value,
         "reward_points": 310,
@@ -95,7 +95,7 @@ COMMUNITY_PROFILES: list[dict] = [
     },
     {
         "username": "demo_zhoumin",
-        "email": "demo_zhoumin@seed.quantlab.local",
+        "email": "demo_zhoumin@demo.quantlab.ai",
         "level": UserLevel.L2,
         "user_type": UserType.NEWBIE.value,
         "reward_points": 255,
@@ -116,7 +116,7 @@ COMMUNITY_PROFILES: list[dict] = [
     },
     {
         "username": "demo_wangqi",
-        "email": "demo_wangqi@seed.quantlab.local",
+        "email": "demo_wangqi@demo.quantlab.ai",
         "level": UserLevel.L3,
         "user_type": UserType.TRADER.value,
         "reward_points": 505,
@@ -148,7 +148,7 @@ COMMUNITY_PROFILES: list[dict] = [
     },
     {
         "username": "demo_suqing",
-        "email": "demo_suqing@seed.quantlab.local",
+        "email": "demo_suqing@demo.quantlab.ai",
         "level": UserLevel.L1,
         "user_type": UserType.NEWBIE.value,
         "reward_points": 180,
@@ -169,7 +169,7 @@ COMMUNITY_PROFILES: list[dict] = [
     },
     {
         "username": "demo_hejun",
-        "email": "demo_hejun@seed.quantlab.local",
+        "email": "demo_hejun@demo.quantlab.ai",
         "level": UserLevel.L2,
         "user_type": UserType.PYTHON.value,
         "reward_points": 275,
@@ -190,7 +190,7 @@ COMMUNITY_PROFILES: list[dict] = [
     },
     {
         "username": "demo_yanfei",
-        "email": "demo_yanfei@seed.quantlab.local",
+        "email": "demo_yanfei@demo.quantlab.ai",
         "level": UserLevel.L2,
         "user_type": UserType.TRADER.value,
         "reward_points": 340,
@@ -212,7 +212,7 @@ COMMUNITY_PROFILES: list[dict] = [
     },
     {
         "username": "demo_luoran",
-        "email": "demo_luoran@seed.quantlab.local",
+        "email": "demo_luoran@demo.quantlab.ai",
         "level": UserLevel.L1,
         "user_type": UserType.NEWBIE.value,
         "reward_points": 145,
@@ -233,7 +233,7 @@ COMMUNITY_PROFILES: list[dict] = [
     },
     {
         "username": "demo_xiaoyu",
-        "email": "demo_xiaoyu@seed.quantlab.local",
+        "email": "demo_xiaoyu@demo.quantlab.ai",
         "level": UserLevel.L2,
         "user_type": UserType.PYTHON.value,
         "reward_points": 290,
@@ -254,7 +254,7 @@ COMMUNITY_PROFILES: list[dict] = [
     },
     {
         "username": "demo_gaobo",
-        "email": "demo_gaobo@seed.quantlab.local",
+        "email": "demo_gaobo@demo.quantlab.ai",
         "level": UserLevel.L3,
         "user_type": UserType.TRADER.value,
         "reward_points": 480,
@@ -276,7 +276,7 @@ COMMUNITY_PROFILES: list[dict] = [
     },
     {
         "username": "demo_shuyan",
-        "email": "demo_shuyan@seed.quantlab.local",
+        "email": "demo_shuyan@demo.quantlab.ai",
         "level": UserLevel.L1,
         "user_type": UserType.NEWBIE.value,
         "reward_points": 160,
@@ -297,7 +297,7 @@ COMMUNITY_PROFILES: list[dict] = [
     },
     {
         "username": "demo_fengke",
-        "email": "demo_fengke@seed.quantlab.local",
+        "email": "demo_fengke@demo.quantlab.ai",
         "level": UserLevel.L2,
         "user_type": UserType.PYTHON.value,
         "reward_points": 265,
