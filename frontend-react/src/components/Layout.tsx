@@ -9,6 +9,7 @@ import { useLevelLabel } from "../i18n/useLevelLabel";
 const EXTERNAL = [
   { href: "https://ziyingke.com/", key: "aboutZiyingke" as const },
   { href: "https://ai.ziyingke.com/", key: "decisionArena" as const },
+  { href: "https://t.ziyingke.com/", key: "tmos" as const },
 ];
 
 export default function Layout() {
