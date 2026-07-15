@@ -430,6 +430,9 @@ def _build_study(db: Session, user: User, spec: dict) -> dict:
             .limit(1)
         ).scalar_one_or_none()
         if report is not None:
+            report.title = title
+            if spec.get("question"):
+                report.hypothesis = spec["question"]
             report.created_at = _utc_days_ago(int(spec.get("days_ago", 14)))
             existing.created_at = report.created_at
             db.commit()
@@ -485,6 +488,11 @@ def _build_study(db: Session, user: User, spec: dict) -> dict:
     validation_service.execute(db, val.id)
 
     report = research_service.generate_for_project(db, user, project.id)
+    # 使用有人情味的项目标题, 避免引擎默认「标的·因子名」看起来像机器批量产物
+    report.title = title
+    if spec.get("question"):
+        report.hypothesis = spec["question"]
+    db.commit()
     try:
         project_service.publish_project(db, user.id, project.id)
     except ProjectQualityRejectedError:
@@ -494,6 +502,7 @@ def _build_study(db: Session, user: User, spec: dict) -> dict:
 
     report.created_at = stamp
     project.created_at = stamp
+    report.title = title
     db.commit()
 
     try:
