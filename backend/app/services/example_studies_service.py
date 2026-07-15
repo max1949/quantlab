@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from backend.app.models.factor import Factor
 from backend.app.models.project import ProjectStatus, ResearchProject
+from backend.app.models.research import ResearchReport
 from backend.app.models.user import User, UserLevel
 from backend.app.schemas.user import UserCreate
 from backend.app.services import (
@@ -136,6 +137,10 @@ def _build_one_example(db: Session, user: User, spec: dict) -> dict:
     validation_service.execute(db, val.id)
 
     report = research_service.generate_for_project(db, user, project.id)
+    report.title = title
+    if spec.get("question"):
+        report.hypothesis = spec["question"]
+    db.commit()
     published = False
     try:
         project_service.publish_project(db, user.id, project.id)
@@ -143,6 +148,7 @@ def _build_one_example(db: Session, user: User, spec: dict) -> dict:
     except ProjectQualityRejectedError:
         project.status = ProjectStatus.PUBLISHED.value
         report.is_public = True
+        report.title = title
         db.commit()
         published = True
 
@@ -166,6 +172,18 @@ def seed_public_example_studies(db: Session) -> dict:
     for spec in EXAMPLE_SPECS:
         existing = _existing_project(db, user.id, spec["title"])
         if existing is not None and existing.status == ProjectStatus.PUBLISHED.value:
+            # 润色已有示例标题, 避免广场看起来像批量机打
+            report = db.execute(
+                select(ResearchReport)
+                .where(ResearchReport.project_id == existing.id)
+                .order_by(ResearchReport.created_at.desc())
+                .limit(1)
+            ).scalar_one_or_none()
+            if report is not None and report.title != spec["title"]:
+                report.title = spec["title"]
+                if spec.get("question"):
+                    report.hypothesis = spec["question"]
+                db.commit()
             skipped.append(spec["title"])
             continue
         try:
