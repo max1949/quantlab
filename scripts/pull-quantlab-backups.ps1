@@ -11,8 +11,24 @@ $out = Join-Path $dest $stamp
 New-Item -ItemType Directory -Force -Path $out | Out-Null
 Write-Host "Pulling to $out"
 
-scp -i $sshKey -o StrictHostKeyChecking=yes -r "${server}:/opt/quantlab/backups/daily/latest" (Join-Path $out "daily-latest")
-scp -i $sshKey -o StrictHostKeyChecking=yes -r "${server}:/opt/quantlab/backups/weekly/latest" (Join-Path $out "weekly-latest")
+$dailyOk = $false
+$weeklyOk = $false
+try {
+  scp -i $sshKey -o StrictHostKeyChecking=yes -r "${server}:/opt/quantlab/backups/daily/latest" (Join-Path $out "daily-latest")
+  $dailyOk = $true
+} catch {
+  Write-Warning "daily/latest not available yet: $($_.Exception.Message)"
+}
+try {
+  scp -i $sshKey -o StrictHostKeyChecking=yes -r "${server}:/opt/quantlab/backups/weekly/latest" (Join-Path $out "weekly-latest")
+  $weeklyOk = $true
+} catch {
+  Write-Warning "weekly/latest not available yet (run a weekly backup first): $($_.Exception.Message)"
+}
+
+if (-not $dailyOk -and -not $weeklyOk) {
+  throw "No backups pulled. Ensure server backups exist under /opt/quantlab/backups/"
+}
 
 # Keep only last 8 local pull folders
 Get-ChildItem $dest -Directory |
