@@ -136,6 +136,17 @@ def _mastery_path_phase_rows(
     ]
 
 
+def _mastery_goal_counts_light(db: Session, user: User) -> dict:
+    """Feed 列表专用：只要毕业/跟踪计数，避免 project_quality / 榜单 / 挑战重计算。"""
+    from backend.app.services import research_quality_service as rqs
+
+    counts = rqs.user_paper_mastery_counts(db, user.id)
+    return {
+        "paper_graduated_count": int(counts.get("paper_graduated_count") or 0),
+        "paper_tracking_count": int(counts.get("paper_tracking_count") or 0),
+    }
+
+
 def mastery_path_snapshot_for_user(
     db: Session,
     user: User,
@@ -144,11 +155,20 @@ def mastery_path_snapshot_for_user(
     flags: dict[str, bool] | None = None,
     mastery_goal: dict | None = None,
     active_project_id: uuid.UUID | None = None,
+    light: bool = False,
 ) -> dict:
-    """五阶段大师路径快照 — 用于 Feed / 分享卡片展示。"""
+    """五阶段大师路径快照 — 用于 Feed / 分享卡片展示。
+
+    light=True：跳过 _mastery_goal_payload（含 regime / 质量闸门 / 榜单），
+    供研究广场列表使用，避免 N 作者 × 秒级延迟触发前端 30s timeout。
+    """
     flags = flags if flags is not None else _journey_flags(db, user)
     if mastery_goal is None:
-        mastery_goal = _mastery_goal_payload(db, user, locale)
+        mastery_goal = (
+            _mastery_goal_counts_light(db, user)
+            if light
+            else _mastery_goal_payload(db, user, locale)
+        )
     if active_project_id is None:
         active_project_id = _active_project_id(db, user)
     phases = _mastery_path_phase_rows(

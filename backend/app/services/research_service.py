@@ -277,8 +277,18 @@ def _feed_factor_meta(db: Session, report: ResearchReport) -> dict:
     }
 
 
-def _feed_mastery_badges(db: Session, report: ResearchReport) -> dict:
-    """大师化徽章 — Paper 毕业线 / 模拟跟踪 (Feed 卡片展示)。"""
+def _feed_mastery_badges(
+    db: Session,
+    report: ResearchReport,
+    *,
+    include_regime: bool = False,
+    tracking_factor_ids: set[uuid.UUID] | None = None,
+) -> dict:
+    """大师化徽章 — Paper 毕业线 / 模拟跟踪 (Feed 卡片展示)。
+
+    列表默认 include_regime=False：不加载行情算制度分（可选增强），
+    避免广场对每条报告读 parquet 导致超时。详情/质量页仍可传 True。
+    """
     out = {
         "paper_graduated": False,
         "paper_tracking": False,
@@ -290,33 +300,37 @@ def _feed_mastery_badges(db: Session, report: ResearchReport) -> dict:
     from backend.app.models.execution import PaperOrder
     from backend.app.services import research_quality_service as rqs
 
-    factor = db.get(Factor, report.factor_id)
-    project = db.get(ResearchProject, report.project_id) if report.project_id else None
     regime_fit_score = None
-    if factor and project and report.owner_id:
-        owner = db.get(User, report.owner_id)
-        if owner:
-            from backend.app.services import regime_advisory
+    if include_regime:
+        factor = db.get(Factor, report.factor_id)
+        project = db.get(ResearchProject, report.project_id) if report.project_id else None
+        if factor and project and report.owner_id:
+            owner = db.get(User, report.owner_id)
+            if owner:
+                from backend.app.services import regime_advisory
 
-            regime = regime_advisory.market_regime_for_symbol(
-                db,
-                owner,
-                project.symbol or report.symbol or "RB",
-                "1d",
-                factor=factor,
-            )
-            if regime:
-                regime_fit_score = regime.get("fit_score")
+                regime = regime_advisory.market_regime_for_symbol(
+                    db,
+                    owner,
+                    project.symbol or report.symbol or "RB",
+                    "1d",
+                    factor=factor,
+                )
+                if regime:
+                    regime_fit_score = regime.get("fit_score")
 
     verdict = rqs.assess_factor_paper(
         db, report.factor_id, regime_fit_score=regime_fit_score
     )
-    has_po = (
-        db.execute(
-            select(PaperOrder.id).where(PaperOrder.factor_id == report.factor_id).limit(1)
-        ).first()
-        is not None
-    )
+    if tracking_factor_ids is not None:
+        has_po = report.factor_id in tracking_factor_ids
+    else:
+        has_po = (
+            db.execute(
+                select(PaperOrder.id).where(PaperOrder.factor_id == report.factor_id).limit(1)
+            ).first()
+            is not None
+        )
     out["paper_graduated"] = verdict.passed
     out["paper_tracking"] = has_po
     if verdict.passed and has_po:
@@ -391,7 +405,34 @@ def feed(
         except (TypeError, ValueError):
             val_id = None
         metrics_by_report[row.id] = _validation_metrics(validations.get(val_id)) if val_id else (None, None)
-    badges_by_report = {r.id: _feed_mastery_badges(db, r) for r in rows}
+
+    from backend.app.models.execution import PaperOrder
+
+    factor_ids = [r.factor_id for r in rows if r.factor_id]
+    tracking_factor_ids: set[uuid.UUID] = set()
+    if factor_ids:
+        tracking_factor_ids = set(
+            db.execute(
+                select(PaperOrder.factor_id).where(
+                    PaperOrder.factor_id.in_(factor_ids),
+                    PaperOrder.factor_id.isnot(None),
+                )
+            ).scalars().all()
+        )
+    # 按 factor 缓存徽章，避免同因子重复评估
+    badge_by_factor: dict[uuid.UUID, dict] = {}
+    badges_by_report: dict[uuid.UUID, dict] = {}
+    for r in rows:
+        if not r.factor_id:
+            badges_by_report[r.id] = _feed_mastery_badges(
+                db, r, include_regime=False, tracking_factor_ids=tracking_factor_ids
+            )
+            continue
+        if r.factor_id not in badge_by_factor:
+            badge_by_factor[r.factor_id] = _feed_mastery_badges(
+                db, r, include_regime=False, tracking_factor_ids=tracking_factor_ids
+            )
+        badges_by_report[r.id] = badge_by_factor[r.factor_id]
     if graduated_only:
         rows = [r for r in rows if badges_by_report.get(r.id, {}).get("paper_graduated")]
     if sort == "top":
@@ -416,7 +457,7 @@ def feed(
                 owner = db.get(User, r.owner_id)
                 if owner:
                     path_by_owner[r.owner_id] = onboarding_service.mastery_path_snapshot_for_user(
-                        db, owner, "en"
+                        db, owner, "en", light=True
                     )
             mp = path_by_owner.get(r.owner_id)
         out_rows.append(
