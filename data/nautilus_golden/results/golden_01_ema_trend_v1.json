@@ -1,0 +1,22 @@
+{
+  "engine": "NAUTILUS",
+  "engine_version": "1.231.0",
+  "strategy_id": "golden_01_ema_trend",
+  "strategy_version": "v1",
+  "status": "success",
+  "fill_count": 34,
+  "position_count": 17,
+  "metrics": {
+    "bar_count": 400,
+    "fill_count": 34,
+    "position_count": 17,
+    "fast_ema": 10,
+    "slow_ema": 20
+  },
+  "artifacts": {
+    "instrument_id": "EUR/USD.SIM",
+    "bar_type": "EUR/USD.SIM-15-MINUTE-LAST-EXTERNAL",
+    "generated_at": "2026-08-23T21:05:21.908344+00:00"
+  },
+  "error": null
+}

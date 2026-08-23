@@ -1,0 +1,9 @@
+# Optional NautilusTrader runtime (isolated env; do NOT merge into main backend requirements yet).
+# Install:
+#   python -m venv .venv-nautilus
+#   .venv-nautilus\Scripts\pip install -r backend/requirements-nautilus.txt
+#
+# Pin source of truth: config/nautilus-version.yaml
+# Upgrade only via NAUTILUS_UPGRADE_GATE.
+
+nautilus_trader==1.231.0

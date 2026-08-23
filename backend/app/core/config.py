@@ -117,6 +117,14 @@ class Settings(BaseSettings):
     # Python 因子沙箱
     sandbox_timeout_sec: float = 15.0
 
+    # Nautilus evolution feature flags (LIVE default OFF)
+    quantlab_nautilus_engine: bool = False
+    quantlab_strategy_spec: bool = False
+    quantlab_ai_strategy_builder: bool = False
+    quantlab_nautilus_backtest: bool = False
+    quantlab_sandbox: bool = False
+    quantlab_live: bool = False
+
 
 @lru_cache
 def get_settings() -> Settings:
