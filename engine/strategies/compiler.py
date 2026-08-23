@@ -47,6 +47,8 @@ def compile_spec(spec: StrategySpec | dict[str, Any]) -> CompiledStrategy:
         spec = validate_spec(spec)
     if spec.strategy.ambiguous:
         raise SpecValidationError("cannot compile ambiguous strategy (AMBIGUOUS=TRUE)")
+    if spec.strategy.deployable or "LIVE" in spec.deployment.permitted_environments:
+        raise SpecValidationError("compiler refuses LIVE/deployable specs in Phase 2/3")
 
     ema_params = _find_condition(spec, "ema_cross")
     if ema_params is not None:

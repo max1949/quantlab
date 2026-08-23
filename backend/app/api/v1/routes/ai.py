@@ -153,6 +153,42 @@ def review_validation(
     return InsightOut.model_validate(insight)
 
 
+class StrategyBuilderRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=4000)
+    confirm: bool = False
+    run_backtest: bool = False
+
+
+@router.post(
+    "/strategy-builder",
+    summary="中文交易想法 → Strategy Spec 草稿 (不可实盘)",
+)
+def strategy_builder(
+    body: StrategyBuilderRequest,
+    current_user: CurrentUser,
+) -> dict:
+    """QUANTLAB_AI_STRATEGY_BUILDER feature path. AI cannot approve LIVE."""
+    from backend.app.core.config import get_settings
+    from engine.ai.mvp_pipeline import run_mvp_chinese_idea
+    from engine.ai.strategy_builder import build_strategy_from_chinese
+
+    settings = get_settings()
+    if not (
+        settings.quantlab_ai_strategy_builder
+        or settings.quantlab_nautilus_engine
+        or settings.app_env in {"development", "test"}
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="AI 策略构建器未启用",
+        )
+    _check_ai_quota(current_user.id)
+    if body.run_backtest:
+        return run_mvp_chinese_idea(body.text, confirm=body.confirm)
+    built = build_strategy_from_chinese(body.text, author=str(current_user.id))
+    return {"live_denied": True, "builder": built.to_dict()}
+
+
 @router.post(
     "/backtests/{backtest_id}/summary",
     response_model=InsightOut,
