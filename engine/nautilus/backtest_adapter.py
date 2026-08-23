@@ -50,6 +50,26 @@ class NautilusBacktestAdapter:
             )
         self.engine_version = ver or "unknown"
 
+    def run_compiled_ema(
+        self,
+        compiled_params: dict[str, Any],
+        ohlcv: pd.DataFrame | None = None,
+        *,
+        strategy_id: str,
+        strategy_version: str,
+        persist_dir: str | Path | None = None,
+    ) -> BacktestResult:
+        """Run EMA golden path from compiler output params."""
+        return self.run_ema_golden(
+            ohlcv,
+            fast_ema=int(compiled_params.get("fast_ema", 10)),
+            slow_ema=int(compiled_params.get("slow_ema", 20)),
+            trade_size=str(compiled_params.get("trade_size", "1000000")),
+            persist_dir=persist_dir,
+            strategy_id=strategy_id,
+            strategy_version=strategy_version,
+        )
+
     def run_ema_golden(
         self,
         ohlcv: pd.DataFrame | None = None,
@@ -58,6 +78,8 @@ class NautilusBacktestAdapter:
         slow_ema: int = 20,
         trade_size: str = "1000000",
         persist_dir: str | Path | None = None,
+        strategy_id: str = GOLDEN_STRATEGY_ID,
+        strategy_version: str = GOLDEN_STRATEGY_VERSION,
     ) -> BacktestResult:
         """Golden strategy 01: EMA trend (official EMACross example strategy)."""
         from nautilus_trader.backtest.config import BacktestEngineConfig
@@ -71,8 +93,8 @@ class NautilusBacktestAdapter:
         from nautilus_trader.test_kit.providers import TestInstrumentProvider
 
         request = BacktestRequest(
-            strategy_id=GOLDEN_STRATEGY_ID,
-            strategy_version=GOLDEN_STRATEGY_VERSION,
+            strategy_id=strategy_id,
+            strategy_version=strategy_version,
             instrument=InstrumentRef(symbol="EUR/USD", venue="SIM", asset_class="FX"),
             parameters={"fast_ema": fast_ema, "slow_ema": slow_ema, "trade_size": trade_size},
         )
