@@ -1,0 +1,29 @@
+﻿{
+    "commit":  "bc981983f48987b8e90b08c4abfe3f282a12f2ea",
+    "remotes":  [
+                    "origin\thttps://github.com/max1949/quantlab.git (fetch)",
+                    "origin\thttps://github.com/max1949/quantlab.git (push)"
+                ],
+    "timestamp":  "2026-08-24T04:49:44.6885547+08:00",
+    "branch":  "master",
+    "dirty_files":  [
+                        " M README.md",
+                        " M backend/migrations/env.py",
+                        " M docker-compose.yml",
+                        " M engine/__init__.py",
+                        " M engine/backtest.py",
+                        "?? .cursor/permissions.json",
+                        "?? test_cursor_auto.py",
+                        "?? tools/"
+                    ],
+    "status":  [
+                   " M README.md",
+                   " M backend/migrations/env.py",
+                   " M docker-compose.yml",
+                   " M engine/__init__.py",
+                   " M engine/backtest.py",
+                   "?? .cursor/permissions.json",
+                   "?? test_cursor_auto.py",
+                   "?? tools/"
+               ]
+}

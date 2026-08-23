@@ -1,0 +1,34 @@
+# QuantLab NautilusTrader version pin (NO floating / NO nightly / NO auto major upgrade)
+# Upgrade only via NAUTILUS_UPGRADE_GATE after full test pyramid PASS.
+
+nautilus:
+  version: "1.231.0"
+  channel: "released"
+  package: "nautilus_trader"
+  python: ">=3.12,<3.15"
+  python_recommended: "3.12"
+  validated_at: "2026-08-24T00:00:00Z"
+  official_docs_version: "1.231.0"
+  pypi_url: "https://pypi.org/project/nautilus_trader/1.231.0/"
+  install_index: "https://packages.nautechsystems.io/simple"
+  notes: |
+    Selected latest non-RC 1.x release as of Phase 0 (2026-08-24).
+    2.0.0rc* exists but is DENIED for production / MVP until upgrade gate.
+    Nightly and floating ranges are DENIED.
+
+upgrade_gate:
+  name: NAUTILUS_UPGRADE_GATE
+  auto_upgrade: false
+  allow_nightly: false
+  allow_major_auto: false
+  required_checks:
+    - unit_tests
+    - integration_tests
+    - backtest_parity
+    - serialization
+    - strategy_compiler
+    - portfolio
+    - risk
+    - execution
+    - restart
+    - adapter_tests
