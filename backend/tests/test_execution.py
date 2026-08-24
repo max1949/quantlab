@@ -197,7 +197,7 @@ def test_route_paper_to_vnpy_gone(client, db_session):
     assert routed.status_code == 410, routed.text
 
 
-def test_qmt_channel_stub_order(client, db_session):
+def test_qmt_channel_new_create_denied(client, db_session):
     from backend.app.services.market_data import seed_sample_market_data
 
     h = _pro_headers(client, db_session)
@@ -214,12 +214,29 @@ def test_qmt_channel_stub_order(client, db_session):
             "acknowledge_risk": True,
         },
     )
-    assert created.status_code == 201, created.text
-    body = created.json()
-    assert body["channel"] == "qmt"
-    assert body["status"] == "routed"
-    assert body["external_ref"] and body["external_ref"].startswith("QMT-")
+    assert created.status_code == 422, created.text
+    assert "QMT_LEGACY" in created.text
 
+
+def _legacy_qmt_order(db_session, user_id):
+    import uuid
+    from backend.app.models.execution import PaperOrder
+
+    order = PaperOrder(
+        id=uuid.uuid4(),
+        user_id=user_id,
+        symbol="RB",
+        side="buy",
+        notional_cny=12000,
+        status="routed",
+        channel="qmt",
+        external_ref="QMT-LEGACY-TEST",
+        risk_verdict="passed",
+    )
+    db_session.add(order)
+    db_session.commit()
+    db_session.refresh(order)
+    return order
 
 def test_gateway_webhook_updates_order(client, db_session):
     import hashlib
@@ -229,18 +246,12 @@ def test_gateway_webhook_updates_order(client, db_session):
     from backend.app.core.config import get_settings
 
     h = _pro_headers(client, db_session)
-    order = client.post(
-        f"{BASE}/execution/paper/orders",
-        headers=h,
-        json={
-            "symbol": "RB",
-            "side": "buy",
-            "notional_cny": 12000,
-            "channel": "qmt",
-            "acknowledge_risk": True,
-        },
-    ).json()
-    ref = order["external_ref"]
+    from backend.app.models.user import User
+    from sqlalchemy import select
+
+    user = db_session.execute(select(User).where(User.username == USER["username"])).scalar_one()
+    order = _legacy_qmt_order(db_session, user.id)
+    ref = order.external_ref
     assert ref
 
     settings = get_settings()
@@ -259,7 +270,7 @@ def test_gateway_webhook_updates_order(client, db_session):
         assert resp.status_code == 200, resp.text
         assert resp.json()["status"] == "filled"
 
-        detail = client.get(f"{BASE}/execution/paper/orders/{order['id']}", headers=h).json()
+        detail = client.get(f"{BASE}/execution/paper/orders/{order.id}", headers=h).json()
         assert detail["status"] == "filled"
         assert detail["gateway_status"] == "filled"
         assert detail["filled_at"] is not None
@@ -313,7 +324,7 @@ def test_order_events_timeline(client, db_session):
     assert body[0]["to_status"] == "filled"
 
 
-def test_route_paper_to_qmt(client, db_session):
+def test_route_paper_to_qmt_retired(client, db_session):
     from backend.app.services.market_data import seed_sample_market_data
 
     h = _pro_headers(client, db_session)
@@ -325,13 +336,8 @@ def test_route_paper_to_qmt(client, db_session):
     ).json()
 
     routed = client.post(f"{BASE}/execution/paper/orders/{order['id']}/route-qmt", headers=h)
-    assert routed.status_code == 200, routed.text
-    assert routed.json()["channel"] == "qmt"
-    assert routed.json()["external_ref"].startswith("QMT-")
-
-    events = client.get(f"{BASE}/execution/paper/orders/{order['id']}/events", headers=h).json()
-    assert any(e["event_type"] == "routed" for e in events)
-
+    assert routed.status_code == 410, routed.text
+    assert "QMT_LEGACY" in routed.text
 
 def test_refresh_gateway_order_poll(client, db_session, monkeypatch):
     monkeypatch.setattr(
@@ -340,24 +346,18 @@ def test_refresh_gateway_order_poll(client, db_session, monkeypatch):
     )
 
     h = _pro_headers(client, db_session)
-    order = client.post(
-        f"{BASE}/execution/paper/orders",
-        headers=h,
-        json={
-            "symbol": "RB",
-            "side": "buy",
-            "notional_cny": 16000,
-            "channel": "qmt",
-            "acknowledge_risk": True,
-        },
-    ).json()
+    from backend.app.models.user import User
+    from sqlalchemy import select
 
-    refreshed = client.post(f"{BASE}/execution/paper/orders/{order['id']}/refresh", headers=h)
+    user = db_session.execute(select(User).where(User.username == USER["username"])).scalar_one()
+    order = _legacy_qmt_order(db_session, user.id)
+
+    refreshed = client.post(f"{BASE}/execution/paper/orders/{order.id}/refresh", headers=h)
     assert refreshed.status_code == 200, refreshed.text
     assert refreshed.json()["status"] == "filled"
     assert refreshed.json()["gateway_status"] == "filled"
 
-    events = client.get(f"{BASE}/execution/paper/orders/{order['id']}/events", headers=h).json()
+    events = client.get(f"{BASE}/execution/paper/orders/{order.id}/events", headers=h).json()
     assert any(e["event_type"] == "gateway_poll" for e in events)
 
 
@@ -378,19 +378,12 @@ def test_sync_all_pending_gateway_orders(client, db_session, monkeypatch):
         lambda **_: "filled",
     )
     from backend.app.services import execution_service as exs
+    from backend.app.models.user import User
+    from sqlalchemy import select
 
     h = _pro_headers(client, db_session)
-    client.post(
-        f"{BASE}/execution/paper/orders",
-        headers=h,
-        json={
-            "symbol": "RB",
-            "side": "buy",
-            "notional_cny": 14000,
-            "channel": "qmt",
-            "acknowledge_risk": True,
-        },
-    )
+    user = db_session.execute(select(User).where(User.username == USER["username"])).scalar_one()
+    _legacy_qmt_order(db_session, user.id)
     result = exs.sync_all_pending_gateway_orders(db_session)
     assert result["checked"] >= 1
     assert result["updated"] >= 1
@@ -403,37 +396,24 @@ def test_sync_gateway_orders_task(client, db_session, monkeypatch):
         lambda **_: "filled",
     )
     from backend.app.services import execution_service as exs
+    from backend.app.models.user import User
+    from sqlalchemy import select
 
     h = _pro_headers(client, db_session)
-    client.post(
-        f"{BASE}/execution/paper/orders",
-        headers=h,
-        json={
-            "symbol": "AU",
-            "side": "sell",
-            "notional_cny": 10000,
-            "channel": "qmt",
-            "acknowledge_risk": True,
-        },
-    )
+    user = db_session.execute(select(User).where(User.username == USER["username"])).scalar_one()
+    _legacy_qmt_order(db_session, user.id)
     out = exs.sync_all_pending_gateway_orders(db_session)
     assert out["checked"] >= 1
 
 
-def test_refresh_stub_gateway_422(client, db_session):
+def test_refresh_legacy_qmt_retired(client, db_session):
     h = _pro_headers(client, db_session)
-    order = client.post(
-        f"{BASE}/execution/paper/orders",
-        headers=h,
-        json={
-            "symbol": "RB",
-            "side": "buy",
-            "notional_cny": 9000,
-            "channel": "qmt",
-            "acknowledge_risk": True,
-        },
-    ).json()
+    from backend.app.models.user import User
+    from sqlalchemy import select
 
-    resp = client.post(f"{BASE}/execution/paper/orders/{order['id']}/refresh", headers=h)
+    user = db_session.execute(select(User).where(User.username == USER["username"])).scalar_one()
+    order = _legacy_qmt_order(db_session, user.id)
+
+    resp = client.post(f"{BASE}/execution/paper/orders/{order.id}/refresh", headers=h)
     assert resp.status_code == 422
-    assert "网关未配置" in resp.json()["detail"]
+    assert "QMT_LEGACY" in resp.json()["detail"]

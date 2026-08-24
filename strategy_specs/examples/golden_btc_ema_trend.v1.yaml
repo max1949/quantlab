@@ -1,0 +1,72 @@
+# BTC golden strategy spec for Phase 6 paper sandbox (architecture not BTC-hardcoded).
+
+strategy:
+  id: golden_btc_ema_trend
+  version: v1
+  name: BTC EMA Trend
+  description: Phase-6 BTC paper sandbox golden spec
+  author: quantlab
+  status: RESEARCH
+  parent_version: null
+  change_reason: phase6 btc paper
+  created_by: phase6
+  ai_generated: false
+  user_approved: true
+  ambiguous: false
+  deployable: false
+  assumed_values: []
+market:
+  instrument: BTCUSDT
+  venue: BINANCE_SANDBOX
+  asset_class: CRYPTO
+  timeframe: 1m
+  session: null
+  timezone: UTC
+data:
+  required: [bars]
+  warmup: 50
+  frequency: 1m
+  source_policy: PUBLIC_MARKET_DATA
+entry:
+  long:
+    conditions:
+      - type: ema_cross
+        params: {fast: 10, slow: 20, direction: up}
+  short:
+    conditions:
+      - type: ema_cross
+        params: {fast: 10, slow: 20, direction: down}
+exit:
+  conditions: []
+stop_loss:
+  type: none
+  value: null
+take_profit:
+  type: none
+  value: null
+position_sizing:
+  type: fixed
+  risk_per_trade: null
+  max_position: null
+  trade_size: "0.01"
+risk:
+  daily_loss_limit: 5000
+  max_drawdown: 0.15
+  max_open_positions: 1
+  max_consecutive_losses: 5
+  exposure_limit: 100000
+  leverage_limit: null
+execution:
+  order_type: MARKET
+  time_in_force: GTC
+  slippage_policy: sandbox_default
+  retry_policy: none
+regime:
+  enabled: false
+  allow: []
+  deny: []
+  filters: []
+validation:
+  required_tests: [golden_backtest, robustness]
+deployment:
+  permitted_environments: [SANDBOX, PAPER, SHADOW]

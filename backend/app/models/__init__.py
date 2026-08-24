@@ -47,6 +47,15 @@ from backend.app.models.membership import (  # noqa: F401
 )
 from backend.app.models.billing_ledger import BillingLedger  # noqa: F401
 from backend.app.models.execution import PaperOrder, PaperOrderEvent  # noqa: F401
+from backend.app.models.paper_run import (  # noqa: F401
+    PaperReadyRegistry,
+    PaperRun,
+    PaperRunEvent,
+    PaperRunFill,
+    PaperRunOrder,
+    PaperRunPosition,
+    SignalDecisionRecord,
+)
 from backend.app.models.research import ResearchReport  # noqa: F401
 from backend.app.models.task import Task, TaskStatus, UserTask  # noqa: F401
 from backend.app.models.user import User, UserLevel, UserType  # noqa: F401
@@ -96,6 +105,13 @@ __all__ = [
     "BillingLedger",
     "PaperOrder",
     "PaperOrderEvent",
+    "PaperRun",
+    "PaperRunOrder",
+    "PaperRunFill",
+    "PaperRunPosition",
+    "PaperRunEvent",
+    "SignalDecisionRecord",
+    "PaperReadyRegistry",
     "FactorScan",
     "ResearchOrg",
     "OrgMember",

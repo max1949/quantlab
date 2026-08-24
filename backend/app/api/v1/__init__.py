@@ -23,6 +23,7 @@ from backend.app.api.v1.routes import (
     me,
     onboarding,
     organizations,
+    paper_runs,
     portfolio,
     projects,
     public,
@@ -68,6 +69,7 @@ api_router.include_router(public_feed.router, prefix="/public", tags=["public"])
 api_router.include_router(billing.router, prefix="/billing", tags=["billing"])
 api_router.include_router(admin_billing.router, prefix="/admin/billing", tags=["admin"])
 api_router.include_router(admin_ops.router, prefix="/admin/ops", tags=["admin"])
+api_router.include_router(paper_runs.router, prefix="/paper-sandbox", tags=["paper-sandbox"])
 api_router.include_router(portfolio.router, prefix="/portfolio", tags=["portfolio"])
 api_router.include_router(execution.router, prefix="/execution", tags=["execution"])
 

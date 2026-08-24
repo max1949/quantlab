@@ -1371,6 +1371,66 @@ export async function retryOrgFailedAlertDeliveries(orgId: string): Promise<{ re
   return data;
 }
 
+// ---- paper sandbox (Phase 6) ----
+export async function registerPaperReady(): Promise<void> {
+  await api.post("/paper-sandbox/paper-ready", {
+    spec: {
+      strategy: { id: "golden_btc_ema_trend", version: "v1", name: "BTC EMA", author: "quantlab", status: "RESEARCH" },
+      market: { instrument: "BTCUSDT", venue: "BINANCE_SANDBOX", asset_class: "CRYPTO", timeframe: "1m" },
+      data: { required: ["bars"], warmup: 50, frequency: "1m" },
+      entry: { long: { conditions: [{ type: "ema_cross", params: { fast: 10, slow: 20, direction: "up" } }] }, short: { conditions: [{ type: "ema_cross", params: { fast: 10, slow: 20, direction: "down" } }] } },
+      exit: { conditions: [] },
+      stop_loss: { type: "none" },
+      take_profit: { type: "none" },
+      position_sizing: { type: "fixed", trade_size: "10000" },
+      risk: { max_open_positions: 1 },
+      execution: { order_type: "MARKET" },
+      regime: { enabled: false, allow: [], deny: [], filters: [] },
+      validation: { required_tests: [] },
+      deployment: { permitted_environments: ["SANDBOX"] },
+    },
+    compiled_hash: "demo",
+    data_gate_status: "PASS",
+    backtest_pass: true,
+    validation_pass: true,
+    robustness_pass: true,
+  });
+}
+
+export async function createPaperSandboxRun(): Promise<{ id: string }> {
+  const { data } = await api.post("/paper-sandbox/runs", {
+    spec: {
+      strategy: { id: "golden_btc_ema_trend", version: "v1", name: "BTC EMA", author: "quantlab", status: "RESEARCH" },
+      market: { instrument: "BTCUSDT", venue: "BINANCE_SANDBOX", asset_class: "CRYPTO", timeframe: "1m" },
+      data: { required: ["bars"], warmup: 50, frequency: "1m" },
+      entry: { long: { conditions: [{ type: "ema_cross", params: { fast: 10, slow: 20, direction: "up" } }] }, short: { conditions: [{ type: "ema_cross", params: { fast: 10, slow: 20, direction: "down" } }] } },
+      exit: { conditions: [] },
+      stop_loss: { type: "none" },
+      take_profit: { type: "none" },
+      position_sizing: { type: "fixed", trade_size: "10000" },
+      risk: { max_open_positions: 1 },
+      execution: { order_type: "MARKET" },
+      regime: { enabled: false, allow: [], deny: [], filters: [] },
+      validation: { required_tests: [] },
+      deployment: { permitted_environments: ["SANDBOX"] },
+    },
+    environment: "SANDBOX",
+    instrument: "BTCUSDT",
+    data_provider: "synthetic",
+  });
+  return data;
+}
+
+export async function startPaperRun(runId: string) {
+  const { data } = await api.post(`/paper-sandbox/runs/${runId}/start`);
+  return data;
+}
+
+export async function getPaperSandboxDashboard(runId: string) {
+  const { data } = await api.get(`/paper-sandbox/runs/${runId}/dashboard`);
+  return data;
+}
+
 // ---- events (埋点, 允许匿名) ----
 export async function trackEvent(
   event: string,

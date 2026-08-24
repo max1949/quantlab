@@ -17,10 +17,10 @@ import type { Dictionary } from "../i18n/dictionaries";
 import type { PaperOrder } from "../api/types";
 
 const SYMBOLS = ["RB", "AU", "IF"];
-type ExecChannel = "paper" | "qmt";
+type ExecChannel = "paper";
 
-function isGatewayChannel(channel: string): boolean {
-  return channel === "qmt";
+function isGatewayChannel(_channel: string): boolean {
+  return false;
 }
 
 export default function PaperExecutionPanel({
@@ -150,7 +150,6 @@ export default function PaperExecutionPanel({
           onChange={(e) => setChannel(e.target.value as ExecChannel)}
         >
           <option value="paper">{l4.execChannelPaper}</option>
-          <option value="qmt">{l4.execChannelQmt}</option>
         </select>
         <input
           className="input w-32 text-sm"

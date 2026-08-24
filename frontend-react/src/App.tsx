@@ -34,6 +34,7 @@ import OrgLibrary from "./pages/OrgLibrary";
 import OrgDetail from "./pages/OrgDetail";
 import OrgInvite from "./pages/OrgInvite";
 import AiCreateStrategy from "./pages/AiCreateStrategy";
+import PaperTrading from "./pages/PaperTrading";
 import NotFound from "./pages/NotFound";
 
 export default function App() {
@@ -79,6 +80,7 @@ export default function App() {
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/app" element={<Dashboard />} />
             <Route path="/ai-strategy" element={<AiCreateStrategy />} />
+            <Route path="/paper" element={<PaperTrading />} />
             <Route path="/handbook" element={<BeginnerHandbookPage />} />
             <Route path="/app/alerts" element={<AttentionHistory />} />
             <Route path="/templates" element={<Templates />} />

@@ -64,6 +64,32 @@ def db_session() -> Generator:
 
 
 @pytest.fixture()
+def legacy_qmt_order(db_session):
+    """Insert a legacy QMT-routed order (NEW_CREATE=DENY; history preserved)."""
+    import uuid
+    from backend.app.models.execution import PaperOrder
+
+    def _make(user_id: uuid.UUID, **kwargs):
+        order = PaperOrder(
+            id=kwargs.get("id", uuid.uuid4()),
+            user_id=user_id,
+            symbol=kwargs.get("symbol", "RB"),
+            side=kwargs.get("side", "buy"),
+            notional_cny=kwargs.get("notional_cny", 12000),
+            status=kwargs.get("status", "routed"),
+            channel="qmt",
+            external_ref=kwargs.get("external_ref", f"QMT-LEGACY-{uuid.uuid4().hex[:8].upper()}"),
+            risk_verdict="passed",
+        )
+        db_session.add(order)
+        db_session.commit()
+        db_session.refresh(order)
+        return order
+
+    return _make
+
+
+@pytest.fixture()
 def client(db_session) -> Generator:
     def _override_get_db() -> Generator:
         yield db_session

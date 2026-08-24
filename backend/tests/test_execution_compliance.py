@@ -46,7 +46,7 @@ def test_admin_execution_compliance_report(client, db_session):
     assert body["sla_stale_minutes"] >= 1
 
 
-def test_stale_routed_order_triggers_sla_alert(client, db_session):
+def test_stale_routed_order_triggers_sla_alert(client, db_session, legacy_qmt_order):
     import uuid
 
     from backend.app.models.execution import PaperOrder
@@ -56,19 +56,13 @@ def test_stale_routed_order_triggers_sla_alert(client, db_session):
     settings.execution_sla_stale_minutes = 30
 
     h = _pro_headers(client, db_session)
-    order = client.post(
-        f"{BASE}/execution/paper/orders",
-        headers=h,
-        json={
-            "symbol": "RB",
-            "side": "buy",
-            "notional_cny": 10000,
-            "channel": "qmt",
-            "acknowledge_risk": True,
-        },
-    ).json()
+    from backend.app.models.user import User
+    from sqlalchemy import select
 
-    row = db_session.get(PaperOrder, uuid.UUID(order["id"]))
+    user = db_session.execute(select(User).where(User.username == USER["username"])).scalar_one()
+    order = legacy_qmt_order(user.id, notional_cny=10000)
+
+    row = db_session.get(PaperOrder, order.id)
     row.routed_at = datetime.now(timezone.utc) - timedelta(hours=2)
     db_session.add(row)
     db_session.commit()

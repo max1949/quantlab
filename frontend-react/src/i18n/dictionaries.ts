@@ -8,6 +8,7 @@ const en = {
   nav: {
     workspace: "Desk",
     aiStrategy: "AI Strategy",
+    paperTrading: "Paper Trading",
     feed: "Feed",
     leaderboards: "Ranks",
     challenges: "Challenge",
@@ -1791,6 +1792,7 @@ const zh = {
   nav: {
     workspace: "工作台",
     aiStrategy: "AI创建策略",
+    paperTrading: "模拟交易",
     feed: "广场",
     leaderboards: "榜单",
     challenges: "挑战",

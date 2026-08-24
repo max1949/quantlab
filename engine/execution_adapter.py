@@ -14,11 +14,15 @@ from backend.app.core.config import get_settings
 
 CHANNEL_PAPER = "paper"
 CHANNEL_VNPY = "vnpy"  # VNPY_LEGACY — NEW_CREATE=DENY
-CHANNEL_QMT = "qmt"
+CHANNEL_QMT = "qmt"  # QMT_LEGACY — NEW_CREATE=DENY (Phase 5.5)
 
 VNPY_RETIRED_MSG = (
     "vn.py 执行通道已停止新增（VNPY_LEGACY）。"
     "请使用纸面模拟；历史 vn.py 订单仍可查询。"
+)
+QMT_RETIRED_MSG = (
+    "QMT 通道已停止新增（QMT_LEGACY）。"
+    "请使用 Nautilus 模拟交易；历史 QMT 订单仍可查询。"
 )
 
 
@@ -30,13 +34,18 @@ class VnpyChannelRetired(AdapterError):
     """Raised when code attempts a new vn.py create/route."""
 
 
+class QmtChannelRetired(AdapterError):
+    """Raised when code attempts a new QMT create/route."""
+
+
 def vnpy_configured() -> bool:
     # Phase 5: never advertise as available for new routing.
     return False
 
 
 def qmt_configured() -> bool:
-    return bool(get_settings().qmt_gateway_url.strip())
+    # Phase 5.5: never advertise as available for new routing.
+    return False
 
 
 def verify_gateway_webhook(payload: bytes, signature: str, secret: str) -> bool:
@@ -54,7 +63,8 @@ def execution_config_payload() -> dict:
         "min_regime_fit_vnpy": s.execution_min_regime_fit_vnpy,
         "vnpy_configured": False,
         "vnpy_retired": True,
-        "qmt_configured": qmt_configured(),
+        "qmt_configured": False,
+        "qmt_retired": True,
         "gateway_sync_enabled": s.execution_gateway_sync_enabled,
         "gateway_sync_interval_seconds": s.execution_gateway_sync_interval_seconds,
         "channels": [
@@ -68,9 +78,10 @@ def execution_config_payload() -> dict:
             },
             {
                 "code": CHANNEL_QMT,
-                "label": "QMT 网关",
-                "available": not s.execution_kill_switch,
-                "stub_mode": not qmt_configured(),
+                "label": "历史通道：QMT（已停止新增，仅保留历史记录）",
+                "available": False,
+                "deprecated": True,
+                "stub_mode": True,
             },
         ],
     }
@@ -125,7 +136,7 @@ def _gateway_credentials(channel: str) -> tuple[str, str]:
     if channel == CHANNEL_VNPY:
         raise VnpyChannelRetired(VNPY_RETIRED_MSG)
     if channel == CHANNEL_QMT:
-        return s.qmt_gateway_url, s.qmt_gateway_token
+        raise QmtChannelRetired(QMT_RETIRED_MSG)
     raise AdapterError("非网关通道")
 
 
@@ -162,6 +173,24 @@ def fetch_gateway_order_status(*, channel: str, external_ref: str) -> str:
 
 def probe_gateway_health(channel: str) -> dict[str, Any]:
     """探测执行网关连通性 (GET /health 或 /)。"""
+    if channel == CHANNEL_VNPY:
+        return {
+            "channel": channel,
+            "configured": False,
+            "ok": False,
+            "mode": "retired",
+            "deprecated": True,
+            "message": VNPY_RETIRED_MSG,
+        }
+    if channel == CHANNEL_QMT:
+        return {
+            "channel": channel,
+            "configured": False,
+            "ok": False,
+            "mode": "retired",
+            "deprecated": True,
+            "message": QMT_RETIRED_MSG,
+        }
     try:
         base_url, token = _gateway_credentials(channel)
     except AdapterError:
@@ -212,7 +241,14 @@ def gateway_health_summary() -> list[dict[str, Any]]:
             "deprecated": True,
             "message": VNPY_RETIRED_MSG,
         },
-        probe_gateway_health(CHANNEL_QMT),
+        {
+            "channel": CHANNEL_QMT,
+            "configured": False,
+            "ok": False,
+            "mode": "retired",
+            "deprecated": True,
+            "message": QMT_RETIRED_MSG,
+        },
     ]
 
 
@@ -235,14 +271,4 @@ def route_qmt_order(
     notional_cny: float,
     signal_value: float | None = None,
 ) -> dict[str, Any]:
-    s = get_settings()
-    return _route_gateway(
-        base_url=s.qmt_gateway_url,
-        token=s.qmt_gateway_token,
-        stub_prefix="QMT-STUB",
-        order_id=order_id,
-        symbol=symbol,
-        side=side,
-        notional_cny=notional_cny,
-        signal_value=signal_value,
-    )
+    raise QmtChannelRetired(QMT_RETIRED_MSG)

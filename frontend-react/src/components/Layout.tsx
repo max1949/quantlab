@@ -22,6 +22,7 @@ export default function Layout() {
 
   const navItems = [
     { to: "/app", label: t.nav.workspace, auth: true },
+    { to: "/paper", label: t.nav.paperTrading || "模拟交易", auth: true },
     { to: "/ai-strategy", label: t.nav.aiStrategy || "AI创建策略", auth: true },
     { to: "/feed", label: t.nav.feed, auth: false },
     { to: "/leaderboards", label: t.nav.leaderboards, auth: false },
