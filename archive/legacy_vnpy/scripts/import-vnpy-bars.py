@@ -1,9 +1,7 @@
-﻿# DEPRECATED — see archive/legacy_vnpy/
-# VNPY_LEGACY: no new product use
-
 #!/usr/bin/env python3
-"""浠?vn.py SQLite 瀵煎叆 K 绾垮埌 QuantLab Parquet銆?
-鐢ㄦ硶 (浠撳簱鏍圭洰褰?:
+"""从 vn.py SQLite 导入 K 线到 QuantLab Parquet。
+
+用法 (仓库根目录):
   python scripts/import-vnpy-bars.py
   python scripts/import-vnpy-bars.py --db C:/Users/Administrator/.vntrader/database.db --symbol RB2605 --interval 1m
   python scripts/import-vnpy-bars.py --resample 1d --symbol RB2605 --out-symbol RB
@@ -76,4 +74,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

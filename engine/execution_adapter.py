@@ -1,4 +1,4 @@
-"""执行通道适配 — 纸面 / vn.py / QMT Gateway。"""
+"""执行通道适配 — 纸面 / QMT Gateway；vn.py 已退役（仅历史审计）。"""
 
 from __future__ import annotations
 
@@ -13,16 +13,26 @@ import httpx
 from backend.app.core.config import get_settings
 
 CHANNEL_PAPER = "paper"
-CHANNEL_VNPY = "vnpy"
+CHANNEL_VNPY = "vnpy"  # VNPY_LEGACY — NEW_CREATE=DENY
 CHANNEL_QMT = "qmt"
+
+VNPY_RETIRED_MSG = (
+    "vn.py 执行通道已停止新增（VNPY_LEGACY）。"
+    "请使用纸面模拟；历史 vn.py 订单仍可查询。"
+)
 
 
 class AdapterError(Exception):
     pass
 
 
+class VnpyChannelRetired(AdapterError):
+    """Raised when code attempts a new vn.py create/route."""
+
+
 def vnpy_configured() -> bool:
-    return bool(get_settings().vnpy_gateway_url.strip())
+    # Phase 5: never advertise as available for new routing.
+    return False
 
 
 def qmt_configured() -> bool:
@@ -42,7 +52,8 @@ def execution_config_payload() -> dict:
         "kill_switch": s.execution_kill_switch,
         "max_notional_cny": s.execution_max_notional_cny,
         "min_regime_fit_vnpy": s.execution_min_regime_fit_vnpy,
-        "vnpy_configured": vnpy_configured(),
+        "vnpy_configured": False,
+        "vnpy_retired": True,
         "qmt_configured": qmt_configured(),
         "gateway_sync_enabled": s.execution_gateway_sync_enabled,
         "gateway_sync_interval_seconds": s.execution_gateway_sync_interval_seconds,
@@ -50,9 +61,10 @@ def execution_config_payload() -> dict:
             {"code": CHANNEL_PAPER, "label": "纸面模拟", "available": True},
             {
                 "code": CHANNEL_VNPY,
-                "label": "vn.py 网关",
-                "available": not s.execution_kill_switch,
-                "stub_mode": not vnpy_configured(),
+                "label": "历史引擎：vn.py（已停止新增，仅保留历史记录）",
+                "available": False,
+                "deprecated": True,
+                "stub_mode": True,
             },
             {
                 "code": CHANNEL_QMT,
@@ -111,7 +123,7 @@ def _route_gateway(
 def _gateway_credentials(channel: str) -> tuple[str, str]:
     s = get_settings()
     if channel == CHANNEL_VNPY:
-        return s.vnpy_gateway_url, s.vnpy_gateway_token
+        raise VnpyChannelRetired(VNPY_RETIRED_MSG)
     if channel == CHANNEL_QMT:
         return s.qmt_gateway_url, s.qmt_gateway_token
     raise AdapterError("非网关通道")
@@ -119,6 +131,8 @@ def _gateway_credentials(channel: str) -> tuple[str, str]:
 
 def fetch_gateway_order_status(*, channel: str, external_ref: str) -> str:
     """主动轮询网关订单状态 (GET /orders/{ref})。"""
+    if channel == CHANNEL_VNPY:
+        raise VnpyChannelRetired(VNPY_RETIRED_MSG)
     base_url, token = _gateway_credentials(channel)
     base = base_url.strip()
     ref = (external_ref or "").strip()
@@ -190,7 +204,14 @@ def probe_gateway_health(channel: str) -> dict[str, Any]:
 
 def gateway_health_summary() -> list[dict[str, Any]]:
     return [
-        probe_gateway_health(CHANNEL_VNPY),
+        {
+            "channel": CHANNEL_VNPY,
+            "configured": False,
+            "ok": False,
+            "mode": "retired",
+            "deprecated": True,
+            "message": VNPY_RETIRED_MSG,
+        },
         probe_gateway_health(CHANNEL_QMT),
     ]
 
@@ -203,17 +224,7 @@ def route_vnpy_order(
     notional_cny: float,
     signal_value: float | None = None,
 ) -> dict[str, Any]:
-    s = get_settings()
-    return _route_gateway(
-        base_url=s.vnpy_gateway_url,
-        token=s.vnpy_gateway_token,
-        stub_prefix="VNPY-STUB",
-        order_id=order_id,
-        symbol=symbol,
-        side=side,
-        notional_cny=notional_cny,
-        signal_value=signal_value,
-    )
+    raise VnpyChannelRetired(VNPY_RETIRED_MSG)
 
 
 def route_qmt_order(

@@ -1,9 +1,7 @@
-﻿# DEPRECATED — see archive/legacy_vnpy/
-# VNPY_LEGACY: no new product use
-
 #!/usr/bin/env python3
-"""浠?vn.py MongoDB 瀵煎叆 K 绾垮埌 QuantLab (Parquet + PG 绱㈠紩)銆?
-鐢ㄦ硶 (浠撳簱鏍圭洰褰? 闇€鏈満 MongoDB 杩愯涓?:
+"""从 vn.py MongoDB 导入 K 线到 QuantLab (Parquet + PG 索引)。
+
+用法 (仓库根目录, 需本机 MongoDB 运行中):
   python scripts/import-vnpy-mongo.py
   python scripts/import-vnpy-mongo.py --symbols RB888,AG888,CU888
   python scripts/import-vnpy-mongo.py --list
@@ -65,4 +63,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

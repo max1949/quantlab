@@ -79,12 +79,12 @@ class Settings(BaseSettings):
     oidc_userinfo_endpoint: str = ""
     oidc_scopes: str = "openid email profile"
 
-    # 执行适配 (vn.py / 纸面); kill_switch=True 时拒绝所有下单
+    # 执行适配 (纸面 / QMT); vn.py 通道已退役 (VNPY_LEGACY, NEW_CREATE=DENY)
     execution_kill_switch: bool = False
     execution_max_notional_cny: float = 5_000_000
-    execution_min_regime_fit_vnpy: int = 40
-    vnpy_gateway_url: str = ""       # 留空则 vnpy 通道走本地 stub
-    vnpy_gateway_token: str = ""
+    execution_min_regime_fit_vnpy: int = 40  # legacy field name; used for gateway risk thresholds
+    vnpy_gateway_url: str = ""  # DEPRECATED — unused for new routes
+    vnpy_gateway_token: str = ""  # DEPRECATED — unused for new routes
     qmt_gateway_url: str = ""
     qmt_gateway_token: str = ""
     execution_webhook_secret: str = ""  # 网关状态回调 HMAC 密钥

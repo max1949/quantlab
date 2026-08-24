@@ -160,7 +160,8 @@ def test_risk_preflight_blocks_vnpy_low_fit():
         er.get_settings = orig
 
 
-def test_vnpy_channel_stub_order(client, db_session):
+def test_vnpy_channel_new_create_rejected(client, db_session):
+    """Phase 5: NEW vn.py creates are denied; historical rows remain readable."""
     from backend.app.services.market_data import seed_sample_market_data
 
     h = _pro_headers(client, db_session)
@@ -177,14 +178,11 @@ def test_vnpy_channel_stub_order(client, db_session):
             "acknowledge_risk": True,
         },
     )
-    assert created.status_code == 201, created.text
-    body = created.json()
-    assert body["channel"] == "vnpy"
-    assert body["status"] == "routed"
-    assert body["external_ref"] and body["external_ref"].startswith("VNPY-")
+    assert created.status_code == 422, created.text
+    assert "VNPY_LEGACY" in created.text or "停止新增" in created.text
 
 
-def test_route_paper_to_vnpy(client, db_session):
+def test_route_paper_to_vnpy_gone(client, db_session):
     from backend.app.services.market_data import seed_sample_market_data
 
     h = _pro_headers(client, db_session)
@@ -196,9 +194,7 @@ def test_route_paper_to_vnpy(client, db_session):
     ).json()
 
     routed = client.post(f"{BASE}/execution/paper/orders/{order['id']}/route-vnpy", headers=h)
-    assert routed.status_code == 200, routed.text
-    assert routed.json()["channel"] == "vnpy"
-    assert routed.json()["external_ref"]
+    assert routed.status_code == 410, routed.text
 
 
 def test_qmt_channel_stub_order(client, db_session):
@@ -372,6 +368,8 @@ def test_execution_gateway_health_endpoint(client, db_session):
     body = resp.json()
     assert len(body["gateways"]) == 2
     assert {g["channel"] for g in body["gateways"]} == {"vnpy", "qmt"}
+    vn = next(g for g in body["gateways"] if g["channel"] == "vnpy")
+    assert vn.get("mode") == "retired" or vn.get("deprecated") is True or vn.get("ok") is False
 
 
 def test_sync_all_pending_gateway_orders(client, db_session, monkeypatch):
@@ -414,7 +412,7 @@ def test_sync_gateway_orders_task(client, db_session, monkeypatch):
             "symbol": "AU",
             "side": "sell",
             "notional_cny": 10000,
-            "channel": "vnpy",
+            "channel": "qmt",
             "acknowledge_risk": True,
         },
     )

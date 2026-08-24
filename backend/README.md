@@ -44,7 +44,7 @@ tests/                 # pytest (SQLite 内存库; 含 ../engine/tests)
 | L0 | 观察员 | 只读 + 模板因子 |
 | L1 | 研究学徒 | 因子组合器 |
 | L2 | 研究员 | 自定义 Python 因子 (沙箱) |
-| L3 | 高级研究员 | vn.py 模拟/实盘 |
+| L3 | 高级研究员 | 高级研究 / 模拟 |
 
 用 `IntEnum`,权限判断退化为数值比较。受限路由用
 `Depends(require_level(UserLevel.Lx))` 声明所需最低等级(Sprint 2 起广泛使用)。
@@ -256,7 +256,7 @@ PostgreSQL 存索引 + Parquet 存 K 线。`MarketDataset`(品种/周期/区间/
 
 ## Sprint 8.1 — 研究项目报告(研究生态化)
 
-产品方向从"交易化"转向"研究生态化"(vn.py 推迟为未来可插拔 Execution Adapter)。
+产品方向从"交易化"转向"研究生态化"(交易核心为 NautilusTrader；vn.py 已退役)。
 第一步:把"因子 + 回测 + 验证"**聚合成一篇人话研究报告**,让小白看到的不再是裸指标。
 
 - 计算在 `engine/research_report.py`(纯函数);`research_service` 取该因子**最新成功的回测 + 验证**聚合。
@@ -273,7 +273,7 @@ PostgreSQL 存索引 + Parquet 存 K 线。`MarketDataset`(品种/周期/区间/
 
 把系统从"研究原型"升级为可被真实小白使用的 MVP,串起完整闭环:
 **注册 → 项目 → 因子 → 回测 → 验证 → 报告 → 发布 → 赛季 → 排行榜 → 主页/积分**。
-不做实盘/下单/vn.py(推迟为未来可插拔 Execution Adapter)。
+不做真钱实盘（LIVE=HOLD）；纸面可用；vn.py 通道已退役。
 
 迁移 `0010_research_os`:新增 `research_projects` / `research_nodes` / `research_edges` /
 `challenges` / `challenge_progress`;`factors` 加 `project_id`;`research_reports` 升级

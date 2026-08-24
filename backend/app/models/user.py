@@ -1,7 +1,7 @@
 """User ORM 模型。
 
 Sprint 1 用户系统的核心实体。等级 (Level) 是平台的能力闸门:
-Level 决定用户能做什么 (L0 模板 → L1 组合器 → L2 Python → L3 vn.py),
+Level 决定用户能做什么 (L0 模板 → L1 组合器 → L2 Python → L3 高级研究),
 等级绑定权限的校验逻辑在 Sprint 2 (学院系统) 展开,这里先把字段与语义定下来。
 
 `research_score` 为研究积分预留 (Sprint 6 竞技系统使用动态评分),

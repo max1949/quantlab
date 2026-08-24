@@ -49,9 +49,23 @@ def test_probe_gateway_health_stub():
 
     vn = probe_gateway_health(CHANNEL_VNPY)
     assert vn["configured"] is False
-    assert vn["mode"] == "stub"
+    assert vn["mode"] in {"stub", "retired"}
     qmt = probe_gateway_health(CHANNEL_QMT)
     assert qmt["configured"] is False
+
+
+def test_vnpy_new_route_retired():
+    """LEGACY_COMPAT: new vn.py routes must raise VnpyChannelRetired."""
+    import pytest
+    from engine.execution_adapter import VnpyChannelRetired
+
+    with pytest.raises(VnpyChannelRetired):
+        route_vnpy_order(
+            order_id=uuid.uuid4(),
+            symbol="RB",
+            side="buy",
+            notional_cny=10000,
+        )
 
 
 def test_probe_gateway_health_ok_mocked(monkeypatch):
@@ -86,17 +100,6 @@ def test_probe_gateway_health_ok_mocked(monkeypatch):
     out = ea.probe_gateway_health(ea.CHANNEL_QMT)
     assert out["configured"] is True
     assert out["ok"] is True
-
-
-def test_vnpy_stub_without_gateway():
-    out = route_vnpy_order(
-        order_id=uuid.uuid4(),
-        symbol="RB",
-        side="buy",
-        notional_cny=10000,
-    )
-    assert out["mode"] == "stub"
-    assert out["external_ref"].startswith("VNPY-STUB-")
 
 
 def test_qmt_stub_without_gateway():

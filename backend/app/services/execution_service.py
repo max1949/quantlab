@@ -78,6 +78,10 @@ def submit_paper_order(
         raise ExecutionError("名义金额必须大于 0")
     if channel not in (CHANNEL_PAPER, CHANNEL_VNPY, CHANNEL_QMT):
         raise ExecutionError("无效的执行通道")
+    if channel == CHANNEL_VNPY:
+        raise ExecutionError(
+            "vn.py 执行通道已停止新增（VNPY_LEGACY）。请使用纸面模拟；历史订单仍可查询。"
+        )
 
     factor = db.get(Factor, factor_id) if factor_id else None
     if factor_id and factor is None:
@@ -168,7 +172,9 @@ def submit_paper_order(
 
 
 def route_existing_to_vnpy(db: Session, user_id: uuid.UUID, order_id: uuid.UUID) -> PaperOrder:
-    return _route_existing_to_gateway(db, user_id, order_id, CHANNEL_VNPY)
+    raise ExecutionError(
+        "vn.py 执行通道已停止新增（VNPY_LEGACY）。历史订单仍保留，不可再路由到 vn.py。"
+    )
 
 
 def route_existing_to_qmt(db: Session, user_id: uuid.UUID, order_id: uuid.UUID) -> PaperOrder:

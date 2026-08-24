@@ -112,27 +112,20 @@ def create_paper_order(
 @router.post(
     "/paper/orders/{order_id}/route-vnpy",
     response_model=PaperOrderOut,
-    summary="将纸面订单路由到 vn.py 网关",
+    summary="[已退役] vn.py 路由 — 停止新增",
 )
 def route_order_vnpy(
     order_id: str,
     current_user: Annotated[User, Depends(require_feature("paper_trading"))],
     db: Annotated[Session, Depends(get_db)],
 ) -> PaperOrderOut:
-    try:
-        order = exs.route_existing_to_vnpy(db, current_user.id, uuid.UUID(order_id))
-    except exs.ExecutionError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
-    audit_service.log(
-        db,
-        actor_id=current_user.id,
-        action="execution.vnpy.route",
-        resource_type="paper_order",
-        resource_id=str(order.id),
-        detail={"external_ref": order.external_ref},
+    raise HTTPException(
+        status_code=status.HTTP_410_GONE,
+        detail=(
+            "vn.py 执行通道已停止新增（VNPY_LEGACY）。"
+            "历史订单仍保留审计；请使用纸面模拟。"
+        ),
     )
-    return PaperOrderOut(**exs.order_to_dict(order))
-
 
 @router.post(
     "/paper/orders/{order_id}/route-qmt",

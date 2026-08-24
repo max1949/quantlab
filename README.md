@@ -46,10 +46,10 @@
 1. **Research Competition 层**:新增 `Season` / `SeasonTask`,以赛季驱动留存。
 2. **Research Graph**:`ResearchEvent` 升级为 `ResearchNode` / `ResearchEdge` 知识图谱。
 3. **动态评分(Dynamic Research Score)**:`final = base × decay`,防止失效老因子霸榜。
-4. **等级绑定权限**:Level 决定能力(L0 模板 → L1 组合器 → L2 Python → L3 vn.py)。
+4. **等级绑定权限**: Level 决定能力(L0 模板 → L1 组合器 → L2 Python → L3 高级研究)。
 5. **回测产出研究报告**:不仅给数字,生成可读的"研究报告"(假设/方法/结果/结论)。
 6. **数据存储 V1**:PostgreSQL 存索引 + Parquet 存 K 线(不上 TimescaleDB)。
-7. **vn.py 推迟**:方向修订后聚焦"研究生产线",实盘/下单/vn.py 推迟为未来可插拔 Execution Adapter(非当前核心)。
+7. **交易引擎**: 长期执行核心为 NautilusTrader；vn.py 已退出活动主线（历史审计保留）。
 
 ---
 
@@ -60,7 +60,7 @@
 - 异步计算:Celery + Redis
 - 数据库:PostgreSQL(业务/研究元数据);行情:Parquet + PG 索引
 - 计算引擎:Pandas · NumPy · scikit-learn(`engine/` 纯函数库)
-- 部署:Docker Compose;后期接入 vn.py
+- 部署:Docker Compose;交易核心为 NautilusTrader
 
 ---
 
@@ -108,13 +108,13 @@ quantlab/
 | 3 | 因子实验室 | 模板因子 · 组合器 |
 | 4 | 回测系统 | 成本 · **研究报告** · 数据快照 |
 | 5 | 验证系统 | OOS · Walk-Forward · Decay |
-| 6 | 竞技系统 | Season · 排行榜 · 研究积分(+ vn.py 接口预留) |
+| 6 | 竞技系统 | Season · 排行榜 · 研究积分 |
 | 7 | AI 助手 | 研究建议 · 报告总结(外部 LLM,可降级本地) ✅ |
 | 8 | **研究生态化** | 研究报告自动生成 · 研究员主页 · AI 研究 Agent |
-| 9+ | Execution Adapter | vn.py / QMT / 模拟盘(可插拔,核心不依赖) |
+| 9+ | Execution Adapter | NautilusTrader / 纸面 / QMT(可选) |
 
 > **方向修订(Sprint 8)**:核心是「量化研究员生产线 + 研究数据基础设施」,不是交易软件。
-> vn.py 推迟为未来的可插拔 **Execution Adapter**(Phase 3),先把研究生态做厚。
+> 长期交易核心为 **NautilusTrader**；vn.py 已退出活动主线（历史审计保留）。
 
 > 开发纪律:按 Sprint 锁死推进。每个模块必须 **可运行 + 有测试 + 有 README**。
 
@@ -224,7 +224,7 @@ docker compose --profile workers up -d worker   # 可选: Celery worker
   - `AiInsight` 模型(迁移 `0008`)留存文本 + 结构化分析 + 来源(`llm`/`local`)+ 模型名;接口 `/ai`(status / 验证复盘 / 回测总结 / 洞察列表)
   - 验证:真库 + **真 Celery worker** 端到端(无 Key → `source=local`,AI 正确识别弱动量因子过拟合:衰减 0.59、OOS 夏普 −0.73、跨期一致性 25%);测试合计 **107 passed**
   - 只给研究改进建议,**不给买卖信号**;细节见 `backend/README.md`
-- [x] Sprint 8:产品化与研究生态(Research OS;方向从"交易化"转向"研究生产线";vn.py 推迟为可插拔 Execution Adapter)
+- [x] Sprint 8:产品化与研究生态(Research OS;方向从"交易化"转向"研究生产线";NautilusTrader 为交易核心)
   - [x] **8.1 研究报告自动生成**:engine `research_report.py` 把「因子+回测+验证」聚合成人话叙事报告
     - `ResearchReport` 模型(迁移 `0009`):标题/假设/评级/阶段完成度/完整叙事/溯源/公开;接口 `/research`(生成/列表/详情)
   - [x] **8.2 Research OS 核心**:`ResearchProject` 顶层容器 + 报告升级(`project_id` + 显式字段)+ **研究路径图谱**(`/projects/{id}/graph`:假设→实验→验证→结果);因子可归入项目
@@ -233,7 +233,7 @@ docker compose --profile workers up -d worker   # 可选: Celery worker
   - [x] **8.5 极简前端单页 + 完整闭环测试 + 产品/开发文档**:`frontend/index.html`(FastAPI 同源托管,`/app/`「一键走完整闭环」)
     - 迁移 `0010_research_os`;新增 `README_PRODUCT.md` / `README_DEVELOPMENT.md`
     - 验证:真库迁移 + 端到端实测(项目报告 final 13.87 回填主页、挑战 3/4、AI 计划本地 3 假设、Feed/图谱完整);测试合计 **136 passed(后端)+ 53 passed(engine)**
-- [x] Sprint 9:Growth OS(产品化与自增长;方向锁定"研究人才平台",不接 vn.py)
+- [x] Sprint 9:Growth OS(产品化与自增长;方向锁定"研究人才平台",不接真钱实盘)
   - [x] **9A 后端增长内核**:分流/onboarding、研究模板一键开局、分享卡片 + 公开页 `/share/{token}`、关注/关注 Feed、多维榜单(researcher/contributor/newcomer/improved)、邀请裂变(被邀请者首次研究激活发奖)、AI 研究导师 `/ai/mentor/next`、30 天挑战奖励 + 证书、匿名埋点 + 漏斗
     - **两套互不合并的分数**:`reward_points`(游戏激励)与 `research_contribution_score`(研究信用),竞技 `research_score` 仍独立
     - 迁移 `0011_growth_os`(已落真库)+ 种子 `seed-templates`;`test_growth.py` / `test_growth_loop.py` 守护增长闭环;测试合计 **152 passed(后端)+ 53 passed(engine)**
@@ -245,7 +245,7 @@ docker compose --profile workers up -d worker   # 可选: Celery worker
   - **刻意不做** `checkout` 在线支付;商业化以**月卡/兑换码**为主
   - 迁移 `0012_membership`;前端 `/pricing` 兑换页
 
-## 产品迭代状态(锁定方向, vn.py/在线支付仍不做)
+## 产品迭代状态(锁定方向；LIVE 默认关闭)
 
 | 优先级 | 主题 | 状态 |
 |---|---|---|
