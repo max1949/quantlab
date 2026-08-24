@@ -59,9 +59,21 @@ class NautilusBacktestAdapter:
         strategy_version: str,
         persist_dir: str | Path | None = None,
     ) -> BacktestResult:
-        """Run EMA golden path from compiler output params."""
-        return self.run_ema_golden(
-            ohlcv,
+        """Run EMA path from compiler output params (multi-instrument)."""
+        from engine.data.dataset_resolver import build_btc_golden_ohlcv, resolve_dataset
+
+        instrument = str(compiled_params.get("instrument") or "EUR/USD")
+        if ohlcv is None:
+            _ref, ohlcv = resolve_dataset(instrument)
+            if ohlcv is None:
+                ohlcv = (
+                    build_golden_ohlcv()
+                    if "EUR" in instrument.upper()
+                    else build_btc_golden_ohlcv()
+                )
+        return self.run_ema_for_instrument(
+            instrument=instrument,
+            ohlcv=ohlcv,
             fast_ema=int(compiled_params.get("fast_ema", 10)),
             slow_ema=int(compiled_params.get("slow_ema", 20)),
             trade_size=str(compiled_params.get("trade_size", "1000000")),
@@ -158,6 +170,136 @@ class NautilusBacktestAdapter:
                 },
             )
         except Exception as exc:  # noqa: BLE001 — surface as structured result
+            result = BacktestResult(
+                engine="NAUTILUS",
+                engine_version=self.engine_version,
+                strategy_id=request.strategy_id,
+                strategy_version=request.strategy_version,
+                status="failed",
+                fill_count=0,
+                position_count=0,
+                error=str(exc),
+            )
+        finally:
+            engine.dispose()
+
+        if persist_dir is not None and result.status == "success":
+            self.persist_result(result, persist_dir)
+        return result
+
+    def run_ema_for_instrument(
+        self,
+        *,
+        instrument: str,
+        ohlcv: pd.DataFrame,
+        fast_ema: int = 10,
+        slow_ema: int = 20,
+        trade_size: str = "1000000",
+        strategy_id: str = GOLDEN_STRATEGY_ID,
+        strategy_version: str = GOLDEN_STRATEGY_VERSION,
+        persist_dir: str | Path | None = None,
+    ) -> BacktestResult:
+        """Multi-instrument EMA path (EUR/USD + BTCUSDT golden)."""
+        from nautilus_trader.backtest.config import BacktestEngineConfig
+        from nautilus_trader.backtest.engine import BacktestEngine
+        from nautilus_trader.config import LoggingConfig
+        from nautilus_trader.examples.strategies.ema_cross import EMACross, EMACrossConfig
+        from nautilus_trader.model import BarType, Money, Venue
+        from nautilus_trader.model.enums import AccountType, OmsType
+        from nautilus_trader.model.identifiers import TraderId
+        from nautilus_trader.persistence.wranglers import BarDataWrangler
+        from nautilus_trader.test_kit.providers import TestInstrumentProvider
+
+        inst_key = instrument.upper().replace(" ", "")
+        if inst_key in {"EUR/USD", "EURUSD"}:
+            nt_instrument = TestInstrumentProvider.default_fx_ccy("EUR/USD")
+            venue = Venue("SIM")
+            account_type = AccountType.MARGIN
+            balance = Money(1_000_000, nt_instrument.quote_currency)
+            size = trade_size
+            asset_class = "FX"
+        elif inst_key in {"BTCUSDT", "BTC/USDT"}:
+            nt_instrument = TestInstrumentProvider.btcusdt_binance()
+            venue = Venue("BINANCE")
+            account_type = AccountType.MARGIN
+            balance = Money(1_000_000, nt_instrument.quote_currency)
+            size = "0.1" if trade_size == "1000000" else trade_size
+            asset_class = "CRYPTO"
+        else:
+            return BacktestResult(
+                engine="NAUTILUS",
+                engine_version=self.engine_version,
+                strategy_id=strategy_id,
+                strategy_version=strategy_version,
+                status="failed",
+                fill_count=0,
+                position_count=0,
+                error=f"unsupported_instrument:{instrument}",
+            )
+
+        request = BacktestRequest(
+            strategy_id=strategy_id,
+            strategy_version=strategy_version,
+            instrument=InstrumentRef(symbol=str(nt_instrument.id), venue=str(venue), asset_class=asset_class),
+            parameters={"fast_ema": fast_ema, "slow_ema": slow_ema, "trade_size": size},
+        )
+        bar_type = BarType.from_str(f"{nt_instrument.id}-15-MINUTE-LAST-EXTERNAL")
+        bars = BarDataWrangler(bar_type, nt_instrument).process(ohlcv)
+        engine = BacktestEngine(
+            config=BacktestEngineConfig(
+                trader_id=TraderId("QL-MULTI-001"),
+                logging=LoggingConfig(log_level="ERROR"),
+            )
+        )
+        try:
+            engine.add_venue(
+                venue=venue,
+                oms_type=OmsType.NETTING,
+                account_type=account_type,
+                base_currency=nt_instrument.quote_currency,
+                starting_balances=[balance],
+            )
+            engine.add_instrument(nt_instrument)
+            engine.add_data(bars)
+            engine.add_strategy(
+                EMACross(
+                    config=EMACrossConfig(
+                        instrument_id=nt_instrument.id,
+                        bar_type=bar_type,
+                        trade_size=Decimal(size),
+                        fast_ema_period=fast_ema,
+                        slow_ema_period=slow_ema,
+                    )
+                )
+            )
+            engine.run()
+            fills = engine.trader.generate_order_fills_report()
+            positions = engine.trader.generate_positions_report()
+            fill_count = 0 if fills is None else int(len(fills))
+            position_count = 0 if positions is None else int(len(positions))
+            result = BacktestResult(
+                engine="NAUTILUS",
+                engine_version=self.engine_version,
+                strategy_id=request.strategy_id,
+                strategy_version=request.strategy_version,
+                status="success",
+                fill_count=fill_count,
+                position_count=position_count,
+                metrics={
+                    "bar_count": len(bars),
+                    "fill_count": fill_count,
+                    "position_count": position_count,
+                    "fast_ema": fast_ema,
+                    "slow_ema": slow_ema,
+                    "instrument": str(nt_instrument.id),
+                },
+                artifacts={
+                    "instrument_id": str(nt_instrument.id),
+                    "bar_type": str(bar_type),
+                    "generated_at": datetime.now(timezone.utc).isoformat(),
+                },
+            )
+        except Exception as exc:  # noqa: BLE001
             result = BacktestResult(
                 engine="NAUTILUS",
                 engine_version=self.engine_version,
