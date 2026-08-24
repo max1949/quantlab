@@ -33,6 +33,7 @@ import AdminOps from "./pages/AdminOps";
 import OrgLibrary from "./pages/OrgLibrary";
 import OrgDetail from "./pages/OrgDetail";
 import OrgInvite from "./pages/OrgInvite";
+import AiCreateStrategy from "./pages/AiCreateStrategy";
 import NotFound from "./pages/NotFound";
 
 export default function App() {
@@ -77,6 +78,7 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/app" element={<Dashboard />} />
+            <Route path="/ai-strategy" element={<AiCreateStrategy />} />
             <Route path="/handbook" element={<BeginnerHandbookPage />} />
             <Route path="/app/alerts" element={<AttentionHistory />} />
             <Route path="/templates" element={<Templates />} />

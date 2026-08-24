@@ -1134,7 +1134,16 @@ export async function setOrgSsoDomains(orgId: string, domains: string[]): Promis
   return data;
 }
 
-// ---- execution (institutional paper / vn.py / QMT) ----
+export async function runAiStrategyBuilder(body: {
+  text: string;
+  confirm?: boolean;
+  run_backtest?: boolean;
+}): Promise<Record<string, unknown>> {
+  const { data } = await api.post("/ai/strategy-builder", body);
+  return data;
+}
+
+// ---- execution (paper / QMT; vn.py retired) ----
 export async function getExecutionConfig(): Promise<ExecutionConfig> {
   const { data } = await api.get<ExecutionConfig>("/execution/config");
   return data;

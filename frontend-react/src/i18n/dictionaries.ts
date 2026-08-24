@@ -7,6 +7,7 @@ const en = {
   brandTag: "QAI Lab",
   nav: {
     workspace: "Desk",
+    aiStrategy: "AI Strategy",
     feed: "Feed",
     leaderboards: "Ranks",
     challenges: "Challenge",
@@ -1789,6 +1790,7 @@ const zh = {
   brandTag: "QAI 实验室",
   nav: {
     workspace: "工作台",
+    aiStrategy: "AI创建策略",
     feed: "广场",
     leaderboards: "榜单",
     challenges: "挑战",
