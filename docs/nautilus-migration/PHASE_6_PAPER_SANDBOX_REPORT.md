@@ -4,9 +4,10 @@
 
 ```
 PHASE=6
-STATUS=PASS
+STATUS=PASS_LOCAL / HOLD_PRODUCTION
 
-QMT_RETIREMENT=PASS
+WORKSTATION=PASS (tests + golden E2E + migration 0032)
+PRODUCTION=NOT_DEPLOYED (paper-sandbox API 404; deploy pending Owner)
 STRATEGY_SEMANTIC_DRIFT=NO (SSOT: compile_spec → runtime_params)
 BACKTEST_PAPER_SHARED_SPEC=PASS
 ALEMBIC_0032=PASS (upgrade / downgrade / re-upgrade)

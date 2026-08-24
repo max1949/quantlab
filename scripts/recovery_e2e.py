@@ -52,13 +52,14 @@ def main() -> int:
             db.commit()
             db.refresh(user)
 
-        spec = validate_spec(
-            yaml.safe_load(
-                (ROOT / "strategy_specs/examples/golden_btc_ema_trend.v1.yaml").read_text(
-                    encoding="utf-8"
-                )
+        from engine.strategies.runtime_params import require_nautilus_runtime_params
+
+        spec_payload = yaml.safe_load(
+            (ROOT / "strategy_specs/examples/golden_btc_ema_trend.v1.yaml").read_text(
+                encoding="utf-8"
             )
         )
+        spec = validate_spec(spec_payload)
         from sqlalchemy import select
 
         ready = db.scalars(
@@ -94,16 +95,7 @@ def main() -> int:
             current_balance=100_000,
             status=PaperRunStatus.CREATED.value,
             effective_config={
-                **__import__(
-                    "engine.strategies.runtime_params",
-                    fromlist=["require_nautilus_runtime_params"],
-                ).require_nautilus_runtime_params(
-                    yaml.safe_load(
-                        (ROOT / "strategy_specs/examples/golden_btc_ema_trend.v1.yaml").read_text(
-                            encoding="utf-8"
-                        )
-                    )
-                ),
+                **require_nautilus_runtime_params(spec_payload),
                 "synthetic_ticks": 120,
             },
             run_manifest={"environment": "SANDBOX"},
