@@ -107,7 +107,7 @@ def test_factor_catalog(client, db_session):
     assert body["factors"][0]["factor_id"] == fid
 
 
-def test_admin_execution_health_and_sync(client, db_session, monkeypatch):
+def test_admin_execution_health_and_sync(client, db_session, monkeypatch, legacy_qmt_order):
     monkeypatch.setattr(
         "backend.app.services.execution_service.fetch_gateway_order_status",
         lambda **_: "filled",
@@ -124,11 +124,7 @@ def test_admin_execution_health_and_sync(client, db_session, monkeypatch):
     db_session.commit()
     ms.grant(db_session, user, ms.TIER_PRO, 30, "pro_monthly")
 
-    client.post(
-        f"{BASE}/execution/paper/orders",
-        headers=h,
-        json={"symbol": "RB", "side": "buy", "notional_cny": 13000, "channel": "qmt", "acknowledge_risk": True},
-    )
+    legacy_qmt_order(user.id, notional_cny=13000)
 
     health = client.get(f"{BASE}/admin/ops/execution/health", headers=_admin_headers())
     assert health.status_code == 200, health.text

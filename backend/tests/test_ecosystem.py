@@ -72,7 +72,7 @@ def test_challenge_progress_auto(client, db_session):
 
     # 报名时还没产物 -> 0 完成
     prog = client.post(f"{BASE}/challenges/30d-research/enroll", headers=h).json()
-    assert prog["total"] == 6
+    assert prog["total"] == 8
     assert prog["completed_count"] == 0
     assert any(r["code"] == "challenge-enroll" for r in prog.get("academy_rewards", []))
     again = client.post(f"{BASE}/challenges/30d-research/enroll", headers=h).json()

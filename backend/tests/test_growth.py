@@ -344,6 +344,7 @@ def test_journey_includes_research_revisit_coaching(client, db_session):
 
     from backend.app.models.user import User
 
+    seed_sample_market_data(db_session)
     seed_default_templates(db_session)
     h = _register(client, "stalled1")
     client.post(f"{BASE}/onboarding/choose-type", headers=h, json={"user_type": "newbie"})
@@ -470,10 +471,14 @@ def test_first_report_coaching_hides_after_paper_order(client, db_session):
 
     j2 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
     assert j2.get("first_report_coaching") is None
-    coach = j2.get("first_paper_order_coaching")
+    # 研究质量若已过 Paper 毕业线，会进入声誉教练；否则展示首笔 Paper 教练
+    coach = j2.get("first_paper_order_coaching") or j2.get("reputation_coaching")
     assert coach is not None
-    assert coach["cta_path"] == "/leaderboards?kind=paper_mastery"
-    assert coach.get("tracking_path", "").endswith("#paper-tracking")
+    if j2.get("first_paper_order_coaching"):
+        assert coach["cta_path"] == "/leaderboards?kind=paper_mastery"
+        assert coach.get("tracking_path", "").endswith("#paper-tracking")
+    else:
+        assert coach["cta_action"] == "publish_share"
 
 
 def test_journey_includes_reputation_coaching_after_paper(client, db_session):
@@ -517,18 +522,24 @@ def test_journey_includes_reputation_coaching_after_paper(client, db_session):
     assert share_resp.status_code == 201, share_resp.text
     j2 = client.get(f"{BASE}/onboarding/journey", headers=h).json()
     assert j2.get("reputation_coaching") is None
+    # 大师路径全部完成时优先展示毕业教练，并抑制 share_growth
     growth = j2.get("share_growth_coaching")
-    assert growth is not None
-    assert growth["reason"] in ("first_views", "network_start")
-    assert growth["views"] == 0
-    assert growth["followers"] == 0
-    assert growth["following"] == 0
-    assert growth["share_url_path"] == f"/share/{share_resp.json()['token']}"
-    assert growth["feed_path"] == f"/feed?highlight={report['id']}"
-    assert growth["profile_path"] == "/me"
-    assert growth["following_feed_path"] == "/me/following"
-    assert len(growth.get("guide_steps") or []) == 3
-    assert growth["guide_steps"][2]["cta_path"] == "/feed?focus=follow"
+    graduation = j2.get("mastery_graduation_coaching")
+    assert growth is not None or graduation is not None
+    if growth is not None:
+        assert growth["reason"] in ("first_views", "network_start")
+        assert growth["views"] == 0
+        assert growth["followers"] == 0
+        assert growth["following"] == 0
+        assert growth["share_url_path"] == f"/share/{share_resp.json()['token']}"
+        assert growth["feed_path"] == f"/feed?highlight={report['id']}"
+        assert growth["profile_path"] == "/me"
+        assert growth["following_feed_path"] == "/me/following"
+        assert len(growth.get("guide_steps") or []) == 3
+        assert growth["guide_steps"][2]["cta_path"] == "/feed?focus=follow"
+    else:
+        assert graduation["share_url_path"] == f"/share/{share_resp.json()['token']}"
+        assert graduation["cta_path"] == "/leaderboards?kind=paper_mastery"
 
 
 def test_journey_includes_mastery_graduation_when_path_complete(client, db_session, monkeypatch):
@@ -687,6 +698,7 @@ def test_choose_type_updates_user(client, db_session):
 # ---------------- 研究模板 ----------------
 
 def test_template_one_click_start(client, db_session):
+    seed_sample_market_data(db_session)
     seed_default_templates(db_session)
     h = _register(client, "paula")
     tpls = client.get(f"{BASE}/research/templates", headers=h).json()
@@ -940,6 +952,7 @@ def test_network_radar_academy_on_third_follow(client, db_session):
 def test_master_replication_academy_on_replication_share(client, db_session):
     from backend.app.services.task_service import seed_default_tasks
 
+    seed_sample_market_data(db_session)
     seed_default_tasks(db_session)
     h = _register(client, "repl_acad")
     proj, rep = _full_research(client, h, db_session)

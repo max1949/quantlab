@@ -135,7 +135,9 @@ def test_challenge_full_completion_issues_certificate(client, db_session):
     assert stack.status_code == 201, stack.text
     client.post(f"{BASE}/backtests", headers=h, json={"factor_id": fid, "symbol": "RB"})
     client.post(f"{BASE}/validations", headers=h, json={"factor_id": fid, "symbol": "RB", "oos_ratio": 0.3, "n_splits": 4})
-    client.post(f"{BASE}/research/reports/generate", headers=h, json={"project_id": proj["id"]})
+    rep = client.post(f"{BASE}/research/reports/generate", headers=h, json={"project_id": proj["id"]})
+    assert rep.status_code in (200, 201), rep.text
+    rid = rep.json()["id"]
 
     from backend.app.models.user import User
     from backend.app.services import membership_service as ms
@@ -151,8 +153,21 @@ def test_challenge_full_completion_issues_certificate(client, db_session):
         json={"symbol": "RB", "side": "buy", "notional_cny": 50000, "factor_id": fid},
     )
 
+    # 补齐 Paper 大师路径新增里程碑：关注 3 人 + 分享卡片
+    for uname in ("f1_danr", "f2_danr", "f3_danr"):
+        client.post(
+            f"{BASE}/auth/register",
+            json={"email": f"{uname}@quantlab.ai", "username": uname, "password": "s3cret-pass"},
+        )
+        uid = client.get(f"{BASE}/researchers/me", headers=_login(client, uname)).json()["user_id"]
+        fr = client.post(f"{BASE}/researchers/{uid}/follow", headers=h)
+        assert fr.status_code in (200, 201), fr.text
+
+    share = client.post(f"{BASE}/research/reports/{rid}/share", headers=h)
+    assert share.status_code == 201, share.text
+
     prog = client.get(f"{BASE}/challenges/30d-research/progress", headers=h).json()
-    assert prog["completed_count"] == 6
+    assert prog["completed_count"] == 8
     assert prog["certificate_code"] is not None
     # 证书可领取
     cert = client.get(f"{BASE}/challenges/30d-research/certificate", headers=h).json()

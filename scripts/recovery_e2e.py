@@ -93,7 +93,19 @@ def main() -> int:
             starting_balance=100_000,
             current_balance=100_000,
             status=PaperRunStatus.CREATED.value,
-            effective_config={"ema_fast": 3, "ema_slow": 8, "trade_size": "0.010000", "synthetic_ticks": 120},
+            effective_config={
+                **__import__(
+                    "engine.strategies.runtime_params",
+                    fromlist=["require_nautilus_runtime_params"],
+                ).require_nautilus_runtime_params(
+                    yaml.safe_load(
+                        (ROOT / "strategy_specs/examples/golden_btc_ema_trend.v1.yaml").read_text(
+                            encoding="utf-8"
+                        )
+                    )
+                ),
+                "synthetic_ticks": 120,
+            },
             run_manifest={"environment": "SANDBOX"},
             run_manifest_hash="recovery",
         )
