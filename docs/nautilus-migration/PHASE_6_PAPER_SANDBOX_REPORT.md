@@ -4,10 +4,12 @@
 
 ```
 PHASE=6
-STATUS=PASS_LOCAL / HOLD_PRODUCTION
+STATUS=PASS
 
 WORKSTATION=PASS (tests + golden E2E + migration 0032)
-PRODUCTION=NOT_DEPLOYED (paper-sandbox API 404; deploy pending Owner)
+PRODUCTION=PASS (tmos-prod-hk /srv/quantlab @ bf935a0; alembic 0032; Golden E2E PASS 2026-08-25)
+TARGET_SERVER=43.161.203.133 (tmos-prod-hk) — NOT Oracle /opt/quantlab
+UPDATE_NOTE=update-oracle.sh targets /opt/quantlab; production deploy used lean sync to /srv/quantlab
 STRATEGY_SEMANTIC_DRIFT=NO (SSOT: compile_spec → runtime_params)
 BACKTEST_PAPER_SHARED_SPEC=PASS
 ALEMBIC_0032=PASS (upgrade / downgrade / re-upgrade)
