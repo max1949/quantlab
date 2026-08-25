@@ -1,0 +1,198 @@
+{
+  "strategy_id": "baseline_sma_ratio_trend",
+  "strategy_version": "v1",
+  "family": "trend",
+  "hypothesis": "Price above/below SMA signals trend direction.",
+  "market": "EUR/USD",
+  "timeframe": "15m",
+  "decision": "REJECT",
+  "overfit_risk": "HIGH",
+  "gates": {
+    "oos": "FAIL",
+    "walk_forward": "FAIL",
+    "robustness": "FAIL",
+    "cost_stress": "FAIL",
+    "paper": "INSUFFICIENT",
+    "parity": "INSUFFICIENT",
+    "notes": []
+  },
+  "reasons": [
+    "hard fail: oos, walk_forward, robustness, cost_stress",
+    "OVERFIT_RISK=HIGH"
+  ],
+  "metrics_is": {
+    "total_return": 0.00020251561995099365,
+    "annual_return": 0.0001822622125269291,
+    "annual_volatility": 0.004355869364183825,
+    "sharpe": 0.04401080707523073,
+    "max_drawdown": -0.002914079534499181,
+    "win_rate": 0.6846153846153846,
+    "trade_count": 12,
+    "turnover": 23.0,
+    "periods": 280
+  },
+  "metrics_oos": {
+    "total_return": -0.00015363158253700604,
+    "annual_return": -0.00032259906239140435,
+    "annual_volatility": 0.00424224221977074,
+    "sharpe": -0.07395171367344942,
+    "max_drawdown": -0.002640214481033021,
+    "win_rate": 0.67,
+    "trade_count": 5,
+    "turnover": 9.0,
+    "periods": 120
+  },
+  "walk_forward": {
+    "folds": [
+      {
+        "fold": 1,
+        "start": "2024-01-01",
+        "end": "2024-01-02",
+        "sharpe": -0.30524759561706605,
+        "total_return": -0.0006980822343720661
+      },
+      {
+        "fold": 2,
+        "start": "2024-01-02",
+        "end": "2024-01-03",
+        "sharpe": 0.7216205369375567,
+        "total_return": 0.0014918682785727277
+      },
+      {
+        "fold": 3,
+        "start": "2024-01-03",
+        "end": "2024-01-05",
+        "sharpe": -0.374979978688075,
+        "total_return": -0.0008924617904824128
+      }
+    ],
+    "summary": {
+      "n_splits": 3,
+      "mean_sharpe": 0.013797654210805218,
+      "std_sharpe": 0.5013153207951371,
+      "positive_ratio": 0.3333333333333333
+    }
+  },
+  "robustness": {
+    "score": 24.2,
+    "grade": "脆弱",
+    "components": {
+      "oos": 0.0,
+      "walk_forward": 0.3333333333333333,
+      "sensitivity": 0.5
+    },
+    "notes": [
+      "样本外夏普非正, 警惕过拟合。",
+      "跨期一致性不足 (多数分段未盈利)。"
+    ],
+    "full_sample_extended": {
+      "total_return": 0.0001796811392886788,
+      "cagr": 0.00011319535520759594,
+      "net_pnl": 0.0001796811392886788,
+      "profit_factor": 99.0,
+      "expectancy": 0.0007952541635869378,
+      "average_trade": 0.0007952541635869378,
+      "max_drawdown": -0.002914079534499181,
+      "drawdown_duration_bars": 91,
+      "volatility": 0.0044359046163979605,
+      "worst_day": -0.0013781730642141933,
+      "worst_trade": 0.0007952541635869378,
+      "consecutive_losses": 0,
+      "sharpe": 0.027730560888312685,
+      "sortino": 0.018586578191473174,
+      "calmar": 0.038844291608207564,
+      "trade_count": 17,
+      "top_win_concentration": 1.0,
+      "periods": 400
+    }
+  },
+  "cost_stress": {
+    "multipliers": {
+      "BASE_COST": {
+        "total_return": 0.0001796811392886788,
+        "annual_return": 0.00011319535520759594,
+        "annual_volatility": 0.0044359046163979605,
+        "sharpe": 0.027730560888312685,
+        "max_drawdown": -0.002914079534499181,
+        "win_rate": 0.6710526315789473,
+        "trade_count": 17,
+        "turnover": 33.0,
+        "periods": 400
+      },
+      "1.5X_COST": {
+        "total_return": -0.009688583221984959,
+        "annual_return": -0.00611479650534863,
+        "annual_volatility": 0.006249886262947868,
+        "sharpe": -0.9782561825463457,
+        "max_drawdown": -0.010369703257055551,
+        "win_rate": 0.6710526315789473,
+        "trade_count": 17,
+        "turnover": 33.0,
+        "periods": 400
+      },
+      "2X_COST": {
+        "total_return": -0.0194652401209483,
+        "annual_return": -0.012307658689073575,
+        "annual_volatility": 0.008094743680614035,
+        "sharpe": -1.5258037022863873,
+        "max_drawdown": -0.0201396359309145,
+        "win_rate": 0.6710526315789473,
+        "trade_count": 17,
+        "turnover": 33.0,
+        "periods": 400
+      }
+    },
+    "status": "FAIL"
+  },
+  "paper": {
+    "status": "INSUFFICIENT",
+    "note": "Batch-001: long Paper window not yet run"
+  },
+  "parity": {
+    "status": "INSUFFICIENT",
+    "note": "Requires Paper evidence; not skipped as PASS"
+  },
+  "neighborhood": {
+    "points": [
+      {
+        "label": "window10",
+        "sharpe": 0.49654452371197483,
+        "total_return": 0.003654307767929188
+      },
+      {
+        "label": "window15",
+        "sharpe": 0.48391424125925725,
+        "total_return": 0.003419027139516917
+      },
+      {
+        "label": "window20",
+        "sharpe": 0.027730560888312685,
+        "total_return": 0.0001796811392886788
+      },
+      {
+        "label": "window25",
+        "sharpe": -0.7854273146226132,
+        "total_return": -0.0059292539441792025
+      },
+      {
+        "label": "window30",
+        "sharpe": -0.8070681136360814,
+        "total_return": -0.005732478909687644
+      },
+      {
+        "label": "window40",
+        "sharpe": -1.5875792743247865,
+        "total_return": -0.011541446717513337
+      }
+    ],
+    "summary": {
+      "n_variants": 6,
+      "mean_sharpe": -0.3619808961206561,
+      "std_sharpe": 0.7620127278967834,
+      "min_sharpe": -1.5875792743247865,
+      "positive_ratio": 0.5
+    }
+  },
+  "live_execution": "DENY",
+  "phase_7": "DENY"
+}

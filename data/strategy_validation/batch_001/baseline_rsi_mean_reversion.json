@@ -1,0 +1,197 @@
+{
+  "strategy_id": "baseline_rsi_mean_reversion",
+  "strategy_version": "v1",
+  "family": "mean_reversion",
+  "hypothesis": "RSI extremes mean-revert over short horizons.",
+  "market": "EUR/USD",
+  "timeframe": "15m",
+  "decision": "REJECT",
+  "overfit_risk": "MEDIUM",
+  "gates": {
+    "oos": "FAIL",
+    "walk_forward": "FAIL",
+    "robustness": "FAIL",
+    "cost_stress": "FAIL",
+    "paper": "INSUFFICIENT",
+    "parity": "INSUFFICIENT",
+    "notes": []
+  },
+  "reasons": [
+    "hard fail: oos, walk_forward, robustness, cost_stress"
+  ],
+  "metrics_is": {
+    "total_return": -0.028830778082903685,
+    "annual_return": -0.025985506403134684,
+    "annual_volatility": 0.0040428573160989165,
+    "sharpe": -6.51014107718992,
+    "max_drawdown": -0.028830778082903685,
+    "win_rate": 0.3246753246753247,
+    "trade_count": 22,
+    "turnover": 33.0,
+    "periods": 280
+  },
+  "metrics_oos": {
+    "total_return": -0.012188799392906846,
+    "annual_return": -0.025424953945579865,
+    "annual_volatility": 0.0037324804243380563,
+    "sharpe": -6.897698832110849,
+    "max_drawdown": -0.012188799392906846,
+    "win_rate": 0.3118279569892473,
+    "trade_count": 9,
+    "turnover": 13.0,
+    "periods": 120
+  },
+  "walk_forward": {
+    "folds": [
+      {
+        "fold": 1,
+        "start": "2024-01-01",
+        "end": "2024-01-02",
+        "sharpe": -5.67193318415664,
+        "total_return": -0.011832228442842485
+      },
+      {
+        "fold": 2,
+        "start": "2024-01-02",
+        "end": "2024-01-03",
+        "sharpe": -7.2089371059945915,
+        "total_return": -0.014323799150972927
+      },
+      {
+        "fold": 3,
+        "start": "2024-01-03",
+        "end": "2024-01-05",
+        "sharpe": -6.549338390844582,
+        "total_return": -0.013126351205708042
+      }
+    ],
+    "summary": {
+      "n_splits": 3,
+      "mean_sharpe": -6.476736226998605,
+      "std_sharpe": 0.6295758199415695,
+      "positive_ratio": 0.0
+    }
+  },
+  "robustness": {
+    "score": 0.0,
+    "grade": "脆弱",
+    "components": {
+      "oos": 0.0,
+      "walk_forward": 0.0,
+      "sensitivity": 0.0
+    },
+    "notes": [
+      "样本外夏普非正, 警惕过拟合。",
+      "跨期一致性不足 (多数分段未盈利)。"
+    ],
+    "full_sample_extended": {
+      "total_return": -0.041050769854900415,
+      "cagr": -0.02606216510975823,
+      "net_pnl": -0.041050769854900415,
+      "profit_factor": 0.0,
+      "expectancy": -0.004637786681032017,
+      "average_trade": -0.004637786681032017,
+      "max_drawdown": -0.041050769854900415,
+      "drawdown_duration_bars": 385,
+      "volatility": 0.00399717391663114,
+      "worst_day": -0.0011996354427147517,
+      "worst_trade": -0.005767314664877452,
+      "consecutive_losses": 8,
+      "sharpe": -6.604277277644765,
+      "sortino": -5.7634285547204875,
+      "calmar": -0.634876403094961,
+      "trade_count": 31,
+      "top_win_concentration": null,
+      "periods": 400
+    }
+  },
+  "cost_stress": {
+    "multipliers": {
+      "BASE_COST": {
+        "total_return": -0.041050769854900415,
+        "annual_return": -0.02606216510975823,
+        "annual_volatility": 0.00399717391663114,
+        "sharpe": -6.604277277644765,
+        "max_drawdown": -0.041050769854900415,
+        "win_rate": 0.3333333333333333,
+        "trade_count": 31,
+        "turnover": 47.0,
+        "periods": 400
+      },
+      "1.5X_COST": {
+        "total_return": -0.05449332385920824,
+        "annual_return": -0.034685793322399405,
+        "annual_volatility": 0.005956145003476659,
+        "sharpe": -5.923536927292275,
+        "max_drawdown": -0.05449332385920824,
+        "win_rate": 0.3333333333333333,
+        "trade_count": 31,
+        "turnover": 47.0,
+        "periods": 400
+      },
+      "2X_COST": {
+        "total_return": -0.06775408916652081,
+        "annual_return": -0.043237363618222946,
+        "annual_volatility": 0.00795783631799694,
+        "sharpe": -5.5498056390682295,
+        "max_drawdown": -0.06775408916652081,
+        "win_rate": 0.3333333333333333,
+        "trade_count": 31,
+        "turnover": 47.0,
+        "periods": 400
+      }
+    },
+    "status": "FAIL"
+  },
+  "paper": {
+    "status": "INSUFFICIENT",
+    "note": "Batch-001: long Paper window not yet run"
+  },
+  "parity": {
+    "status": "INSUFFICIENT",
+    "note": "Requires Paper evidence; not skipped as PASS"
+  },
+  "neighborhood": {
+    "points": [
+      {
+        "label": "window10",
+        "sharpe": -6.784310057205525,
+        "total_return": -0.04195777877124196
+      },
+      {
+        "label": "window12",
+        "sharpe": -6.728225491796067,
+        "total_return": -0.04376198480841764
+      },
+      {
+        "label": "window14",
+        "sharpe": -6.604277277644765,
+        "total_return": -0.041050769854900415
+      },
+      {
+        "label": "window16",
+        "sharpe": -6.51230314138902,
+        "total_return": -0.039527821978947775
+      },
+      {
+        "label": "window18",
+        "sharpe": -5.934264991610243,
+        "total_return": -0.035227183900672254
+      },
+      {
+        "label": "window21",
+        "sharpe": -5.510383802659208,
+        "total_return": -0.03503513772217193
+      }
+    ],
+    "summary": {
+      "n_variants": 6,
+      "mean_sharpe": -6.345627460384137,
+      "std_sharpe": 0.4655382607776205,
+      "min_sharpe": -6.784310057205525,
+      "positive_ratio": 0.0
+    }
+  },
+  "live_execution": "DENY",
+  "phase_7": "DENY"
+}

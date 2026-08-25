@@ -1,0 +1,192 @@
+{
+  "strategy_id": "baseline_ema_cross_btc",
+  "strategy_version": "v1",
+  "family": "trend",
+  "hypothesis": "Same EMA trend rule on BTCUSDT golden sample.",
+  "market": "BTCUSDT",
+  "timeframe": "15m",
+  "decision": "REJECT",
+  "overfit_risk": "HIGH",
+  "gates": {
+    "oos": "PASS",
+    "walk_forward": "PASS",
+    "robustness": "PASS",
+    "cost_stress": "PASS",
+    "paper": "INSUFFICIENT",
+    "parity": "INSUFFICIENT",
+    "notes": []
+  },
+  "reasons": [
+    "insufficient evidence: paper, parity",
+    "OVERFIT_RISK=HIGH → cannot PROMOTE"
+  ],
+  "metrics_is": {
+    "total_return": 0.09901901700376348,
+    "annual_return": 0.08869113514834792,
+    "annual_volatility": 0.010582449619837602,
+    "sharpe": 8.036540448062619,
+    "max_drawdown": -0.002877612746980951,
+    "win_rate": 0.6906474820143885,
+    "trade_count": 1,
+    "turnover": 1.0,
+    "periods": 280
+  },
+  "metrics_oos": {
+    "total_return": 0.03174708810275528,
+    "annual_return": 0.06783420684368835,
+    "annual_volatility": 0.009282614365074653,
+    "sharpe": 7.07599671847652,
+    "max_drawdown": -0.0019368464887448145,
+    "win_rate": 0.6440677966101694,
+    "trade_count": 1,
+    "turnover": 1.0,
+    "periods": 120
+  },
+  "walk_forward": {
+    "folds": [
+      {
+        "fold": 1,
+        "start": "2024-01-01",
+        "end": "2024-01-02",
+        "sharpe": 7.5322539378924915,
+        "total_return": 0.04305149724658053
+      },
+      {
+        "fold": 2,
+        "start": "2024-01-02",
+        "end": "2024-01-03",
+        "sharpe": 7.673851937936622,
+        "total_return": 0.0415176610913055
+      },
+      {
+        "fold": 3,
+        "start": "2024-01-03",
+        "end": "2024-01-05",
+        "sharpe": 7.694731953051915,
+        "total_return": 0.04070664529658985
+      }
+    ],
+    "summary": {
+      "n_splits": 3,
+      "mean_sharpe": 7.633612609627009,
+      "std_sharpe": 0.07217653824543918,
+      "positive_ratio": 1.0
+    }
+  },
+  "robustness": {
+    "score": 100.0,
+    "grade": "稳健",
+    "components": {
+      "oos": 1.0,
+      "walk_forward": 1.0,
+      "sensitivity": 1.0
+    },
+    "notes": [
+      "样本外相对样本内明显衰减。"
+    ],
+    "full_sample_extended": {
+      "total_return": 0.13567370417062508,
+      "cagr": 0.08345218347732608,
+      "net_pnl": 0.13567370417062508,
+      "profit_factor": 99.0,
+      "expectancy": 0.12792847794214213,
+      "average_trade": 0.12792847794214213,
+      "max_drawdown": -0.002877612746980951,
+      "drawdown_duration_bars": 24,
+      "volatility": 0.010191346168750698,
+      "worst_day": -0.0014839398612672694,
+      "worst_trade": 0.12792847794214213,
+      "consecutive_losses": 0,
+      "sharpe": 7.8710839348697075,
+      "sortino": 16.440245686590288,
+      "calmar": 29.00049131519868,
+      "trade_count": 1,
+      "top_win_concentration": 1.0,
+      "periods": 400
+    }
+  },
+  "cost_stress": {
+    "multipliers": {
+      "BASE_COST": {
+        "total_return": 0.13567370417062508,
+        "annual_return": 0.08345218347732608,
+        "annual_volatility": 0.010191346168750698,
+        "sharpe": 7.8710839348697075,
+        "max_drawdown": -0.002877612746980951,
+        "win_rate": 0.678391959798995,
+        "trade_count": 1,
+        "turnover": 1.0,
+        "periods": 400
+      },
+      "1.5X_COST": {
+        "total_return": 0.1353327975153804,
+        "annual_return": 0.08324727669732668,
+        "annual_volatility": 0.010211181720617123,
+        "sharpe": 7.837284977699229,
+        "max_drawdown": -0.002877612746981062,
+        "win_rate": 0.678391959798995,
+        "trade_count": 1,
+        "turnover": 1.0,
+        "periods": 400
+      },
+      "2X_COST": {
+        "total_return": 0.1349918908601353,
+        "annual_return": 0.08304234715092096,
+        "annual_volatility": 0.010236519307441414,
+        "sharpe": 7.7994227046991265,
+        "max_drawdown": -0.002877612746980507,
+        "win_rate": 0.678391959798995,
+        "trade_count": 1,
+        "turnover": 1.0,
+        "periods": 400
+      }
+    },
+    "status": "PASS"
+  },
+  "paper": {
+    "status": "INSUFFICIENT",
+    "note": "Batch-001: long Paper window not yet run"
+  },
+  "parity": {
+    "status": "INSUFFICIENT",
+    "note": "Requires Paper evidence; not skipped as PASS"
+  },
+  "neighborhood": {
+    "points": [
+      {
+        "label": "fast8_slow18",
+        "sharpe": 7.344829482430326,
+        "total_return": 0.13013895323824554
+      },
+      {
+        "label": "fast10_slow20",
+        "sharpe": 7.8710839348697075,
+        "total_return": 0.13567370417062508
+      },
+      {
+        "label": "fast12_slow22",
+        "sharpe": 7.8710839348697075,
+        "total_return": 0.13567370417062508
+      },
+      {
+        "label": "fast10_slow24",
+        "sharpe": 7.8710839348697075,
+        "total_return": 0.13567370417062508
+      },
+      {
+        "label": "fast14_slow28",
+        "sharpe": 7.8710839348697075,
+        "total_return": 0.13567370417062508
+      }
+    ],
+    "summary": {
+      "n_variants": 5,
+      "mean_sharpe": 7.765833044381831,
+      "std_sharpe": 0.21050178097575267,
+      "min_sharpe": 7.344829482430326,
+      "positive_ratio": 1.0
+    }
+  },
+  "live_execution": "DENY",
+  "phase_7": "DENY"
+}

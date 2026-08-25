@@ -1,9 +1,30 @@
 #!/usr/bin/env bash
+# =============================================================================
+# LEGACY_ORACLE_DEPLOY_SCRIPT=DEPRECATED
+# TENCENT_PRODUCTION_USE=DENY
+#
+# This script targets the LEGACY Oracle host path (/opt/quantlab).
+# It must NEVER be used for Tencent production:
+#   PRODUCTION_SERVER=43.161.203.133
+#   PRODUCTION_PATH=/srv/quantlab
+#
+# Do not run this against Tencent prod. Maintenance-only; Strategy Validation
+# mode does not authorize new deploy tooling.
+# =============================================================================
 # Oracle 生产机一键更新代码并重启 (避免 git pull 与 scp dist 冲突)
 # 用法: sudo bash /opt/quantlab/scripts/update-oracle.sh
 #
 # 两阶段执行: 先 pull 最新脚本, 再 exec 自身以运行含 alembic 的新版逻辑。
 set -euo pipefail
+
+if [[ "${QUANTLAB_FORCE_LEGACY_ORACLE:-}" != "1" ]]; then
+  echo "ERROR: scripts/update-oracle.sh is DEPRECATED for Tencent production." >&2
+  echo "  LEGACY_ORACLE_DEPLOY_SCRIPT=DEPRECATED" >&2
+  echo "  TENCENT_PRODUCTION_USE=DENY" >&2
+  echo "  PRODUCTION_PATH=/srv/quantlab (not /opt/quantlab)" >&2
+  echo "Set QUANTLAB_FORCE_LEGACY_ORACLE=1 only on the legacy Oracle host." >&2
+  exit 2
+fi
 
 INSTALL_DIR="${INSTALL_DIR:-/opt/quantlab}"
 cd "$INSTALL_DIR"

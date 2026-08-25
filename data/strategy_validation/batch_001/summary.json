@@ -1,0 +1,2022 @@
+{
+  "batch": "001",
+  "generated_at": "2026-08-25T07:19:33Z",
+  "STRATEGIES_TESTED": 10,
+  "PROMOTED": 0,
+  "HELD": 0,
+  "REJECTED": 10,
+  "OOS_PASS": 2,
+  "WALK_FORWARD_PASS": 3,
+  "ROBUSTNESS_PASS": 2,
+  "COST_STRESS_PASS": 2,
+  "PAPER_PASS": 0,
+  "BEST_STRATEGY": "baseline_ema_cross_btc",
+  "BEST_STRATEGY_VERSION": "v1",
+  "BEST_MARKET": "BTCUSDT",
+  "BEST_TIMEFRAME": "15m",
+  "best_extended": {
+    "total_return": 0.13567370417062508,
+    "cagr": 0.08345218347732608,
+    "net_pnl": 0.13567370417062508,
+    "profit_factor": 99.0,
+    "expectancy": 0.12792847794214213,
+    "average_trade": 0.12792847794214213,
+    "max_drawdown": -0.002877612746980951,
+    "drawdown_duration_bars": 24,
+    "volatility": 0.010191346168750698,
+    "worst_day": -0.0014839398612672694,
+    "worst_trade": 0.12792847794214213,
+    "consecutive_losses": 0,
+    "sharpe": 7.8710839348697075,
+    "sortino": 16.440245686590288,
+    "calmar": 29.00049131519868,
+    "trade_count": 1,
+    "top_win_concentration": 1.0,
+    "periods": 400
+  },
+  "LIVE_EXECUTION": "DENY",
+  "PHASE_7": "DENY",
+  "ENGINEERING_MODE": "MAINTENANCE_ONLY",
+  "reports": [
+    {
+      "strategy_id": "baseline_ema_cross_trend",
+      "strategy_version": "v1",
+      "family": "trend",
+      "hypothesis": "EMA fast/slow crossover captures short-horizon trend continuation.",
+      "market": "EUR/USD",
+      "timeframe": "15m",
+      "decision": "REJECT",
+      "overfit_risk": "HIGH",
+      "gates": {
+        "oos": "FAIL",
+        "walk_forward": "PASS",
+        "robustness": "PASS",
+        "cost_stress": "PASS",
+        "paper": "INSUFFICIENT",
+        "parity": "INSUFFICIENT",
+        "notes": []
+      },
+      "reasons": [
+        "hard fail: oos",
+        "OVERFIT_RISK=HIGH"
+      ],
+      "metrics_is": {
+        "total_return": 0.011689693686205871,
+        "annual_return": 0.010514601311602423,
+        "annual_volatility": 0.001663007906273651,
+        "sharpe": 6.290590833970043,
+        "max_drawdown": -0.0009693550463300005,
+        "win_rate": 0.6115107913669064,
+        "trade_count": 1,
+        "turnover": 1.0,
+        "periods": 280
+      },
+      "metrics_oos": {
+        "total_return": 0.0025969629777164993,
+        "annual_return": 0.005461412497415941,
+        "annual_volatility": 0.002723586263330405,
+        "sharpe": 2.0011452717303113,
+        "max_drawdown": -0.002336837705418482,
+        "win_rate": 0.6440677966101694,
+        "trade_count": 2,
+        "turnover": 3.0,
+        "periods": 120
+      },
+      "walk_forward": {
+        "folds": [
+          {
+            "fold": 1,
+            "start": "2024-01-01",
+            "end": "2024-01-02",
+            "sharpe": 5.051266193554356,
+            "total_return": 0.004666520205221403
+          },
+          {
+            "fold": 2,
+            "start": "2024-01-02",
+            "end": "2024-01-03",
+            "sharpe": 4.001588863154806,
+            "total_return": 0.005467642709776621
+          },
+          {
+            "fold": 3,
+            "start": "2024-01-03",
+            "end": "2024-01-05",
+            "sharpe": 0.3270724444133085,
+            "total_return": 0.0005500425725675218
+          }
+        ],
+        "summary": {
+          "n_splits": 3,
+          "mean_sharpe": 3.126642500374157,
+          "std_sharpe": 2.0254464525404683,
+          "positive_ratio": 1.0
+        }
+      },
+      "robustness": {
+        "score": 96.9,
+        "grade": "稳健",
+        "components": {
+          "oos": 1.0,
+          "walk_forward": 1.0,
+          "sensitivity": 0.875
+        },
+        "notes": [
+          "样本外相对样本内明显衰减。"
+        ],
+        "full_sample_extended": {
+          "total_return": 0.017034223679312177,
+          "cagr": 0.010698002662664852,
+          "net_pnl": 0.017034223679312177,
+          "profit_factor": 99.0,
+          "expectancy": 0.017493271493891127,
+          "average_trade": 0.017493271493891127,
+          "max_drawdown": -0.0009693550463300005,
+          "drawdown_duration_bars": 31,
+          "volatility": 0.0016467302491157498,
+          "worst_day": -0.0006000000000000001,
+          "worst_trade": 0.017493271493891127,
+          "consecutive_losses": 0,
+          "sharpe": 6.462965653825991,
+          "sortino": 10.819733327884439,
+          "calmar": 11.03620670585842,
+          "trade_count": 1,
+          "top_win_concentration": 1.0,
+          "periods": 400
+        }
+      },
+      "cost_stress": {
+        "multipliers": {
+          "BASE_COST": {
+            "total_return": 0.017034223679312177,
+            "annual_return": 0.010698002662664852,
+            "annual_volatility": 0.0016467302491157498,
+            "sharpe": 6.462965653825991,
+            "max_drawdown": -0.0009693550463300005,
+            "win_rate": 0.6381909547738693,
+            "trade_count": 1,
+            "turnover": 1.0,
+            "periods": 400
+          },
+          "1.5X_COST": {
+            "total_return": 0.016728930236143302,
+            "annual_return": 0.010506855442294016,
+            "annual_volatility": 0.0017354518392473574,
+            "sharpe": 6.023653785566916,
+            "max_drawdown": -0.0009693550463301115,
+            "win_rate": 0.6381909547738693,
+            "trade_count": 1,
+            "turnover": 1.0,
+            "periods": 400
+          },
+          "2X_COST": {
+            "total_return": 0.01642363679297354,
+            "annual_return": 0.010315686984287975,
+            "annual_volatility": 0.0018507473245533137,
+            "sharpe": 5.546279011171262,
+            "max_drawdown": -0.0011999999999999789,
+            "win_rate": 0.6381909547738693,
+            "trade_count": 1,
+            "turnover": 1.0,
+            "periods": 400
+          }
+        },
+        "status": "PASS"
+      },
+      "paper": {
+        "status": "INSUFFICIENT",
+        "note": "Batch-001: long Paper window not yet run"
+      },
+      "parity": {
+        "status": "INSUFFICIENT",
+        "note": "Requires Paper evidence; not skipped as PASS"
+      },
+      "neighborhood": {
+        "points": [
+          {
+            "label": "fast15_slow40",
+            "sharpe": 6.462965653825991,
+            "total_return": 0.017034223679312177
+          },
+          {
+            "label": "fast15_slow50",
+            "sharpe": 6.462965653825991,
+            "total_return": 0.017034223679312177
+          },
+          {
+            "label": "fast20_slow40",
+            "sharpe": 6.462965653825991,
+            "total_return": 0.017034223679312177
+          },
+          {
+            "label": "fast20_slow50",
+            "sharpe": 6.462965653825991,
+            "total_return": 0.017034223679312177
+          },
+          {
+            "label": "fast20_slow60",
+            "sharpe": 6.462965653825991,
+            "total_return": 0.017034223679312177
+          },
+          {
+            "label": "fast25_slow50",
+            "sharpe": 6.462965653825991,
+            "total_return": 0.017034223679312177
+          },
+          {
+            "label": "fast25_slow60",
+            "sharpe": 6.462965653825991,
+            "total_return": 0.017034223679312177
+          },
+          {
+            "label": "fast10_slow20",
+            "sharpe": -1.2506313919622591,
+            "total_return": -0.008891205951389813
+          }
+        ],
+        "summary": {
+          "n_variants": 8,
+          "mean_sharpe": 5.49876602310246,
+          "std_sharpe": 2.551032437114777,
+          "min_sharpe": -1.2506313919622591,
+          "positive_ratio": 0.875
+        }
+      },
+      "live_execution": "DENY",
+      "phase_7": "DENY"
+    },
+    {
+      "strategy_id": "baseline_ema_cross_btc",
+      "strategy_version": "v1",
+      "family": "trend",
+      "hypothesis": "Same EMA trend rule on BTCUSDT golden sample.",
+      "market": "BTCUSDT",
+      "timeframe": "15m",
+      "decision": "REJECT",
+      "overfit_risk": "HIGH",
+      "gates": {
+        "oos": "PASS",
+        "walk_forward": "PASS",
+        "robustness": "PASS",
+        "cost_stress": "PASS",
+        "paper": "INSUFFICIENT",
+        "parity": "INSUFFICIENT",
+        "notes": []
+      },
+      "reasons": [
+        "insufficient evidence: paper, parity",
+        "OVERFIT_RISK=HIGH → cannot PROMOTE"
+      ],
+      "metrics_is": {
+        "total_return": 0.09901901700376348,
+        "annual_return": 0.08869113514834792,
+        "annual_volatility": 0.010582449619837602,
+        "sharpe": 8.036540448062619,
+        "max_drawdown": -0.002877612746980951,
+        "win_rate": 0.6906474820143885,
+        "trade_count": 1,
+        "turnover": 1.0,
+        "periods": 280
+      },
+      "metrics_oos": {
+        "total_return": 0.03174708810275528,
+        "annual_return": 0.06783420684368835,
+        "annual_volatility": 0.009282614365074653,
+        "sharpe": 7.07599671847652,
+        "max_drawdown": -0.0019368464887448145,
+        "win_rate": 0.6440677966101694,
+        "trade_count": 1,
+        "turnover": 1.0,
+        "periods": 120
+      },
+      "walk_forward": {
+        "folds": [
+          {
+            "fold": 1,
+            "start": "2024-01-01",
+            "end": "2024-01-02",
+            "sharpe": 7.5322539378924915,
+            "total_return": 0.04305149724658053
+          },
+          {
+            "fold": 2,
+            "start": "2024-01-02",
+            "end": "2024-01-03",
+            "sharpe": 7.673851937936622,
+            "total_return": 0.0415176610913055
+          },
+          {
+            "fold": 3,
+            "start": "2024-01-03",
+            "end": "2024-01-05",
+            "sharpe": 7.694731953051915,
+            "total_return": 0.04070664529658985
+          }
+        ],
+        "summary": {
+          "n_splits": 3,
+          "mean_sharpe": 7.633612609627009,
+          "std_sharpe": 0.07217653824543918,
+          "positive_ratio": 1.0
+        }
+      },
+      "robustness": {
+        "score": 100.0,
+        "grade": "稳健",
+        "components": {
+          "oos": 1.0,
+          "walk_forward": 1.0,
+          "sensitivity": 1.0
+        },
+        "notes": [
+          "样本外相对样本内明显衰减。"
+        ],
+        "full_sample_extended": {
+          "total_return": 0.13567370417062508,
+          "cagr": 0.08345218347732608,
+          "net_pnl": 0.13567370417062508,
+          "profit_factor": 99.0,
+          "expectancy": 0.12792847794214213,
+          "average_trade": 0.12792847794214213,
+          "max_drawdown": -0.002877612746980951,
+          "drawdown_duration_bars": 24,
+          "volatility": 0.010191346168750698,
+          "worst_day": -0.0014839398612672694,
+          "worst_trade": 0.12792847794214213,
+          "consecutive_losses": 0,
+          "sharpe": 7.8710839348697075,
+          "sortino": 16.440245686590288,
+          "calmar": 29.00049131519868,
+          "trade_count": 1,
+          "top_win_concentration": 1.0,
+          "periods": 400
+        }
+      },
+      "cost_stress": {
+        "multipliers": {
+          "BASE_COST": {
+            "total_return": 0.13567370417062508,
+            "annual_return": 0.08345218347732608,
+            "annual_volatility": 0.010191346168750698,
+            "sharpe": 7.8710839348697075,
+            "max_drawdown": -0.002877612746980951,
+            "win_rate": 0.678391959798995,
+            "trade_count": 1,
+            "turnover": 1.0,
+            "periods": 400
+          },
+          "1.5X_COST": {
+            "total_return": 0.1353327975153804,
+            "annual_return": 0.08324727669732668,
+            "annual_volatility": 0.010211181720617123,
+            "sharpe": 7.837284977699229,
+            "max_drawdown": -0.002877612746981062,
+            "win_rate": 0.678391959798995,
+            "trade_count": 1,
+            "turnover": 1.0,
+            "periods": 400
+          },
+          "2X_COST": {
+            "total_return": 0.1349918908601353,
+            "annual_return": 0.08304234715092096,
+            "annual_volatility": 0.010236519307441414,
+            "sharpe": 7.7994227046991265,
+            "max_drawdown": -0.002877612746980507,
+            "win_rate": 0.678391959798995,
+            "trade_count": 1,
+            "turnover": 1.0,
+            "periods": 400
+          }
+        },
+        "status": "PASS"
+      },
+      "paper": {
+        "status": "INSUFFICIENT",
+        "note": "Batch-001: long Paper window not yet run"
+      },
+      "parity": {
+        "status": "INSUFFICIENT",
+        "note": "Requires Paper evidence; not skipped as PASS"
+      },
+      "neighborhood": {
+        "points": [
+          {
+            "label": "fast8_slow18",
+            "sharpe": 7.344829482430326,
+            "total_return": 0.13013895323824554
+          },
+          {
+            "label": "fast10_slow20",
+            "sharpe": 7.8710839348697075,
+            "total_return": 0.13567370417062508
+          },
+          {
+            "label": "fast12_slow22",
+            "sharpe": 7.8710839348697075,
+            "total_return": 0.13567370417062508
+          },
+          {
+            "label": "fast10_slow24",
+            "sharpe": 7.8710839348697075,
+            "total_return": 0.13567370417062508
+          },
+          {
+            "label": "fast14_slow28",
+            "sharpe": 7.8710839348697075,
+            "total_return": 0.13567370417062508
+          }
+        ],
+        "summary": {
+          "n_variants": 5,
+          "mean_sharpe": 7.765833044381831,
+          "std_sharpe": 0.21050178097575267,
+          "min_sharpe": 7.344829482430326,
+          "positive_ratio": 1.0
+        }
+      },
+      "live_execution": "DENY",
+      "phase_7": "DENY"
+    },
+    {
+      "strategy_id": "baseline_channel_breakout",
+      "strategy_version": "v1",
+      "family": "trend",
+      "hypothesis": "Close break of prior N-bar high/low continues.",
+      "market": "EUR/USD",
+      "timeframe": "15m",
+      "decision": "REJECT",
+      "overfit_risk": "MEDIUM",
+      "gates": {
+        "oos": "FAIL",
+        "walk_forward": "FAIL",
+        "robustness": "FAIL",
+        "cost_stress": "FAIL",
+        "paper": "INSUFFICIENT",
+        "parity": "INSUFFICIENT",
+        "notes": []
+      },
+      "reasons": [
+        "hard fail: oos, walk_forward, robustness, cost_stress"
+      ],
+      "metrics_is": {
+        "total_return": -0.0193995224812622,
+        "annual_return": -0.01747662730518884,
+        "annual_volatility": 0.00308058206920247,
+        "sharpe": -5.721581069267927,
+        "max_drawdown": -0.0193995224812622,
+        "win_rate": 0.18181818181818182,
+        "trade_count": 36,
+        "turnover": 36.0,
+        "periods": 280
+      },
+      "metrics_oos": {
+        "total_return": -0.007826995640192624,
+        "annual_return": -0.016365951888452135,
+        "annual_volatility": 0.0028857813702135833,
+        "sharpe": -5.716539268268601,
+        "max_drawdown": -0.007826995640192624,
+        "win_rate": 0.0,
+        "trade_count": 14,
+        "turnover": 14.0,
+        "periods": 120
+      },
+      "walk_forward": {
+        "folds": [
+          {
+            "fold": 1,
+            "start": "2024-01-01",
+            "end": "2024-01-02",
+            "sharpe": -5.190553207421341,
+            "total_return": -0.007690958143871218
+          },
+          {
+            "fold": 2,
+            "start": "2024-01-02",
+            "end": "2024-01-03",
+            "sharpe": -6.137542936828225,
+            "total_return": -0.010723594499126077
+          },
+          {
+            "fold": 3,
+            "start": "2024-01-03",
+            "end": "2024-01-05",
+            "sharpe": -5.181421601163376,
+            "total_return": -0.007612800223925187
+          }
+        ],
+        "summary": {
+          "n_splits": 3,
+          "mean_sharpe": -5.503172581804314,
+          "std_sharpe": 0.4485830707595376,
+          "positive_ratio": 0.0
+        }
+      },
+      "robustness": {
+        "score": 0.0,
+        "grade": "脆弱",
+        "components": {
+          "oos": 0.0,
+          "walk_forward": 0.0,
+          "sensitivity": 0.0
+        },
+        "notes": [
+          "样本外夏普非正, 警惕过拟合。",
+          "跨期一致性不足 (多数分段未盈利)。"
+        ],
+        "full_sample_extended": {
+          "total_return": -0.026864638016098175,
+          "cagr": -0.01700988577730489,
+          "net_pnl": -0.026864638016098175,
+          "profit_factor": 0.0,
+          "expectancy": -0.000488956009389891,
+          "average_trade": -0.000488956009389891,
+          "max_drawdown": -0.026864638016098175,
+          "drawdown_duration_bars": 347,
+          "volatility": 0.003027985956355941,
+          "worst_day": -0.0006757724298382501,
+          "worst_trade": -0.0006757724298382501,
+          "consecutive_losses": 25,
+          "sharpe": -5.664179885606667,
+          "sortino": -19.56290969979019,
+          "calmar": -0.6331701088662355,
+          "trade_count": 50,
+          "top_win_concentration": null,
+          "periods": 400
+        }
+      },
+      "cost_stress": {
+        "multipliers": {
+          "BASE_COST": {
+            "total_return": -0.026864638016098175,
+            "annual_return": -0.01700988577730489,
+            "annual_volatility": 0.003027985956355941,
+            "sharpe": -5.664179885606667,
+            "max_drawdown": -0.026864638016098175,
+            "win_rate": 0.16666666666666666,
+            "trade_count": 50,
+            "turnover": 50.0,
+            "periods": 400
+          },
+          "1.5X_COST": {
+            "total_return": -0.04136303383345186,
+            "annual_return": -0.02626197833342181,
+            "annual_volatility": 0.004591608489753581,
+            "sharpe": -5.793407083215492,
+            "max_drawdown": -0.04136303383345186,
+            "win_rate": 0.16666666666666666,
+            "trade_count": 50,
+            "turnover": 50.0,
+            "periods": 400
+          },
+          "2X_COST": {
+            "total_return": -0.05564968018817529,
+            "annual_return": -0.03542972771088926,
+            "annual_volatility": 0.006162038810733966,
+            "sharpe": -5.850507965819956,
+            "max_drawdown": -0.05564968018817529,
+            "win_rate": 0.16666666666666666,
+            "trade_count": 50,
+            "turnover": 50.0,
+            "periods": 400
+          }
+        },
+        "status": "FAIL"
+      },
+      "paper": {
+        "status": "INSUFFICIENT",
+        "note": "Batch-001: long Paper window not yet run"
+      },
+      "parity": {
+        "status": "INSUFFICIENT",
+        "note": "Requires Paper evidence; not skipped as PASS"
+      },
+      "neighborhood": {
+        "points": [
+          {
+            "label": "window15",
+            "sharpe": -6.347074430897156,
+            "total_return": -0.03258786054606644
+          },
+          {
+            "label": "window18",
+            "sharpe": -5.804039573974586,
+            "total_return": -0.027995748094152284
+          },
+          {
+            "label": "window20",
+            "sharpe": -5.664179885606667,
+            "total_return": -0.026864638016098175
+          },
+          {
+            "label": "window22",
+            "sharpe": -5.664179885606667,
+            "total_return": -0.026864638016098175
+          },
+          {
+            "label": "window25",
+            "sharpe": -5.23395637131546,
+            "total_return": -0.023512387279539748
+          },
+          {
+            "label": "window30",
+            "sharpe": -5.2886360767759095,
+            "total_return": -0.023700548446507597
+          }
+        ],
+        "summary": {
+          "n_variants": 6,
+          "mean_sharpe": -5.667011037362741,
+          "std_sharpe": 0.367872945570539,
+          "min_sharpe": -6.347074430897156,
+          "positive_ratio": 0.0
+        }
+      },
+      "live_execution": "DENY",
+      "phase_7": "DENY"
+    },
+    {
+      "strategy_id": "baseline_sma_ratio_trend",
+      "strategy_version": "v1",
+      "family": "trend",
+      "hypothesis": "Price above/below SMA signals trend direction.",
+      "market": "EUR/USD",
+      "timeframe": "15m",
+      "decision": "REJECT",
+      "overfit_risk": "HIGH",
+      "gates": {
+        "oos": "FAIL",
+        "walk_forward": "FAIL",
+        "robustness": "FAIL",
+        "cost_stress": "FAIL",
+        "paper": "INSUFFICIENT",
+        "parity": "INSUFFICIENT",
+        "notes": []
+      },
+      "reasons": [
+        "hard fail: oos, walk_forward, robustness, cost_stress",
+        "OVERFIT_RISK=HIGH"
+      ],
+      "metrics_is": {
+        "total_return": 0.00020251561995099365,
+        "annual_return": 0.0001822622125269291,
+        "annual_volatility": 0.004355869364183825,
+        "sharpe": 0.04401080707523073,
+        "max_drawdown": -0.002914079534499181,
+        "win_rate": 0.6846153846153846,
+        "trade_count": 12,
+        "turnover": 23.0,
+        "periods": 280
+      },
+      "metrics_oos": {
+        "total_return": -0.00015363158253700604,
+        "annual_return": -0.00032259906239140435,
+        "annual_volatility": 0.00424224221977074,
+        "sharpe": -0.07395171367344942,
+        "max_drawdown": -0.002640214481033021,
+        "win_rate": 0.67,
+        "trade_count": 5,
+        "turnover": 9.0,
+        "periods": 120
+      },
+      "walk_forward": {
+        "folds": [
+          {
+            "fold": 1,
+            "start": "2024-01-01",
+            "end": "2024-01-02",
+            "sharpe": -0.30524759561706605,
+            "total_return": -0.0006980822343720661
+          },
+          {
+            "fold": 2,
+            "start": "2024-01-02",
+            "end": "2024-01-03",
+            "sharpe": 0.7216205369375567,
+            "total_return": 0.0014918682785727277
+          },
+          {
+            "fold": 3,
+            "start": "2024-01-03",
+            "end": "2024-01-05",
+            "sharpe": -0.374979978688075,
+            "total_return": -0.0008924617904824128
+          }
+        ],
+        "summary": {
+          "n_splits": 3,
+          "mean_sharpe": 0.013797654210805218,
+          "std_sharpe": 0.5013153207951371,
+          "positive_ratio": 0.3333333333333333
+        }
+      },
+      "robustness": {
+        "score": 24.2,
+        "grade": "脆弱",
+        "components": {
+          "oos": 0.0,
+          "walk_forward": 0.3333333333333333,
+          "sensitivity": 0.5
+        },
+        "notes": [
+          "样本外夏普非正, 警惕过拟合。",
+          "跨期一致性不足 (多数分段未盈利)。"
+        ],
+        "full_sample_extended": {
+          "total_return": 0.0001796811392886788,
+          "cagr": 0.00011319535520759594,
+          "net_pnl": 0.0001796811392886788,
+          "profit_factor": 99.0,
+          "expectancy": 0.0007952541635869378,
+          "average_trade": 0.0007952541635869378,
+          "max_drawdown": -0.002914079534499181,
+          "drawdown_duration_bars": 91,
+          "volatility": 0.0044359046163979605,
+          "worst_day": -0.0013781730642141933,
+          "worst_trade": 0.0007952541635869378,
+          "consecutive_losses": 0,
+          "sharpe": 0.027730560888312685,
+          "sortino": 0.018586578191473174,
+          "calmar": 0.038844291608207564,
+          "trade_count": 17,
+          "top_win_concentration": 1.0,
+          "periods": 400
+        }
+      },
+      "cost_stress": {
+        "multipliers": {
+          "BASE_COST": {
+            "total_return": 0.0001796811392886788,
+            "annual_return": 0.00011319535520759594,
+            "annual_volatility": 0.0044359046163979605,
+            "sharpe": 0.027730560888312685,
+            "max_drawdown": -0.002914079534499181,
+            "win_rate": 0.6710526315789473,
+            "trade_count": 17,
+            "turnover": 33.0,
+            "periods": 400
+          },
+          "1.5X_COST": {
+            "total_return": -0.009688583221984959,
+            "annual_return": -0.00611479650534863,
+            "annual_volatility": 0.006249886262947868,
+            "sharpe": -0.9782561825463457,
+            "max_drawdown": -0.010369703257055551,
+            "win_rate": 0.6710526315789473,
+            "trade_count": 17,
+            "turnover": 33.0,
+            "periods": 400
+          },
+          "2X_COST": {
+            "total_return": -0.0194652401209483,
+            "annual_return": -0.012307658689073575,
+            "annual_volatility": 0.008094743680614035,
+            "sharpe": -1.5258037022863873,
+            "max_drawdown": -0.0201396359309145,
+            "win_rate": 0.6710526315789473,
+            "trade_count": 17,
+            "turnover": 33.0,
+            "periods": 400
+          }
+        },
+        "status": "FAIL"
+      },
+      "paper": {
+        "status": "INSUFFICIENT",
+        "note": "Batch-001: long Paper window not yet run"
+      },
+      "parity": {
+        "status": "INSUFFICIENT",
+        "note": "Requires Paper evidence; not skipped as PASS"
+      },
+      "neighborhood": {
+        "points": [
+          {
+            "label": "window10",
+            "sharpe": 0.49654452371197483,
+            "total_return": 0.003654307767929188
+          },
+          {
+            "label": "window15",
+            "sharpe": 0.48391424125925725,
+            "total_return": 0.003419027139516917
+          },
+          {
+            "label": "window20",
+            "sharpe": 0.027730560888312685,
+            "total_return": 0.0001796811392886788
+          },
+          {
+            "label": "window25",
+            "sharpe": -0.7854273146226132,
+            "total_return": -0.0059292539441792025
+          },
+          {
+            "label": "window30",
+            "sharpe": -0.8070681136360814,
+            "total_return": -0.005732478909687644
+          },
+          {
+            "label": "window40",
+            "sharpe": -1.5875792743247865,
+            "total_return": -0.011541446717513337
+          }
+        ],
+        "summary": {
+          "n_variants": 6,
+          "mean_sharpe": -0.3619808961206561,
+          "std_sharpe": 0.7620127278967834,
+          "min_sharpe": -1.5875792743247865,
+          "positive_ratio": 0.5
+        }
+      },
+      "live_execution": "DENY",
+      "phase_7": "DENY"
+    },
+    {
+      "strategy_id": "baseline_rsi_mean_reversion",
+      "strategy_version": "v1",
+      "family": "mean_reversion",
+      "hypothesis": "RSI extremes mean-revert over short horizons.",
+      "market": "EUR/USD",
+      "timeframe": "15m",
+      "decision": "REJECT",
+      "overfit_risk": "MEDIUM",
+      "gates": {
+        "oos": "FAIL",
+        "walk_forward": "FAIL",
+        "robustness": "FAIL",
+        "cost_stress": "FAIL",
+        "paper": "INSUFFICIENT",
+        "parity": "INSUFFICIENT",
+        "notes": []
+      },
+      "reasons": [
+        "hard fail: oos, walk_forward, robustness, cost_stress"
+      ],
+      "metrics_is": {
+        "total_return": -0.028830778082903685,
+        "annual_return": -0.025985506403134684,
+        "annual_volatility": 0.0040428573160989165,
+        "sharpe": -6.51014107718992,
+        "max_drawdown": -0.028830778082903685,
+        "win_rate": 0.3246753246753247,
+        "trade_count": 22,
+        "turnover": 33.0,
+        "periods": 280
+      },
+      "metrics_oos": {
+        "total_return": -0.012188799392906846,
+        "annual_return": -0.025424953945579865,
+        "annual_volatility": 0.0037324804243380563,
+        "sharpe": -6.897698832110849,
+        "max_drawdown": -0.012188799392906846,
+        "win_rate": 0.3118279569892473,
+        "trade_count": 9,
+        "turnover": 13.0,
+        "periods": 120
+      },
+      "walk_forward": {
+        "folds": [
+          {
+            "fold": 1,
+            "start": "2024-01-01",
+            "end": "2024-01-02",
+            "sharpe": -5.67193318415664,
+            "total_return": -0.011832228442842485
+          },
+          {
+            "fold": 2,
+            "start": "2024-01-02",
+            "end": "2024-01-03",
+            "sharpe": -7.2089371059945915,
+            "total_return": -0.014323799150972927
+          },
+          {
+            "fold": 3,
+            "start": "2024-01-03",
+            "end": "2024-01-05",
+            "sharpe": -6.549338390844582,
+            "total_return": -0.013126351205708042
+          }
+        ],
+        "summary": {
+          "n_splits": 3,
+          "mean_sharpe": -6.476736226998605,
+          "std_sharpe": 0.6295758199415695,
+          "positive_ratio": 0.0
+        }
+      },
+      "robustness": {
+        "score": 0.0,
+        "grade": "脆弱",
+        "components": {
+          "oos": 0.0,
+          "walk_forward": 0.0,
+          "sensitivity": 0.0
+        },
+        "notes": [
+          "样本外夏普非正, 警惕过拟合。",
+          "跨期一致性不足 (多数分段未盈利)。"
+        ],
+        "full_sample_extended": {
+          "total_return": -0.041050769854900415,
+          "cagr": -0.02606216510975823,
+          "net_pnl": -0.041050769854900415,
+          "profit_factor": 0.0,
+          "expectancy": -0.004637786681032017,
+          "average_trade": -0.004637786681032017,
+          "max_drawdown": -0.041050769854900415,
+          "drawdown_duration_bars": 385,
+          "volatility": 0.00399717391663114,
+          "worst_day": -0.0011996354427147517,
+          "worst_trade": -0.005767314664877452,
+          "consecutive_losses": 8,
+          "sharpe": -6.604277277644765,
+          "sortino": -5.7634285547204875,
+          "calmar": -0.634876403094961,
+          "trade_count": 31,
+          "top_win_concentration": null,
+          "periods": 400
+        }
+      },
+      "cost_stress": {
+        "multipliers": {
+          "BASE_COST": {
+            "total_return": -0.041050769854900415,
+            "annual_return": -0.02606216510975823,
+            "annual_volatility": 0.00399717391663114,
+            "sharpe": -6.604277277644765,
+            "max_drawdown": -0.041050769854900415,
+            "win_rate": 0.3333333333333333,
+            "trade_count": 31,
+            "turnover": 47.0,
+            "periods": 400
+          },
+          "1.5X_COST": {
+            "total_return": -0.05449332385920824,
+            "annual_return": -0.034685793322399405,
+            "annual_volatility": 0.005956145003476659,
+            "sharpe": -5.923536927292275,
+            "max_drawdown": -0.05449332385920824,
+            "win_rate": 0.3333333333333333,
+            "trade_count": 31,
+            "turnover": 47.0,
+            "periods": 400
+          },
+          "2X_COST": {
+            "total_return": -0.06775408916652081,
+            "annual_return": -0.043237363618222946,
+            "annual_volatility": 0.00795783631799694,
+            "sharpe": -5.5498056390682295,
+            "max_drawdown": -0.06775408916652081,
+            "win_rate": 0.3333333333333333,
+            "trade_count": 31,
+            "turnover": 47.0,
+            "periods": 400
+          }
+        },
+        "status": "FAIL"
+      },
+      "paper": {
+        "status": "INSUFFICIENT",
+        "note": "Batch-001: long Paper window not yet run"
+      },
+      "parity": {
+        "status": "INSUFFICIENT",
+        "note": "Requires Paper evidence; not skipped as PASS"
+      },
+      "neighborhood": {
+        "points": [
+          {
+            "label": "window10",
+            "sharpe": -6.784310057205525,
+            "total_return": -0.04195777877124196
+          },
+          {
+            "label": "window12",
+            "sharpe": -6.728225491796067,
+            "total_return": -0.04376198480841764
+          },
+          {
+            "label": "window14",
+            "sharpe": -6.604277277644765,
+            "total_return": -0.041050769854900415
+          },
+          {
+            "label": "window16",
+            "sharpe": -6.51230314138902,
+            "total_return": -0.039527821978947775
+          },
+          {
+            "label": "window18",
+            "sharpe": -5.934264991610243,
+            "total_return": -0.035227183900672254
+          },
+          {
+            "label": "window21",
+            "sharpe": -5.510383802659208,
+            "total_return": -0.03503513772217193
+          }
+        ],
+        "summary": {
+          "n_variants": 6,
+          "mean_sharpe": -6.345627460384137,
+          "std_sharpe": 0.4655382607776205,
+          "min_sharpe": -6.784310057205525,
+          "positive_ratio": 0.0
+        }
+      },
+      "live_execution": "DENY",
+      "phase_7": "DENY"
+    },
+    {
+      "strategy_id": "baseline_bollinger_zscore",
+      "strategy_version": "v1",
+      "family": "mean_reversion",
+      "hypothesis": "Price z-score vs rolling band mean-reverts.",
+      "market": "EUR/USD",
+      "timeframe": "15m",
+      "decision": "REJECT",
+      "overfit_risk": "HIGH",
+      "gates": {
+        "oos": "FAIL",
+        "walk_forward": "FAIL",
+        "robustness": "FAIL",
+        "cost_stress": "FAIL",
+        "paper": "INSUFFICIENT",
+        "parity": "INSUFFICIENT",
+        "notes": []
+      },
+      "reasons": [
+        "hard fail: oos, walk_forward, robustness, cost_stress",
+        "OVERFIT_RISK=HIGH"
+      ],
+      "metrics_is": {
+        "total_return": -0.02743819074056153,
+        "annual_return": -0.02472859594528587,
+        "annual_volatility": 0.0036203542106067322,
+        "sharpe": -6.914159187213056,
+        "max_drawdown": -0.02743819074056153,
+        "win_rate": 0.27307692307692305,
+        "trade_count": 12,
+        "turnover": 23.0,
+        "periods": 280
+      },
+      "metrics_oos": {
+        "total_return": -0.010597155678013781,
+        "annual_return": -0.022124366687453323,
+        "annual_volatility": 0.0033323628058722797,
+        "sharpe": -6.711837882302705,
+        "max_drawdown": -0.010597155678013781,
+        "win_rate": 0.29,
+        "trade_count": 5,
+        "turnover": 9.0,
+        "periods": 120
+      },
+      "walk_forward": {
+        "folds": [
+          {
+            "fold": 1,
+            "start": "2024-01-01",
+            "end": "2024-01-02",
+            "sharpe": -6.701800598479065,
+            "total_return": -0.012432467287668114
+          },
+          {
+            "fold": 2,
+            "start": "2024-01-02",
+            "end": "2024-01-03",
+            "sharpe": -6.91308013512482,
+            "total_return": -0.012223030932674406
+          },
+          {
+            "fold": 3,
+            "start": "2024-01-03",
+            "end": "2024-01-05",
+            "sharpe": -6.6699298982609045,
+            "total_return": -0.012240591010563406
+          }
+        ],
+        "summary": {
+          "n_splits": 3,
+          "mean_sharpe": -6.76160354395493,
+          "std_sharpe": 0.10789749344458517,
+          "positive_ratio": 0.0
+        }
+      },
+      "robustness": {
+        "score": 0.0,
+        "grade": "脆弱",
+        "components": {
+          "oos": 0.0,
+          "walk_forward": 0.0,
+          "sensitivity": 0.0
+        },
+        "notes": [
+          "样本外夏普非正, 警惕过拟合。",
+          "跨期一致性不足 (多数分段未盈利)。"
+        ],
+        "full_sample_extended": {
+          "total_return": -0.03902557843971499,
+          "cagr": -0.02476685814209112,
+          "net_pnl": -0.03902557843971499,
+          "profit_factor": 0.0,
+          "expectancy": -0.039195254163586934,
+          "average_trade": -0.039195254163586934,
+          "max_drawdown": -0.03902557843971499,
+          "drawdown_duration_bars": 381,
+          "volatility": 0.0035974462942887776,
+          "worst_day": -0.001192111823602814,
+          "worst_trade": -0.039195254163586934,
+          "consecutive_losses": 1,
+          "sharpe": -6.969113107501265,
+          "sortino": -6.3896889587440455,
+          "calmar": -0.6346314169397868,
+          "trade_count": 17,
+          "top_win_concentration": null,
+          "periods": 400
+        }
+      },
+      "cost_stress": {
+        "multipliers": {
+          "BASE_COST": {
+            "total_return": -0.03902557843971499,
+            "annual_return": -0.02476685814209112,
+            "annual_volatility": 0.0035974462942887776,
+            "sharpe": -6.969113107501265,
+            "max_drawdown": -0.03902557843971499,
+            "win_rate": 0.2868421052631579,
+            "trade_count": 17,
+            "turnover": 33.0,
+            "periods": 400
+          },
+          "1.5X_COST": {
+            "total_return": -0.04850542453793161,
+            "annual_return": -0.030838888117360685,
+            "annual_volatility": 0.0053812297304195655,
+            "sharpe": -5.818002889948864,
+            "max_drawdown": -0.04850542453793161,
+            "win_rate": 0.2868421052631579,
+            "trade_count": 17,
+            "turnover": 33.0,
+            "periods": 400
+          },
+          "2X_COST": {
+            "total_return": -0.0578972837042282,
+            "annual_return": -0.03687667391084881,
+            "annual_volatility": 0.0072148191525403796,
+            "sharpe": -5.203874044415925,
+            "max_drawdown": -0.0578972837042282,
+            "win_rate": 0.2868421052631579,
+            "trade_count": 17,
+            "turnover": 33.0,
+            "periods": 400
+          }
+        },
+        "status": "FAIL"
+      },
+      "paper": {
+        "status": "INSUFFICIENT",
+        "note": "Batch-001: long Paper window not yet run"
+      },
+      "parity": {
+        "status": "INSUFFICIENT",
+        "note": "Requires Paper evidence; not skipped as PASS"
+      },
+      "neighborhood": {
+        "points": [
+          {
+            "label": "window15",
+            "sharpe": -7.737843501174997,
+            "total_return": -0.042127918891331384
+          },
+          {
+            "label": "window18",
+            "sharpe": -7.271647961956643,
+            "total_return": -0.04277417241647086
+          },
+          {
+            "label": "window20",
+            "sharpe": -6.969113107501265,
+            "total_return": -0.03902557843971499
+          },
+          {
+            "label": "window22",
+            "sharpe": -6.715475704840377,
+            "total_return": -0.03763359783037812
+          },
+          {
+            "label": "window25",
+            "sharpe": -6.545501072269634,
+            "total_return": -0.037752680887574885
+          },
+          {
+            "label": "window30",
+            "sharpe": -5.821167601405503,
+            "total_return": -0.030987106701507394
+          }
+        ],
+        "summary": {
+          "n_variants": 6,
+          "mean_sharpe": -6.843458158191403,
+          "std_sharpe": 0.5985115888586767,
+          "min_sharpe": -7.737843501174997,
+          "positive_ratio": 0.0
+        }
+      },
+      "live_execution": "DENY",
+      "phase_7": "DENY"
+    },
+    {
+      "strategy_id": "baseline_mean_reversion_z",
+      "strategy_version": "v1",
+      "family": "mean_reversion",
+      "hypothesis": "Negative z-score of price vs mean predicts reversion.",
+      "market": "EUR/USD",
+      "timeframe": "15m",
+      "decision": "REJECT",
+      "overfit_risk": "HIGH",
+      "gates": {
+        "oos": "FAIL",
+        "walk_forward": "FAIL",
+        "robustness": "FAIL",
+        "cost_stress": "FAIL",
+        "paper": "INSUFFICIENT",
+        "parity": "INSUFFICIENT",
+        "notes": []
+      },
+      "reasons": [
+        "hard fail: oos, walk_forward, robustness, cost_stress",
+        "OVERFIT_RISK=HIGH"
+      ],
+      "metrics_is": {
+        "total_return": -0.02743819074056153,
+        "annual_return": -0.02472859594528587,
+        "annual_volatility": 0.0036203542106067322,
+        "sharpe": -6.914159187213056,
+        "max_drawdown": -0.02743819074056153,
+        "win_rate": 0.27307692307692305,
+        "trade_count": 12,
+        "turnover": 23.0,
+        "periods": 280
+      },
+      "metrics_oos": {
+        "total_return": -0.010597155678013781,
+        "annual_return": -0.022124366687453323,
+        "annual_volatility": 0.0033323628058722797,
+        "sharpe": -6.711837882302705,
+        "max_drawdown": -0.010597155678013781,
+        "win_rate": 0.29,
+        "trade_count": 5,
+        "turnover": 9.0,
+        "periods": 120
+      },
+      "walk_forward": {
+        "folds": [
+          {
+            "fold": 1,
+            "start": "2024-01-01",
+            "end": "2024-01-02",
+            "sharpe": -6.701800598479065,
+            "total_return": -0.012432467287668114
+          },
+          {
+            "fold": 2,
+            "start": "2024-01-02",
+            "end": "2024-01-03",
+            "sharpe": -6.91308013512482,
+            "total_return": -0.012223030932674406
+          },
+          {
+            "fold": 3,
+            "start": "2024-01-03",
+            "end": "2024-01-05",
+            "sharpe": -6.6699298982609045,
+            "total_return": -0.012240591010563406
+          }
+        ],
+        "summary": {
+          "n_splits": 3,
+          "mean_sharpe": -6.76160354395493,
+          "std_sharpe": 0.10789749344458517,
+          "positive_ratio": 0.0
+        }
+      },
+      "robustness": {
+        "score": 0.0,
+        "grade": "脆弱",
+        "components": {
+          "oos": 0.0,
+          "walk_forward": 0.0,
+          "sensitivity": 0.0
+        },
+        "notes": [
+          "样本外夏普非正, 警惕过拟合。",
+          "跨期一致性不足 (多数分段未盈利)。"
+        ],
+        "full_sample_extended": {
+          "total_return": -0.03902557843971499,
+          "cagr": -0.02476685814209112,
+          "net_pnl": -0.03902557843971499,
+          "profit_factor": 0.0,
+          "expectancy": -0.039195254163586934,
+          "average_trade": -0.039195254163586934,
+          "max_drawdown": -0.03902557843971499,
+          "drawdown_duration_bars": 381,
+          "volatility": 0.0035974462942887776,
+          "worst_day": -0.001192111823602814,
+          "worst_trade": -0.039195254163586934,
+          "consecutive_losses": 1,
+          "sharpe": -6.969113107501265,
+          "sortino": -6.3896889587440455,
+          "calmar": -0.6346314169397868,
+          "trade_count": 17,
+          "top_win_concentration": null,
+          "periods": 400
+        }
+      },
+      "cost_stress": {
+        "multipliers": {
+          "BASE_COST": {
+            "total_return": -0.03902557843971499,
+            "annual_return": -0.02476685814209112,
+            "annual_volatility": 0.0035974462942887776,
+            "sharpe": -6.969113107501265,
+            "max_drawdown": -0.03902557843971499,
+            "win_rate": 0.2868421052631579,
+            "trade_count": 17,
+            "turnover": 33.0,
+            "periods": 400
+          },
+          "1.5X_COST": {
+            "total_return": -0.04850542453793161,
+            "annual_return": -0.030838888117360685,
+            "annual_volatility": 0.0053812297304195655,
+            "sharpe": -5.818002889948864,
+            "max_drawdown": -0.04850542453793161,
+            "win_rate": 0.2868421052631579,
+            "trade_count": 17,
+            "turnover": 33.0,
+            "periods": 400
+          },
+          "2X_COST": {
+            "total_return": -0.0578972837042282,
+            "annual_return": -0.03687667391084881,
+            "annual_volatility": 0.0072148191525403796,
+            "sharpe": -5.203874044415925,
+            "max_drawdown": -0.0578972837042282,
+            "win_rate": 0.2868421052631579,
+            "trade_count": 17,
+            "turnover": 33.0,
+            "periods": 400
+          }
+        },
+        "status": "FAIL"
+      },
+      "paper": {
+        "status": "INSUFFICIENT",
+        "note": "Batch-001: long Paper window not yet run"
+      },
+      "parity": {
+        "status": "INSUFFICIENT",
+        "note": "Requires Paper evidence; not skipped as PASS"
+      },
+      "neighborhood": {
+        "points": [
+          {
+            "label": "window15",
+            "sharpe": -7.737843501174997,
+            "total_return": -0.042127918891331384
+          },
+          {
+            "label": "window18",
+            "sharpe": -7.271647961956643,
+            "total_return": -0.04277417241647086
+          },
+          {
+            "label": "window20",
+            "sharpe": -6.969113107501265,
+            "total_return": -0.03902557843971499
+          },
+          {
+            "label": "window22",
+            "sharpe": -6.715475704840377,
+            "total_return": -0.03763359783037812
+          },
+          {
+            "label": "window25",
+            "sharpe": -6.545501072269634,
+            "total_return": -0.037752680887574885
+          },
+          {
+            "label": "window30",
+            "sharpe": -5.821167601405503,
+            "total_return": -0.030987106701507394
+          }
+        ],
+        "summary": {
+          "n_variants": 6,
+          "mean_sharpe": -6.843458158191403,
+          "std_sharpe": 0.5985115888586767,
+          "min_sharpe": -7.737843501174997,
+          "positive_ratio": 0.0
+        }
+      },
+      "live_execution": "DENY",
+      "phase_7": "DENY"
+    },
+    {
+      "strategy_id": "baseline_ts_momentum",
+      "strategy_version": "v1",
+      "family": "momentum",
+      "hypothesis": "Positive past N-bar return continues (time-series momentum).",
+      "market": "EUR/USD",
+      "timeframe": "15m",
+      "decision": "REJECT",
+      "overfit_risk": "HIGH",
+      "gates": {
+        "oos": "FAIL",
+        "walk_forward": "FAIL",
+        "robustness": "FAIL",
+        "cost_stress": "FAIL",
+        "paper": "INSUFFICIENT",
+        "parity": "INSUFFICIENT",
+        "notes": []
+      },
+      "reasons": [
+        "hard fail: oos, walk_forward, robustness, cost_stress",
+        "OVERFIT_RISK=HIGH"
+      ],
+      "metrics_is": {
+        "total_return": -0.0064165380900417235,
+        "annual_return": -0.005776741393022089,
+        "annual_volatility": 0.004411709645589831,
+        "sharpe": -1.3109930883202259,
+        "max_drawdown": -0.007166711572756723,
+        "win_rate": 0.5598455598455598,
+        "trade_count": 12,
+        "turnover": 23.0,
+        "periods": 280
+      },
+      "metrics_oos": {
+        "total_return": -0.002896393582085044,
+        "annual_return": -0.006072738052838034,
+        "annual_volatility": 0.004242058062472394,
+        "sharpe": -1.433796833974387,
+        "max_drawdown": -0.004383926368322966,
+        "win_rate": 0.5858585858585859,
+        "trade_count": 5,
+        "turnover": 9.0,
+        "periods": 120
+      },
+      "walk_forward": {
+        "folds": [
+          {
+            "fold": 1,
+            "start": "2024-01-01",
+            "end": "2024-01-02",
+            "sharpe": -1.6067433957801796,
+            "total_return": -0.0035793905704583073
+          },
+          {
+            "fold": 2,
+            "start": "2024-01-02",
+            "end": "2024-01-03",
+            "sharpe": -0.5040488018782948,
+            "total_return": -0.0010924352674699378
+          },
+          {
+            "fold": 3,
+            "start": "2024-01-03",
+            "end": "2024-01-05",
+            "sharpe": -1.646408380261474,
+            "total_return": -0.0038945306281411574
+          }
+        ],
+        "summary": {
+          "n_splits": 3,
+          "mean_sharpe": -1.2524001926399828,
+          "std_sharpe": 0.5294120517389643,
+          "positive_ratio": 0.0
+        }
+      },
+      "robustness": {
+        "score": 8.3,
+        "grade": "脆弱",
+        "components": {
+          "oos": 0.0,
+          "walk_forward": 0.0,
+          "sensitivity": 0.3333333333333333
+        },
+        "notes": [
+          "样本外夏普非正, 警惕过拟合。",
+          "跨期一致性不足 (多数分段未盈利)。"
+        ],
+        "full_sample_extended": {
+          "total_return": -0.009454395787956038,
+          "cagr": -0.005966732470962244,
+          "net_pnl": -0.009454395787956038,
+          "profit_factor": 0.0,
+          "expectancy": -0.00888338468605088,
+          "average_trade": -0.00888338468605088,
+          "max_drawdown": -0.00979858554593871,
+          "drawdown_duration_bars": 380,
+          "volatility": 0.0044763544627573724,
+          "worst_day": -0.001469579331571679,
+          "worst_trade": -0.00888338468605088,
+          "consecutive_losses": 1,
+          "sharpe": -1.334687054369646,
+          "sortino": -1.0128821995965758,
+          "calmar": -0.608938141427496,
+          "trade_count": 17,
+          "top_win_concentration": null,
+          "periods": 400
+        }
+      },
+      "cost_stress": {
+        "multipliers": {
+          "BASE_COST": {
+            "total_return": -0.009454395787956038,
+            "annual_return": -0.005966732470962244,
+            "annual_volatility": 0.0044763544627573724,
+            "sharpe": -1.334687054369646,
+            "max_drawdown": -0.00979858554593871,
+            "win_rate": 0.5620052770448549,
+            "trade_count": 17,
+            "turnover": 33.0,
+            "periods": 400
+          },
+          "1.5X_COST": {
+            "total_return": -0.019227801864228233,
+            "annual_return": -0.012156987407308861,
+            "annual_volatility": 0.006274624781474484,
+            "sharpe": -1.9461773058153204,
+            "max_drawdown": -0.01956859560868296,
+            "win_rate": 0.5620052770448549,
+            "trade_count": 17,
+            "turnover": 33.0,
+            "periods": 400
+          },
+          "2X_COST": {
+            "total_return": -0.02891047923176915,
+            "annual_return": -0.018312324825524473,
+            "annual_volatility": 0.008110736800155225,
+            "sharpe": -2.274581558590212,
+            "max_drawdown": -0.02924790848864689,
+            "win_rate": 0.5620052770448549,
+            "trade_count": 17,
+            "turnover": 33.0,
+            "periods": 400
+          }
+        },
+        "status": "FAIL"
+      },
+      "paper": {
+        "status": "INSUFFICIENT",
+        "note": "Batch-001: long Paper window not yet run"
+      },
+      "parity": {
+        "status": "INSUFFICIENT",
+        "note": "Requires Paper evidence; not skipped as PASS"
+      },
+      "neighborhood": {
+        "points": [
+          {
+            "label": "window10",
+            "sharpe": 0.42865350309794786,
+            "total_return": 0.002998007663012503
+          },
+          {
+            "label": "window15",
+            "sharpe": -1.0331684373088532,
+            "total_return": -0.00808520450477257
+          },
+          {
+            "label": "window20",
+            "sharpe": -1.334687054369646,
+            "total_return": -0.009454395787956038
+          },
+          {
+            "label": "window25",
+            "sharpe": -2.185003936662708,
+            "total_return": -0.015498256748097905
+          },
+          {
+            "label": "window30",
+            "sharpe": -2.5396079928359305,
+            "total_return": -0.01743753542014359
+          },
+          {
+            "label": "window40",
+            "sharpe": 6.338485505344655,
+            "total_return": 0.01615159777301378
+          }
+        ],
+        "summary": {
+          "n_variants": 6,
+          "mean_sharpe": -0.054221402122422546,
+          "std_sharpe": 3.0115106972513126,
+          "min_sharpe": -2.5396079928359305,
+          "positive_ratio": 0.3333333333333333
+        }
+      },
+      "live_execution": "DENY",
+      "phase_7": "DENY"
+    },
+    {
+      "strategy_id": "baseline_roc_momentum",
+      "strategy_version": "v1",
+      "family": "momentum",
+      "hypothesis": "Shorter ROC window captures faster momentum.",
+      "market": "EUR/USD",
+      "timeframe": "15m",
+      "decision": "REJECT",
+      "overfit_risk": "MEDIUM",
+      "gates": {
+        "oos": "PASS",
+        "walk_forward": "PASS",
+        "robustness": "INSUFFICIENT",
+        "cost_stress": "FAIL",
+        "paper": "INSUFFICIENT",
+        "parity": "INSUFFICIENT",
+        "notes": []
+      },
+      "reasons": [
+        "hard fail: cost_stress"
+      ],
+      "metrics_is": {
+        "total_return": 0.0017938688594087981,
+        "annual_return": 0.0016143372601795658,
+        "annual_volatility": 0.004379600802705687,
+        "sharpe": 0.3704912754793654,
+        "max_drawdown": -0.0025912365818415717,
+        "win_rate": 0.7211895910780669,
+        "trade_count": 12,
+        "turnover": 23.0,
+        "periods": 280
+      },
+      "metrics_oos": {
+        "total_return": 0.000460996243346834,
+        "annual_return": 0.000968337572554212,
+        "annual_volatility": 0.004613359701038818,
+        "sharpe": 0.21208650899525497,
+        "max_drawdown": -0.0021935686251859376,
+        "win_rate": 0.7155963302752294,
+        "trade_count": 6,
+        "turnover": 11.0,
+        "periods": 120
+      },
+      "walk_forward": {
+        "folds": [
+          {
+            "fold": 1,
+            "start": "2024-01-01",
+            "end": "2024-01-02",
+            "sharpe": 0.029337087605574193,
+            "total_return": 6.124213176961213e-05
+          },
+          {
+            "fold": 2,
+            "start": "2024-01-02",
+            "end": "2024-01-03",
+            "sharpe": 1.5410071925351474,
+            "total_return": 0.0032898762050959096
+          },
+          {
+            "fold": 3,
+            "start": "2024-01-03",
+            "end": "2024-01-05",
+            "sharpe": 0.3252908841681393,
+            "total_return": 0.000752521635226433
+          }
+        ],
+        "summary": {
+          "n_splits": 3,
+          "mean_sharpe": 0.6318783881029536,
+          "std_sharpe": 0.6541067954145212,
+          "positive_ratio": 1.0
+        }
+      },
+      "robustness": {
+        "score": 53.2,
+        "grade": "中等",
+        "components": {
+          "oos": 0.14139100599683666,
+          "walk_forward": 1.0,
+          "sensitivity": 0.5
+        },
+        "notes": [
+          "各维度表现尚可, 可进入下一步竞争性评估。"
+        ],
+        "full_sample_extended": {
+          "total_return": 0.002998007663012503,
+          "cagr": 0.0018876987021343439,
+          "net_pnl": 0.002998007663012503,
+          "profit_factor": 99.0,
+          "expectancy": 0.003609028337499757,
+          "average_trade": 0.003609028337499757,
+          "max_drawdown": -0.0025912365818415717,
+          "drawdown_duration_bars": 51,
+          "volatility": 0.0044224247298211864,
+          "worst_day": -0.0013779511781949684,
+          "worst_trade": 0.003609028337499757,
+          "consecutive_losses": 0,
+          "sharpe": 0.42865350309794786,
+          "sortino": 0.27487808824526855,
+          "calmar": 0.7284933824115631,
+          "trade_count": 17,
+          "top_win_concentration": 1.0,
+          "periods": 400
+        }
+      },
+      "cost_stress": {
+        "multipliers": {
+          "BASE_COST": {
+            "total_return": 0.002998007663012503,
+            "annual_return": 0.0018876987021343439,
+            "annual_volatility": 0.0044224247298211864,
+            "sharpe": 0.42865350309794786,
+            "max_drawdown": -0.0025912365818415717,
+            "win_rate": 0.7095115681233933,
+            "trade_count": 17,
+            "turnover": 33.0,
+            "periods": 400
+          },
+          "1.5X_COST": {
+            "total_return": -0.006898013726584384,
+            "annual_return": -0.004351311940370861,
+            "annual_volatility": 0.006242298728986801,
+            "sharpe": -0.6954669002327285,
+            "max_drawdown": -0.00770655168084633,
+            "win_rate": 0.7095115681233933,
+            "trade_count": 17,
+            "turnover": 33.0,
+            "periods": 400
+          },
+          "2X_COST": {
+            "total_return": -0.016702170447560172,
+            "annual_return": -0.010555130930933188,
+            "annual_volatility": 0.00809040881377073,
+            "sharpe": -1.3075126845716067,
+            "max_drawdown": -0.017502726308413763,
+            "win_rate": 0.7095115681233933,
+            "trade_count": 17,
+            "turnover": 33.0,
+            "periods": 400
+          }
+        },
+        "status": "FAIL"
+      },
+      "paper": {
+        "status": "INSUFFICIENT",
+        "note": "Batch-001: long Paper window not yet run"
+      },
+      "parity": {
+        "status": "INSUFFICIENT",
+        "note": "Requires Paper evidence; not skipped as PASS"
+      },
+      "neighborhood": {
+        "points": [
+          {
+            "label": "window5",
+            "sharpe": 0.37448184649758837,
+            "total_return": 0.0028489036415348945
+          },
+          {
+            "label": "window8",
+            "sharpe": 0.04245120029337444,
+            "total_return": 0.0003072658084999347
+          },
+          {
+            "label": "window10",
+            "sharpe": 0.42865350309794786,
+            "total_return": 0.002998007663012503
+          },
+          {
+            "label": "window12",
+            "sharpe": -0.2004236289282882,
+            "total_return": -0.0014838466013210594
+          },
+          {
+            "label": "window15",
+            "sharpe": -1.0331684373088532,
+            "total_return": -0.00808520450477257
+          },
+          {
+            "label": "window20",
+            "sharpe": -1.334687054369646,
+            "total_return": -0.009454395787956038
+          }
+        ],
+        "summary": {
+          "n_variants": 6,
+          "mean_sharpe": -0.2871154284529795,
+          "std_sharpe": 0.6733210170406869,
+          "min_sharpe": -1.334687054369646,
+          "positive_ratio": 0.5
+        }
+      },
+      "live_execution": "DENY",
+      "phase_7": "DENY"
+    },
+    {
+      "strategy_id": "baseline_volatility_breakout",
+      "strategy_version": "v1",
+      "family": "volatility",
+      "hypothesis": "Volatility expansion + momentum confirms breakouts.",
+      "market": "EUR/USD",
+      "timeframe": "15m",
+      "decision": "REJECT",
+      "overfit_risk": "HIGH",
+      "gates": {
+        "oos": "FAIL",
+        "walk_forward": "FAIL",
+        "robustness": "FAIL",
+        "cost_stress": "FAIL",
+        "paper": "INSUFFICIENT",
+        "parity": "INSUFFICIENT",
+        "notes": []
+      },
+      "reasons": [
+        "hard fail: oos, walk_forward, robustness, cost_stress",
+        "OVERFIT_RISK=HIGH"
+      ],
+      "metrics_is": {
+        "total_return": -0.008534233157236892,
+        "annual_return": -0.007684097634797493,
+        "annual_volatility": 0.003711945566791455,
+        "sharpe": -2.0762120853194355,
+        "max_drawdown": -0.00937400818083356,
+        "win_rate": 0.7024793388429752,
+        "trade_count": 27,
+        "turnover": 31.0,
+        "periods": 280
+      },
+      "metrics_oos": {
+        "total_return": -0.004813172629621776,
+        "annual_return": -0.010080909361274815,
+        "annual_volatility": 0.0038255980782941268,
+        "sharpe": -2.6465408865723927,
+        "max_drawdown": -0.005026477487399927,
+        "win_rate": 0.7045454545454546,
+        "trade_count": 12,
+        "turnover": 14.0,
+        "periods": 120
+      },
+      "walk_forward": {
+        "folds": [
+          {
+            "fold": 1,
+            "start": "2024-01-01",
+            "end": "2024-01-02",
+            "sharpe": -2.4109643350677152,
+            "total_return": -0.004580863280671421
+          },
+          {
+            "fold": 2,
+            "start": "2024-01-02",
+            "end": "2024-01-03",
+            "sharpe": -0.8347332491004166,
+            "total_return": -0.0013611430281196268
+          },
+          {
+            "fold": 3,
+            "start": "2024-01-03",
+            "end": "2024-01-05",
+            "sharpe": -2.5019144430831752,
+            "total_return": -0.004813172629621776
+          }
+        ],
+        "summary": {
+          "n_splits": 3,
+          "mean_sharpe": -1.9158706757504358,
+          "std_sharpe": 0.7653807688615191,
+          "positive_ratio": 0.0
+        }
+      },
+      "robustness": {
+        "score": 0.0,
+        "grade": "脆弱",
+        "components": {
+          "oos": 0.0,
+          "walk_forward": 0.0,
+          "sensitivity": 0.0
+        },
+        "notes": [
+          "样本外夏普非正, 警惕过拟合。",
+          "样本外相对样本内明显衰减。",
+          "跨期一致性不足 (多数分段未盈利)。"
+        ],
+        "full_sample_extended": {
+          "total_return": -0.013347093930776932,
+          "cagr": -0.008429559529080866,
+          "net_pnl": -0.013347093930776932,
+          "profit_factor": 0.7595333193005499,
+          "expectancy": -0.0001458371965838292,
+          "average_trade": -0.0001458371965838292,
+          "max_drawdown": -0.014394089050511094,
+          "drawdown_duration_bars": 348,
+          "volatility": 0.003838749159694416,
+          "worst_day": -0.0013123414656368783,
+          "worst_trade": -0.0017817350301336562,
+          "consecutive_losses": 2,
+          "sharpe": -2.2032681629903395,
+          "sortino": -1.4600062218548775,
+          "calmar": -0.5856264678855488,
+          "trade_count": 42,
+          "top_win_concentration": 0.17491756862580085,
+          "periods": 400
+        }
+      },
+      "cost_stress": {
+        "multipliers": {
+          "BASE_COST": {
+            "total_return": -0.013347093930776932,
+            "annual_return": -0.008429559529080866,
+            "annual_volatility": 0.003838749159694416,
+            "sharpe": -2.2032681629903395,
+            "max_drawdown": -0.014394089050511094,
+            "win_rate": 0.7094972067039106,
+            "trade_count": 42,
+            "turnover": 48.0,
+            "periods": 400
+          },
+          "1.5X_COST": {
+            "total_return": -0.027466087638696512,
+            "annual_return": -0.017392679996330318,
+            "annual_volatility": 0.00553739644757174,
+            "sharpe": -3.165710451695723,
+            "max_drawdown": -0.027998051664460788,
+            "win_rate": 0.7094972067039106,
+            "trade_count": 42,
+            "turnover": 48.0,
+            "periods": 400
+          },
+          "2X_COST": {
+            "total_return": -0.04138822833082545,
+            "annual_return": -0.026278100979336694,
+            "annual_volatility": 0.0072633157237622925,
+            "sharpe": -3.662486228187983,
+            "max_drawdown": -0.041624805565035006,
+            "win_rate": 0.7094972067039106,
+            "trade_count": 42,
+            "turnover": 48.0,
+            "periods": 400
+          }
+        },
+        "status": "FAIL"
+      },
+      "paper": {
+        "status": "INSUFFICIENT",
+        "note": "Batch-001: long Paper window not yet run"
+      },
+      "parity": {
+        "status": "INSUFFICIENT",
+        "note": "Requires Paper evidence; not skipped as PASS"
+      },
+      "neighborhood": {
+        "points": [
+          {
+            "label": "window15",
+            "sharpe": -3.8254087802472263,
+            "total_return": -0.02706845163129301
+          },
+          {
+            "label": "window18",
+            "sharpe": -3.6729788710125524,
+            "total_return": -0.025633940023497392
+          },
+          {
+            "label": "window20",
+            "sharpe": -2.2032681629903395,
+            "total_return": -0.013347093930776932
+          },
+          {
+            "label": "window22",
+            "sharpe": -1.9473372672271765,
+            "total_return": -0.011631239156917883
+          },
+          {
+            "label": "window25",
+            "sharpe": -2.0320212376037228,
+            "total_return": -0.012110927325655885
+          },
+          {
+            "label": "window30",
+            "sharpe": -3.0205772174010503,
+            "total_return": -0.019131350299747996
+          }
+        ],
+        "summary": {
+          "n_variants": 6,
+          "mean_sharpe": -2.7835985894136783,
+          "std_sharpe": 0.767410097635306,
+          "min_sharpe": -3.8254087802472263,
+          "positive_ratio": 0.0
+        }
+      },
+      "live_execution": "DENY",
+      "phase_7": "DENY"
+    }
+  ]
+}
