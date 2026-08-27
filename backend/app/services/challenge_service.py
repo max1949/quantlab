@@ -106,31 +106,15 @@ def _count(db: Session, stmt) -> int:
 def _any_factor_paper_graduated(db: Session, uid: uuid.UUID) -> bool:
     """True if any owned factor passes Paper graduation — short-circuit on first hit.
 
-    Challenge progress is polled often; prefer factors with successful validation
-    and cap how many full assessments we run per request.
+    Prefer shared mastery counts (session-cached) so journey + challenge do not
+    re-walk assessments. Fallback: validated factors only, cap 12.
     """
     from backend.app.services import research_quality_service as rqs
 
-    # Factors that already have a successful validation are the only realistic graduates.
-    validated_ids = list(
-        db.execute(
-            select(Factor.id)
-            .join(Validation, Validation.factor_id == Factor.id)
-            .where(
-                Factor.owner_id == uid,
-                Validation.status == ValidationStatus.SUCCESS.value,
-            )
-            .order_by(Validation.created_at.desc())
-            .limit(12)
-        ).scalars().all()
-    )
-    seen: set[uuid.UUID] = set()
-    for fid in validated_ids:
-        if fid in seen:
-            continue
-        seen.add(fid)
-        if rqs.assess_factor_paper(db, fid).passed:
-            return True
+    counts = rqs.user_paper_mastery_counts(db, uid)
+    if int(counts.get("paper_graduated_count") or 0) > 0:
+        return True
+    # Counts already scanned all validated factors; zero means none graduated.
     return False
 
 
@@ -237,6 +221,11 @@ def _pending_hint(db: Session, user: User, code: str, *, done: bool) -> tuple[st
 
 def evaluate(db: Session, user: User, code: str) -> dict:
     """按当前产物重算里程碑完成情况, 持久化并返回带状态的进度。"""
+    cache_key = ("challenge_evaluate", str(user.id), code)
+    cached = db.info.get(cache_key)
+    if cached is not None:
+        return cached
+
     ch = get_by_code(db, code)
     prog = enroll(db, user, code)
     stats = _user_stats(db, user.id)
@@ -289,7 +278,7 @@ def evaluate(db: Session, user: User, code: str) -> dict:
     db.commit()
     db.refresh(prog)
 
-    return {
+    out = {
         "code": ch.code,
         "title": ch.title,
         "days": ch.days,
@@ -304,6 +293,8 @@ def evaluate(db: Session, user: User, code: str) -> dict:
         "certificate_valid": bool(all_done and prog.certificate_code),
         "completed_at": prog.completed_at if all_done else None,
     }
+    db.info[cache_key] = out
+    return out
 
 
 def get_certificate(db: Session, user: User, code: str) -> dict:

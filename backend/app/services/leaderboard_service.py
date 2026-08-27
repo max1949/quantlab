@@ -11,6 +11,7 @@
 
 from __future__ import annotations
 
+import time
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import func, select
@@ -27,6 +28,10 @@ KINDS = {"researcher", "contributor", "newcomer", "improved", "paper_mastery"}
 NEWCOMER_DAYS = 30
 IMPROVED_DAYS = 14
 PAPER_MASTERY_BOARD_LIMIT = 50
+# Full-site paper mastery ranking walks every factor owner; cache briefly so
+# journey / coaching endpoints do not recompute on every page load.
+_PAPER_MASTERY_RANKED_TTL_S = 60.0
+_paper_mastery_ranked_cache: dict = {"at": 0.0, "rows": None}
 
 
 def _row(rank: int, user: User, metric_label: str, metric_value) -> dict:
@@ -121,7 +126,29 @@ def _paper_mastery_ranked(db: Session) -> list[tuple]:
     """[(user_id, graduated, tracking), ...] 按毕业数、跟踪数降序。"""
     from backend.app.services import research_quality_service as rqs
 
-    owner_ids = list(db.execute(select(Factor.owner_id).distinct()).scalars().all())
+    sess_key = "paper_mastery_ranked"
+    cached = db.info.get(sess_key)
+    if cached is not None:
+        return cached
+
+    now = time.monotonic()
+    global_rows = _paper_mastery_ranked_cache.get("rows")
+    if (
+        global_rows is not None
+        and (now - float(_paper_mastery_ranked_cache.get("at") or 0.0)) < _PAPER_MASTERY_RANKED_TTL_S
+    ):
+        db.info[sess_key] = global_rows
+        return global_rows
+
+    # Only owners with a successful validation can have graduated factors.
+    owner_ids = list(
+        db.execute(
+            select(Factor.owner_id)
+            .join(Validation, Validation.factor_id == Factor.id)
+            .where(Validation.status == ValidationStatus.SUCCESS.value)
+            .distinct()
+        ).scalars().all()
+    )
     scores: list[tuple] = []
     for uid in owner_ids:
         counts = rqs.user_paper_mastery_counts(db, uid)
@@ -129,6 +156,9 @@ def _paper_mastery_ranked(db: Session) -> list[tuple]:
         if graduated > 0:
             scores.append((uid, graduated, counts["paper_tracking_count"]))
     scores.sort(key=lambda row: (row[1], row[2]), reverse=True)
+    _paper_mastery_ranked_cache["at"] = now
+    _paper_mastery_ranked_cache["rows"] = scores
+    db.info[sess_key] = scores
     return scores
 
 

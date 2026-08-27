@@ -146,9 +146,13 @@ def paper_thresholds_payload() -> dict:
 
 
 def assess_factor_paper(db: Session, factor_id: uuid.UUID, *, regime_fit_score: int | None = None) -> QualityVerdict:
+    cache_key = ("assess_factor_paper", factor_id, regime_fit_score)
+    cached = db.info.get(cache_key)
+    if cached is not None:
+        return cached
     bt = _latest_success_backtest(db, factor_id)
     val = _latest_success_validation(db, factor_id)
-    return assess_paper_readiness(
+    verdict = assess_paper_readiness(
         backtest_metrics=bt.metrics if bt else None,
         validation_status=val.status if val else None,
         validation_oos=val.oos if val else None,
@@ -156,6 +160,8 @@ def assess_factor_paper(db: Session, factor_id: uuid.UUID, *, regime_fit_score: 
         regime_fit_score=regime_fit_score,
         thresholds=_paper_thresholds(),
     )
+    db.info[cache_key] = verdict
+    return verdict
 
 
 def compute_mastery_stage(
@@ -352,12 +358,23 @@ def _has_paper_order(db: Session, user_id: uuid.UUID, factor_id: uuid.UUID | Non
 
 
 def user_paper_mastery_counts(db: Session, user_id: uuid.UUID) -> dict:
-    """用户维度 Paper 毕业 / 跟踪因子数 (研究员主页统计)。"""
-    factor_ids = list(
+    """用户维度 Paper 毕业 / 跟踪因子数 (研究员主页统计)。
+
+    Only factors with a successful validation can graduate — skip the rest.
+    Result is cached on the SQLAlchemy session for the request lifetime.
+    """
+    cache_key = ("user_paper_mastery_counts", user_id)
+    cached = db.info.get(cache_key)
+    if cached is not None:
+        return cached
+
+    owned_ids = set(
         db.execute(select(Factor.id).where(Factor.owner_id == user_id)).scalars().all()
     )
-    if not factor_ids:
-        return {"paper_graduated_count": 0, "paper_tracking_count": 0}
+    if not owned_ids:
+        out = {"paper_graduated_count": 0, "paper_tracking_count": 0}
+        db.info[cache_key] = out
+        return out
 
     po_fids = set(
         db.execute(
@@ -367,14 +384,28 @@ def user_paper_mastery_counts(db: Session, user_id: uuid.UUID) -> dict:
             )
         ).scalars().all()
     )
+    tracking = len(owned_ids & po_fids)
+
+    # Graduation requires successful validation; assessing every owned factor
+    # was O(N) DB round-trips and made /onboarding/journey multi-second.
+    validated_ids = list(
+        db.execute(
+            select(Validation.factor_id)
+            .where(
+                Validation.factor_id.in_(owned_ids),
+                Validation.status == ValidationStatus.SUCCESS.value,
+            )
+            .distinct()
+        ).scalars().all()
+    )
     graduated = 0
-    tracking = 0
-    for fid in factor_ids:
+    for fid in validated_ids:
         if assess_factor_paper(db, fid).passed:
             graduated += 1
-        if fid in po_fids:
-            tracking += 1
-    return {"paper_graduated_count": graduated, "paper_tracking_count": tracking}
+
+    out = {"paper_graduated_count": graduated, "paper_tracking_count": tracking}
+    db.info[cache_key] = out
+    return out
 
 
 def project_quality_payload(db: Session, project_id: uuid.UUID, *, locale: str = "zh") -> dict:
