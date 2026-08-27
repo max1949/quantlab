@@ -63,19 +63,33 @@ export default function AiCreateStrategy() {
   );
   const [result, setResult] = useState<BuilderOut | null>(null);
 
+  const [gateHint, setGateHint] = useState<string | null>(null);
+
   const draft = useMutation({
     mutationFn: () => runAiStrategyBuilder({ text, confirm: false, run_backtest: false }),
-    onSuccess: (data) => setResult(data),
-    onError: (e) => notify(apiErrorMessage(e, "无法理解交易想法"), "error"),
+    onSuccess: (data) => {
+      setGateHint(null);
+      setResult(data);
+    },
+    onError: (e) => {
+      const msg = apiErrorMessage(e, "无法理解交易想法");
+      setGateHint(msg);
+      notify(msg, "error");
+    },
   });
 
   const confirmRun = useMutation({
     mutationFn: () => runAiStrategyBuilder({ text, confirm: true, run_backtest: true }),
     onSuccess: (data) => {
+      setGateHint(null);
       setResult(data);
       notify(data.status === "ok" ? "回测完成（仅研究，非实盘）" : "已返回结果", "success");
     },
-    onError: (e) => notify(apiErrorMessage(e, "回测失败"), "error"),
+    onError: (e) => {
+      const msg = apiErrorMessage(e, "回测失败");
+      setGateHint(msg);
+      notify(msg, "error");
+    },
   });
 
   const understood = useMemo(() => {
@@ -101,6 +115,19 @@ export default function AiCreateStrategy() {
       <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
         告诉 AI 你的交易想法。系统会先结构化确认，再检查数据并回测。不会直接下真钱单。
       </p>
+      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+        当前使用 QuantLab 内置规则引擎理解中文交易想法，无需配置个人 AI Key。不会开放真钱下单。
+      </p>
+
+      {gateHint ? (
+        <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
+          <p className="font-medium">暂时无法继续</p>
+          <p className="mt-1">{gateHint}</p>
+          <p className="mt-2 text-xs">
+            替代路径：从研究模板创建策略 → 回测 / 验证 → 模拟交易。实盘交易仍未开放。
+          </p>
+        </div>
+      ) : null}
 
       <label className="mt-6 block text-sm font-medium text-slate-700 dark:text-slate-200">
         告诉 AI 你的交易想法

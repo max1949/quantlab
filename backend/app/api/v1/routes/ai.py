@@ -180,7 +180,11 @@ def strategy_builder(
     ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="AI 策略构建器未启用",
+            detail=(
+                "AI 创建策略暂时关闭（运营配置）。"
+                "当前仍可使用：研究模板 → 回测 → 验证 → 模拟交易。"
+                "不会开放真钱下单。"
+            ),
         )
     _check_ai_quota(current_user.id)
     if body.run_backtest:

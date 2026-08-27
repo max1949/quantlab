@@ -109,6 +109,12 @@ export default function Pricing() {
     <div>
       <PageTitle title={p.title} subtitle={p.subtitle} />
 
+      {user && sub.data && sub.data.online_payment_available === false && (
+        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
+          在线卡支付尚未开放。升级请使用本页下方兑换码；或继续使用当前研究员权限做研究 / 模拟交易。
+        </div>
+      )}
+
       {user && sub.data && (
         <div className="mb-6 rounded-xl border border-brand-100 bg-brand-50/50 px-4 py-3 text-sm dark:border-brand-900 dark:bg-brand-950/40">
           {p.current}:{" "}
@@ -169,8 +175,22 @@ export default function Pricing() {
                 <button className="btn-ghost w-full" disabled>
                   {p.activePlan}
                 </button>
+              ) : sub.data?.online_payment_available === false ? (
+                <button
+                  type="button"
+                  className="btn-primary w-full"
+                  onClick={() => {
+                    document.getElementById("membership-redeem")?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "center",
+                    });
+                  }}
+                >
+                  去兑换码开通
+                </button>
               ) : (
                 <button
+                  type="button"
                   className="btn-primary w-full"
                   disabled={doCheckout.isPending}
                   onClick={() => doCheckout.mutate(plan.code)}
@@ -211,7 +231,7 @@ export default function Pricing() {
       )}
 
       {user && (
-        <div className="mt-8 max-w-md">
+        <div id="membership-redeem" className="mt-8 max-w-md scroll-mt-24">
           <h3 className="mb-2 font-semibold">{p.cardTitle}</h3>
           <p className="mb-3 text-sm text-slate-500">{p.cardHint}</p>
           <div className="flex gap-2">

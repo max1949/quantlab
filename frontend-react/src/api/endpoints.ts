@@ -1426,6 +1426,16 @@ export async function startPaperRun(runId: string) {
   return data;
 }
 
+export async function stopPaperRun(runId: string) {
+  const { data } = await api.post(`/paper-sandbox/runs/${runId}/stop`);
+  return data;
+}
+
+export async function killPaperRun(runId: string) {
+  const { data } = await api.post(`/paper-sandbox/runs/${runId}/kill`);
+  return data;
+}
+
 export async function getPaperSandboxDashboard(runId: string) {
   const { data } = await api.get(`/paper-sandbox/runs/${runId}/dashboard`);
   return data;

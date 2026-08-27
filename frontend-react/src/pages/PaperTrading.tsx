@@ -1,5 +1,12 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { getPaperSandboxDashboard, startPaperRun, createPaperSandboxRun, registerPaperReady } from "../api/endpoints";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  getPaperSandboxDashboard,
+  startPaperRun,
+  stopPaperRun,
+  killPaperRun,
+  createPaperSandboxRun,
+  registerPaperReady,
+} from "../api/endpoints";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
 import { apiErrorMessage } from "../api/client";
@@ -7,6 +14,7 @@ import { apiErrorMessage } from "../api/client";
 export default function PaperTrading() {
   const notify = useUi((s) => s.notify);
   const t = useLocale((s) => s.dict);
+  const qc = useQueryClient();
 
   const demoRunId = sessionStorage.getItem("paper_run_id") || "";
 
@@ -14,6 +22,11 @@ export default function PaperTrading() {
     queryKey: ["paper-dashboard", demoRunId],
     queryFn: () => getPaperSandboxDashboard(demoRunId),
     enabled: Boolean(demoRunId),
+    refetchInterval: (q) => {
+      const status = String((q.state.data as { status?: string } | undefined)?.status || "").toUpperCase();
+      if (status === "RUNNING" || status === "STARTING") return 3000;
+      return false;
+    },
   });
 
   const bootstrap = useMutation({
@@ -25,33 +38,81 @@ export default function PaperTrading() {
       return run.id;
     },
     onSuccess: () => {
-      notify("模拟交易已启动", "success");
-      void dashboard.refetch();
+      notify("模拟交易已启动（不涉及真钱）", "success");
+      void qc.invalidateQueries({ queryKey: ["paper-dashboard"] });
     },
     onError: (e) => notify(apiErrorMessage(e, "启动失败"), "error"),
   });
 
+  const stopMut = useMutation({
+    mutationFn: () => stopPaperRun(demoRunId),
+    onSuccess: () => {
+      notify("已请求优雅停止", "success");
+      void dashboard.refetch();
+    },
+    onError: (e) => notify(apiErrorMessage(e, "停止失败"), "error"),
+  });
+
+  const killMut = useMutation({
+    mutationFn: () => killPaperRun(demoRunId),
+    onSuccess: () => {
+      notify("已强制终止模拟（Kill Switch）", "info");
+      void dashboard.refetch();
+    },
+    onError: (e) => notify(apiErrorMessage(e, "终止失败"), "error"),
+  });
+
   const d = dashboard.data;
+  const statusUpper = String(d?.status || "").toUpperCase();
+  const isActive = statusUpper === "RUNNING" || statusUpper === "STARTING";
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <div className="mb-6 rounded-xl border-2 border-amber-400 bg-amber-50 p-4 text-center dark:border-amber-600 dark:bg-amber-950/40">
         <p className="text-2xl font-bold text-amber-900 dark:text-amber-100">模拟交易，不涉及真实资金</p>
-        <p className="mt-1 text-sm text-amber-800 dark:text-amber-200">SANDBOX · Nautilus 模拟执行 · BTCUSDT</p>
+        <p className="mt-1 text-sm text-amber-800 dark:text-amber-200">SANDBOX · Nautilus 模拟执行 · BTCUSDT · 实盘未开放</p>
       </div>
 
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-semibold">{t.nav?.paperTrading || "模拟交易"}</h1>
-        <button type="button" className="btn-primary" disabled={bootstrap.isPending} onClick={() => bootstrap.mutate()}>
-          {bootstrap.isPending ? "启动中…" : "启动 BTC 模拟"}
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button type="button" className="btn-primary" disabled={bootstrap.isPending} onClick={() => bootstrap.mutate()}>
+            {bootstrap.isPending ? "启动中…" : demoRunId ? "重新启动 BTC 模拟" : "启动 BTC 模拟"}
+          </button>
+          {demoRunId && isActive ? (
+            <>
+              <button
+                type="button"
+                className="btn text-sm"
+                disabled={stopMut.isPending}
+                onClick={() => stopMut.mutate()}
+              >
+                {stopMut.isPending ? "停止中…" : "停止"}
+              </button>
+              <button
+                type="button"
+                className="btn text-sm text-rose-700"
+                disabled={killMut.isPending}
+                onClick={() => killMut.mutate()}
+              >
+                {killMut.isPending ? "终止中…" : "强制终止"}
+              </button>
+            </>
+          ) : null}
+        </div>
       </div>
+
+      {dashboard.isError ? (
+        <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-100">
+          无法读取模拟状态：{apiErrorMessage(dashboard.error)}。可尝试重新启动，或检查登录是否过期。
+        </div>
+      ) : null}
 
       {d ? (
         <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900/40">
           <div className="text-lg font-medium">{d.strategy_name} · {d.strategy_version}</div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Stat label="状态" value={d.status_zh} />
+            <Stat label="状态" value={d.status_zh || d.status || "—"} />
             <Stat label="运行时间" value={d.uptime_zh} />
             <Stat label="权益 (Equity)" value={d.equity_zh || d.simulated_balance_zh} />
             <Stat label="累计盈亏" value={d.total_pnl_zh} />
@@ -104,7 +165,7 @@ export default function PaperTrading() {
           ) : null}
         </div>
       ) : (
-        <p className="text-slate-500">点击「启动 BTC 模拟」开始 Phase 6 纸面沙盒体验。</p>
+        <p className="text-slate-500">点击「启动 BTC 模拟」开始纸面沙盒体验。这是模拟盘，不会连接真实交易所账户。</p>
       )}
     </div>
   );

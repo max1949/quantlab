@@ -568,6 +568,8 @@ export interface SubscriptionStatus {
   personal_tier?: number;
   org_tier?: number;
   org_benefit?: boolean;
+  stripe_available?: boolean;
+  online_payment_available?: boolean; // false → UI must not fake Stripe checkout
 }
 
 export interface FeatureState {

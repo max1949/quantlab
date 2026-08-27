@@ -117,12 +117,14 @@ class Settings(BaseSettings):
     # Python 因子沙箱
     sandbox_timeout_sec: float = 15.0
 
-    # Nautilus evolution feature flags (LIVE default OFF)
-    quantlab_nautilus_engine: bool = False
-    quantlab_strategy_spec: bool = False
-    quantlab_ai_strategy_builder: bool = False
-    quantlab_nautilus_backtest: bool = False
-    quantlab_sandbox: bool = False
+    # Nautilus evolution feature flags.
+    # Research surfaces shipped in primary nav default ON.
+    # LIVE stays OFF until explicit Phase 7 approval.
+    quantlab_nautilus_engine: bool = True
+    quantlab_strategy_spec: bool = True
+    quantlab_ai_strategy_builder: bool = True
+    quantlab_nautilus_backtest: bool = True
+    quantlab_sandbox: bool = True
     quantlab_live: bool = False
 
 

@@ -29,6 +29,8 @@ class SubscriptionStatusOut(BaseModel):
     personal_tier: int = 0
     org_tier: int = 0
     org_benefit: bool = False
+    stripe_available: bool = False
+    online_payment_available: bool = False
 
 
 class FeatureState(BaseModel):

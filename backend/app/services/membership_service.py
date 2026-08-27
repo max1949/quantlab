@@ -197,6 +197,8 @@ def get_status(db: Session, user: User) -> dict:
         primary = sorted(
             subs, key=lambda s: (s.tier, s.expires_at or datetime.max.replace(tzinfo=timezone.utc))
         )[-1]
+    from backend.app.services import payment_service
+
     return {
         "tier": tier,
         "tier_name": TIER_NAMES.get(tier, "免费"),
@@ -206,6 +208,8 @@ def get_status(db: Session, user: User) -> dict:
         "personal_tier": personal_tier,
         "org_tier": org_tier,
         "org_benefit": org_tier > personal_tier,
+        "stripe_available": payment_service.stripe_configured(),
+        "online_payment_available": payment_service.stripe_configured(),
     }
 
 

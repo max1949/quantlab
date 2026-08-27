@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   challengeProgress,
@@ -13,6 +14,17 @@ import { useAuth } from "../store/auth";
 import { useUi } from "../store/ui";
 import { ErrorBox, PageTitle, Spinner } from "../components/ui";
 import ChallengeNetworkCoachPanel from "../components/ChallengeNetworkCoachPanel";
+
+const MILESTONE_CTA: Record<string, { to: string; label: string }> = {
+  first_factor: { to: "/templates", label: "去创建因子" },
+  first_oos: { to: "/projects", label: "去做验证" },
+  stack_factor: { to: "/projects", label: "去组合因子" },
+  network_radar: { to: "/feed?focus=follow", label: "去关注研究员" },
+  first_paper_order: { to: "/paper", label: "去下模拟单" },
+  paper_graduated: { to: "/paper", label: "查看模拟毕业线" },
+  research_share: { to: "/projects", label: "去生成分享卡" },
+  first_report: { to: "/projects", label: "去写研究报告" },
+};
 
 export default function Challenges() {
   const { dict } = useLocale();
@@ -90,7 +102,7 @@ export default function Challenges() {
                 className={`rounded-lg px-4 py-2 text-sm font-medium ${
                   code === c.code
                     ? "bg-brand-600 text-white"
-                    : "bg-white text-slate-600 ring-1 ring-slate-200"
+                    : "bg-white text-slate-600 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700"
                 }`}
               >
                 {c.title}
@@ -108,7 +120,7 @@ export default function Challenges() {
             />
           ) : (
             <div className="card text-center">
-              <p className="text-slate-600">{t.enrollHint}</p>
+              <p className="text-slate-600 dark:text-slate-300">{t.enrollHint}</p>
               <button
                 className="btn-primary mt-3"
                 disabled={enroll.isPending}
@@ -138,15 +150,21 @@ function ProgressView({
   const { dict } = useLocale();
   const t = dict.challengesPage;
   const allDone = data.completed_count >= data.total;
+  const pending = data.milestones.filter((m) => !m.completed);
   return (
     <div>
       <div className="card">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="font-semibold text-slate-800">{data.title}</p>
+            <p className="font-semibold text-slate-800 dark:text-slate-100">{data.title}</p>
             <p className="text-sm text-slate-400">
               {t.completed(data.completed_count, data.total, data.reward_points)}
             </p>
+            {pending.length === 1 ? (
+              <p className="mt-1 text-sm text-amber-700 dark:text-amber-300">
+                还差 1 项：{pending[0].title}
+              </p>
+            ) : null}
           </div>
           {data.certificate_code ? (
             <span className="badge bg-emerald-100 text-emerald-700">
@@ -162,7 +180,7 @@ function ProgressView({
             </button>
           )}
         </div>
-        <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+        <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
           <div
             className="h-full rounded-full bg-brand-500 transition-all"
             style={{ width: `${data.percent}%` }}
@@ -171,33 +189,46 @@ function ProgressView({
       </div>
 
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
-        {data.milestones.map((m) => (
-          <div
-            key={m.code}
-            className={`card flex items-center justify-between ${
-              m.completed ? "border-emerald-200 bg-emerald-50/40" : ""
-            }`}
-          >
-            <div>
-              <p className="font-medium text-slate-700">
-                {m.completed ? "✅ " : "⬜ "}
-                {m.title}
-              </p>
-              {m.journey_label && (
-                <p className="text-xs text-brand-600 dark:text-brand-400">
-                  {t.journeyStep(m.journey_label)}
+        {data.milestones.map((m) => {
+          const cta = !m.completed ? MILESTONE_CTA[m.code] : null;
+          return (
+            <div
+              key={m.code}
+              className={`card flex items-center justify-between gap-2 ${
+                m.completed
+                  ? "border-emerald-200 bg-emerald-50/40 dark:border-emerald-900 dark:bg-emerald-950/30"
+                  : ""
+              }`}
+            >
+              <div className="min-w-0">
+                <p className="font-medium text-slate-700 dark:text-slate-200">
+                  {m.completed ? "✅ " : "⬜ "}
+                  {m.title}
                 </p>
-              )}
-              {m.mastery_stage_label && (
-                <p className="text-xs text-emerald-700 dark:text-emerald-300">
-                  {t.masteryStep(m.mastery_stage_label)}
-                </p>
-              )}
-              <p className="text-xs text-slate-400">{t.day(m.day)}</p>
+                {m.journey_label && (
+                  <p className="text-xs text-brand-600 dark:text-brand-400">
+                    {t.journeyStep(m.journey_label)}
+                  </p>
+                )}
+                {m.mastery_stage_label && (
+                  <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                    {t.masteryStep(m.mastery_stage_label)}
+                  </p>
+                )}
+                <p className="text-xs text-slate-400">{t.day(m.day)}</p>
+                {cta ? (
+                  <Link
+                    to={cta.to}
+                    className="mt-1 inline-block text-xs font-medium text-brand-600 underline dark:text-brand-300"
+                  >
+                    {cta.label} →
+                  </Link>
+                ) : null}
+              </div>
+              <span className="badge shrink-0">+{m.reward_points}</span>
             </div>
-            <span className="badge">+{m.reward_points}</span>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
