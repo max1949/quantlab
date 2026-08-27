@@ -31,6 +31,8 @@ class MilestoneStatus(BaseModel):
     journey_label: str | None = None
     mastery_stage: str | None = None
     mastery_stage_label: str | None = None
+    pending_hint_zh: str | None = None
+    pending_hint_en: str | None = None
 
 
 class ProgressOut(BaseModel):

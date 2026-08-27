@@ -212,6 +212,11 @@ def assess_paper_readiness(
     thresholds: PaperThresholds | None = None,
 ) -> QualityVerdict:
     """判断因子是否达到「可上模拟盘」标准。"""
+    from engine.validation.decision import (
+        MIN_PERIODS_FOR_EVIDENCE,
+        MIN_TRADE_COUNT_FOR_EVIDENCE,
+    )
+
     th = thresholds or PaperThresholds()
     verdict = assess_publish_readiness(
         backtest_metrics=backtest_metrics,
@@ -221,10 +226,31 @@ def assess_paper_readiness(
         thresholds=th,
     )
     reasons = list(verdict.reasons)
+    # When real gates are active, reuse overfit evidence floors so 1-trade
+    # "huge Sharpe" cannot graduate (and thus cannot enter paper_mastery board).
+    gate_active = float(th.min_oos_sharpe) > -100.0
+    if gate_active:
+        trade_count = (backtest_metrics or {}).get("trade_count")
+        periods = (backtest_metrics or {}).get("periods")
+        if trade_count is None or int(trade_count) < MIN_TRADE_COUNT_FOR_EVIDENCE:
+            reasons.append(
+                f"成交/调仓次数 {trade_count if trade_count is not None else '缺'} "
+                f"低于证据线 {MIN_TRADE_COUNT_FOR_EVIDENCE}（样本过少，夏普不可信）"
+            )
+        if periods is None or int(periods) < MIN_PERIODS_FOR_EVIDENCE:
+            reasons.append(
+                f"回测 bar 数 {periods if periods is not None else '缺'} "
+                f"低于证据线 {MIN_PERIODS_FOR_EVIDENCE}"
+            )
     if regime_fit_score is not None and int(regime_fit_score) < th.min_regime_fit_score:
         reasons.append(
             f"当前市况适配分 {int(regime_fit_score)} 低于模拟盘建议线 "
             f"{th.min_regime_fit_score}（策略与波动制度可能不匹配）"
         )
-    scorecard = {**verdict.scorecard, "regime_fit_score": regime_fit_score}
+    scorecard = {
+        **verdict.scorecard,
+        "regime_fit_score": regime_fit_score,
+        "trade_count": (backtest_metrics or {}).get("trade_count"),
+        "periods": (backtest_metrics or {}).get("periods"),
+    }
     return QualityVerdict(passed=len(reasons) == 0, reasons=reasons, scorecard=scorecard)

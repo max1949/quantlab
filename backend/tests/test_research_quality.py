@@ -44,7 +44,12 @@ def test_project_quality_includes_regime_fit(client, db_session):
 def test_paper_readiness_stricter_than_publish():
     from engine.research_quality import assess_paper_readiness, assess_publish_readiness
 
-    metrics = {"sharpe": 0.2, "turnover": 70.0}
+    metrics = {
+        "sharpe": 0.2,
+        "turnover": 70.0,
+        "trade_count": 40,
+        "periods": 250,
+    }
     oos = {"out_of_sample": {"sharpe": 0.3}}
     rob = {
         "score": 56.0,

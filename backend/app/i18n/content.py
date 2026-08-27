@@ -1610,6 +1610,11 @@ def localize_progress(progress: dict, locale: Locale) -> dict:
             m2["mastery_stage"] = ms
             stage_labels = MASTERY_STAGE_LABEL.get(locale) or MASTERY_STAGE_LABEL["en"]
             m2["mastery_stage_label"] = stage_labels.get(ms, ms)
+        if locale == "zh":
+            m2["pending_hint_zh"] = m.get("pending_hint_zh") or m.get("pending_hint_en")
+        else:
+            m2["pending_hint_en"] = m.get("pending_hint_en") or m.get("pending_hint_zh")
+            m2["pending_hint_zh"] = m2.get("pending_hint_en")
         loc_ms.append(m2)
     out["milestones"] = loc_ms
     return out

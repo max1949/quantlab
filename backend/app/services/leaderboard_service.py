@@ -45,14 +45,23 @@ def leaderboard(db: Session, kind: str, limit: int = 50) -> list[dict]:
         raise ValueError(f"未知榜单: {kind}")
 
     if kind == "researcher":
+        # Min sample for ranking: non-zero research credit (effective validation /
+        # report / publish / follow). Boards are not Sharpe-ranked; zero-score
+        # accounts must not pad #1–N.
         users = db.execute(
-            select(User).order_by(User.research_contribution_score.desc(), User.created_at.asc()).limit(limit)
+            select(User)
+            .where(User.research_contribution_score > 0)
+            .order_by(User.research_contribution_score.desc(), User.created_at.asc())
+            .limit(limit)
         ).scalars().all()
         return [_row(i + 1, u, "研究信用", round(u.research_contribution_score, 2)) for i, u in enumerate(users)]
 
     if kind == "contributor":
         users = db.execute(
-            select(User).order_by(User.reward_points.desc(), User.created_at.asc()).limit(limit)
+            select(User)
+            .where(User.reward_points > 0)
+            .order_by(User.reward_points.desc(), User.created_at.asc())
+            .limit(limit)
         ).scalars().all()
         return [_row(i + 1, u, "活跃积分", u.reward_points) for i, u in enumerate(users)]
 
@@ -60,7 +69,10 @@ def leaderboard(db: Session, kind: str, limit: int = 50) -> list[dict]:
         since = datetime.now(timezone.utc) - timedelta(days=NEWCOMER_DAYS)
         users = db.execute(
             select(User)
-            .where(User.created_at >= since)
+            .where(
+                User.created_at >= since,
+                User.research_contribution_score > 0,
+            )
             .order_by(User.research_contribution_score.desc(), User.created_at.asc())
             .limit(limit)
         ).scalars().all()

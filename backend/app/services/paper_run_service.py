@@ -260,31 +260,29 @@ def start_paper_run(db: Session, user_id: uuid.UUID, run_id: uuid.UUID) -> Paper
     script = _repo_root() / "scripts" / "paper_runner.py"
     cmd = [sys.executable, str(script), str(run.id), "--once", f"--ticks={tick_count}"]
     try:
+        # Async spawn: paper_runner.py owns RUNNING → STOPPED/FAILED/KILLED transitions.
+        # Do NOT communicate() here — that blocked the API and hid RUNNING from UI/DB polls.
         proc = subprocess.Popen(  # noqa: S603
             cmd,
             cwd=str(_repo_root()),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
             text=True,
+            start_new_session=True,
         )
-        stdout, stderr = proc.communicate(timeout=120)
         run.runner_pid = proc.pid
-        if proc.returncode != 0:
-            run.status = PaperRunStatus.FAILED.value
-            run.failure_reason = (stderr or stdout or "runner failed")[:500]
-        else:
-            run.status = PaperRunStatus.STOPPED.value
-            run.stop_reason = "tick_batch_complete"
-            run.ended_at = datetime.now(timezone.utc)
-        db.refresh(run)
-        _finalize_run_evaluation(db, run)
+        run.started_at = run.started_at or datetime.now(timezone.utc)
+        # Leave STARTING; runner flips to RUNNING on first successful tick window.
+        db.commit()
         db.refresh(run)
         return run
-    except subprocess.TimeoutExpired as exc:
+    except OSError as exc:
         run.status = PaperRunStatus.FAILED.value
-        run.failure_reason = "paper-runner timeout"
+        run.failure_reason = f"failed to spawn paper-runner: {exc}"[:500]
+        run.ended_at = datetime.now(timezone.utc)
         db.commit()
-        raise PaperRunError("paper-runner 超时") from exc
+        db.refresh(run)
+        raise PaperRunError("无法启动 paper-runner") from exc
 
 
 def stop_paper_run(db: Session, user_id: uuid.UUID, run_id: uuid.UUID) -> PaperRun:

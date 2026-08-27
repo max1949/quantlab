@@ -9,6 +9,10 @@ Decision = Literal["PROMOTE", "HOLD", "REJECT"]
 OverfitRisk = Literal["LOW", "MEDIUM", "HIGH"]
 GateFlag = Literal["PASS", "FAIL", "INSUFFICIENT"]
 
+# Evidence floors reused by paper graduation / leaderboard ranking (not invented ad hoc).
+MIN_TRADE_COUNT_FOR_EVIDENCE = 30
+MIN_PERIODS_FOR_EVIDENCE = 200
+
 
 @dataclass
 class GateChecklist:
@@ -53,9 +57,9 @@ def assess_overfit_risk(
     flags = 0
     if param_count >= 4:
         flags += 1
-    if trade_count < 30:
+    if trade_count < MIN_TRADE_COUNT_FOR_EVIDENCE:
         flags += 1
-    if periods < 200:
+    if periods < MIN_PERIODS_FOR_EVIDENCE:
         flags += 1
     if sens_positive_ratio is not None and sens_positive_ratio < 0.5:
         flags += 2

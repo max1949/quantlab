@@ -8,6 +8,7 @@
 - QL-CLICK-0018 (EN): **PASS** on landing.
 - QL-CLICK-0019 (中文): **PASS** (default).
 - External QL-CLICK-0010..0012: HTTP 200 verified → treat as **PASS** (KEEP_EXTERNAL).
+- **RANKINGS / sample gate (QL-CLICK-0133..0137):** site-wide boards are **not** Sharpe-sorted. `paper_mastery` requires paper graduation (`assess_paper_readiness`) including evidence floors `trade_count>=30` / `periods>=200` (same constants as overfit risk). `researcher`/`newcomer` require `research_contribution_score>0`. Verify: `scripts/_closure_rankings_gate_verify.py`.
 - Remaining primary/secondary CTAs: still **UNKNOWN** until full browser/auth pass.
 
 

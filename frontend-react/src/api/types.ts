@@ -1176,6 +1176,8 @@ export interface Milestone {
   journey_label?: string | null;
   mastery_stage?: string | null;
   mastery_stage_label?: string | null;
+  pending_hint_zh?: string | null;
+  pending_hint_en?: string | null;
 }
 
 export interface ChallengeProgress {

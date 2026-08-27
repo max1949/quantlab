@@ -216,6 +216,11 @@ function ProgressView({
                   </p>
                 )}
                 <p className="text-xs text-slate-400">{t.day(m.day)}</p>
+                {(m.pending_hint_zh || m.pending_hint_en) && !m.completed ? (
+                  <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
+                    {m.pending_hint_zh || m.pending_hint_en}
+                  </p>
+                ) : null}
                 {cta ? (
                   <Link
                     to={cta.to}

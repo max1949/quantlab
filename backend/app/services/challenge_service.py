@@ -103,8 +103,38 @@ def _count(db: Session, stmt) -> int:
     return int(db.execute(stmt).scalar_one() or 0)
 
 
-def _user_stats(db: Session, uid: uuid.UUID) -> dict:
+def _any_factor_paper_graduated(db: Session, uid: uuid.UUID) -> bool:
+    """True if any owned factor passes Paper graduation — short-circuit on first hit.
+
+    Challenge progress is polled often; prefer factors with successful validation
+    and cap how many full assessments we run per request.
+    """
     from backend.app.services import research_quality_service as rqs
+
+    # Factors that already have a successful validation are the only realistic graduates.
+    validated_ids = list(
+        db.execute(
+            select(Factor.id)
+            .join(Validation, Validation.factor_id == Factor.id)
+            .where(
+                Factor.owner_id == uid,
+                Validation.status == ValidationStatus.SUCCESS.value,
+            )
+            .order_by(Validation.created_at.desc())
+            .limit(12)
+        ).scalars().all()
+    )
+    seen: set[uuid.UUID] = set()
+    for fid in validated_ids:
+        if fid in seen:
+            continue
+        seen.add(fid)
+        if rqs.assess_factor_paper(db, fid).passed:
+            return True
+    return False
+
+
+def _user_stats(db: Session, uid: uuid.UUID) -> dict:
     from backend.app.models.growth import ResearchShare
     from backend.app.services import social_service
 
@@ -130,7 +160,7 @@ def _user_stats(db: Session, uid: uuid.UUID) -> dict:
         "paper_order": _count(
             db, select(func.count(PaperOrder.id)).where(PaperOrder.user_id == uid)
         ),
-        "paper_graduated": rqs.user_paper_mastery_counts(db, uid)["paper_graduated_count"],
+        "paper_graduated": 1 if _any_factor_paper_graduated(db, uid) else 0,
         "following_three": 1 if following >= 3 else 0,
         "research_share": _count(
             db, select(func.count(ResearchShare.id)).where(ResearchShare.owner_id == uid)
@@ -174,6 +204,37 @@ def enroll(db: Session, user: User, code: str) -> ChallengeProgress:
     return prog
 
 
+def _pending_hint(db: Session, user: User, code: str, *, done: bool) -> tuple[str | None, str | None]:
+    """User-facing why a milestone is still open (zh, en).
+
+    Keep this cheap: progress is polled often; never run full paper assessment
+    loops here (that previously caused Cloudflare 502 timeouts).
+    """
+    if done:
+        return None, None
+    if code == "first_paper_order":
+        return (
+            "还没有模拟成交单。请到「模拟交易」或项目 Paper 面板下一笔模拟单（不涉及真钱）。",
+            "No paper order yet. Place one in Paper Trading or the project Paper panel (no real money).",
+        )
+    if code == "paper_graduated":
+        return (
+            "暂无因子达到 Paper 毕业线。请在项目质量面板查看差距（样本外夏普、稳健性、换手、最低成交次数等）。",
+            "No factor has passed the Paper graduation line yet. Check the project quality panel for gaps (OOS Sharpe, robustness, turnover, min trades).",
+        )
+    if code == "network_radar":
+        return (
+            "还需要关注满 3 位研究员。可去广场筛选活跃研究员。",
+            "Follow 3 researchers on the feed to complete this milestone.",
+        )
+    if code == "stack_factor":
+        return (
+            "还没有组合因子。打开项目里的因子实验室，用组合模式创建。",
+            "No stacked factor yet. Create one in Factor Lab (stack mode).",
+        )
+    return None, None
+
+
 def evaluate(db: Session, user: User, code: str) -> dict:
     """按当前产物重算里程碑完成情况, 持久化并返回带状态的进度。"""
     ch = get_by_code(db, code)
@@ -188,13 +249,13 @@ def evaluate(db: Session, user: User, code: str) -> dict:
         done = stats.get(m["check"], 0) >= 1
         if done:
             done_codes.append(m["code"])
-            # 新完成的里程碑发放 reward_points (幂等: 记录在 rewarded)。
             if m["code"] not in rewarded:
                 pts = int(m.get("reward_points", 0))
                 if pts:
                     growth_service.award_reward_points(db, user, pts, commit=False)
                     newly_awarded += pts
                 rewarded.add(m["code"])
+        hint_zh, hint_en = _pending_hint(db, user, m["code"], done=done)
         milestones_status.append(
             {
                 "day": m["day"],
@@ -204,18 +265,24 @@ def evaluate(db: Session, user: User, code: str) -> dict:
                 "reward_points": int(m.get("reward_points", 0)),
                 "journey_key": MILESTONE_JOURNEY_KEYS.get(m["code"]),
                 "mastery_stage": MILESTONE_MASTERY_STAGES.get(m["code"]),
+                "pending_hint_zh": hint_zh,
+                "pending_hint_en": hint_en,
             }
         )
 
     total = len(ch.milestones)
     all_done = len(done_codes) == total and total > 0
 
-    # 全部完成 -> 生成证书 + 一次性奖金 (幂等)。
     if all_done and not prog.certificate_code:
         prog.certificate_code = f"QLAB-{code.upper()}-{user.username}-{uuid.uuid4().hex[:6].upper()}"
         prog.completed_at = datetime.now(timezone.utc)
         growth_service.award_reward_points(db, user, CHALLENGE_COMPLETE_BONUS, commit=False)
         newly_awarded += CHALLENGE_COMPLETE_BONUS
+
+    # Keep historical certificate_code in DB, but only expose when currently complete.
+    visible_cert = prog.certificate_code if all_done else None
+    if not all_done:
+        prog.completed_at = None
 
     prog.completed = done_codes
     prog.rewarded = sorted(rewarded)
@@ -233,15 +300,16 @@ def evaluate(db: Session, user: User, code: str) -> dict:
         "enrolled_at": prog.enrolled_at,
         "newly_awarded_points": newly_awarded,
         "reward_points": user.reward_points,
-        "certificate_code": prog.certificate_code,
-        "completed_at": prog.completed_at,
+        "certificate_code": visible_cert,
+        "certificate_valid": bool(all_done and prog.certificate_code),
+        "completed_at": prog.completed_at if all_done else None,
     }
 
 
 def get_certificate(db: Session, user: User, code: str) -> dict:
-    """领取证书 (需挑战已全部完成)。"""
+    """领取证书 (需挑战当前全部里程碑完成)。"""
     res = evaluate(db, user, code)
-    if not res["certificate_code"]:
+    if not res.get("certificate_valid") or not res.get("certificate_code"):
         raise ChallengeNotCompletedError(code)
     return {
         "certificate_code": res["certificate_code"],

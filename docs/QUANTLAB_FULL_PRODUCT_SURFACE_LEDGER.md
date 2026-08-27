@@ -34,7 +34,7 @@ REDIS=PONG
 | QL-S-002 | 模拟交易 | `/app/paper` | user | Y | auth | `/paper-sandbox/*` | entitlement `paper_trading` | PARTIAL | PASS | missing stop/kill UI (pre-fix) | add stop/kill + poll |
 | QL-S-003 | AI 创建策略 | `/app/ai-strategy` | user | Y | auth | `POST /ai/strategy-builder` | `QUANTLAB_AI_STRATEGY_BUILDER` | BROKEN pre-fix | PASS | prod flags False → 403「未启用」 | defaults ON + clearer 403 |
 | QL-S-004 | 广场 | `/app/feed` | public/user | Y | Y | `/public/feed` `/research/feed` | — | ACTIVE | PASS_OR_RESCOPE | social coaches | keep core |
-| QL-S-005 | 榜单 | `/app/leaderboards` | public | Y | Y | `/leaderboards/{kind}` | — | ACTIVE | PASS | sample gates exist for paper_mastery | verify |
+| QL-S-005 | 榜单 | `/app/leaderboards` | public | Y | Y | `/leaderboards/{kind}` | — | ACTIVE | PASS | paper_mastery=graduation+trade/period floors; researcher score>0; not Sharpe-ranked | `scripts/_closure_rankings_gate_verify.py` |
 | QL-S-006 | 团队因子库 | `/app/orgs` | user | Y | auth | `/orgs/*` | — | ACTIVE | PASS | institutional surface | keep |
 | QL-S-007 | 挑战 | `/app/challenges` | user | Y | auth | `/challenges/*` | — | ACTIVE | PASS | 7/8 = missing `first_paper_order` for user wen | CTA links |
 | QL-S-008 | 会员 | `/app/pricing` | public/user | Y | Y | `/billing/*` | Stripe optional | PARTIAL | INTENTIONALLY_DISABLED online pay | Stripe unset | banner + redeem |
