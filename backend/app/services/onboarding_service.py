@@ -1202,7 +1202,20 @@ def _mastery_goal_payload(db: Session, user: User, locale: Locale) -> dict:
     counts = rqs.user_paper_mastery_counts(db, user.id)
     graduated = counts["paper_graduated_count"]
     tracking = counts["paper_tracking_count"]
-    board_ctx = leaderboard_service.paper_mastery_board_context(db, user.id)
+    # Zero graduates cannot appear on paper_mastery board — skip full-site recompute.
+    if graduated <= 0:
+        board_ctx = {
+            "board_limit": leaderboard_service.PAPER_MASTERY_BOARD_LIMIT,
+            "leaderboard_rank": None,
+            "on_leaderboard": False,
+            "cutoff_graduated": None,
+            "graduated_needed": None,
+            "needs_tracking_boost": False,
+            "ranks_outside_board": None,
+            "total_ranked": 0,
+        }
+    else:
+        board_ctx = leaderboard_service.paper_mastery_board_context(db, user.id)
     rank = board_ctx["leaderboard_rank"]
     on_board = board_ctx["on_leaderboard"]
 

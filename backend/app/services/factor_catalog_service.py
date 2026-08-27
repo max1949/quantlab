@@ -56,6 +56,42 @@ def catalog_for_user(
     if project_id is not None:
         q = q.where(Factor.project_id == project_id)
     factors = list(db.execute(q.limit(50)).scalars().all())
+    if not factors:
+        return {
+            "symbol": (symbol or "").upper() or None,
+            "timeframe": timeframe,
+            "factors": [],
+            "redundancy_pairs": [],
+            "high_overlap_count": 0,
+        }
+
+    fids = [f.id for f in factors]
+    # Batch latest successful backtests / validations (avoid N+1).
+    bt_rows = list(
+        db.execute(
+            select(Backtest)
+            .where(Backtest.factor_id.in_(fids), Backtest.status == BacktestStatus.SUCCESS.value)
+            .order_by(Backtest.factor_id, Backtest.created_at.desc())
+        ).scalars().all()
+    )
+    latest_bt: dict[uuid.UUID, Backtest] = {}
+    for bt in bt_rows:
+        if bt.factor_id not in latest_bt:
+            latest_bt[bt.factor_id] = bt
+    val_rows = list(
+        db.execute(
+            select(Validation)
+            .where(
+                Validation.factor_id.in_(fids),
+                Validation.status == ValidationStatus.SUCCESS.value,
+            )
+            .order_by(Validation.factor_id, Validation.created_at.desc())
+        ).scalars().all()
+    )
+    latest_val: dict[uuid.UUID, Validation] = {}
+    for val in val_rows:
+        if val.factor_id not in latest_val:
+            latest_val[val.factor_id] = val
 
     ohlcv = None
     sym = (symbol or "").upper()
@@ -70,8 +106,8 @@ def catalog_for_user(
     entries: list[dict] = []
     series_map: dict[uuid.UUID, pd.Series] = {}
     for f in factors:
-        bt = _latest_backtest(db, f.id)
-        val = _latest_validation(db, f.id)
+        bt = latest_bt.get(f.id)
+        val = latest_val.get(f.id)
         oos_sharpe = None
         robustness = None
         if val and val.oos:

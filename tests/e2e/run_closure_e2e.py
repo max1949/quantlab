@@ -34,7 +34,7 @@ failures: list[str] = []
 def inject(context):
     context.add_init_script(
         f"""localStorage.setItem('ql_token', {TOKEN!r});
-localStorage.setItem('ql-locale', 'zh');"""
+localStorage.setItem('ql-locale', JSON.stringify({{state:{{locale:'zh'}},version:0}}));"""
     )
 
 

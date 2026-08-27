@@ -59,7 +59,7 @@
 | 妯℃嫙浜ゆ槗 | `/app/paper` | **PENDING** | entitlement `paper_trading` |
 | AI 鍒涘缓绛栫暐 | `/app/ai-strategy` | **PARTIAL** | page loads; **actions BROKEN** (403) |
 | 骞垮満 | `/app/feed` | **PENDING** | |
-| 姒滃崟 | `/app/leaderboards` | **PENDING** | |
+| 姒滃崟 | `/app/leaderboards` | **PASS** (sample gate) | Not Sharpe-ranked; paper_mastery needs graduation + trade/period floors; see `_closure_rankings_gate_verify.py` |
 | 鍥㈤槦鍥犲瓙搴?| `/app/orgs` | **PENDING** | |
 | 鎸戞垬 | `/app/challenges` | **PENDING** | ACTIVE product |
 | 浼氬憳 | `/app/pricing` | **PENDING** | |
@@ -251,3 +251,32 @@ QUANTLAB_FULL_PRODUCT_FUNCTIONAL_CLOSURE=FAIL
 ```
 
 Honest gate: full closure requires zero remaining broken/unknown user-visible CTAs. Inventory + P0 AI Builder fix shipped; remaining click audit continues.
+
+## Closure progress update — 2026-08-27T09:05Z (Round 2 continued)
+
+```text
+PRODUCTION=q.ziyingke.com / tmos-prod-hk /srv/quantlab
+PRODUCTION_HEAD=d8fe2f1-journey2 (hotfixed services; NO_GIT tree)
+LOCAL_MASTER=d8fe2f1 (+ pending onboarding/catalog commits)
+
+CHALLENGE_7_8_ACCOUNT=ziyingke (Owner) — missing paper_graduated only; first_paper_order DONE
+CHALLENGE_wen=different user — missing first_paper_order
+STALE_CERT=hidden unless all milestones currently complete
+
+JOURNEY_LATENCY=PASS (~2.4s HTTP; was ~16s) — session/TTL caches + validated-only mastery
+E2E=PASS (15 pages; CORE_CONSOLE_ERRORS=0; challenge 7/8)
+FACTOR_LIBRARY=PASS (GET /orgs /factors /catalog /projects; ziyingke has 0 org membership — empty library OK)
+RANKINGS_GATE=PASS (prior script)
+THEME_LOCALE_MOBILE=PASS (日间/夜间/自动 + EN/中文 + 390/430)
+PAPER_RUNTIME_MATRIX=PASS (prior CREATED→…→KILLED)
+CLICK_LEDGER_ROWS=~198 mostly UNKNOWN — automated matrix ~127 clicks smoke-ok but NOT full row closure
+CONTROLS_REMAINING_BROKEN=not proven 0 (ledger UNKNOWN remains)
+LIVE_EXECUTION=DENY
+REAL_MONEY=DENY
+PHASE_7=DENY
+QUANTLAB_LIVE=false
+
+QUANTLAB_FULL_PRODUCT_FUNCTIONAL_CLOSURE=FAIL
+```
+
+Blockers for PASS: finish click-ledger row STATUS (UNKNOWN→PASS|INTENTIONALLY_DISABLED) with CONTROLS_REMAINING_BROKEN=0; optional org-member factor-share path when Owner has an org.
