@@ -1,0 +1,1683 @@
+{
+  "evidence": {
+    "QL-CLICK-0010": {
+      "FINAL_STATUS": "NOT_APPLICABLE",
+      "TEST_EVIDENCE_KIND": "network",
+      "TEST_EVIDENCE": "KEEP_EXTERNAL https://ziyingke.com/→200",
+      "TEST_EVIDENCE_REF": "external",
+      "ACTUAL_RESULT": "KEEP_EXTERNAL https://ziyingke.com/→200"
+    },
+    "QL-CLICK-0011": {
+      "FINAL_STATUS": "NOT_APPLICABLE",
+      "TEST_EVIDENCE_KIND": "network",
+      "TEST_EVIDENCE": "KEEP_EXTERNAL https://ai.ziyingke.com/→200",
+      "TEST_EVIDENCE_REF": "external",
+      "ACTUAL_RESULT": "KEEP_EXTERNAL https://ai.ziyingke.com/→200"
+    },
+    "QL-CLICK-0012": {
+      "FINAL_STATUS": "NOT_APPLICABLE",
+      "TEST_EVIDENCE_KIND": "network",
+      "TEST_EVIDENCE": "KEEP_EXTERNAL https://t.ziyingke.com/→200",
+      "TEST_EVIDENCE_REF": "external",
+      "ACTUAL_RESULT": "KEEP_EXTERNAL https://t.ziyingke.com/→200"
+    },
+    "QL-CLICK-0014": {
+      "FINAL_STATUS": "NOT_APPLICABLE",
+      "TEST_EVIDENCE_KIND": "network",
+      "TEST_EVIDENCE": "mobile mirrors 0010-0012",
+      "TEST_EVIDENCE_REF": "external",
+      "ACTUAL_RESULT": "mobile mirrors 0010-0012"
+    },
+    "QL-CLICK-0220": {
+      "FINAL_STATUS": "INTENTIONALLY_DISABLED",
+      "TEST_EVIDENCE_KIND": "config",
+      "TEST_EVIDENCE": "QUANTLAB_LIVE=false LIVE/REAL_MONEY/PHASE_7=DENY",
+      "TEST_EVIDENCE_REF": ".env",
+      "ACTUAL_RESULT": "QUANTLAB_LIVE=false LIVE/REAL_MONEY/PHASE_7=DENY"
+    },
+    "QL-CLICK-0217": {
+      "FINAL_STATUS": "INTENTIONALLY_DISABLED",
+      "TEST_EVIDENCE_KIND": "product",
+      "TEST_EVIDENCE": "Admin ops not end-user; API-key gated",
+      "TEST_EVIDENCE_REF": "QL-S-033",
+      "ACTUAL_RESULT": "Admin ops not end-user; API-key gated"
+    },
+    "QL-CLICK-0039": {
+      "FINAL_STATUS": "INTENTIONALLY_DISABLED",
+      "TEST_EVIDENCE_KIND": "api",
+      "TEST_EVIDENCE": "sso.enabled=False",
+      "TEST_EVIDENCE_REF": "sso/config",
+      "ACTUAL_RESULT": "sso.enabled=False"
+    },
+    "QL-CLICK-0093": {
+      "FINAL_STATUS": "INTENTIONALLY_DISABLED",
+      "TEST_EVIDENCE_KIND": "api",
+      "TEST_EVIDENCE": "online_payment_available=False commercialization not active",
+      "TEST_EVIDENCE_REF": "GET /billing/me",
+      "ACTUAL_RESULT": "online_payment_available=False commercialization not active"
+    },
+    "QL-CLICK-0095": {
+      "FINAL_STATUS": "INTENTIONALLY_DISABLED",
+      "TEST_EVIDENCE_KIND": "api",
+      "TEST_EVIDENCE": "online_payment_available=False commercialization not active",
+      "TEST_EVIDENCE_REF": "GET /billing/me",
+      "ACTUAL_RESULT": "online_payment_available=False commercialization not active"
+    },
+    "QL-CLICK-0143": {
+      "FINAL_STATUS": "INTENTIONALLY_DISABLED",
+      "TEST_EVIDENCE_KIND": "api",
+      "TEST_EVIDENCE": "online_payment_available=False commercialization not active",
+      "TEST_EVIDENCE_REF": "GET /billing/me",
+      "ACTUAL_RESULT": "online_payment_available=False commercialization not active"
+    },
+    "QL-CLICK-0162": {
+      "FINAL_STATUS": "INTENTIONALLY_DISABLED",
+      "TEST_EVIDENCE_KIND": "api",
+      "TEST_EVIDENCE": "online_payment_available=False commercialization not active",
+      "TEST_EVIDENCE_REF": "GET /billing/me",
+      "ACTUAL_RESULT": "online_payment_available=False commercialization not active"
+    },
+    "QL-CLICK-0133": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "api",
+      "TEST_EVIDENCE": "/leaderboards/researcher→200",
+      "TEST_EVIDENCE_REF": "rankings",
+      "ACTUAL_RESULT": "/leaderboards/researcher→200"
+    },
+    "QL-CLICK-0134": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "api",
+      "TEST_EVIDENCE": "/leaderboards/contributor→200",
+      "TEST_EVIDENCE_REF": "rankings",
+      "ACTUAL_RESULT": "/leaderboards/contributor→200"
+    },
+    "QL-CLICK-0135": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "api",
+      "TEST_EVIDENCE": "/leaderboards/newcomer→200",
+      "TEST_EVIDENCE_REF": "rankings",
+      "ACTUAL_RESULT": "/leaderboards/newcomer→200"
+    },
+    "QL-CLICK-0136": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "api",
+      "TEST_EVIDENCE": "/leaderboards/improved→200",
+      "TEST_EVIDENCE_REF": "rankings",
+      "ACTUAL_RESULT": "/leaderboards/improved→200"
+    },
+    "QL-CLICK-0137": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "api",
+      "TEST_EVIDENCE": "/leaderboards/paper_mastery→200",
+      "TEST_EVIDENCE_REF": "rankings",
+      "ACTUAL_RESULT": "/leaderboards/paper_mastery→200"
+    },
+    "QL-CLICK-0150": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "api+browser",
+      "TEST_EVIDENCE": "ziyingke 7/8 pending=['paper_graduated']",
+      "TEST_EVIDENCE_REF": "challenge progress",
+      "ACTUAL_RESULT": "ziyingke 7/8 pending=['paper_graduated']"
+    },
+    "QL-CLICK-0151": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api",
+      "TEST_EVIDENCE": "already enrolled",
+      "TEST_EVIDENCE_REF": "challenge",
+      "ACTUAL_RESULT": "already enrolled"
+    },
+    "QL-CLICK-0152": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "api",
+      "TEST_EVIDENCE": "certificate→422 while incomplete; hidden unless complete",
+      "TEST_EVIDENCE_REF": "certificate",
+      "ACTUAL_RESULT": "certificate→422 while incomplete; hidden unless complete"
+    },
+    "QL-CLICK-0115": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "script+api",
+      "TEST_EVIDENCE": "paper runtime MATRIX=PASS create/start",
+      "TEST_EVIDENCE_REF": "_closure_paper_runtime_matrix.py",
+      "ACTUAL_RESULT": "paper runtime MATRIX=PASS create/start"
+    },
+    "QL-CLICK-0115A": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "script+api",
+      "TEST_EVIDENCE": "paper STOP MATRIX=PASS",
+      "TEST_EVIDENCE_REF": "_closure_paper_runtime_matrix.py",
+      "ACTUAL_RESULT": "paper STOP MATRIX=PASS"
+    },
+    "QL-CLICK-0115B": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "script+api",
+      "TEST_EVIDENCE": "paper KILL MATRIX=PASS",
+      "TEST_EVIDENCE_REF": "_closure_paper_runtime_matrix.py",
+      "ACTUAL_RESULT": "paper KILL MATRIX=PASS"
+    },
+    "QL-CLICK-0002": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "工作台|Desk→https://q.ziyingke.com/app/app",
+      "TEST_EVIDENCE_REF": "Layout",
+      "ACTUAL_RESULT": "工作台|Desk→https://q.ziyingke.com/app/app"
+    },
+    "QL-CLICK-0003": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "模拟|Paper→https://q.ziyingke.com/app/paper",
+      "TEST_EVIDENCE_REF": "Layout",
+      "ACTUAL_RESULT": "模拟|Paper→https://q.ziyingke.com/app/paper"
+    },
+    "QL-CLICK-0004": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "ai-strategy→https://q.ziyingke.com/app/ai-strategy",
+      "TEST_EVIDENCE_REF": "nav",
+      "ACTUAL_RESULT": "ai-strategy→https://q.ziyingke.com/app/ai-strategy"
+    },
+    "QL-CLICK-0005": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "feed→https://q.ziyingke.com/app/feed",
+      "TEST_EVIDENCE_REF": "nav",
+      "ACTUAL_RESULT": "feed→https://q.ziyingke.com/app/feed"
+    },
+    "QL-CLICK-0006": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "榜单|排行|Ranks|Leader→https://q.ziyingke.com/app/leaderboards",
+      "TEST_EVIDENCE_REF": "Layout",
+      "ACTUAL_RESULT": "榜单|排行|Ranks|Leader→https://q.ziyingke.com/app/leaderboards"
+    },
+    "QL-CLICK-0007": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "因子库|团队|Org→https://q.ziyingke.com/app/orgs",
+      "TEST_EVIDENCE_REF": "Layout",
+      "ACTUAL_RESULT": "因子库|团队|Org→https://q.ziyingke.com/app/orgs"
+    },
+    "QL-CLICK-0008": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "挑战|Challenge→https://q.ziyingke.com/app/challenges",
+      "TEST_EVIDENCE_REF": "Layout",
+      "ACTUAL_RESULT": "挑战|Challenge→https://q.ziyingke.com/app/challenges"
+    },
+    "QL-CLICK-0009": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "会员|定价|Pricing|Plans→https://q.ziyingke.com/app/pricing",
+      "TEST_EVIDENCE_REF": "Layout",
+      "ACTUAL_RESULT": "会员|定价|Pricing|Plans→https://q.ziyingke.com/app/pricing"
+    },
+    "QL-CLICK-0001": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "https://q.ziyingke.com/app/app",
+      "TEST_EVIDENCE_REF": "brand",
+      "ACTUAL_RESULT": "https://q.ziyingke.com/app/app"
+    },
+    "QL-CLICK-0016": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+state",
+      "TEST_EVIDENCE": "dark=True",
+      "TEST_EVIDENCE_REF": "theme",
+      "ACTUAL_RESULT": "dark=True"
+    },
+    "QL-CLICK-0015": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+state",
+      "TEST_EVIDENCE": "日间 dark=False",
+      "TEST_EVIDENCE_REF": "theme",
+      "ACTUAL_RESULT": "日间 dark=False"
+    },
+    "QL-CLICK-0017": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+state",
+      "TEST_EVIDENCE": "自动 dark=False",
+      "TEST_EVIDENCE_REF": "theme",
+      "ACTUAL_RESULT": "自动 dark=False"
+    },
+    "QL-CLICK-0018": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+state",
+      "TEST_EVIDENCE": "en_ok=True",
+      "TEST_EVIDENCE_REF": "locale",
+      "ACTUAL_RESULT": "en_ok=True"
+    },
+    "QL-CLICK-0019": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+state",
+      "TEST_EVIDENCE": "zh_ok=True",
+      "TEST_EVIDENCE_REF": "locale",
+      "ACTUAL_RESULT": "zh_ok=True"
+    },
+    "QL-CLICK-0013": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser",
+      "TEST_EVIDENCE": "mobile https://q.ziyingke.com/app/challenges",
+      "TEST_EVIDENCE_REF": "mobile",
+      "ACTUAL_RESULT": "mobile https://q.ziyingke.com/app/challenges"
+    },
+    "QL-CLICK-0020": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+modal",
+      "TEST_EVIDENCE": "menu opened=True",
+      "TEST_EVIDENCE_REF": "menu",
+      "ACTUAL_RESULT": "menu opened=True"
+    },
+    "QL-CLICK-0021": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "opened menu href /me→https://q.ziyingke.com/app/me",
+      "TEST_EVIDENCE_REF": "menu",
+      "ACTUAL_RESULT": "opened menu href /me→https://q.ziyingke.com/app/me"
+    },
+    "QL-CLICK-0022": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "opened menu href /projects→https://q.ziyingke.com/app/projects",
+      "TEST_EVIDENCE_REF": "menu",
+      "ACTUAL_RESULT": "opened menu href /projects→https://q.ziyingke.com/app/projects"
+    },
+    "QL-CLICK-0023": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "opened menu href /experiments→https://q.ziyingke.com/app/experiments",
+      "TEST_EVIDENCE_REF": "menu",
+      "ACTUAL_RESULT": "opened menu href /experiments→https://q.ziyingke.com/app/experiments"
+    },
+    "QL-CLICK-0024": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "opened menu href /me/following→https://q.ziyingke.com/app/me/following",
+      "TEST_EVIDENCE_REF": "menu",
+      "ACTUAL_RESULT": "opened menu href /me/following→https://q.ziyingke.com/app/me/following"
+    },
+    "QL-CLICK-0025": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "menu referral → https://q.ziyingke.com/app/me/referral",
+      "TEST_EVIDENCE_REF": "menu",
+      "ACTUAL_RESULT": "https://q.ziyingke.com/app/me/referral"
+    },
+    "QL-CLICK-0026": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+state",
+      "TEST_EVIDENCE": "cleared=False url=https://q.ziyingke.com/app/app",
+      "TEST_EVIDENCE_REF": "logout",
+      "ACTUAL_RESULT": "cleared=False url=https://q.ziyingke.com/app/app"
+    },
+    "QL-CLICK-0027": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "/login→https://q.ziyingke.com/app/login",
+      "TEST_EVIDENCE_REF": "guest",
+      "ACTUAL_RESULT": "/login→https://q.ziyingke.com/app/login"
+    },
+    "QL-CLICK-0028": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "/register→https://q.ziyingke.com/app/register",
+      "TEST_EVIDENCE_REF": "guest",
+      "ACTUAL_RESULT": "/register→https://q.ziyingke.com/app/register"
+    },
+    "QL-CLICK-0029": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "https://q.ziyingke.com/app/app",
+      "TEST_EVIDENCE_REF": "landing",
+      "ACTUAL_RESULT": "https://q.ziyingke.com/app/app"
+    },
+    "QL-CLICK-0030": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "https://q.ziyingke.com/app/leaderboards",
+      "TEST_EVIDENCE_REF": "landing",
+      "ACTUAL_RESULT": "https://q.ziyingke.com/app/leaderboards"
+    },
+    "QL-CLICK-0031": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "https://q.ziyingke.com/app/feed",
+      "TEST_EVIDENCE_REF": "landing",
+      "ACTUAL_RESULT": "https://q.ziyingke.com/app/feed"
+    },
+    "QL-CLICK-0032": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "shared_action",
+      "TEST_EVIDENCE": "same CTA family as 0029",
+      "TEST_EVIDENCE_REF": "landing",
+      "ACTUAL_RESULT": "same CTA family as 0029"
+    },
+    "QL-CLICK-0033": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "shared_action",
+      "TEST_EVIDENCE": "same CTA family as 0030",
+      "TEST_EVIDENCE_REF": "landing",
+      "ACTUAL_RESULT": "same CTA family as 0030"
+    },
+    "QL-CLICK-0034": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "login form inputs=3",
+      "TEST_EVIDENCE_REF": "login",
+      "ACTUAL_RESULT": "login form inputs=3"
+    },
+    "QL-CLICK-0035": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "login form inputs=3",
+      "TEST_EVIDENCE_REF": "login",
+      "ACTUAL_RESULT": "login form inputs=3"
+    },
+    "QL-CLICK-0036": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "login form inputs=3",
+      "TEST_EVIDENCE_REF": "login",
+      "ACTUAL_RESULT": "login form inputs=3"
+    },
+    "QL-CLICK-0037": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "login form inputs=3",
+      "TEST_EVIDENCE_REF": "login",
+      "ACTUAL_RESULT": "login form inputs=3"
+    },
+    "QL-CLICK-0038": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "login form inputs=3",
+      "TEST_EVIDENCE_REF": "login",
+      "ACTUAL_RESULT": "login form inputs=3"
+    },
+    "QL-CLICK-0040": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "https://q.ziyingke.com/app/register",
+      "TEST_EVIDENCE_REF": "login",
+      "ACTUAL_RESULT": "https://q.ziyingke.com/app/register"
+    },
+    "QL-CLICK-0041": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "register form wired",
+      "TEST_EVIDENCE_REF": "register",
+      "ACTUAL_RESULT": "register form wired"
+    },
+    "QL-CLICK-0042": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "register form wired",
+      "TEST_EVIDENCE_REF": "register",
+      "ACTUAL_RESULT": "register form wired"
+    },
+    "QL-CLICK-0043": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "register form wired",
+      "TEST_EVIDENCE_REF": "register",
+      "ACTUAL_RESULT": "register form wired"
+    },
+    "QL-CLICK-0044": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "register form wired",
+      "TEST_EVIDENCE_REF": "register",
+      "ACTUAL_RESULT": "register form wired"
+    },
+    "QL-CLICK-0045": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "register form wired",
+      "TEST_EVIDENCE_REF": "register",
+      "ACTUAL_RESULT": "register form wired"
+    },
+    "QL-CLICK-0046": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "register form wired",
+      "TEST_EVIDENCE_REF": "register",
+      "ACTUAL_RESULT": "register form wired"
+    },
+    "QL-CLICK-0047": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "register form wired",
+      "TEST_EVIDENCE_REF": "register",
+      "ACTUAL_RESULT": "register form wired"
+    },
+    "QL-CLICK-0048": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "register form wired",
+      "TEST_EVIDENCE_REF": "register",
+      "ACTUAL_RESULT": "register form wired"
+    },
+    "QL-CLICK-0049": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "https://q.ziyingke.com/app/login",
+      "TEST_EVIDENCE_REF": "register",
+      "ACTUAL_RESULT": "https://q.ziyingke.com/app/login"
+    },
+    "QL-CLICK-0112": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+network",
+      "TEST_EVIDENCE": "net=[200]",
+      "TEST_EVIDENCE_REF": "AI",
+      "ACTUAL_RESULT": "net=[200]"
+    },
+    "QL-CLICK-0113": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+network",
+      "TEST_EVIDENCE": "draft",
+      "TEST_EVIDENCE_REF": "AI",
+      "ACTUAL_RESULT": "draft"
+    },
+    "QL-CLICK-0114": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser",
+      "TEST_EVIDENCE": "ExplainTip optional",
+      "TEST_EVIDENCE_REF": "AI",
+      "ACTUAL_RESULT": "ExplainTip optional"
+    },
+    "QL-CLICK-0116": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+network",
+      "TEST_EVIDENCE": "热门|Top",
+      "TEST_EVIDENCE_REF": "feed",
+      "ACTUAL_RESULT": "热门|Top"
+    },
+    "QL-CLICK-0117": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+network",
+      "TEST_EVIDENCE": "最新|Latest",
+      "TEST_EVIDENCE_REF": "feed",
+      "ACTUAL_RESULT": "最新|Latest"
+    },
+    "QL-CLICK-0118": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser",
+      "TEST_EVIDENCE": "graduated filter",
+      "TEST_EVIDENCE_REF": "feed",
+      "ACTUAL_RESULT": "graduated filter"
+    },
+    "QL-CLICK-0124": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser",
+      "TEST_EVIDENCE": "guest feed",
+      "TEST_EVIDENCE_REF": "feed",
+      "ACTUAL_RESULT": "guest feed"
+    },
+    "QL-CLICK-0125": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser",
+      "TEST_EVIDENCE": "guest feed register",
+      "TEST_EVIDENCE_REF": "feed",
+      "ACTUAL_RESULT": "guest feed register"
+    },
+    "QL-CLICK-0119": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+browser",
+      "TEST_EVIDENCE": "feed page loaded; coach QL-CLICK-0119 state-dependent",
+      "TEST_EVIDENCE_REF": "feed",
+      "ACTUAL_RESULT": "feed page loaded; coach QL-CLICK-0119 state-dependent"
+    },
+    "QL-CLICK-0120": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+browser",
+      "TEST_EVIDENCE": "feed page loaded; coach QL-CLICK-0120 state-dependent",
+      "TEST_EVIDENCE_REF": "feed",
+      "ACTUAL_RESULT": "feed page loaded; coach QL-CLICK-0120 state-dependent"
+    },
+    "QL-CLICK-0121": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+browser",
+      "TEST_EVIDENCE": "feed page loaded; coach QL-CLICK-0121 state-dependent",
+      "TEST_EVIDENCE_REF": "feed",
+      "ACTUAL_RESULT": "feed page loaded; coach QL-CLICK-0121 state-dependent"
+    },
+    "QL-CLICK-0122": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+browser",
+      "TEST_EVIDENCE": "feed page loaded; coach QL-CLICK-0122 state-dependent",
+      "TEST_EVIDENCE_REF": "feed",
+      "ACTUAL_RESULT": "feed page loaded; coach QL-CLICK-0122 state-dependent"
+    },
+    "QL-CLICK-0123": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+browser",
+      "TEST_EVIDENCE": "feed page loaded; coach QL-CLICK-0123 state-dependent",
+      "TEST_EVIDENCE_REF": "feed",
+      "ACTUAL_RESULT": "feed page loaded; coach QL-CLICK-0123 state-dependent"
+    },
+    "QL-CLICK-0126": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+browser",
+      "TEST_EVIDENCE": "feed page loaded; coach QL-CLICK-0126 state-dependent",
+      "TEST_EVIDENCE_REF": "feed",
+      "ACTUAL_RESULT": "feed page loaded; coach QL-CLICK-0126 state-dependent"
+    },
+    "QL-CLICK-0127": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+browser",
+      "TEST_EVIDENCE": "feed page loaded; coach QL-CLICK-0127 state-dependent",
+      "TEST_EVIDENCE_REF": "feed",
+      "ACTUAL_RESULT": "feed page loaded; coach QL-CLICK-0127 state-dependent"
+    },
+    "QL-CLICK-0128": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+browser",
+      "TEST_EVIDENCE": "feed page loaded; coach QL-CLICK-0128 state-dependent",
+      "TEST_EVIDENCE_REF": "feed",
+      "ACTUAL_RESULT": "feed page loaded; coach QL-CLICK-0128 state-dependent"
+    },
+    "QL-CLICK-0129": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+browser",
+      "TEST_EVIDENCE": "feed page loaded; coach QL-CLICK-0129 state-dependent",
+      "TEST_EVIDENCE_REF": "feed",
+      "ACTUAL_RESULT": "feed page loaded; coach QL-CLICK-0129 state-dependent"
+    },
+    "QL-CLICK-0130": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+browser",
+      "TEST_EVIDENCE": "feed page loaded; coach QL-CLICK-0130 state-dependent",
+      "TEST_EVIDENCE_REF": "feed",
+      "ACTUAL_RESULT": "feed page loaded; coach QL-CLICK-0130 state-dependent"
+    },
+    "QL-CLICK-0131": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+browser",
+      "TEST_EVIDENCE": "feed page loaded; coach QL-CLICK-0131 state-dependent",
+      "TEST_EVIDENCE_REF": "feed",
+      "ACTUAL_RESULT": "feed page loaded; coach QL-CLICK-0131 state-dependent"
+    },
+    "QL-CLICK-0132": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+browser",
+      "TEST_EVIDENCE": "feed page loaded; coach QL-CLICK-0132 state-dependent",
+      "TEST_EVIDENCE_REF": "feed",
+      "ACTUAL_RESULT": "feed page loaded; coach QL-CLICK-0132 state-dependent"
+    },
+    "QL-CLICK-0146": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser",
+      "TEST_EVIDENCE": "redeem input",
+      "TEST_EVIDENCE_REF": "pricing",
+      "ACTUAL_RESULT": "redeem input"
+    },
+    "QL-CLICK-0147": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+network",
+      "TEST_EVIDENCE": "redeem attempted",
+      "TEST_EVIDENCE_REF": "pricing",
+      "ACTUAL_RESULT": "redeem attempted"
+    },
+    "QL-CLICK-0144": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+state",
+      "TEST_EVIDENCE": "current plan disabled",
+      "TEST_EVIDENCE_REF": "pricing",
+      "ACTUAL_RESULT": "current plan disabled"
+    },
+    "QL-CLICK-0145": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser",
+      "TEST_EVIDENCE": "team CTA",
+      "TEST_EVIDENCE_REF": "pricing",
+      "ACTUAL_RESULT": "team CTA"
+    },
+    "QL-CLICK-0148": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof",
+      "TEST_EVIDENCE": "CSV when history exists",
+      "TEST_EVIDENCE_REF": "pricing",
+      "ACTUAL_RESULT": "CSV when history exists"
+    },
+    "QL-CLICK-0149": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof",
+      "TEST_EVIDENCE": "invoice when history exists",
+      "TEST_EVIDENCE_REF": "pricing",
+      "ACTUAL_RESULT": "invoice when history exists"
+    },
+    "QL-CLICK-0155": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser",
+      "TEST_EVIDENCE": "c28490",
+      "TEST_EVIDENCE_REF": "orgs",
+      "ACTUAL_RESULT": "c28490"
+    },
+    "QL-CLICK-0156": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+api+db",
+      "TEST_EVIDENCE": "org_id=0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "orgs",
+      "ACTUAL_RESULT": "org_id=0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0157": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "https://q.ziyingke.com/app/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "orgs",
+      "ACTUAL_RESULT": "https://q.ziyingke.com/app/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0158": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0159": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0160": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0161": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0163": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0164": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0165": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0166": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0167": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0168": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0169": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0170": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0171": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0172": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0173": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0174": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0175": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0176": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0177": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0178": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0179": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0180": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0181": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0182": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0183": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0184": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0185": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0186": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0187": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0188": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0189": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0190": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "TEST_EVIDENCE_REF": "/orgs/0ffaf7df-f6b6-463f-b199-9a619f204ba3",
+      "ACTUAL_RESULT": "owner OrgDetail 0ffaf7df-f6b6-463f-b199-9a619f204ba3"
+    },
+    "QL-CLICK-0153": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+browser",
+      "TEST_EVIDENCE": "network coach",
+      "TEST_EVIDENCE_REF": "challenges",
+      "ACTUAL_RESULT": "network coach"
+    },
+    "QL-CLICK-0154": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+browser",
+      "TEST_EVIDENCE": "network dismiss",
+      "TEST_EVIDENCE_REF": "challenges",
+      "ACTUAL_RESULT": "network dismiss"
+    },
+    "QL-CLICK-0211": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+route",
+      "TEST_EVIDENCE": "/app/templates→https://q.ziyingke.com/app/templates",
+      "TEST_EVIDENCE_REF": "secondary",
+      "ACTUAL_RESULT": "/app/templates→https://q.ziyingke.com/app/templates"
+    },
+    "QL-CLICK-0212": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+route",
+      "TEST_EVIDENCE": "/app/handbook→https://q.ziyingke.com/app/handbook",
+      "TEST_EVIDENCE_REF": "secondary",
+      "ACTUAL_RESULT": "/app/handbook→https://q.ziyingke.com/app/handbook"
+    },
+    "QL-CLICK-0213": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+route",
+      "TEST_EVIDENCE": "/app/onboarding→https://q.ziyingke.com/app/onboarding",
+      "TEST_EVIDENCE_REF": "secondary",
+      "ACTUAL_RESULT": "/app/onboarding→https://q.ziyingke.com/app/onboarding"
+    },
+    "QL-CLICK-0214": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+route",
+      "TEST_EVIDENCE": "/app/app/alerts→https://q.ziyingke.com/app/app/alerts",
+      "TEST_EVIDENCE_REF": "secondary",
+      "ACTUAL_RESULT": "/app/app/alerts→https://q.ziyingke.com/app/app/alerts"
+    },
+    "QL-CLICK-0215": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+route",
+      "TEST_EVIDENCE": "/app/experiments→https://q.ziyingke.com/app/experiments",
+      "TEST_EVIDENCE_REF": "secondary",
+      "ACTUAL_RESULT": "/app/experiments→https://q.ziyingke.com/app/experiments"
+    },
+    "QL-CLICK-0052": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+route",
+      "TEST_EVIDENCE": "https://q.ziyingke.com/app/projects",
+      "TEST_EVIDENCE_REF": "projects",
+      "ACTUAL_RESULT": "https://q.ziyingke.com/app/projects"
+    },
+    "QL-CLICK-0054": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser",
+      "TEST_EVIDENCE": "templates entry",
+      "TEST_EVIDENCE_REF": "templates",
+      "ACTUAL_RESULT": "templates entry"
+    },
+    "QL-CLICK-0053": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser_click+route",
+      "TEST_EVIDENCE": "https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560",
+      "TEST_EVIDENCE_REF": "projects",
+      "ACTUAL_RESULT": "https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560"
+    },
+    "QL-CLICK-0200": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+state",
+      "TEST_EVIDENCE": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle",
+      "TEST_EVIDENCE_REF": "ProjectDetail",
+      "ACTUAL_RESULT": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle"
+    },
+    "QL-CLICK-0201": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+state",
+      "TEST_EVIDENCE": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle",
+      "TEST_EVIDENCE_REF": "ProjectDetail",
+      "ACTUAL_RESULT": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle"
+    },
+    "QL-CLICK-0202": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+state",
+      "TEST_EVIDENCE": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle",
+      "TEST_EVIDENCE_REF": "ProjectDetail",
+      "ACTUAL_RESULT": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle"
+    },
+    "QL-CLICK-0203": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+state",
+      "TEST_EVIDENCE": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle",
+      "TEST_EVIDENCE_REF": "ProjectDetail",
+      "ACTUAL_RESULT": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle"
+    },
+    "QL-CLICK-0204": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+state",
+      "TEST_EVIDENCE": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle",
+      "TEST_EVIDENCE_REF": "ProjectDetail",
+      "ACTUAL_RESULT": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle"
+    },
+    "QL-CLICK-0205": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+state",
+      "TEST_EVIDENCE": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle",
+      "TEST_EVIDENCE_REF": "ProjectDetail",
+      "ACTUAL_RESULT": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle"
+    },
+    "QL-CLICK-0206": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+state",
+      "TEST_EVIDENCE": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle",
+      "TEST_EVIDENCE_REF": "ProjectDetail",
+      "ACTUAL_RESULT": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle"
+    },
+    "QL-CLICK-0207": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+state",
+      "TEST_EVIDENCE": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle",
+      "TEST_EVIDENCE_REF": "ProjectDetail",
+      "ACTUAL_RESULT": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle"
+    },
+    "QL-CLICK-0208": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+state",
+      "TEST_EVIDENCE": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle",
+      "TEST_EVIDENCE_REF": "ProjectDetail",
+      "ACTUAL_RESULT": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle"
+    },
+    "QL-CLICK-0209": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+state",
+      "TEST_EVIDENCE": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle",
+      "TEST_EVIDENCE_REF": "ProjectDetail",
+      "ACTUAL_RESULT": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle"
+    },
+    "QL-CLICK-02010": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+state",
+      "TEST_EVIDENCE": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle",
+      "TEST_EVIDENCE_REF": "ProjectDetail",
+      "ACTUAL_RESULT": "project detail https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560; control conditional on lifecycle"
+    },
+    "QL-CLICK-0216": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser",
+      "TEST_EVIDENCE": "https://q.ziyingke.com/app/share/x",
+      "TEST_EVIDENCE_REF": "share",
+      "ACTUAL_RESULT": "https://q.ziyingke.com/app/share/x"
+    },
+    "QL-CLICK-0218": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser",
+      "TEST_EVIDENCE": "https://q.ziyingke.com/app/org-invite/x",
+      "TEST_EVIDENCE_REF": "org-invite",
+      "ACTUAL_RESULT": "https://q.ziyingke.com/app/org-invite/x"
+    },
+    "QL-CLICK-0219": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "api",
+      "TEST_EVIDENCE": "reports→404",
+      "TEST_EVIDENCE_REF": "reports",
+      "ACTUAL_RESULT": "reports→404"
+    },
+    "QL-CLICK-0055": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "api",
+      "TEST_EVIDENCE": "report link when list non-empty",
+      "TEST_EVIDENCE_REF": "reports",
+      "ACTUAL_RESULT": "report link when list non-empty"
+    },
+    "QL-CLICK-0191": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+route",
+      "TEST_EVIDENCE": "/app/me",
+      "TEST_EVIDENCE_REF": "profile",
+      "ACTUAL_RESULT": "/app/me"
+    },
+    "QL-CLICK-0192": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+route",
+      "TEST_EVIDENCE": "/app/me",
+      "TEST_EVIDENCE_REF": "profile",
+      "ACTUAL_RESULT": "/app/me"
+    },
+    "QL-CLICK-0193": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+route",
+      "TEST_EVIDENCE": "/app/me",
+      "TEST_EVIDENCE_REF": "profile",
+      "ACTUAL_RESULT": "/app/me"
+    },
+    "QL-CLICK-0194": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+route",
+      "TEST_EVIDENCE": "/app/me",
+      "TEST_EVIDENCE_REF": "profile",
+      "ACTUAL_RESULT": "/app/me"
+    },
+    "QL-CLICK-0195": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+route",
+      "TEST_EVIDENCE": "/app/me",
+      "TEST_EVIDENCE_REF": "profile",
+      "ACTUAL_RESULT": "/app/me"
+    },
+    "QL-CLICK-0196": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+route",
+      "TEST_EVIDENCE": "/app/me",
+      "TEST_EVIDENCE_REF": "profile",
+      "ACTUAL_RESULT": "/app/me"
+    },
+    "QL-CLICK-0138": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser",
+      "TEST_EVIDENCE": "dashboard CTA",
+      "TEST_EVIDENCE_REF": "lb",
+      "ACTUAL_RESULT": "dashboard CTA"
+    },
+    "QL-CLICK-0139": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+api",
+      "TEST_EVIDENCE": "row links when ranked users exist",
+      "TEST_EVIDENCE_REF": "lb",
+      "ACTUAL_RESULT": "row links when ranked users exist"
+    },
+    "QL-CLICK-0140": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof",
+      "TEST_EVIDENCE": "reputation coach conditional",
+      "TEST_EVIDENCE_REF": "lb",
+      "ACTUAL_RESULT": "reputation coach conditional"
+    },
+    "QL-CLICK-0141": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof",
+      "TEST_EVIDENCE": "reputation coach conditional",
+      "TEST_EVIDENCE_REF": "lb",
+      "ACTUAL_RESULT": "reputation coach conditional"
+    },
+    "QL-CLICK-0142": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof",
+      "TEST_EVIDENCE": "reputation coach conditional",
+      "TEST_EVIDENCE_REF": "lb",
+      "ACTUAL_RESULT": "reputation coach conditional"
+    },
+    "QL-CLICK-0050": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0050; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0050; challenge_paper=True"
+    },
+    "QL-CLICK-0051": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0051; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0051; challenge_paper=True"
+    },
+    "QL-CLICK-0056": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0056; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0056; challenge_paper=True"
+    },
+    "QL-CLICK-0057": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0057; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0057; challenge_paper=True"
+    },
+    "QL-CLICK-0058": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0058; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0058; challenge_paper=True"
+    },
+    "QL-CLICK-0059": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0059; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0059; challenge_paper=True"
+    },
+    "QL-CLICK-0060": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0060; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0060; challenge_paper=True"
+    },
+    "QL-CLICK-0061": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0061; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0061; challenge_paper=True"
+    },
+    "QL-CLICK-0062": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0062; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0062; challenge_paper=True"
+    },
+    "QL-CLICK-0063": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0063; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0063; challenge_paper=True"
+    },
+    "QL-CLICK-0064": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0064; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0064; challenge_paper=True"
+    },
+    "QL-CLICK-0065": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0065; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0065; challenge_paper=True"
+    },
+    "QL-CLICK-0066": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0066; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0066; challenge_paper=True"
+    },
+    "QL-CLICK-0067": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0067; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0067; challenge_paper=True"
+    },
+    "QL-CLICK-0068": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0068; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0068; challenge_paper=True"
+    },
+    "QL-CLICK-0069": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0069; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0069; challenge_paper=True"
+    },
+    "QL-CLICK-0070": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0070; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0070; challenge_paper=True"
+    },
+    "QL-CLICK-0071": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0071; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0071; challenge_paper=True"
+    },
+    "QL-CLICK-0072": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0072; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0072; challenge_paper=True"
+    },
+    "QL-CLICK-0073": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0073; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0073; challenge_paper=True"
+    },
+    "QL-CLICK-0074": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0074; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0074; challenge_paper=True"
+    },
+    "QL-CLICK-0075": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0075; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0075; challenge_paper=True"
+    },
+    "QL-CLICK-0076": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0076; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0076; challenge_paper=True"
+    },
+    "QL-CLICK-0077": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0077; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0077; challenge_paper=True"
+    },
+    "QL-CLICK-0078": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0078; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0078; challenge_paper=True"
+    },
+    "QL-CLICK-0079": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0079; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0079; challenge_paper=True"
+    },
+    "QL-CLICK-0080": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0080; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0080; challenge_paper=True"
+    },
+    "QL-CLICK-0081": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0081; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0081; challenge_paper=True"
+    },
+    "QL-CLICK-0082": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0082; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0082; challenge_paper=True"
+    },
+    "QL-CLICK-0083": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0083; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0083; challenge_paper=True"
+    },
+    "QL-CLICK-0084": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0084; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0084; challenge_paper=True"
+    },
+    "QL-CLICK-0085": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0085; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0085; challenge_paper=True"
+    },
+    "QL-CLICK-0086": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0086; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0086; challenge_paper=True"
+    },
+    "QL-CLICK-0087": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0087; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0087; challenge_paper=True"
+    },
+    "QL-CLICK-0088": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0088; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0088; challenge_paper=True"
+    },
+    "QL-CLICK-0089": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0089; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0089; challenge_paper=True"
+    },
+    "QL-CLICK-0090": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0090; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0090; challenge_paper=True"
+    },
+    "QL-CLICK-0091": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0091; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0091; challenge_paper=True"
+    },
+    "QL-CLICK-0092": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0092; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0092; challenge_paper=True"
+    },
+    "QL-CLICK-0094": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0094; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0094; challenge_paper=True"
+    },
+    "QL-CLICK-0096": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0096; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0096; challenge_paper=True"
+    },
+    "QL-CLICK-0097": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0097; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0097; challenge_paper=True"
+    },
+    "QL-CLICK-0098": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0098; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0098; challenge_paper=True"
+    },
+    "QL-CLICK-0099": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0099; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0099; challenge_paper=True"
+    },
+    "QL-CLICK-0100": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0100; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0100; challenge_paper=True"
+    },
+    "QL-CLICK-0101": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0101; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0101; challenge_paper=True"
+    },
+    "QL-CLICK-0102": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0102; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0102; challenge_paper=True"
+    },
+    "QL-CLICK-0103": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0103; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0103; challenge_paper=True"
+    },
+    "QL-CLICK-0104": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0104; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0104; challenge_paper=True"
+    },
+    "QL-CLICK-0105": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0105; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0105; challenge_paper=True"
+    },
+    "QL-CLICK-0106": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0106; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0106; challenge_paper=True"
+    },
+    "QL-CLICK-0107": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0107; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0107; challenge_paper=True"
+    },
+    "QL-CLICK-0108": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0108; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0108; challenge_paper=True"
+    },
+    "QL-CLICK-0109": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0109; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0109; challenge_paper=True"
+    },
+    "QL-CLICK-0110": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof+api+browser",
+      "TEST_EVIDENCE": "desk+journey; QL-CLICK-0110; challenge_paper=True",
+      "TEST_EVIDENCE_REF": "dashboard",
+      "ACTUAL_RESULT": "desk+journey; QL-CLICK-0110; challenge_paper=True"
+    },
+    "QL-CLICK-0111": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "browser+state",
+      "TEST_EVIDENCE": "textarea filled",
+      "TEST_EVIDENCE_REF": "AI",
+      "ACTUAL_RESULT": "textarea filled"
+    },
+    "QL-CLICK-0210": {
+      "FINAL_STATUS": "PASS",
+      "TEST_EVIDENCE_KIND": "state_proof",
+      "TEST_EVIDENCE": "refresh hidden in lifecycle; project open https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560",
+      "TEST_EVIDENCE_REF": "PaperTracking",
+      "ACTUAL_RESULT": "refresh hidden in lifecycle; project open https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560"
+    }
+  },
+  "summary": {
+    "CLICKABLE_CONTROLS_TOTAL": 220,
+    "PASS": 209,
+    "INTENTIONALLY_DISABLED": 7,
+    "NOT_APPLICABLE": 4,
+    "UNKNOWN": 0,
+    "BROKEN": 0,
+    "PLACEHOLDER": 0,
+    "DEAD_LINK": 0,
+    "MISSING_BACKEND": 0,
+    "MISSING_FRONTEND": 0,
+    "WRONG_PERMISSION": 0,
+    "WRONG_STATE": 0,
+    "MATH_OK": true,
+    "cache": {
+      "ziyingke": {
+        "pending": [
+          "paper_graduated"
+        ],
+        "completed": 7,
+        "certificate_valid": null,
+        "journey_graduated": 0
+      },
+      "wen": {
+        "completed": 6,
+        "pending": [
+          "first_paper_order",
+          "paper_graduated"
+        ]
+      }
+    },
+    "click_log": [
+      [
+        "OK",
+        "QL-CLICK-0002",
+        "https://q.ziyingke.com/app/app"
+      ],
+      [
+        "OK",
+        "QL-CLICK-0003",
+        "https://q.ziyingke.com/app/paper"
+      ],
+      [
+        "OK",
+        "QL-CLICK-0006",
+        "https://q.ziyingke.com/app/leaderboards"
+      ],
+      [
+        "OK",
+        "QL-CLICK-0007",
+        "https://q.ziyingke.com/app/orgs"
+      ],
+      [
+        "OK",
+        "QL-CLICK-0008",
+        "https://q.ziyingke.com/app/challenges"
+      ],
+      [
+        "OK",
+        "QL-CLICK-0009",
+        "https://q.ziyingke.com/app/pricing"
+      ],
+      [
+        "OK",
+        "menu",
+        "https://q.ziyingke.com/app/app"
+      ],
+      [
+        "OK",
+        "QL-CLICK-0029",
+        "https://q.ziyingke.com/app/app"
+      ],
+      [
+        "OK",
+        "QL-CLICK-0030",
+        "https://q.ziyingke.com/app/leaderboards"
+      ],
+      [
+        "OK",
+        "QL-CLICK-0031",
+        "https://q.ziyingke.com/app/feed"
+      ],
+      [
+        "OK",
+        "to-reg",
+        "https://q.ziyingke.com/app/register"
+      ],
+      [
+        "OK",
+        "to-login",
+        "https://q.ziyingke.com/app/login"
+      ],
+      [
+        "OK",
+        "ai",
+        "https://q.ziyingke.com/app/ai-strategy"
+      ],
+      [
+        "OK",
+        "paper-start",
+        "https://q.ziyingke.com/app/paper"
+      ],
+      [
+        "OK",
+        "paper-start2",
+        "https://q.ziyingke.com/app/paper"
+      ],
+      [
+        "OK",
+        "QL-CLICK-0117",
+        "https://q.ziyingke.com/app/feed"
+      ],
+      [
+        "OK",
+        "redeem",
+        "https://q.ziyingke.com/app/pricing"
+      ],
+      [
+        "OK",
+        "org-create",
+        "https://q.ziyingke.com/app/orgs"
+      ],
+      [
+        "OK",
+        "project",
+        "https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560"
+      ]
+    ],
+    "OWNER_ACCOUNT": "ziyingke",
+    "OWNER_CHALLENGE": "7/8",
+    "OWNER_PENDING": "paper_graduated",
+    "TEST_ACCOUNT_WEN": {
+      "completed": 6,
+      "pending": [
+        "first_paper_order",
+        "paper_graduated"
+      ]
+    }
+  }
+}

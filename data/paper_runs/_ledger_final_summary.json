@@ -1,0 +1,139 @@
+{
+  "CLICKABLE_CONTROLS_TOTAL": 220,
+  "PASS": 209,
+  "INTENTIONALLY_DISABLED": 7,
+  "NOT_APPLICABLE": 4,
+  "UNKNOWN": 0,
+  "BROKEN": 0,
+  "PLACEHOLDER": 0,
+  "DEAD_LINK": 0,
+  "MISSING_BACKEND": 0,
+  "MISSING_FRONTEND": 0,
+  "WRONG_PERMISSION": 0,
+  "WRONG_STATE": 0,
+  "MATH_OK": true,
+  "cache": {
+    "ziyingke": {
+      "pending": [
+        "paper_graduated"
+      ],
+      "completed": 7,
+      "certificate_valid": null,
+      "journey_graduated": 0
+    },
+    "wen": {
+      "completed": 6,
+      "pending": [
+        "first_paper_order",
+        "paper_graduated"
+      ]
+    }
+  },
+  "click_log": [
+    [
+      "OK",
+      "QL-CLICK-0002",
+      "https://q.ziyingke.com/app/app"
+    ],
+    [
+      "OK",
+      "QL-CLICK-0003",
+      "https://q.ziyingke.com/app/paper"
+    ],
+    [
+      "OK",
+      "QL-CLICK-0006",
+      "https://q.ziyingke.com/app/leaderboards"
+    ],
+    [
+      "OK",
+      "QL-CLICK-0007",
+      "https://q.ziyingke.com/app/orgs"
+    ],
+    [
+      "OK",
+      "QL-CLICK-0008",
+      "https://q.ziyingke.com/app/challenges"
+    ],
+    [
+      "OK",
+      "QL-CLICK-0009",
+      "https://q.ziyingke.com/app/pricing"
+    ],
+    [
+      "OK",
+      "menu",
+      "https://q.ziyingke.com/app/app"
+    ],
+    [
+      "OK",
+      "QL-CLICK-0029",
+      "https://q.ziyingke.com/app/app"
+    ],
+    [
+      "OK",
+      "QL-CLICK-0030",
+      "https://q.ziyingke.com/app/leaderboards"
+    ],
+    [
+      "OK",
+      "QL-CLICK-0031",
+      "https://q.ziyingke.com/app/feed"
+    ],
+    [
+      "OK",
+      "to-reg",
+      "https://q.ziyingke.com/app/register"
+    ],
+    [
+      "OK",
+      "to-login",
+      "https://q.ziyingke.com/app/login"
+    ],
+    [
+      "OK",
+      "ai",
+      "https://q.ziyingke.com/app/ai-strategy"
+    ],
+    [
+      "OK",
+      "paper-start",
+      "https://q.ziyingke.com/app/paper"
+    ],
+    [
+      "OK",
+      "paper-start2",
+      "https://q.ziyingke.com/app/paper"
+    ],
+    [
+      "OK",
+      "QL-CLICK-0117",
+      "https://q.ziyingke.com/app/feed"
+    ],
+    [
+      "OK",
+      "redeem",
+      "https://q.ziyingke.com/app/pricing"
+    ],
+    [
+      "OK",
+      "org-create",
+      "https://q.ziyingke.com/app/orgs"
+    ],
+    [
+      "OK",
+      "project",
+      "https://q.ziyingke.com/app/projects/ae919010-e107-47c2-a15b-1b2fec553560"
+    ]
+  ],
+  "OWNER_ACCOUNT": "ziyingke",
+  "OWNER_CHALLENGE": "7/8",
+  "OWNER_PENDING": "paper_graduated",
+  "TEST_ACCOUNT_WEN": {
+    "completed": 6,
+    "pending": [
+      "first_paper_order",
+      "paper_graduated"
+    ]
+  }
+}

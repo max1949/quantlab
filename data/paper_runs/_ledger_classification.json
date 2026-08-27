@@ -1,0 +1,1202 @@
+{
+  "total": 198,
+  "by_class": {
+    "C": 24,
+    "E": 4,
+    "B": 74,
+    "F": 6,
+    "D": 73,
+    "A": 3,
+    "G": 14
+  },
+  "rows": [
+    {
+      "id": "QL-CLICK-0001",
+      "class": "C",
+      "page": "Layout",
+      "text": "Brand logo (t.brand)"
+    },
+    {
+      "id": "QL-CLICK-0002",
+      "class": "C",
+      "page": "Layout",
+      "text": "t.nav.workspace"
+    },
+    {
+      "id": "QL-CLICK-0003",
+      "class": "C",
+      "page": "Layout",
+      "text": "t.nav.paperTrading"
+    },
+    {
+      "id": "QL-CLICK-0004",
+      "class": "C",
+      "page": "Layout",
+      "text": "t.nav.aiStrategy"
+    },
+    {
+      "id": "QL-CLICK-0005",
+      "class": "C",
+      "page": "Layout",
+      "text": "t.nav.feed"
+    },
+    {
+      "id": "QL-CLICK-0006",
+      "class": "C",
+      "page": "Layout",
+      "text": "t.nav.leaderboards"
+    },
+    {
+      "id": "QL-CLICK-0007",
+      "class": "C",
+      "page": "Layout",
+      "text": "t.nav.orgLibrary"
+    },
+    {
+      "id": "QL-CLICK-0008",
+      "class": "C",
+      "page": "Layout",
+      "text": "t.nav.challenges"
+    },
+    {
+      "id": "QL-CLICK-0009",
+      "class": "C",
+      "page": "Layout",
+      "text": "t.nav.pricing"
+    },
+    {
+      "id": "QL-CLICK-0010",
+      "class": "E",
+      "page": "Layout",
+      "text": "t.nav.aboutZiyingke / 自营客"
+    },
+    {
+      "id": "QL-CLICK-0011",
+      "class": "E",
+      "page": "Layout",
+      "text": "t.nav.decisionArena / 决策场"
+    },
+    {
+      "id": "QL-CLICK-0012",
+      "class": "E",
+      "page": "Layout",
+      "text": "t.nav.tmos / TMOS"
+    },
+    {
+      "id": "QL-CLICK-0013",
+      "class": "C",
+      "page": "Layout",
+      "text": "t.nav.* (×8)"
+    },
+    {
+      "id": "QL-CLICK-0014",
+      "class": "E",
+      "page": "Layout",
+      "text": "t.nav.* external (×3)"
+    },
+    {
+      "id": "QL-CLICK-0015",
+      "class": "C",
+      "page": "Layout",
+      "text": "t.theme.light"
+    },
+    {
+      "id": "QL-CLICK-0016",
+      "class": "C",
+      "page": "Layout",
+      "text": "t.theme.dark"
+    },
+    {
+      "id": "QL-CLICK-0017",
+      "class": "C",
+      "page": "Layout",
+      "text": "t.theme.system"
+    },
+    {
+      "id": "QL-CLICK-0018",
+      "class": "C",
+      "page": "Layout",
+      "text": "EN"
+    },
+    {
+      "id": "QL-CLICK-0019",
+      "class": "C",
+      "page": "Layout",
+      "text": "中文"
+    },
+    {
+      "id": "QL-CLICK-0020",
+      "class": "C",
+      "page": "Layout",
+      "text": "user.username + level badge"
+    },
+    {
+      "id": "QL-CLICK-0021",
+      "class": "C",
+      "page": "Layout",
+      "text": "t.nav.myProfile"
+    },
+    {
+      "id": "QL-CLICK-0022",
+      "class": "C",
+      "page": "Layout",
+      "text": "t.nav.myProjects"
+    },
+    {
+      "id": "QL-CLICK-0023",
+      "class": "C",
+      "page": "Layout",
+      "text": "t.nav.myExperiments"
+    },
+    {
+      "id": "QL-CLICK-0024",
+      "class": "C",
+      "page": "Layout",
+      "text": "t.nav.following"
+    },
+    {
+      "id": "QL-CLICK-0025",
+      "class": "C",
+      "page": "Layout",
+      "text": "t.nav.referral"
+    },
+    {
+      "id": "QL-CLICK-0026",
+      "class": "C",
+      "page": "Layout",
+      "text": "t.nav.logout"
+    },
+    {
+      "id": "QL-CLICK-0027",
+      "class": "C",
+      "page": "Layout",
+      "text": "t.nav.login"
+    },
+    {
+      "id": "QL-CLICK-0028",
+      "class": "C",
+      "page": "Layout",
+      "text": "t.nav.register"
+    },
+    {
+      "id": "QL-CLICK-0029",
+      "class": "B",
+      "page": "Landing",
+      "text": "l.ctaWork / l.cta"
+    },
+    {
+      "id": "QL-CLICK-0030",
+      "class": "B",
+      "page": "Landing",
+      "text": "l.ctaMasters"
+    },
+    {
+      "id": "QL-CLICK-0031",
+      "class": "B",
+      "page": "Landing",
+      "text": "l.ctaBrowse"
+    },
+    {
+      "id": "QL-CLICK-0032",
+      "class": "B",
+      "page": "Landing",
+      "text": "l.ctaWork / l.cta"
+    },
+    {
+      "id": "QL-CLICK-0033",
+      "class": "B",
+      "page": "Landing",
+      "text": "l.step5Title"
+    },
+    {
+      "id": "QL-CLICK-0034",
+      "class": "B",
+      "page": "Login",
+      "text": "auth.signIn"
+    },
+    {
+      "id": "QL-CLICK-0035",
+      "class": "B",
+      "page": "Login",
+      "text": "auth.identifier"
+    },
+    {
+      "id": "QL-CLICK-0036",
+      "class": "B",
+      "page": "Login",
+      "text": "auth.password"
+    },
+    {
+      "id": "QL-CLICK-0037",
+      "class": "B",
+      "page": "Login",
+      "text": "auth.captchaRefresh"
+    },
+    {
+      "id": "QL-CLICK-0038",
+      "class": "B",
+      "page": "Login",
+      "text": "auth.captchaPlaceholder"
+    },
+    {
+      "id": "QL-CLICK-0039",
+      "class": "F",
+      "page": "Login",
+      "text": "auth.ssoSignIn"
+    },
+    {
+      "id": "QL-CLICK-0040",
+      "class": "B",
+      "page": "Login",
+      "text": "nav.register"
+    },
+    {
+      "id": "QL-CLICK-0041",
+      "class": "B",
+      "page": "Register",
+      "text": "nav.register"
+    },
+    {
+      "id": "QL-CLICK-0042",
+      "class": "B",
+      "page": "Register",
+      "text": "auth.email"
+    },
+    {
+      "id": "QL-CLICK-0043",
+      "class": "B",
+      "page": "Register",
+      "text": "auth.username"
+    },
+    {
+      "id": "QL-CLICK-0044",
+      "class": "B",
+      "page": "Register",
+      "text": "auth.password"
+    },
+    {
+      "id": "QL-CLICK-0045",
+      "class": "B",
+      "page": "Register",
+      "text": "newbie label"
+    },
+    {
+      "id": "QL-CLICK-0046",
+      "class": "B",
+      "page": "Register",
+      "text": "python label"
+    },
+    {
+      "id": "QL-CLICK-0047",
+      "class": "B",
+      "page": "Register",
+      "text": "trader label"
+    },
+    {
+      "id": "QL-CLICK-0048",
+      "class": "B",
+      "page": "Register",
+      "text": "auth.captchaRefresh"
+    },
+    {
+      "id": "QL-CLICK-0049",
+      "class": "B",
+      "page": "Register",
+      "text": "auth.signIn"
+    },
+    {
+      "id": "QL-CLICK-0050",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "stageToCtaLabel"
+    },
+    {
+      "id": "QL-CLICK-0051",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "stageToCtaLabel"
+    },
+    {
+      "id": "QL-CLICK-0052",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "d.allProjects"
+    },
+    {
+      "id": "QL-CLICK-0053",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "p.title"
+    },
+    {
+      "id": "QL-CLICK-0054",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.fromTemplate"
+    },
+    {
+      "id": "QL-CLICK-0055",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "r.title"
+    },
+    {
+      "id": "QL-CLICK-0056",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "h.printPdf"
+    },
+    {
+      "id": "QL-CLICK-0057",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "h.downloadPdf"
+    },
+    {
+      "id": "QL-CLICK-0058",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "h.stripDismiss"
+    },
+    {
+      "id": "QL-CLICK-0059",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "primaryLabel (template)"
+    },
+    {
+      "id": "QL-CLICK-0060",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "primaryLabel"
+    },
+    {
+      "id": "QL-CLICK-0061",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "d.openQuickstart"
+    },
+    {
+      "id": "QL-CLICK-0062",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.gotIt"
+    },
+    {
+      "id": "QL-CLICK-0063",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.incubationCoachExpand"
+    },
+    {
+      "id": "QL-CLICK-0064",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.incubationCoachCollapse"
+    },
+    {
+      "id": "QL-CLICK-0065",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.stepGo"
+    },
+    {
+      "id": "QL-CLICK-0066",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.viewFeed"
+    },
+    {
+      "id": "QL-CLICK-0067",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "d.viewProfile"
+    },
+    {
+      "id": "QL-CLICK-0068",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.viewFollowing"
+    },
+    {
+      "id": "QL-CLICK-0069",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "d.copyLink"
+    },
+    {
+      "id": "QL-CLICK-0070",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.dismiss"
+    },
+    {
+      "id": "QL-CLICK-0071",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "ctaLabel"
+    },
+    {
+      "id": "QL-CLICK-0072",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "d.viewPlans"
+    },
+    {
+      "id": "QL-CLICK-0073",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.dismiss"
+    },
+    {
+      "id": "QL-CLICK-0074",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "stepCta"
+    },
+    {
+      "id": "QL-CLICK-0075",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "ctaLabel"
+    },
+    {
+      "id": "QL-CLICK-0076",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.viewFeed"
+    },
+    {
+      "id": "QL-CLICK-0077",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.dismiss"
+    },
+    {
+      "id": "QL-CLICK-0078",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "stepCta"
+    },
+    {
+      "id": "QL-CLICK-0079",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "ctaLabel"
+    },
+    {
+      "id": "QL-CLICK-0080",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "coach.org_path label"
+    },
+    {
+      "id": "QL-CLICK-0081",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.dismiss"
+    },
+    {
+      "id": "QL-CLICK-0082",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.openFollowing"
+    },
+    {
+      "id": "QL-CLICK-0083",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.browseFeed"
+    },
+    {
+      "id": "QL-CLICK-0084",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.shareGrowth"
+    },
+    {
+      "id": "QL-CLICK-0085",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.dismiss"
+    },
+    {
+      "id": "QL-CLICK-0086",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.coachStackExpand"
+    },
+    {
+      "id": "QL-CLICK-0087",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.coachStackCollapse"
+    },
+    {
+      "id": "QL-CLICK-0088",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "d.ctaTemplates/Revalidate/Project"
+    },
+    {
+      "id": "QL-CLICK-0089",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.dismiss"
+    },
+    {
+      "id": "QL-CLICK-0090",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "d.viewHistory"
+    },
+    {
+      "id": "QL-CLICK-0091",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "ctaLabel"
+    },
+    {
+      "id": "QL-CLICK-0092",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "d.viewChallenge"
+    },
+    {
+      "id": "QL-CLICK-0093",
+      "class": "F",
+      "page": "Dashboard",
+      "text": "u.checkoutCta"
+    },
+    {
+      "id": "QL-CLICK-0094",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "u.viewPlans"
+    },
+    {
+      "id": "QL-CLICK-0095",
+      "class": "F",
+      "page": "Dashboard",
+      "text": "d.upgradeCta"
+    },
+    {
+      "id": "QL-CLICK-0096",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.viewPlans"
+    },
+    {
+      "id": "QL-CLICK-0097",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.challengePaperCta"
+    },
+    {
+      "id": "QL-CLICK-0098",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "d.challengeShareFeedCta"
+    },
+    {
+      "id": "QL-CLICK-0099",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "d.challengeShareProjectCta"
+    },
+    {
+      "id": "QL-CLICK-0100",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "d.challengeShareCta"
+    },
+    {
+      "id": "QL-CLICK-0101",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.viewBoard / d.paperCta / d.goProject / d.fromTemplate"
+    },
+    {
+      "id": "QL-CLICK-0102",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.viewBoard"
+    },
+    {
+      "id": "QL-CLICK-0103",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.journeyViewChallenge"
+    },
+    {
+      "id": "QL-CLICK-0104",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "d.journeyGoProject"
+    },
+    {
+      "id": "QL-CLICK-0105",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "d.journeyGoShare"
+    },
+    {
+      "id": "QL-CLICK-0106",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "d.fromTemplate"
+    },
+    {
+      "id": "QL-CLICK-0107",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.journeyEnrollChallenge"
+    },
+    {
+      "id": "QL-CLICK-0108",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "d.academyNetworkCta"
+    },
+    {
+      "id": "QL-CLICK-0109",
+      "class": "D",
+      "page": "Dashboard",
+      "text": "d.academyReplicationCta"
+    },
+    {
+      "id": "QL-CLICK-0110",
+      "class": "B",
+      "page": "Dashboard",
+      "text": "d.academyClaim"
+    },
+    {
+      "id": "QL-CLICK-0111",
+      "class": "B",
+      "page": "AiCreateStrategy",
+      "text": "placeholder 告诉 AI…"
+    },
+    {
+      "id": "QL-CLICK-0112",
+      "class": "A",
+      "page": "AiCreateStrategy",
+      "text": "让 AI 理解规则"
+    },
+    {
+      "id": "QL-CLICK-0113",
+      "class": "A",
+      "page": "AiCreateStrategy",
+      "text": "确认并回测"
+    },
+    {
+      "id": "QL-CLICK-0114",
+      "class": "B",
+      "page": "AiCreateStrategy",
+      "text": "这是什么意思？"
+    },
+    {
+      "id": "QL-CLICK-0115",
+      "class": "D",
+      "page": "PaperTrading",
+      "text": "启动 BTC 模拟"
+    },
+    {
+      "id": "QL-CLICK-0116",
+      "class": "B",
+      "page": "Feed",
+      "text": "f.sortTop"
+    },
+    {
+      "id": "QL-CLICK-0117",
+      "class": "B",
+      "page": "Feed",
+      "text": "f.sortLatest"
+    },
+    {
+      "id": "QL-CLICK-0118",
+      "class": "D",
+      "page": "Feed",
+      "text": "f.filterGraduated"
+    },
+    {
+      "id": "QL-CLICK-0119",
+      "class": "D",
+      "page": "Feed",
+      "text": "d.browseFeed"
+    },
+    {
+      "id": "QL-CLICK-0120",
+      "class": "D",
+      "page": "Feed",
+      "text": "d.openFollowing"
+    },
+    {
+      "id": "QL-CLICK-0121",
+      "class": "D",
+      "page": "Feed",
+      "text": "d.dismiss"
+    },
+    {
+      "id": "QL-CLICK-0122",
+      "class": "D",
+      "page": "Feed",
+      "text": "d.openFollowing"
+    },
+    {
+      "id": "QL-CLICK-0123",
+      "class": "D",
+      "page": "Feed",
+      "text": "d.stayOnFeed"
+    },
+    {
+      "id": "QL-CLICK-0124",
+      "class": "B",
+      "page": "Feed",
+      "text": "f.guestLogin"
+    },
+    {
+      "id": "QL-CLICK-0125",
+      "class": "B",
+      "page": "Feed",
+      "text": "f.guestRegister"
+    },
+    {
+      "id": "QL-CLICK-0126",
+      "class": "D",
+      "page": "Feed",
+      "text": "d.createShare"
+    },
+    {
+      "id": "QL-CLICK-0127",
+      "class": "D",
+      "page": "Feed",
+      "text": "d.dismiss"
+    },
+    {
+      "id": "QL-CLICK-0128",
+      "class": "D",
+      "page": "Feed",
+      "text": "f.emptyCta"
+    },
+    {
+      "id": "QL-CLICK-0129",
+      "class": "B",
+      "page": "Feed",
+      "text": "report.title"
+    },
+    {
+      "id": "QL-CLICK-0130",
+      "class": "B",
+      "page": "Feed",
+      "text": "rc.readFull"
+    },
+    {
+      "id": "QL-CLICK-0131",
+      "class": "D",
+      "page": "Feed",
+      "text": "p.follow / p.followingBtn"
+    },
+    {
+      "id": "QL-CLICK-0132",
+      "class": "B",
+      "page": "Feed",
+      "text": "rc.researcherName"
+    },
+    {
+      "id": "QL-CLICK-0133",
+      "class": "B",
+      "page": "Leaderboards",
+      "text": "l.researcher"
+    },
+    {
+      "id": "QL-CLICK-0134",
+      "class": "B",
+      "page": "Leaderboards",
+      "text": "l.contributor"
+    },
+    {
+      "id": "QL-CLICK-0135",
+      "class": "B",
+      "page": "Leaderboards",
+      "text": "l.newcomer"
+    },
+    {
+      "id": "QL-CLICK-0136",
+      "class": "B",
+      "page": "Leaderboards",
+      "text": "l.improved"
+    },
+    {
+      "id": "QL-CLICK-0137",
+      "class": "B",
+      "page": "Leaderboards",
+      "text": "l.paperMastery"
+    },
+    {
+      "id": "QL-CLICK-0138",
+      "class": "B",
+      "page": "Leaderboards",
+      "text": "l.goDashboard"
+    },
+    {
+      "id": "QL-CLICK-0139",
+      "class": "B",
+      "page": "Leaderboards",
+      "text": "row.username"
+    },
+    {
+      "id": "QL-CLICK-0140",
+      "class": "B",
+      "page": "Leaderboards",
+      "text": "ctaLabel"
+    },
+    {
+      "id": "QL-CLICK-0141",
+      "class": "B",
+      "page": "Leaderboards",
+      "text": "d.viewFeed"
+    },
+    {
+      "id": "QL-CLICK-0142",
+      "class": "B",
+      "page": "Leaderboards",
+      "text": "d.dismiss"
+    },
+    {
+      "id": "QL-CLICK-0143",
+      "class": "F",
+      "page": "Pricing",
+      "text": "p.buyWithCard"
+    },
+    {
+      "id": "QL-CLICK-0144",
+      "class": "D",
+      "page": "Pricing",
+      "text": "p.currentPlan / p.activePlan / p.basicPlan"
+    },
+    {
+      "id": "QL-CLICK-0145",
+      "class": "B",
+      "page": "Pricing",
+      "text": "p.teamCta"
+    },
+    {
+      "id": "QL-CLICK-0146",
+      "class": "B",
+      "page": "Pricing",
+      "text": "BKTA-XXXX placeholder"
+    },
+    {
+      "id": "QL-CLICK-0147",
+      "class": "B",
+      "page": "Pricing",
+      "text": "p.redeem"
+    },
+    {
+      "id": "QL-CLICK-0148",
+      "class": "B",
+      "page": "Pricing",
+      "text": "p.billingExportCsv"
+    },
+    {
+      "id": "QL-CLICK-0149",
+      "class": "B",
+      "page": "Pricing",
+      "text": "p.invoicePdf"
+    },
+    {
+      "id": "QL-CLICK-0150",
+      "class": "A",
+      "page": "Challenges",
+      "text": "c.title"
+    },
+    {
+      "id": "QL-CLICK-0151",
+      "class": "D",
+      "page": "Challenges",
+      "text": "t.enroll"
+    },
+    {
+      "id": "QL-CLICK-0152",
+      "class": "D",
+      "page": "Challenges",
+      "text": "t.claimCert / t.claimCertLocked"
+    },
+    {
+      "id": "QL-CLICK-0153",
+      "class": "D",
+      "page": "Challenges",
+      "text": "d.browseFeed"
+    },
+    {
+      "id": "QL-CLICK-0154",
+      "class": "D",
+      "page": "Challenges",
+      "text": "d.dismiss"
+    },
+    {
+      "id": "QL-CLICK-0155",
+      "class": "B",
+      "page": "OrgLibrary",
+      "text": "o.createPlaceholder"
+    },
+    {
+      "id": "QL-CLICK-0156",
+      "class": "B",
+      "page": "OrgLibrary",
+      "text": "o.createBtn"
+    },
+    {
+      "id": "QL-CLICK-0157",
+      "class": "B",
+      "page": "OrgLibrary",
+      "text": "org.name"
+    },
+    {
+      "id": "QL-CLICK-0158",
+      "class": "G",
+      "page": "OrgDetail",
+      "text": "o.back"
+    },
+    {
+      "id": "QL-CLICK-0159",
+      "class": "D",
+      "page": "OrgDetail",
+      "text": "t.inviteCta"
+    },
+    {
+      "id": "QL-CLICK-0160",
+      "class": "D",
+      "page": "OrgDetail",
+      "text": "t.memberDashboard"
+    },
+    {
+      "id": "QL-CLICK-0161",
+      "class": "G",
+      "page": "OrgDetail",
+      "text": "h.printPdf / h.downloadPdf"
+    },
+    {
+      "id": "QL-CLICK-0162",
+      "class": "F",
+      "page": "OrgDetail",
+      "text": "plan.name · ¥price"
+    },
+    {
+      "id": "QL-CLICK-0163",
+      "class": "G",
+      "page": "OrgDetail",
+      "text": "QLT-XXXXXXXX"
+    },
+    {
+      "id": "QL-CLICK-0164",
+      "class": "G",
+      "page": "OrgDetail",
+      "text": "o.billingRedeemBtn"
+    },
+    {
+      "id": "QL-CLICK-0165",
+      "class": "G",
+      "page": "OrgDetail",
+      "text": "o.billingProfileSave"
+    },
+    {
+      "id": "QL-CLICK-0166",
+      "class": "G",
+      "page": "OrgDetail",
+      "text": "o.billingExportCsv"
+    },
+    {
+      "id": "QL-CLICK-0167",
+      "class": "G",
+      "page": "OrgDetail",
+      "text": "o.billingInvoicePdf"
+    },
+    {
+      "id": "QL-CLICK-0168",
+      "class": "F",
+      "page": "OrgDetail",
+      "text": "o.ssoDomainsSave"
+    },
+    {
+      "id": "QL-CLICK-0169",
+      "class": "D",
+      "page": "OrgDetail",
+      "text": "o.inviteBtn"
+    },
+    {
+      "id": "QL-CLICK-0170",
+      "class": "D",
+      "page": "OrgDetail",
+      "text": "o.copyInvite"
+    },
+    {
+      "id": "QL-CLICK-0171",
+      "class": "G",
+      "page": "OrgDetail",
+      "text": "o.usernamePlaceholder"
+    },
+    {
+      "id": "QL-CLICK-0172",
+      "class": "D",
+      "page": "OrgDetail",
+      "text": "o.addMemberBtn"
+    },
+    {
+      "id": "QL-CLICK-0173",
+      "class": "G",
+      "page": "OrgDetail",
+      "text": "o.pickFactor"
+    },
+    {
+      "id": "QL-CLICK-0174",
+      "class": "G",
+      "page": "OrgDetail",
+      "text": "o.shareBtn"
+    },
+    {
+      "id": "QL-CLICK-0175",
+      "class": "G",
+      "page": "OrgDetail",
+      "text": "RB/AU/IF"
+    },
+    {
+      "id": "QL-CLICK-0176",
+      "class": "D",
+      "page": "OrgDetail",
+      "text": "o.teamAttentionViewProject"
+    },
+    {
+      "id": "QL-CLICK-0177",
+      "class": "D",
+      "page": "OrgDetail",
+      "text": "o.researchAlertWebhookSave"
+    },
+    {
+      "id": "QL-CLICK-0178",
+      "class": "D",
+      "page": "OrgDetail",
+      "text": "o.teamAttentionWebhookDispatch"
+    },
+    {
+      "id": "QL-CLICK-0179",
+      "class": "D",
+      "page": "OrgDetail",
+      "text": "o.alertWebhookSave"
+    },
+    {
+      "id": "QL-CLICK-0180",
+      "class": "G",
+      "page": "OrgDetail",
+      "text": "o.alertWebhookDispatch"
+    },
+    {
+      "id": "QL-CLICK-0181",
+      "class": "D",
+      "page": "OrgDetail",
+      "text": "o.alertDeliveryFilterAll/Sla/Research"
+    },
+    {
+      "id": "QL-CLICK-0182",
+      "class": "D",
+      "page": "OrgDetail",
+      "text": "o.alertDeliveryRetry"
+    },
+    {
+      "id": "QL-CLICK-0183",
+      "class": "D",
+      "page": "OrgDetail",
+      "text": "o.alertDeliveryExport"
+    },
+    {
+      "id": "QL-CLICK-0184",
+      "class": "D",
+      "page": "OrgDetail",
+      "text": "o.execDeskSync"
+    },
+    {
+      "id": "QL-CLICK-0185",
+      "class": "D",
+      "page": "OrgDetail",
+      "text": "role options"
+    },
+    {
+      "id": "QL-CLICK-0186",
+      "class": "D",
+      "page": "OrgDetail",
+      "text": "o.removeMember / o.leaveOrg"
+    },
+    {
+      "id": "QL-CLICK-0187",
+      "class": "D",
+      "page": "OrgDetail",
+      "text": "o.revokeInvite"
+    },
+    {
+      "id": "QL-CLICK-0188",
+      "class": "D",
+      "page": "OrgDetail",
+      "text": "ctaLabel"
+    },
+    {
+      "id": "QL-CLICK-0189",
+      "class": "D",
+      "page": "OrgDetail",
+      "text": "—"
+    },
+    {
+      "id": "QL-CLICK-0190",
+      "class": "D",
+      "page": "OrgDetail",
+      "text": "d.browseFeed"
+    },
+    {
+      "id": "QL-CLICK-0191",
+      "class": "B",
+      "page": "MyProfile",
+      "text": "t.inviteFriends"
+    },
+    {
+      "id": "QL-CLICK-0192",
+      "class": "B",
+      "page": "MyProfile",
+      "text": "t.followingFeed"
+    },
+    {
+      "id": "QL-CLICK-0193",
+      "class": "B",
+      "page": "MyProfile",
+      "text": "t.myProjects"
+    },
+    {
+      "id": "QL-CLICK-0194",
+      "class": "B",
+      "page": "MyProfile",
+      "text": "t.viewPaperBoard"
+    },
+    {
+      "id": "QL-CLICK-0195",
+      "class": "G",
+      "page": "Researcher",
+      "text": "t.follow / t.followingBtn"
+    },
+    {
+      "id": "QL-CLICK-0196",
+      "class": "G",
+      "page": "Researcher",
+      "text": "t.viewPaperBoard"
+    },
+    {
+      "id": "QL-CLICK-0115A",
+      "class": "D",
+      "page": "PaperTrading",
+      "text": "停止"
+    },
+    {
+      "id": "QL-CLICK-0115B",
+      "class": "D",
+      "page": "PaperTrading",
+      "text": "强制终止"
+    }
+  ]
+}
