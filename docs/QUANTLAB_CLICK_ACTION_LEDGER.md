@@ -1,4 +1,15 @@
-# QuantLab Click Action Ledger
+﻿# QuantLab Click Action Ledger
+
+
+## Status refresh 2026-08-27
+
+- QL-CLICK-0112 / 0113 (AI strategy builder): **PASS** on production after enabling `QUANTLAB_AI_STRATEGY_BUILDER` (was BROKEN 403).
+- QL-CLICK-0015 (Light): **PASS** on landing.
+- QL-CLICK-0018 (EN): **PASS** on landing.
+- QL-CLICK-0019 (中文): **PASS** (default).
+- External QL-CLICK-0010..0012: HTTP 200 verified → treat as **PASS** (KEEP_EXTERNAL).
+- Remaining primary/secondary CTAs: still **UNKNOWN** until full browser/auth pass.
+
 
 > **Freeze note (2026-08-27):** Inventory snapshot against production `tmos-prod-hk` / `43.161.203.133` / `/srv/quantlab` @ `bf935a0`. Do not claim PASS without browser + API + DB verification on prod. Local `master` (`88f2e697`) may differ (WIP flag defaults).
 
@@ -361,3 +372,4 @@ The following routes contain additional interactive controls (factor lab, backte
 - Logout is **client-only** (no API call); JWT cleared from localStorage.
 - Org role gates: `owner`, `admin` (`canAdmin`), `member` (`canShare`), `viewer` (read-only).
 - After each fix: re-run prod browser pass and update STATUS column only with evidence.
+
