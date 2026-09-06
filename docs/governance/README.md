@@ -9,8 +9,9 @@ This directory holds Owner-approved governance SSOT documents.
 | [QUANTLAB_CONSTITUTION.md](./QUANTLAB_CONSTITUTION.md) | **CANONICAL** | WHY / WHAT / BOUNDARY / ORDER — Strategy Research & Evidence OS |
 | [amendments/](./amendments/) | **CANONICAL registry** | Owner-approved Constitution Amendments (supplement; do not auto-authorize engineering) |
 | [Amendment No. 1](./amendments/QUANTLAB_CONSTITUTION_AMENDMENT_001_PRODUCT_VALUE_COMMERCIAL_DOCTRINE.md) | **CANONICAL** | Product Value & Commercial Doctrine — Prove Before Capital |
+| [qln0/](./qln0/) | **QLN-0 PASS** (read-only) | Capability / fragmentation / gap / test / alignment ledgers + reconciliation report |
 | [autonomous-engineering/](./autonomous-engineering/) (pack **v1.0**) | **CANONICAL** | Bounded autonomous engineering loop for Owner-approved QLN phases only |
-| `QUANTLAB_NAUTILUS_CAPABILITY_LEDGER.md` | Not yet created | Planned QLN-0 output |
+| `QUANTLAB_NAUTILUS_CAPABILITY_LEDGER.md` | Superseded location | Use `qln0/QUANTLAB_QLN0_CAPABILITY_ASSET_LEDGER.md` as QLN-0 output |
 | `QUANTLAB_PHASE_GATE_LEDGER.md` | Not yet created | Planned phase gate ledger |
 | `QUANTLAB_LIVE_AUTHORITY.md` | Not yet created | Planned Live authority ledger |
 
