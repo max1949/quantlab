@@ -1,75 +1,14 @@
 # QLN-1 Constitutional / Domain Foundation — Closure Report
 
-```text
-PHASE=QLN-1
-OWNER_AUTHORIZATION=YES
-UNATTENDED_MODE=YES
-AUTONOMOUS_ENGINEERING_PROTOCOL_LOADED=YES
-PERSISTENT_DB_SCHEMA_CHANGE=NONE
-ALEMBIC_MIGRATION=NONE
-PRODUCTION_CHANGE=NONE
-LIVE_CHANGE=NONE
-REAL_MONEY_CHANGE=NONE
-NEXT_PHASE_AUTO_ENTER=NO
-QLN_2_STARTED=NO
-```
-
-## Verdict
+**Superseded for formal Owner closure by:**  
+[`QUANTLAB_QLN1_FORMAL_CLOSURE_REPORT.md`](./QUANTLAB_QLN1_FORMAL_CLOSURE_REPORT.md)
 
 ```text
+QLN_1=PASS
 QLN_1_CONSTITUTIONAL_DOMAIN_FOUNDATION=PASS
-```
-
-Unattended resume closed remaining in-phase gaps: dual `BacktestRequest` collision and PaperRuntime contract port.
-
-Live ledger: [`QUANTLAB_QLN1_ACCEPTANCE_LEDGER.md`](./QUANTLAB_QLN1_ACCEPTANCE_LEDGER.md)
-
----
-
-## Closure fields
-
-```text
-CANONICAL_DOMAIN_IDS=PASS
-STRATEGY_LIFECYCLE=PASS
-EVIDENCE_STAGE=PASS
-ENVIRONMENT_MODEL=PASS
-EXECUTION_MODE_MODEL=PASS
-VERSION_SEMANTICS=PASS
-HASH_POLICY=PASS
-AUDIT_EVENT_SCHEMA=PASS
-ENGINE_INTERFACE_CONTRACTS=PASS
-ENGINE_RESPONSIBILITY_BOUNDARY=PASS
-BACKTEST_PAPER_SEMANTIC_PARITY=PASS
-LEGACY_MAPPING=COMPLETE
-LEGACY_PATHS_RETIRED=0
-LEGACY_PATHS_HELD=paper_orders,sandbox_runtime,execution_adapter,QMT,vn.py,UX_EMA_examples
-SIMILAR_ISSUES_FOUND=7
-SIMILAR_ISSUES_FIXED=2
-SIMILAR_ISSUES_HELD=5
-TESTS=42 focused PASS; engine collect 155
-REGRESSION=PASS
-DB_CHANGE=NONE
-MIGRATION_CHANGE=NONE
-PRODUCTION_CHANGE=NONE
-LIVE_CHANGE=NONE
-REAL_MONEY_CHANGE=NONE
-UNAUTHORIZED_SCOPE_EXPANSION=NO
-OPEN_P0=NONE
-OPEN_P1=NONE_IN_PHASE
-OPEN_P2=out-of-phase HOLDs above
-QLN_2_READY=YES_FOR_OWNER_DECISION
 QLN_2_STARTED=NO
-OWNER_DECISION_REQUIRED=NO
 NEXT_PHASE_AUTO_ENTER=NO
 STOP=YES
 ```
 
-## Unattended delta (this resume)
-
-| Change | Purpose |
-|---|---|
-| `AdapterBacktestRequest` / `AdapterBacktestResult` | eliminate canonical name collision |
-| `NautilusPaperRuntimePort` | PaperRuntimeContract + LIVE deny |
-| Acceptance Ledger live file | resume-safe QLN-1 tracking |
-
-Code SSOT remains `engine/domain/`.
+Historical narrative of unattended deltas remains useful; formal gate evidence is in the Formal Closure Report + Acceptance Ledger.
