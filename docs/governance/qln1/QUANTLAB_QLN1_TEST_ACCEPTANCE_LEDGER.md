@@ -2,17 +2,19 @@
 
 ```text
 PHASE=QLN-1
+OVERNIGHT_RUN=YES
 FOCUSED_SUITE=engine/tests/test_domain_foundation.py
 + test_phase6_paper_sandbox.py
 + test_strategy_spec_parity.py
 + test_strategy_validation.py
++ test_nautilus_golden_backtest.py
 ```
 
 | Metric | Value |
 |---|---|
-| Focused result | **42 passed** |
+| Overnight focused result | **42 passed** |
 | Engine collect before QLN-1 | 136 |
-| Engine collect after unattended close | **155** |
+| Engine collect overnight close | **155** |
 | Silent test loss | **NO** |
 | Domain schema tests | PASS |
 | Contract / hash / audit / legacy map | PASS |

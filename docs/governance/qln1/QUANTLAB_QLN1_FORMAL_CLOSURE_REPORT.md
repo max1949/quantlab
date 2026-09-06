@@ -3,31 +3,36 @@
 ```text
 PHASE=QLN-1
 TITLE=Constitutional / Domain Foundation
+OVERNIGHT_RUN=YES
+RESUME_FROM_LEDGER=YES
 QLN_1=PASS
 QLN_1_CONSTITUTIONAL_DOMAIN_FOUNDATION=PASS
 FORMAL_CLOSURE=YES
 CONVERGENCE_PASS=YES
 UNATTENDED_MODE=YES
 AUTONOMOUS_ENGINEERING_PROTOCOL_LOADED=YES
+AUTONOMY_LOOP_GUARD=NOT_TRIGGERED
 ```
 
-## Convergence recheck (this round)
+## Overnight final verification
 
 | Check | Result |
 |---|---|
-| Acceptance A01–A27 | ALL PASS (`OPEN_IN_PHASE=NONE`) |
+| Acceptance A01–A27 | **27 PASS / 0 FAIL** (`OPEN_IN_PHASE=NONE`) |
 | Focused regression | **42 passed** |
-| Engine collect | **155** (baseline pre-QLN-1: 136) → `NO_SILENT_TEST_LOSS=YES` |
-| Semantic duplication | PASS (no `trading.BacktestRequest`; lifecycle ⟂ environment) |
-| Legacy mapping | PASS (code + ledger) |
-| Engine boundary | PASS (domain AST: zero `nautilus_trader`) |
-| Backtest/Paper shared field semantics | PASS |
-| LIVE_DEFAULT_DENY | PRESERVED |
-| In-phase FAIL/PARTIAL remaining | **NONE** |
+| Engine collect | **155** (pre-QLN-1 baseline 136) |
+| NO_SILENT_TEST_LOSS | YES |
+| Semantic duplication | PASS |
+| Legacy mapping | PASS |
+| Engine boundary | PASS |
+| Backtest/Paper semantic parity | PASS |
+| DB / Migration / Production / Live / Real Money | NONE / DENY preserved |
+| Unauthorized scope expansion | NO |
+| Next unresolved QLN-1 item | NONE |
 
-Out-of-phase HOLDs (not QLN-1 blockers): UX EMA examples; paper_orders FE; sandbox_runtime; `_route_gateway`; full Paper process wire-through → QLN-5/9/UX.
+Out-of-phase HOLDs only: UX EMA examples; paper_orders FE; sandbox_runtime; `_route_gateway`; full Paper process wire → QLN-5/9/UX.
 
-## Mandatory Acceptance
+## Mandatory Acceptance (all)
 
 | Gate | Result |
 |---|---|
@@ -54,22 +59,23 @@ Out-of-phase HOLDs (not QLN-1 blockers): UX EMA examples; paper_orders FE; sandb
 | RELEVANT_REGRESSION | PASS |
 | NO_SILENT_TEST_LOSS | YES |
 | SIMILAR_ISSUE_AUDIT | PASS |
-| QUANTLAB_DOMAIN_INDEPENDENT_OF_NAUTILUS_INTERNAL_API | YES |
+| DOMAIN_INDEPENDENT_OF_NAUTILUS | YES |
 | ENGINE_RESPONSIBILITY_BOUNDARY | PASS |
 | LIVE_DEFAULT_DENY | PRESERVED |
 | REAL_MONEY_PATH_CHANGED | NO |
 
-## Artifacts
+## Canonical model
 
-| Kind | Path |
-|---|---|
-| Code SSOT | `engine/domain/` |
-| Live Acceptance | `docs/governance/qln1/QUANTLAB_QLN1_ACCEPTANCE_LEDGER.md` |
-| Legacy mapping | `docs/governance/qln1/QUANTLAB_QLN1_LEGACY_MAPPING_LEDGER.md` |
-| Engine boundary | `docs/governance/qln1/QUANTLAB_QLN1_ENGINE_BOUNDARY_LEDGER.md` |
-| Tests | `engine/tests/test_domain_foundation.py` |
+```text
+CANONICAL_DOMAIN_MODEL=engine/domain
+ENGINE_RESPONSIBILITY_BOUNDARY=PASS
+  Factor Lab = research/simulation KEEP
+  Nautilus = Spec BT/Paper/(future Shadow/Live) kernel via adapters
+BACKTEST_PAPER_SEMANTIC_PARITY=PASS
+LEGACY_MAPPING=COMPLETE
+```
 
-## Authority / freeze
+## Authority freeze
 
 ```text
 DB_CHANGE=NONE
@@ -79,12 +85,12 @@ LIVE_CHANGE=NONE
 REAL_MONEY_CHANGE=NONE
 UNAUTHORIZED_SCOPE_EXPANSION=NO
 OWNER_DECISION_REQUIRED=NO
-HARD_STOP=NO
+QLN_2_READY=YES_FOR_OWNER_DECISION
 QLN_2_STARTED=NO
 NEXT_PHASE_AUTO_ENTER=NO
-QLN_2_AUTO_ENTER=NO
+AUTO_NEXT_QLN=NO
 STOP_REASON=APPROVED_SCOPE_COMPLETE
 STOP=YES
 ```
 
-> Domain foundation PASS 即停，不进入 UI 扩张 / Spec v2 / Experiment Ledger。
+> Overnight success endpoint reached. Do not start QLN-2.
