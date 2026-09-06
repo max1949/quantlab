@@ -13,7 +13,11 @@ Owner-authorized **read-only** reconciliation after Constitution v2 + Amendment 
 
 ```text
 QLN_0=PASS
+QLN_0_FORMAL_CLOSURE=PASS
+CAPABILITY_ASSET_LEDGER=COMPLETE
 QLN_1_STARTED=NO
 NEXT_PHASE_AUTO_ENTER=NO
 ENGINEERING=FROZEN
 ```
+
+Stale claim “Capability Ledger not created yet” is **SUPERSEDED** by [`QUANTLAB_QLN0_CAPABILITY_ASSET_LEDGER.md`](./QUANTLAB_QLN0_CAPABILITY_ASSET_LEDGER.md).

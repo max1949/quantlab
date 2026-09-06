@@ -287,3 +287,50 @@ OWNER_DECISION_REQUIRED=YES  # only for optional OD cards / QLN-1 GO
 NEXT_PHASE_AUTO_ENTER=NO
 QLN_1_STARTED=NO
 ```
+
+---
+
+## 12. Formal Closure Patch (Acceptance contradiction fix)
+
+```text
+PATCH=QLN-0_FORMAL_CLOSURE
+REASON=
+  A late explore-agent note claimed "Capability Ledger not created yet".
+  That note was STALE. Canonical ledger already existed and is now
+  completed to formal field/coverage standard without re-audit.
+SUPERSEDED_CLAIM=Capability Ledger not created yet
+CANONICAL_LEDGER=docs/governance/qln0/QUANTLAB_QLN0_CAPABILITY_ASSET_LEDGER.md
+CAPABILITY_ASSET_LEDGER=COMPLETE
+```
+
+### Acceptance re-check (no standard lowering)
+
+| Criterion | Evidence | Result |
+|---|---|---|
+| CURRENT_ARCHITECTURE_MAPPED | Reconciliation §1 + fragmentation ledger | YES |
+| LEGACY_ROADMAP_RECONCILED | Reconciliation §2 | YES |
+| CAPABILITY_ASSET_LEDGER | Formal ledger A01–A38 + coverage table | **COMPLETE** |
+| ARCHITECTURE_FRAGMENTATION_AUDITED | Fragmentation ledger | YES |
+| STRATEGY_SEMANTIC_AUDIT | Reconciliation §3 + parity tests | COMPLETE |
+| EXPERIMENT_EVIDENCE_AUDIT | Gap ledger + A33–A35 | COMPLETE |
+| VALIDATION_AUDIT | Gap/validation notes + A09–A11 | COMPLETE |
+| PAPER_SANDBOX_RECONCILED | Reconciliation §4 | YES |
+| DATABASE_MIGRATION_RECONCILED | Local head=0032; prod PARTIAL explicit | YES |
+| TEST_TRUTH_RECONCILED | Test truth ledger | YES |
+| PRODUCTION_TRUTH | Explicitly PARTIAL (allowed) | EXPLICITLY_PARTIAL |
+| SECURITY_BOUNDARY_AUDITED | Reconciliation §8 | YES |
+| CONSTITUTION_GAP_LEDGER | Gap ledger | COMPLETE |
+| PRODUCT_VALUE_ALIGNMENT | Alignment ledger | ASSESSED |
+| QLN_1_ENTRY_RECOMMENDATION | Reconciliation §10 | COMPLETE |
+| UNAUTHORIZED_CHANGE | Governance docs only | NO |
+
+```text
+QLN_0_FORMAL_CLOSURE=PASS
+QLN_0_READ_ONLY_RECONCILIATION=PASS
+CAPABILITY_ASSET_LEDGER=COMPLETE
+QLN_0_ACCEPTANCE_RECONCILED=YES
+QLN_1_STARTED=NO
+NEXT_PHASE_AUTO_ENTER=NO
+ENGINEERING=FROZEN
+STOP=YES
+```
