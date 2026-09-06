@@ -6,6 +6,14 @@
 
 当前阶段:**Sprint 9B 产品前端 + Oracle 生产部署**；核心研究链路(Sprint 1–9A)已闭环。
 
+### Strategic Constitution (Owner-approved)
+
+长期战略 SSOT：[`docs/governance/QUANTLAB_CONSTITUTION.md`](docs/governance/QUANTLAB_CONSTITUTION.md)（Strategy Research & Evidence OS；NautilusTrader = kernel）。治理索引：[`docs/governance/README.md`](docs/governance/README.md)。
+
+- 历史 Sprint / `QUANTLAB_NAUTILUS_EVOLUTION` Phase 0–7 文档**保留为事实记录**，不再扩展旧 Phase 编号。
+- 今后新建设阶段统一使用 **QLN-0 → QLN-12**。
+- 全量施工 / 生产变更 / Live / QLN-0：**HOLD**，须 Owner 另行授权；默认 `ENGINEERING=FROZEN`。
+
 ---
 
 ## 顶层结构(最终形态)

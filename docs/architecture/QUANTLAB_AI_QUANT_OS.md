@@ -2,6 +2,8 @@
 
 QuantLab is **not** “NautilusTrader 中文版” and **not** a vn.py replacement.
 
+> **Governance:** Future product direction, boundaries, and phase order are defined by the Owner-approved Constitution: [`docs/governance/QUANTLAB_CONSTITUTION.md`](../governance/QUANTLAB_CONSTITUTION.md). This architecture note remains a historical/working snapshot; it does not authorize new construction.
+
 ## Positioning
 
 > 不会编程，也能把交易想法变成可以研究、验证、模拟和安全执行的量化策略。

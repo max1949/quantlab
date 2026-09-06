@@ -1,5 +1,7 @@
 # Phase 6 Freeze → Strategy Validation
 
+> **Historical route document.** `QUANTLAB_NAUTILUS_EVOLUTION` Phase 0–7 numbering is frozen history. New work must use Constitution **QLN-0 → QLN-12**. Canonical: [`docs/governance/QUANTLAB_CONSTITUTION.md`](../governance/QUANTLAB_CONSTITUTION.md).
+
 ```text
 PHASE_6_STATUS=CLOSED
 FINAL_ACCEPTANCE=20/20 PASS
@@ -10,6 +12,8 @@ LIVE_EXECUTION=DENY
 PHASE_7_AUTO_ENTER=DENY
 DO_NOT_ENTER_PHASE_7
 DO_NOT_ENABLE_LIVE
+QLN_0_STARTED=NO
+NEXT_PHASE_AUTO_ENTER=NO
 ```
 
 ## Frozen (except P0/P1)
