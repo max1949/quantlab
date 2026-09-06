@@ -7,10 +7,21 @@ This directory holds Owner-approved governance SSOT documents.
 | Document | Status | Role |
 |---|---|---|
 | [QUANTLAB_CONSTITUTION.md](./QUANTLAB_CONSTITUTION.md) | **CANONICAL** | WHY / WHAT / BOUNDARY / ORDER — Strategy Research & Evidence OS |
+| [amendments/](./amendments/) | **CANONICAL registry** | Owner-approved Constitution Amendments (supplement; do not auto-authorize engineering) |
+| [Amendment No. 1](./amendments/QUANTLAB_CONSTITUTION_AMENDMENT_001_PRODUCT_VALUE_COMMERCIAL_DOCTRINE.md) | **CANONICAL** | Product Value & Commercial Doctrine — Prove Before Capital |
 | [autonomous-engineering/](./autonomous-engineering/) (pack **v1.0**) | **CANONICAL** | Bounded autonomous engineering loop for Owner-approved QLN phases only |
 | `QUANTLAB_NAUTILUS_CAPABILITY_LEDGER.md` | Not yet created | Planned QLN-0 output |
 | `QUANTLAB_PHASE_GATE_LEDGER.md` | Not yet created | Planned phase gate ledger |
 | `QUANTLAB_LIVE_AUTHORITY.md` | Not yet created | Planned Live authority ledger |
+
+## Interpretation order (binding)
+
+1. Owner explicit instruction
+2. `QUANTLAB_CONSTITUTION.md` + Owner-approved Amendments
+3. Current QLN phase acceptance criteria
+4. Autonomous Engineering Pack
+
+Amendments lock **why / for whom / what counts as high value / what is worth building**. They do **not** by themselves start QLN work, open Production/Live, weaken gates, or enter Commercialization.
 
 ## Autonomous Engineering Pack — authority & invoke
 
@@ -56,6 +67,9 @@ AUTO_REAL_MONEY=NO
 ENGINEERING=FROZEN
 QLN_0_STARTED=NO
 AUTONOMOUS_ENGINEERING_PACK=CANONICAL
+CONSTITUTION_AMENDMENT_001=CANONICAL
+FEATURE_ADMISSION_GATE=EIGHT_QUESTIONS
+COMMERCIALIZATION_AUTO_ENTER=NO
 ```
 
 ## Historical assets (preserved, not superseded as facts)

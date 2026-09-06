@@ -40,6 +40,14 @@ Silence ≠ Approval。Previous work ≠ Permission to continue。
 
 每个阶段完成后默认状态为 STOP / HOLD，必须重新过 Gate 才能进入下一阶段。
 
+### Owner-approved Amendments
+
+补充性 Amendment 登记于 [`amendments/`](./amendments/)。当前生效：
+
+- [Amendment No. 1 — Product Value & Commercial Doctrine](./amendments/QUANTLAB_CONSTITUTION_AMENDMENT_001_PRODUCT_VALUE_COMMERCIAL_DOCTRINE.md)
+
+Amendment 从属于并补充本宪法；**不**自行修改 QLN-0→QLN-12 顺序、安全权限、Live Gate、`NEXT_PHASE_AUTO_ENTER=NO`，或 Autonomous Engineering 边界；**不**因 Amendment 入库而授权工程 / Production / Live / Commercialization。
+
 ---
 
 ## 1. 使命、终局与北极星
@@ -1819,3 +1827,5 @@ QuantLab 不负责制造更多策略；QuantLab 负责让策略的产生、验�
 TMOS 验证人；QuantLab 验证策略；NautilusTrader 负责可靠地计算与执行。
 
 这三句话是未来所有产品和工程决策的最终裁决标准。
+
+产品价值与商业教义的补充裁定见 [Amendment No. 1](./amendments/QUANTLAB_CONSTITUTION_AMENDMENT_001_PRODUCT_VALUE_COMMERCIAL_DOCTRINE.md)（Prove Before Capital；Evidence 稀缺；八问 Admission Gate）。该 Amendment 不授权新施工。
