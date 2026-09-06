@@ -3,8 +3,8 @@
 ```text
 PHASE=QLN-1
 OWNER_AUTHORIZATION=YES
+UNATTENDED_MODE=YES
 AUTONOMOUS_ENGINEERING_PROTOCOL_LOADED=YES
-ENTRY_GATE=OWNER_GO (after QLN-0 PASS)
 PERSISTENT_DB_SCHEMA_CHANGE=NONE
 ALEMBIC_MIGRATION=NONE
 PRODUCTION_CHANGE=NONE
@@ -20,90 +20,56 @@ QLN_2_STARTED=NO
 QLN_1_CONSTITUTIONAL_DOMAIN_FOUNDATION=PASS
 ```
 
-Canonical domain SSOT lives in `engine/domain/`. Dual-stack Factor Lab vs Nautilus remains intentionally mapped, not deleted. LIVE_DEFAULT=DENY preserved.
+Unattended resume closed remaining in-phase gaps: dual `BacktestRequest` collision and PaperRuntime contract port.
+
+Live ledger: [`QUANTLAB_QLN1_ACCEPTANCE_LEDGER.md`](./QUANTLAB_QLN1_ACCEPTANCE_LEDGER.md)
 
 ---
 
-## Acceptance summary
-
-| Gate | Result |
-|---|---|
-| CANONICAL_DOMAIN_IDS | PASS |
-| STRATEGY_LIFECYCLE_ENUM | PASS |
-| EVIDENCE_STAGE_ENUM | PASS |
-| ENVIRONMENT_ENUM | PASS |
-| EXECUTION_MODE_ENUM | PASS |
-| VERSION_SEMANTICS | PASS |
-| IMMUTABLE_IDENTIFIERS | PASS |
-| HASH_POLICY | PASS |
-| AUDIT_EVENT_SCHEMA | PASS |
-| ENGINE_INTERFACE_CONTRACTS | PASS |
-| DUPLICATE_CANONICAL_STATES | 0 (within SSOT enums) |
-| BACKTEST_PAPER_FIELD_SEMANTIC_DRIFT | 0 (shared field contract defined; Spec→Paper SSOT retained) |
-| STRATEGY_DEFAULT_SEMANTICS | ONE_CANONICAL_SOURCE |
-| DOMAIN_CONCEPT_COLLISION | 0 (lifecycle ⟂ environment) |
-| LEGACY_MAPPING | COMPLETE |
-| HISTORICAL_DATA_PRESERVED | YES |
-| UNAUTHORIZED_DESTRUCTIVE_RETIREMENT | NO |
-| DOMAIN_SCHEMA_TESTS | PASS |
-| CONTRACT_TESTS | PASS |
-| FOCUSED_TESTS | PASS (37 incl. domain+parity+phase6+validation) |
-| RELEVANT_REGRESSION | PASS |
-| NO_SILENT_TEST_LOSS | YES (engine collect 136→153) |
-| SIMILAR_ISSUE_AUDIT | PASS |
-| QUANTLAB_DOMAIN_INDEPENDENT_OF_NAUTILUS_INTERNAL_API | YES |
-| ENGINE_RESPONSIBILITY_BOUNDARY | PASS |
-| LIVE_DEFAULT_DENY | PRESERVED |
-| REAL_MONEY_PATH_CHANGED | NO |
-
----
-
-## Delivered code (in-scope)
-
-| Path | Role |
-|---|---|
-| `engine/domain/*` | SSOT IDs, enums, env, hash, audit, contracts, legacy map, defaults |
-| `engine/trading/execution_environment.py` | Compatibility facade → domain (SANDBOX alias kept) |
-| `engine/strategies/lifecycle.py` | Legacy Lifecycle + `to_canonical_lifecycle()` |
-| `engine/nautilus/domain_adapter.py` | BacktestEngineContract port (lazy Nautilus import) |
-| `engine/paper/signal_engine.py` | EMA labels use actual periods (not hardcoded EMA60) |
-| `engine/tests/test_domain_foundation.py` | Schema/contract tests |
-
----
-
-## Similar-issue audit
-
-| Finding | Action |
-|---|---|
-| signal_engine hardcoded EMA20/EMA60 labels | **FIXED** (QLN-1 semantic) |
-| UX AiCreateStrategy EMA20/60 examples | **HOLD** → future UX / QLN-6 messaging (`EXAMPLE != DEFAULT` documented) |
-| Dual `BacktestRequest` (`engine.trading` vs `engine.domain`) | **HOLD** → MERGE later; domain contract is SSOT for Engine Interface |
-| `_route_gateway` residual | **HOLD** → QLN-9 |
-| legacy paper_orders FE path | **HOLD** → QLN-5 |
-| sandbox_runtime scaffold | **HOLD** → QLN-5 SOFT_RETIRE already classified |
+## Closure fields
 
 ```text
-SIMILAR_ISSUES_FOUND=6
-SIMILAR_ISSUES_FIXED=1
+CANONICAL_DOMAIN_IDS=PASS
+STRATEGY_LIFECYCLE=PASS
+EVIDENCE_STAGE=PASS
+ENVIRONMENT_MODEL=PASS
+EXECUTION_MODE_MODEL=PASS
+VERSION_SEMANTICS=PASS
+HASH_POLICY=PASS
+AUDIT_EVENT_SCHEMA=PASS
+ENGINE_INTERFACE_CONTRACTS=PASS
+ENGINE_RESPONSIBILITY_BOUNDARY=PASS
+BACKTEST_PAPER_SEMANTIC_PARITY=PASS
+LEGACY_MAPPING=COMPLETE
+LEGACY_PATHS_RETIRED=0
+LEGACY_PATHS_HELD=paper_orders,sandbox_runtime,execution_adapter,QMT,vn.py,UX_EMA_examples
+SIMILAR_ISSUES_FOUND=7
+SIMILAR_ISSUES_FIXED=2
 SIMILAR_ISSUES_HELD=5
-```
-
----
-
-## Owner Decision Cards
-
-None blocking. Optional later:
-
-| ID | Topic | Default |
-|---|---|---|
-| OD-QLN1-1 | Authorize Alembic when DomainIds persist | DENY until asked |
-| OD-QLN1-2 | Soft-hide legacy paper_orders FE | HOLD until QLN-5 |
-
-```text
-OWNER_DECISION_REQUIRED=NO
+TESTS=42 focused PASS; engine collect 155
+REGRESSION=PASS
+DB_CHANGE=NONE
+MIGRATION_CHANGE=NONE
+PRODUCTION_CHANGE=NONE
+LIVE_CHANGE=NONE
+REAL_MONEY_CHANGE=NONE
+UNAUTHORIZED_SCOPE_EXPANSION=NO
+OPEN_P0=NONE
+OPEN_P1=NONE_IN_PHASE
+OPEN_P2=out-of-phase HOLDs above
 QLN_2_READY=YES_FOR_OWNER_DECISION
 QLN_2_STARTED=NO
+OWNER_DECISION_REQUIRED=NO
+NEXT_PHASE_AUTO_ENTER=NO
 STOP=YES
 ```
 
-Ledgers: [`README.md`](./README.md)
+## Unattended delta (this resume)
+
+| Change | Purpose |
+|---|---|
+| `AdapterBacktestRequest` / `AdapterBacktestResult` | eliminate canonical name collision |
+| `NautilusPaperRuntimePort` | PaperRuntimeContract + LIVE deny |
+| Acceptance Ledger live file | resume-safe QLN-1 tracking |
+
+Code SSOT remains `engine/domain/`.

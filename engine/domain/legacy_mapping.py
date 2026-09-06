@@ -65,6 +65,7 @@ PAPER_RUN_STATUS_LEGACY: tuple[LegacyMapRow, ...] = (
 ASSET_DISPOSITIONS: tuple[LegacyMapRow, ...] = (
     LegacyMapRow("engine/backtest.py", "ExecutionMode.SIMULATION + Research OS", LegacyDisposition.KEEP, "Factor Lab"),
     LegacyMapRow("engine/nautilus/backtest_adapter.py", "BacktestEngineContract impl", LegacyDisposition.KEEP, "official BT"),
+    LegacyMapRow("engine.trading.AdapterBacktestRequest", "adapter transport ≠ domain BacktestRequest", LegacyDisposition.MERGE, "QLN-1 renamed from BacktestRequest"),
     LegacyMapRow("PaperRun", "Environment.PAPER + ExecutionMode.PAPER", LegacyDisposition.KEEP, "official paper"),
     LegacyMapRow("paper_orders", "legacy ExecutionMode.PAPER coaching", LegacyDisposition.SOFT_RETIRE, "FE still callable"),
     LegacyMapRow("execution_adapter", "SOFT_RETIRE residual", LegacyDisposition.SOFT_RETIRE, "_route_gateway latent"),

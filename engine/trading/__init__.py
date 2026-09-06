@@ -1,7 +1,8 @@
-"""QuantLab trading abstractions — no NautilusTrader imports.
+"""QuantLab trading adapter transport types — no NautilusTrader imports.
 
-Business / research services should depend on these types only.
-Nautilus details stay behind engine.nautilus adapters.
+QLN-1: Domain SSOT request/result types live in ``engine.domain.engine_contracts``.
+Types here are **legacy adapter transport** for ``engine.nautilus.backtest_adapter`` only.
+They are intentionally NOT named BacktestRequest/BacktestResult to avoid canonical collision.
 """
 
 from __future__ import annotations
@@ -18,7 +19,9 @@ class InstrumentRef:
 
 
 @dataclass(frozen=True)
-class BacktestRequest:
+class AdapterBacktestRequest:
+    """Legacy Nautilus adapter transport (not Domain BacktestRequest)."""
+
     strategy_id: str
     strategy_version: str
     instrument: InstrumentRef
@@ -30,7 +33,9 @@ class BacktestRequest:
 
 
 @dataclass
-class BacktestResult:
+class AdapterBacktestResult:
+    """Legacy Nautilus adapter transport result (not Domain BacktestResultContract)."""
+
     engine: str
     engine_version: str
     strategy_id: str
@@ -44,3 +49,11 @@ class BacktestResult:
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
+
+
+# Explicit deprecated aliases removed to satisfy DOMAIN_CONCEPT_COLLISION=0.
+__all__ = [
+    "InstrumentRef",
+    "AdapterBacktestRequest",
+    "AdapterBacktestResult",
+]

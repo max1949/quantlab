@@ -19,6 +19,8 @@ from engine.domain import (
     EvidenceStage,
     ExecutionMode,
     HashKind,
+    PaperRuntimeContract,
+    PaperRuntimeRequest,
     StrategyLifecycle,
     VersionBump,
     assert_environment_allowed,
@@ -231,6 +233,46 @@ def test_backtest_engine_contract_runtime_checkable():
     caps = port.capabilities()
     assert caps.supports_backtest is True
     assert caps.supports_live is False
+
+
+def test_paper_runtime_contract_and_live_deny():
+    from engine.nautilus.domain_adapter import NautilusPaperRuntimePort, as_paper_runtime
+
+    port = as_paper_runtime()
+    assert isinstance(port, PaperRuntimeContract)
+    assert port.capabilities().supports_paper is True
+    assert port.capabilities().supports_live is False
+
+    denied = port.start(
+        PaperRuntimeRequest(
+            strategy_spec={"strategy": {"id": "x", "version": "v1"}},
+            run_id="r1",
+            environment=Environment.LIVE,
+            execution_mode=ExecutionMode.LIVE,
+        )
+    )
+    assert denied.ok is False
+    assert "DENY" in (denied.error or "").upper() or denied.status == "DENIED"
+
+    bad = NautilusPaperRuntimePort().start(
+        PaperRuntimeRequest(
+            strategy_spec={"not": "a spec"},
+            run_id="r2",
+            environment=Environment.PAPER,
+            execution_mode=ExecutionMode.PAPER,
+        )
+    )
+    assert bad.ok is False
+
+
+def test_no_canonical_backtest_request_name_collision():
+    import engine.trading as trading
+    import engine.domain.engine_contracts as contracts
+
+    assert hasattr(contracts, "BacktestRequest")
+    assert hasattr(trading, "AdapterBacktestRequest")
+    assert not hasattr(trading, "BacktestRequest")
+    assert contracts.BacktestRequest is not trading.AdapterBacktestRequest
 
 
 def test_enum_uniqueness_within_each_domain():

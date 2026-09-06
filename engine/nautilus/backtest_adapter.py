@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 from engine.nautilus.availability import nautilus_available, nautilus_version
-from engine.trading import BacktestRequest, BacktestResult, InstrumentRef
+from engine.trading import AdapterBacktestRequest, AdapterBacktestResult, InstrumentRef
 
 PINNED_VERSION = "1.231.0"
 GOLDEN_STRATEGY_ID = "golden_01_ema_trend"
@@ -35,7 +35,7 @@ def build_golden_ohlcv(n: int = 400, seed: int = 42) -> pd.DataFrame:
 
 
 class NautilusBacktestAdapter:
-    """Thin facade: QuantLab BacktestRequest → Nautilus BacktestEngine → BacktestResult."""
+    """Thin facade: QuantLab AdapterBacktestRequest → Nautilus BacktestEngine → AdapterBacktestResult."""
 
     def __init__(self, *, require_pinned: bool = True) -> None:
         if not nautilus_available():
@@ -58,7 +58,7 @@ class NautilusBacktestAdapter:
         strategy_id: str,
         strategy_version: str,
         persist_dir: str | Path | None = None,
-    ) -> BacktestResult:
+    ) -> AdapterBacktestResult:
         """Run EMA path from compiler output params (multi-instrument)."""
         from engine.data.dataset_resolver import build_btc_golden_ohlcv, resolve_dataset
 
@@ -92,7 +92,7 @@ class NautilusBacktestAdapter:
         persist_dir: str | Path | None = None,
         strategy_id: str = GOLDEN_STRATEGY_ID,
         strategy_version: str = GOLDEN_STRATEGY_VERSION,
-    ) -> BacktestResult:
+    ) -> AdapterBacktestResult:
         """Golden strategy 01: EMA trend (official EMACross example strategy)."""
         from nautilus_trader.backtest.config import BacktestEngineConfig
         from nautilus_trader.backtest.engine import BacktestEngine
@@ -104,7 +104,7 @@ class NautilusBacktestAdapter:
         from nautilus_trader.persistence.wranglers import BarDataWrangler
         from nautilus_trader.test_kit.providers import TestInstrumentProvider
 
-        request = BacktestRequest(
+        request = AdapterBacktestRequest(
             strategy_id=strategy_id,
             strategy_version=strategy_version,
             instrument=InstrumentRef(symbol="EUR/USD", venue="SIM", asset_class="FX"),
@@ -154,7 +154,7 @@ class NautilusBacktestAdapter:
                 "fast_ema": fast_ema,
                 "slow_ema": slow_ema,
             }
-            result = BacktestResult(
+            result = AdapterBacktestResult(
                 engine="NAUTILUS",
                 engine_version=self.engine_version,
                 strategy_id=request.strategy_id,
@@ -170,7 +170,7 @@ class NautilusBacktestAdapter:
                 },
             )
         except Exception as exc:  # noqa: BLE001 — surface as structured result
-            result = BacktestResult(
+            result = AdapterBacktestResult(
                 engine="NAUTILUS",
                 engine_version=self.engine_version,
                 strategy_id=request.strategy_id,
@@ -198,7 +198,7 @@ class NautilusBacktestAdapter:
         strategy_id: str = GOLDEN_STRATEGY_ID,
         strategy_version: str = GOLDEN_STRATEGY_VERSION,
         persist_dir: str | Path | None = None,
-    ) -> BacktestResult:
+    ) -> AdapterBacktestResult:
         """Multi-instrument EMA path (EUR/USD + BTCUSDT golden)."""
         from nautilus_trader.backtest.config import BacktestEngineConfig
         from nautilus_trader.backtest.engine import BacktestEngine
@@ -226,7 +226,7 @@ class NautilusBacktestAdapter:
             size = "0.1" if trade_size == "1000000" else trade_size
             asset_class = "CRYPTO"
         else:
-            return BacktestResult(
+            return AdapterBacktestResult(
                 engine="NAUTILUS",
                 engine_version=self.engine_version,
                 strategy_id=strategy_id,
@@ -237,7 +237,7 @@ class NautilusBacktestAdapter:
                 error=f"unsupported_instrument:{instrument}",
             )
 
-        request = BacktestRequest(
+        request = AdapterBacktestRequest(
             strategy_id=strategy_id,
             strategy_version=strategy_version,
             instrument=InstrumentRef(symbol=str(nt_instrument.id), venue=str(venue), asset_class=asset_class),
@@ -277,7 +277,7 @@ class NautilusBacktestAdapter:
             positions = engine.trader.generate_positions_report()
             fill_count = 0 if fills is None else int(len(fills))
             position_count = 0 if positions is None else int(len(positions))
-            result = BacktestResult(
+            result = AdapterBacktestResult(
                 engine="NAUTILUS",
                 engine_version=self.engine_version,
                 strategy_id=request.strategy_id,
@@ -300,7 +300,7 @@ class NautilusBacktestAdapter:
                 },
             )
         except Exception as exc:  # noqa: BLE001
-            result = BacktestResult(
+            result = AdapterBacktestResult(
                 engine="NAUTILUS",
                 engine_version=self.engine_version,
                 strategy_id=request.strategy_id,
@@ -318,14 +318,14 @@ class NautilusBacktestAdapter:
         return result
 
     @staticmethod
-    def persist_result(result: BacktestResult, persist_dir: str | Path) -> Path:
+    def persist_result(result: AdapterBacktestResult, persist_dir: str | Path) -> Path:
         out = Path(persist_dir)
         out.mkdir(parents=True, exist_ok=True)
         path = out / f"{result.strategy_id}_{result.strategy_version}.json"
         path.write_text(json.dumps(result.to_dict(), indent=2, ensure_ascii=False), encoding="utf-8")
         return path
 
-    def run_request(self, request: BacktestRequest, **kwargs: Any) -> BacktestResult:
+    def run_request(self, request: AdapterBacktestRequest, **kwargs: Any) -> AdapterBacktestResult:
         """Dispatch known golden strategies; expand in later phases."""
         if request.strategy_id == GOLDEN_STRATEGY_ID:
             return self.run_ema_golden(

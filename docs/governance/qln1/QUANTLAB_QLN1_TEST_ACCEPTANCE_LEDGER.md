@@ -10,9 +10,9 @@ FOCUSED_SUITE=engine/tests/test_domain_foundation.py
 
 | Metric | Value |
 |---|---|
-| Focused result | **37 passed** |
+| Focused result | **42 passed** |
 | Engine collect before QLN-1 | 136 |
-| Engine collect after QLN-1 | **153** |
+| Engine collect after unattended close | **155** |
 | Silent test loss | **NO** |
 | Domain schema tests | PASS |
 | Contract / hash / audit / legacy map | PASS |
