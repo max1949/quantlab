@@ -1800,6 +1800,14 @@ schemas/
 - PASS 后也必须 STOP。
 - Owner 只批准方向，不等于批准所有后续实施。
 
+### Companion protocol pointer (non-amending)
+
+Operational autonomous-engineering detail for an **Owner-approved** QLN phase is maintained in:
+
+[`docs/governance/autonomous-engineering/`](./autonomous-engineering/) (pack **v1.0**)
+
+That companion pack does **not** amend this Constitution’s meaning, Live boundaries, Evidence definitions, or `NEXT_PHASE_AUTO_ENTER=NO`. It remains subordinate to Owner explicit instruction, this Constitution, and the current QLN acceptance criteria. Before any code change in an approved QLN phase: `AUTONOMOUS_ENGINEERING_PROTOCOL_LOADED=YES`, else `ENGINEERING_START=DENY`.
+
 ---
 
 ## 46. 最高层一句话

@@ -7,9 +7,24 @@ This directory holds Owner-approved governance SSOT documents.
 | Document | Status | Role |
 |---|---|---|
 | [QUANTLAB_CONSTITUTION.md](./QUANTLAB_CONSTITUTION.md) | **CANONICAL** | WHY / WHAT / BOUNDARY / ORDER — Strategy Research & Evidence OS |
+| [autonomous-engineering/](./autonomous-engineering/) (pack **v1.0**) | **CANONICAL** | Bounded autonomous engineering loop for Owner-approved QLN phases only |
 | `QUANTLAB_NAUTILUS_CAPABILITY_LEDGER.md` | Not yet created | Planned QLN-0 output |
 | `QUANTLAB_PHASE_GATE_LEDGER.md` | Not yet created | Planned phase gate ledger |
 | `QUANTLAB_LIVE_AUTHORITY.md` | Not yet created | Planned Live authority ledger |
+
+## Autonomous Engineering Pack — authority & invoke
+
+Pack index: [`autonomous-engineering/README.md`](./autonomous-engineering/README.md)
+
+**Priority (pack is lower than all of the following):**
+
+1. Owner explicit instruction
+2. `QUANTLAB_CONSTITUTION.md`
+3. Current QLN phase acceptance criteria
+
+**Permanent invoke rule:** when Owner explicitly approves a QLN phase for engineering, the agent MUST load Constitution + that QLN Acceptance + all four pack contracts **before any code modification**, and confirm `AUTONOMOUS_ENGINEERING_PROTOCOL_LOADED=YES`. Otherwise `ENGINEERING_START=DENY`.
+
+Within an approved phase, bounded auto discover/plan/implement/test/regression/similar-issue audit/repair/recheck/document is allowed. Permanent forbid: auto next QLN, scope expansion, Constitution/acceptance weakening, Live / real-money / broker-credential activation. `NEXT_PHASE_AUTO_ENTER=NO` forever unless Owner amends the Constitution.
 
 ## Phase numbering (binding)
 
@@ -35,8 +50,12 @@ LIVE_TRADING=DENY
 AUTONOMOUS_EXPANSION=DENY
 NEXT_ALLOWED_WHEN_OWNER_AUTHORIZES=QLN_0_READ_ONLY
 NEXT_PHASE_AUTO_ENTER=NO
+AUTO_NEXT_QLN=NO
+AUTO_LIVE_ENABLE=NO
+AUTO_REAL_MONEY=NO
 ENGINEERING=FROZEN
 QLN_0_STARTED=NO
+AUTONOMOUS_ENGINEERING_PACK=CANONICAL
 ```
 
 ## Historical assets (preserved, not superseded as facts)
