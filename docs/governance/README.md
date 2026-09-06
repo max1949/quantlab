@@ -10,6 +10,7 @@ This directory holds Owner-approved governance SSOT documents.
 | [amendments/](./amendments/) | **CANONICAL registry** | Owner-approved Constitution Amendments (supplement; do not auto-authorize engineering) |
 | [Amendment No. 1](./amendments/QUANTLAB_CONSTITUTION_AMENDMENT_001_PRODUCT_VALUE_COMMERCIAL_DOCTRINE.md) | **CANONICAL** | Product Value & Commercial Doctrine — Prove Before Capital |
 | [qln0/](./qln0/) | **QLN-0 PASS** (read-only) | Capability / fragmentation / gap / test / alignment ledgers + reconciliation report |
+| [qln1/](./qln1/) | **QLN-1 PASS** | Canonical Domain Foundation (`engine/domain`) + contracts / legacy / engine boundary |
 | [autonomous-engineering/](./autonomous-engineering/) (pack **v1.0**) | **CANONICAL** | Bounded autonomous engineering loop for Owner-approved QLN phases only |
 | `QUANTLAB_NAUTILUS_CAPABILITY_LEDGER.md` | Superseded location | Use `qln0/QUANTLAB_QLN0_CAPABILITY_ASSET_LEDGER.md` as QLN-0 output |
 | `QUANTLAB_PHASE_GATE_LEDGER.md` | Not yet created | Planned phase gate ledger |
@@ -60,7 +61,7 @@ FULL_BUILD_NOW=DENY
 PRODUCTION_CHANGE=DENY
 LIVE_TRADING=DENY
 AUTONOMOUS_EXPANSION=DENY
-NEXT_ALLOWED_WHEN_OWNER_AUTHORIZES=QLN_1_DOMAIN_FOUNDATION
+NEXT_ALLOWED_WHEN_OWNER_AUTHORIZES=QLN_2_STRATEGY_SPEC_V2
 NEXT_PHASE_AUTO_ENTER=NO
 AUTO_NEXT_QLN=NO
 AUTO_LIVE_ENABLE=NO
@@ -70,16 +71,21 @@ QLN_0_COMPLETED=YES
 QLN_0_READ_ONLY_RECONCILIATION=PASS
 QLN_0_FORMAL_CLOSURE=PASS
 CAPABILITY_ASSET_LEDGER=COMPLETE
-QLN_1_STARTED=NO
+QLN_1_COMPLETED=YES
+QLN_1_CONSTITUTIONAL_DOMAIN_FOUNDATION=PASS
+QLN_2_STARTED=NO
 AUTONOMOUS_ENGINEERING_PACK=CANONICAL
 CONSTITUTION_AMENDMENT_001=CANONICAL
 FEATURE_ADMISSION_GATE=EIGHT_QUESTIONS
 COMMERCIALIZATION_AUTO_ENTER=NO
 ```
 
-## QLN-0 closure pointer
+## QLN-0 / QLN-1 closure pointers
 
-Canonical outputs: [`qln0/README.md`](./qln0/README.md). QLN-0 was **read-only** and is **formally closed** (`CAPABILITY_ASSET_LEDGER=COMPLETE`). QLN-1 requires separate Owner authorization. `NEXT_PHASE_AUTO_ENTER=NO`.
+- QLN-0: [`qln0/README.md`](./qln0/README.md) — read-only reconciliation closed.
+- QLN-1: [`qln1/README.md`](./qln1/README.md) — domain foundation PASS; **no auto-enter QLN-2**.
+- Code SSOT: `engine/domain/`
+
 
 ## Historical assets (preserved, not superseded as facts)
 

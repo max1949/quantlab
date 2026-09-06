@@ -1,4 +1,9 @@
-"""Strategy Spec lifecycle + Validation/Robustness gate wiring (reuse existing engines)."""
+"""Strategy Spec lifecycle + Validation/Robustness gate wiring (reuse existing engines).
+
+QLN-1: Legacy Lifecycle literals below remain for Spec gate compatibility.
+Canonical SSOT is engine.domain.enums.StrategyLifecycle — use
+map_legacy_strategy_lifecycle() when crossing domain boundaries.
+"""
 
 from __future__ import annotations
 
@@ -7,9 +12,12 @@ from typing import Any, Literal
 
 import pandas as pd
 
+from engine.domain.enums import StrategyLifecycle as CanonicalStrategyLifecycle
+from engine.domain.legacy_mapping import map_legacy_strategy_lifecycle
 from engine.strategies.spec import StrategySpec
 from engine.strategies.validate import validate_spec
 
+# Legacy Spec-gate lifecycle (NOT Environment / EvidenceStage).
 Lifecycle = Literal[
     "DRAFT",
     "BACKTESTED",
@@ -17,6 +25,10 @@ Lifecycle = Literal[
     "ROBUST",
     "PAPER_READY",
 ]
+
+
+def to_canonical_lifecycle(legacy: Lifecycle | str) -> CanonicalStrategyLifecycle:
+    return map_legacy_strategy_lifecycle(str(legacy))
 
 GateStatus = Literal["PASS", "WARN", "FAIL"]
 

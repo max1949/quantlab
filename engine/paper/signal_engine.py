@@ -5,6 +5,8 @@ from __future__ import annotations
 from collections import deque
 from dataclasses import dataclass, field
 
+from engine.domain.defaults import format_ema_label
+
 
 @dataclass
 class SignalDecision:
@@ -55,13 +57,15 @@ class EmaSignalEngine:
         ema_s = _ema(prices, self.slow)
         adx = _pseudo_adx(prices)
 
-        cond_vals = {"EMA20": ema_f, "EMA60": ema_s, "ADX": adx, "price": price}
+        fast_label = format_ema_label(self.fast)
+        slow_label = format_ema_label(self.slow)
+        cond_vals = {fast_label: ema_f, slow_label: ema_s, "ADX": adx, "price": price}
         rules: list[str] = []
         decision = "HOLD"
         reason = "条件未满足"
 
         if ema_f > ema_s and adx > self.adx_threshold:
-            rules = ["EMA20 > EMA60", f"ADX > {self.adx_threshold:.0f}"]
+            rules = [f"{fast_label} > {slow_label}", f"ADX > {self.adx_threshold:.0f}"]
             if self._position_side == "long":
                 decision = "HOLD"
                 reason = "已持有多单"
@@ -69,7 +73,7 @@ class EmaSignalEngine:
                 decision = "BUY"
                 reason = "趋势多头"
         elif ema_f < ema_s and adx > self.adx_threshold:
-            rules = ["EMA20 < EMA60", f"ADX > {self.adx_threshold:.0f}"]
+            rules = [f"{fast_label} < {slow_label}", f"ADX > {self.adx_threshold:.0f}"]
             if self._position_side == "short":
                 decision = "HOLD"
                 reason = "已持有空单"
