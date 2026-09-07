@@ -25,7 +25,7 @@ export default function Landing() {
   ];
 
   return (
-    <div className="-mx-4 -mt-6 bg-gradient-to-b from-white to-brand-50 dark:from-slate-950 dark:to-slate-900 sm:-mx-0 sm:mt-0">
+    <div className="bg-gradient-to-b from-white to-brand-50 dark:from-slate-950 dark:to-slate-900">
       <section className="mx-auto max-w-4xl px-4 pb-10 pt-12 text-center">
         {ref && (
           <p className="mb-4 inline-block rounded-full bg-brand-100 px-4 py-1 text-sm text-brand-700 dark:bg-brand-900 dark:text-brand-200">

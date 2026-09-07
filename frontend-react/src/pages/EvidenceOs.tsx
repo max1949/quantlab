@@ -163,21 +163,23 @@ export default function EvidenceOs() {
         </label>
       </div>
 
-      <div className="-mx-1 mb-4 flex gap-1 overflow-x-auto px-1 pb-1">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium ${
-              tab === t.id
-                ? "bg-brand-600 text-white"
-                : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200"
-            }`}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </button>
-        ))}
+      <div className="mb-4 min-w-0 max-w-full overflow-x-auto pb-1">
+        <div className="flex w-max gap-1 px-1">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium ${
+                tab === t.id
+                  ? "bg-brand-600 text-white"
+                  : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              }`}
+              onClick={() => setTab(t.id)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {tab === "evidence" && (
