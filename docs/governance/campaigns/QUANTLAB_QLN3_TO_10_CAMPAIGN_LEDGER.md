@@ -40,6 +40,8 @@ STOP=YES
 | QLN-4 | PASS | `31729fb` / stamp `f2c0cf9` |
 | QLN-5 | PASS | `fca3684` |
 | QLN-6 Entry | **HOLD** | Multiple higher Evidence Level strategies + real research demand absent; forging forbidden |
+| QLN-6 Entry Evidence Accumulation | **HOLD** | `GENUINE_STRATEGY_COUNT=0`; baselines/goldens excluded; prod DB SSH probe failed; see `docs/governance/qln6/` |
+| QLN-6 Genuine Strategy Discovery | **EXHAUSTED / HOLD** | Deep scan + business SQL: Factor Lab demand YES; Strategy Spec genuine count still 0; no auto-generate |
 
 ## QLN-6 Entry Gate evidence (honest)
 
