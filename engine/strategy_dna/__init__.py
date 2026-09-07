@@ -6,9 +6,11 @@ from engine.strategy_dna.budget import ResearchBudget, assert_within_budget
 from engine.strategy_dna.committee import CommitteeOpinion, committee_review
 from engine.strategy_dna.counterfactual import CounterfactualRequest, propose_counterfactual
 from engine.strategy_dna.dna import StrategyDNA, build_dna_from_spec_v2
+from engine.strategy_dna.finalize import ResearchFinalizeResult, finalize_research_outcome
 from engine.strategy_dna.genealogy import GenealogyGraph, link_parent_child
-from engine.strategy_dna.graveyard import GraveyardIndex, index_reject
+from engine.strategy_dna.graveyard import GraveyardIndex, index_reject, persist_reject
 from engine.strategy_dna.memory import MemoryRecord, ResearchMemory
+from engine.strategy_dna.outcomes import evidence_decision_to_memory_outcome
 from engine.strategy_dna.similarity import dna_similarity
 
 __all__ = [
@@ -18,13 +20,17 @@ __all__ = [
     "GraveyardIndex",
     "MemoryRecord",
     "ResearchBudget",
+    "ResearchFinalizeResult",
     "ResearchMemory",
     "StrategyDNA",
     "assert_within_budget",
     "build_dna_from_spec_v2",
     "committee_review",
     "dna_similarity",
+    "evidence_decision_to_memory_outcome",
+    "finalize_research_outcome",
     "index_reject",
     "link_parent_child",
+    "persist_reject",
     "propose_counterfactual",
 ]

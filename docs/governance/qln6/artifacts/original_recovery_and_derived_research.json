@@ -1,0 +1,225 @@
+{
+  "ORIGINAL_DATASETS_SEARCHED": [
+    "data/market_data/*.parquet",
+    "quantlab_business_inserts_pg10.sql data_snapshots",
+    "backend.app.services.market_data.generate_sample_ohlcv",
+    "backend.app.services.market_data.fetch_real_ohlcv (akshare)",
+    "strategy_specs/historical_reconstructed",
+    "docs/governance/qln6/artifacts"
+  ],
+  "AU_DATASET": "FOUND",
+  "RB_DATASET": "FOUND",
+  "IF_DATASET": "FOUND",
+  "AU_LOCAL_CLASS": "SYNTHETIC_SEED",
+  "RB_LOCAL_CLASS": "SYNTHETIC_SEED",
+  "IF_LOCAL_CLASS": "SYNTHETIC_SEED",
+  "EXACT_HISTORICAL_SEED_MATCH": true,
+  "EXACT_HISTORICAL_REPRODUCTION_FOR_ENTRY": "NO",
+  "REAL_FETCH": {
+    "AU": {
+      "symbol": "AU",
+      "status": "OK",
+      "REAL_MARKET_DATA": true,
+      "PROVENANCE": "akshare.futures_main_sina",
+      "code": "AU0",
+      "rows": 4056,
+      "start": "2010-01-04",
+      "end": "2026-09-04",
+      "path": "C:\\Users\\Administrator\\quantlab\\data\\market_data\\genuine_recovery\\AU_1d.parquet",
+      "DATASET_HASH": "2c3249c9c8aef4393e5fc851fc9d28708cfcb86322662e23448617c1dfed265b",
+      "TIMEFRAME": "1d",
+      "NO_SYNTHETIC_DATA": true
+    },
+    "RB": {
+      "symbol": "RB",
+      "status": "OK",
+      "REAL_MARKET_DATA": true,
+      "PROVENANCE": "akshare.futures_main_sina",
+      "code": "RB0",
+      "rows": 4047,
+      "start": "2010-01-04",
+      "end": "2026-09-04",
+      "path": "C:\\Users\\Administrator\\quantlab\\data\\market_data\\genuine_recovery\\RB_1d.parquet",
+      "DATASET_HASH": "d0667a5d0108f2316a39721b801168c3a9f49ea3cf1a0c4319bd911f444995b5",
+      "TIMEFRAME": "1d",
+      "NO_SYNTHETIC_DATA": true
+    },
+    "IF": {
+      "symbol": "IF",
+      "status": "OK",
+      "REAL_MARKET_DATA": true,
+      "PROVENANCE": "akshare.futures_main_sina",
+      "code": "IF0",
+      "rows": 2340,
+      "start": "2017-01-17",
+      "end": "2026-09-07",
+      "path": "C:\\Users\\Administrator\\quantlab\\data\\market_data\\genuine_recovery\\IF_1d.parquet",
+      "DATASET_HASH": "15b686d3adaa65aa20f27598102166cf2e57d9070ac29cea2bf28a2ac2efe8f0",
+      "TIMEFRAME": "1d",
+      "NO_SYNTHETIC_DATA": true
+    }
+  },
+  "ORIGINAL_DATASET_RECOVERABLE_EXACT_BYTES": "YES_BUT_SYNTHETIC_SEED",
+  "ORIGINAL_STRATEGIES_REPRODUCED": 5,
+  "ORIGINAL_EVIDENCE_CLASS": "RECONSTRUCTED_ORIGINAL_INSTRUMENT_VALIDATION",
+  "ORIGINAL_HIGHER_EVIDENCE_STRATEGY_COUNT": 2,
+  "PHASE_B_EXECUTED": false,
+  "DERIVED_STRATEGIES_REGISTERED": 0,
+  "DERIVED_STRATEGIES_FULLY_EVALUATED": 0,
+  "DERIVED_HIGHER_EVIDENCE_STRATEGY_COUNT": 0,
+  "TOTAL_GENUINE_STRATEGY_COUNT": 4,
+  "TOTAL_HIGHER_EVIDENCE_STRATEGY_COUNT": 2,
+  "PROMOTE": 2,
+  "HOLD": 0,
+  "KILL": 3,
+  "REAL_RESEARCH_DEMAND": "YES",
+  "QLN_6_ENTRY_GATE_INTEGRITY": "PASS",
+  "QLN_6_ENTRY_GATE": "PASS",
+  "QLN_6_STARTED": "YES",
+  "CAMPAIGN_CONTINUES": "YES",
+  "REAL_MONEY": "NO",
+  "STOP": "NO",
+  "PARAMETER_OPTIMIZATION_TO_PASS": "NO",
+  "INSTRUMENT_IDENTITY_CONFUSION": "NO",
+  "CROSS_INSTRUMENT_AS_ORIGINAL": "NO",
+  "FAKE_DATA": "NO",
+  "SYNTHETIC_AS_REAL": "NO",
+  "THRESHOLD_RELAXATION": "NO",
+  "PARENT_EVIDENCE_INHERITANCE": "NO",
+  "evaluations": [
+    {
+      "strategy_id": "hist_fl_momentum_w20__orig_au",
+      "kind": "ORIGINAL_RECONSTRUCTED",
+      "instrument": "AU",
+      "decision": "KILL",
+      "higher_evidence": false,
+      "reality_score": 71.7946,
+      "research_debt": 50.0,
+      "gates": {
+        "backtest": "PASS",
+        "oos": "PASS",
+        "walk_forward": "PASS",
+        "fee_stress": "FAIL",
+        "slippage_stress": "PASS",
+        "parameter_sensitivity": "FAIL",
+        "regime_split": "PASS",
+        "extreme_period": "PASS"
+      },
+      "reasons": [
+        "KILL: hard gate fail: fee_stress, parameter_sensitivity"
+      ],
+      "data_trust": "PASS",
+      "evidence_class": "RECONSTRUCTED_ORIGINAL_INSTRUMENT_VALIDATION",
+      "dataset_hash": "cbcf8046fb8598b4636277ba04056941450aa239ea0b361985aa6b6d4d98f2b9",
+      "notes": "NOT exact historical reproduction (hist used synthetic seed). Real continuous futures via akshare; params/rules unchanged."
+    },
+    {
+      "strategy_id": "hist_fl_momentum_w20__orig_rb",
+      "kind": "ORIGINAL_RECONSTRUCTED",
+      "instrument": "RB",
+      "decision": "PROMOTE",
+      "higher_evidence": true,
+      "reality_score": 97.7319,
+      "research_debt": 10.0,
+      "gates": {
+        "backtest": "PASS",
+        "oos": "PASS",
+        "walk_forward": "PASS",
+        "fee_stress": "PASS",
+        "slippage_stress": "PASS",
+        "parameter_sensitivity": "PASS",
+        "regime_split": "PASS",
+        "extreme_period": "PASS"
+      },
+      "reasons": [
+        "PROMOTE: core gates PASS; reality_score>=60.0; debt=10.0"
+      ],
+      "data_trust": "PASS",
+      "evidence_class": "RECONSTRUCTED_ORIGINAL_INSTRUMENT_VALIDATION",
+      "dataset_hash": "32212783604b4159489c0615391557849cc796c54964b65daf57b99ba751ab12",
+      "notes": "NOT exact historical reproduction (hist used synthetic seed). Real continuous futures via akshare; params/rules unchanged."
+    },
+    {
+      "strategy_id": "hist_fl_momentum_w250__orig_if",
+      "kind": "ORIGINAL_RECONSTRUCTED",
+      "instrument": "IF",
+      "decision": "KILL",
+      "higher_evidence": false,
+      "reality_score": 57.1935,
+      "research_debt": 85.0,
+      "gates": {
+        "backtest": "PASS",
+        "oos": "PASS",
+        "walk_forward": "PASS",
+        "fee_stress": "FAIL",
+        "slippage_stress": "FAIL",
+        "parameter_sensitivity": "FAIL",
+        "regime_split": "PASS",
+        "extreme_period": "PASS"
+      },
+      "reasons": [
+        "KILL: hard gate fail: fee_stress, slippage_stress, parameter_sensitivity"
+      ],
+      "data_trust": "PASS",
+      "evidence_class": "RECONSTRUCTED_ORIGINAL_INSTRUMENT_VALIDATION",
+      "dataset_hash": "98e7cea13fb71904692eb7db19ec18f451712a930a89e24c1b8d8396acb57ffb",
+      "notes": "NOT exact historical reproduction (hist used synthetic seed). Real continuous futures via akshare; params/rules unchanged."
+    },
+    {
+      "strategy_id": "hist_fl_mean_reversion_w20__orig_rb",
+      "kind": "ORIGINAL_RECONSTRUCTED",
+      "instrument": "RB",
+      "decision": "KILL",
+      "higher_evidence": false,
+      "reality_score": 20.0,
+      "research_debt": 100.0,
+      "gates": {
+        "backtest": "PASS",
+        "oos": "FAIL",
+        "walk_forward": "FAIL",
+        "fee_stress": "FAIL",
+        "slippage_stress": "FAIL",
+        "parameter_sensitivity": "FAIL",
+        "regime_split": "PASS",
+        "extreme_period": "PASS"
+      },
+      "reasons": [
+        "KILL: hard gate fail: oos, walk_forward, fee_stress, slippage_stress, parameter_sensitivity"
+      ],
+      "data_trust": "PASS",
+      "evidence_class": "RECONSTRUCTED_ORIGINAL_INSTRUMENT_VALIDATION",
+      "dataset_hash": "32212783604b4159489c0615391557849cc796c54964b65daf57b99ba751ab12",
+      "notes": "NOT exact historical reproduction (hist used synthetic seed). Real continuous futures via akshare; params/rules unchanged."
+    },
+    {
+      "strategy_id": "hist_fl_rsi_w14__orig_au",
+      "kind": "ORIGINAL_RECONSTRUCTED",
+      "instrument": "AU",
+      "decision": "PROMOTE",
+      "higher_evidence": true,
+      "reality_score": 98.6306,
+      "research_debt": 25.0,
+      "gates": {
+        "backtest": "PASS",
+        "oos": "PASS",
+        "walk_forward": "PASS",
+        "fee_stress": "PASS",
+        "slippage_stress": "PASS",
+        "parameter_sensitivity": "PASS",
+        "regime_split": "PASS",
+        "extreme_period": "PASS"
+      },
+      "reasons": [
+        "PROMOTE: core gates PASS; reality_score>=60.0; debt=25.0"
+      ],
+      "data_trust": "PASS",
+      "evidence_class": "RECONSTRUCTED_ORIGINAL_INSTRUMENT_VALIDATION",
+      "dataset_hash": "cbcf8046fb8598b4636277ba04056941450aa239ea0b361985aa6b6d4d98f2b9",
+      "notes": "NOT exact historical reproduction (hist used synthetic seed). Real continuous futures via akshare; params/rules unchanged."
+    }
+  ],
+  "entry_he_strategy_ids": [
+    "hist_fl_momentum_w20",
+    "hist_fl_rsi_w14"
+  ]
+}

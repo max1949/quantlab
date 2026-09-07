@@ -6,7 +6,7 @@
       "bars"
     ],
     "source_policy": "HISTORICAL_PARQUET_MARKET_DATA",
-    "warmup": 25
+    "warmup": 19
   },
   "escape_hatch": null,
   "invariants": {
@@ -64,22 +64,22 @@
         "severity": "deny"
       }
     ],
-    "strategy_id": "hist_fl_momentum_w20",
-    "version": "v1"
+    "strategy_id": "hist_fl_rsi_w14",
+    "version": "v1.1"
   },
   "lineage": {
-    "child_kind": null,
-    "content_hash": "68c2ef43062a5144b66a59685c6dfa24838fb60d9d5a4c04e28d67cfe5dca024",
-    "derived_from": "factor_lab_historical_backtest",
-    "family_id": "factorlab_momentum",
+    "child_kind": "logic_changing_child",
+    "content_hash": "fefb075f7684fa86d2d8120b1242d6e60165bcc639d56ad26153c50f38e0eb7b",
+    "derived_from": "hist_fl_rsi_w14@v1",
+    "family_id": "factorlab_rsi",
     "fork_of": null,
-    "notes": "",
-    "parent_version": null,
-    "strategy_id": "hist_fl_momentum_w20",
-    "version": "v1"
+    "notes": "classes={'identity': 3, 'metadata_only': 7, 'parameter': 4, 'breaking_semantic': 2}",
+    "parent_version": "v1",
+    "strategy_id": "hist_fl_rsi_w14",
+    "version": "v1.1"
   },
   "manifest": {
-    "content_hash": "987c5e9bc6bed4ec2e671f458e14d75cdb47df82f4cb72fdeaba2c76e24df889",
+    "content_hash": "cc4d01a6cbc7bd9f4548227c204667492407b02ba5c9836cbda797a35a9a385c",
     "files": [
       "README.md",
       "data_requirements.json",
@@ -92,28 +92,32 @@
     ],
     "format": "quantlab.strategy_package",
     "format_version": "1.0",
-    "strategy_id": "hist_fl_momentum_w20",
-    "version": "v1"
+    "strategy_id": "hist_fl_rsi_w14",
+    "version": "v1.1"
   },
   "parameters": {
+    "cross_instrument_of": [
+      "AU"
+    ],
+    "evidence_instrument": "CU",
     "execution_rule": "sign(signal)",
     "execution_rule_source": "engine.backtest.signal_to_positions",
     "historical_symbols": [
-      "AU",
-      "RB"
+      "AU"
     ],
     "identity_note": "universe is Strategy identity; Factor Lab backtests were symbol-bound",
     "instrument_agnostic": false,
-    "param_window": 20,
-    "template_type": "momentum"
+    "param_window": 14,
+    "template_type": "rsi",
+    "validation_class": "DERIVED_STRATEGY_VERSION"
   },
-  "readme": "# Historical FactorLab Momentum w20 (sign)\n\nORIGINAL historical identity (universe=['AU', 'RB']).\n",
+  "readme": "# Historical FactorLab RSI w14 (sign of raw RSI) [CU derived]\n\nDERIVED_STRATEGY_VERSION from hist_fl_rsi_w14@v1; CROSS_INSTRUMENT_VALIDATION ['AU'] → CU. Not original reproduction.\n",
   "strategy_contract": {
     "abnormal": [
       "lookahead fills",
       "silent instrument remap"
     ],
-    "contract_id": "hist_fl_momentum_w20:v1:contract",
+    "contract_id": "hist_fl_rsi_w14:v1.1:contract",
     "expected": [
       "positions follow sign(factor)",
       "instrument matches Spec universe for reproduction claims"
@@ -127,9 +131,9 @@
     ],
     "risk": "Unit ±1; historical FactorLab costs; no stop",
     "schema_version": "2.0",
-    "strategy_id": "hist_fl_momentum_w20",
-    "version": "v1",
-    "what": "FactorLab momentum → sign(signal) timing on futures",
+    "strategy_id": "hist_fl_rsi_w14",
+    "version": "v1.1",
+    "what": "FactorLab rsi → sign(signal) timing on futures",
     "when": [
       "env:BACKTEST",
       "env:PAPER",
@@ -151,7 +155,7 @@
       "required_data_capabilities": [],
       "required_engine_features": [
         "factor_sign",
-        "momentum"
+        "rsi"
       ]
     },
     "contract_id": null,
@@ -162,7 +166,7 @@
         "bars"
       ],
       "source_policy": "HISTORICAL_PARQUET_MARKET_DATA",
-      "warmup": 25
+      "warmup": 19
     },
     "execution": {
       "assumptions": {
@@ -178,14 +182,14 @@
     },
     "extension_points": [],
     "identity": {
-      "derived_from": "factor_lab_historical_backtest",
-      "family_id": "factorlab_momentum",
+      "derived_from": "hist_fl_rsi_w14@v1",
+      "family_id": "factorlab_rsi",
       "fork_of": null,
-      "name": "Historical FactorLab Momentum w20 (sign)",
-      "parent_version": null,
+      "name": "Historical FactorLab RSI w14 (sign of raw RSI) [CU derived]",
+      "parent_version": "v1",
       "schema_version": "2.0",
-      "strategy_id": "hist_fl_momentum_w20",
-      "version": "v1"
+      "strategy_id": "hist_fl_rsi_w14",
+      "version": "v1.1"
     },
     "implementation_ref": null,
     "invariant_ids": [],
@@ -193,29 +197,36 @@
       "ai_generated": false,
       "ambiguous": false,
       "author": "quantlab_reconstruction",
-      "change_reason": "integrity_restore_historical_universe",
+      "change_reason": "instrument_universe_change_breaking_semantic",
       "created_by": "qln6_phase_a_reconstruction",
-      "description": "Reconstructed from Factor Lab historical backtests. Signal=momentum{'window': 20}; execution=sign(signal) per engine.backtest (ORIGINAL platform contract). Historical symbols=['AU', 'RB'].  [INTEGRITY] universe restored to historical symbols; CU/MA evidence is not original reproduction.",
+      "description": "Derived from hist_fl_rsi_w14@v1 by changing universe ['AU'] → [CU]. Trading rules/params unchanged. NOT original reproduction.",
       "display_name_zh": null,
       "tags": [
         "GENUINE_HISTORICAL_STRATEGY",
         "factor_lab",
-        "momentum"
+        "rsi",
+        "DERIVED_STRATEGY_VERSION",
+        "CROSS_INSTRUMENT_VALIDATION",
+        "CU"
       ],
       "user_approved": false
     },
     "parameters": {
       "values": {
+        "cross_instrument_of": [
+          "AU"
+        ],
+        "evidence_instrument": "CU",
         "execution_rule": "sign(signal)",
         "execution_rule_source": "engine.backtest.signal_to_positions",
         "historical_symbols": [
-          "AU",
-          "RB"
+          "AU"
         ],
         "identity_note": "universe is Strategy identity; Factor Lab backtests were symbol-bound",
         "instrument_agnostic": false,
-        "param_window": 20,
-        "template_type": "momentum"
+        "param_window": 14,
+        "template_type": "rsi",
+        "validation_class": "DERIVED_STRATEGY_VERSION"
       }
     },
     "position_sizing": {
@@ -246,10 +257,10 @@
         {
           "params": {
             "params": {
-              "window": 20
+              "window": 14
             },
             "side": "long",
-            "template_type": "momentum"
+            "template_type": "rsi"
           },
           "type": "factor_sign"
         }
@@ -258,10 +269,10 @@
         {
           "params": {
             "params": {
-              "window": 20
+              "window": 14
             },
             "side": "short",
-            "template_type": "momentum"
+            "template_type": "rsi"
           },
           "type": "factor_sign"
         }
@@ -270,9 +281,9 @@
         {
           "params": {
             "params": {
-              "window": 20
+              "window": 14
             },
-            "template_type": "momentum"
+            "template_type": "rsi"
           },
           "type": "factor_sign_flat_or_flip"
         }
@@ -302,8 +313,7 @@
       "asset_class": "FUTURES",
       "base_currency": null,
       "instruments": [
-        "AU",
-        "RB"
+        "CU"
       ],
       "quote_currency": null,
       "synthetic_formula": null,

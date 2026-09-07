@@ -69,7 +69,7 @@
   },
   "lineage": {
     "child_kind": null,
-    "content_hash": "229c7c322c15f7cc9654ac10b1158cf346e2a385d0bdfc4e9e71d1bd90e08771",
+    "content_hash": "eb2edc0ba651d0b323138916019f0417027d2d4b10027399826968c9435b1a03",
     "derived_from": "factor_lab_historical_backtest",
     "family_id": "factorlab_rsi",
     "fork_of": null,
@@ -79,7 +79,7 @@
     "version": "v1"
   },
   "manifest": {
-    "content_hash": "785c3810368657eeda70dd3c5542f6137bed69611f900154a54dfbe8735f797f",
+    "content_hash": "4670657b2a02c312930ab356e9bde7d63fdcd6e358c9c8e4d4e23d1111ac5361",
     "files": [
       "README.md",
       "data_requirements.json",
@@ -96,36 +96,35 @@
     "version": "v1"
   },
   "parameters": {
-    "evidence_instrument": "CU",
     "execution_rule": "sign(signal)",
     "execution_rule_source": "engine.backtest.signal_to_positions",
     "historical_symbols": [
       "AU"
     ],
+    "identity_note": "universe is Strategy identity; Factor Lab backtests were symbol-bound",
+    "instrument_agnostic": false,
     "param_window": 14,
     "template_type": "rsi"
   },
-  "readme": "# Historical FactorLab RSI w14 (sign of raw RSI)\n\nGENUINE_HISTORICAL_STRATEGY reconstruction.\n",
+  "readme": "# Historical FactorLab RSI w14 (sign of raw RSI)\n\nORIGINAL historical identity (universe=['AU']).\n",
   "strategy_contract": {
     "abnormal": [
       "lookahead fills",
-      "rules not matching engine.backtest"
+      "silent instrument remap"
     ],
     "contract_id": "hist_fl_rsi_w14:v1:contract",
     "expected": [
       "positions follow sign(factor)",
-      "lagged returns avoid lookahead"
+      "instrument matches Spec universe for reproduction claims"
     ],
     "invalidation": [
-      "factor template semantics change",
-      "execution rule no longer sign(signal)",
-      "data trust fail on research dataset"
+      "universe instruments change without new derived version",
+      "labeling cross-instrument evidence as ORIGINAL_STRATEGY_REPRODUCTION"
     ],
     "retirement": [
-      "superseded by Spec revision",
-      "hypothesis invalidated"
+      "superseded by Spec revision"
     ],
-    "risk": "Unit ±1 position; fee/slippage via CostConfig; no stop in historical engine",
+    "risk": "Unit ±1; historical FactorLab costs; no stop",
     "schema_version": "2.0",
     "strategy_id": "hist_fl_rsi_w14",
     "version": "v1",
@@ -137,10 +136,9 @@
     ],
     "when_not": [
       "env:LIVE",
-      "ambiguous=true",
-      "invented_rules=true"
+      "claim_original_reproduction_on_wrong_instrument=true"
     ],
-    "why": "Recovered from historical Factor Lab user/project backtests; platform execution contract preserved"
+    "why": "integrity-corrected identity / derived instrument version"
   },
   "strategy_spec": {
     "compatibility": {
@@ -194,9 +192,9 @@
       "ai_generated": false,
       "ambiguous": false,
       "author": "quantlab_reconstruction",
-      "change_reason": "historical_semantics_recovery",
+      "change_reason": "integrity_restore_historical_universe",
       "created_by": "qln6_phase_a_reconstruction",
-      "description": "Reconstructed from Factor Lab historical backtests. Signal=rsi{'window': 14}; execution=sign(signal) per engine.backtest (ORIGINAL platform contract). Historical symbols=['AU']. Historical engine used np.sign(raw RSI); RSI∈(0,100) ⇒ nearly always +1. Preserved as ORIGINAL.",
+      "description": "Reconstructed from Factor Lab historical backtests. Signal=rsi{'window': 14}; execution=sign(signal) per engine.backtest (ORIGINAL platform contract). Historical symbols=['AU']. Historical engine used np.sign(raw RSI); RSI∈(0,100) ⇒ nearly always +1. Preserved as ORIGINAL. [INTEGRITY] universe restored to historical symbols; CU/MA evidence is not original reproduction.",
       "display_name_zh": null,
       "tags": [
         "GENUINE_HISTORICAL_STRATEGY",
@@ -207,12 +205,13 @@
     },
     "parameters": {
       "values": {
-        "evidence_instrument": "CU",
         "execution_rule": "sign(signal)",
         "execution_rule_source": "engine.backtest.signal_to_positions",
         "historical_symbols": [
           "AU"
         ],
+        "identity_note": "universe is Strategy identity; Factor Lab backtests were symbol-bound",
+        "instrument_agnostic": false,
         "param_window": 14,
         "template_type": "rsi"
       }
@@ -301,7 +300,7 @@
       "asset_class": "FUTURES",
       "base_currency": null,
       "instruments": [
-        "CU"
+        "AU"
       ],
       "quote_currency": null,
       "synthetic_formula": null,

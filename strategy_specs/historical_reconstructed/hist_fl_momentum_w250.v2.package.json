@@ -69,7 +69,7 @@
   },
   "lineage": {
     "child_kind": null,
-    "content_hash": "8cbbddcc4a28dbfeae3408d7958e72d3d34f05a6916a4bf836747c7ca113905c",
+    "content_hash": "42b2d3690981a5c48837ddb6648653b6ba7ad71d1670a8d114adaa8ff4a8703c",
     "derived_from": "factor_lab_historical_backtest",
     "family_id": "factorlab_momentum",
     "fork_of": null,
@@ -79,7 +79,7 @@
     "version": "v1"
   },
   "manifest": {
-    "content_hash": "f2960e2357773845f7bea405fb29ea3d29c71407d2c0b9ed35ac0cdf0b065de7",
+    "content_hash": "e4f05ec8004b641cf12e8801dc60e3e12f2b3c8f512f650569a1f2734f985e06",
     "files": [
       "README.md",
       "data_requirements.json",
@@ -96,36 +96,35 @@
     "version": "v1"
   },
   "parameters": {
-    "evidence_instrument": "CU",
     "execution_rule": "sign(signal)",
     "execution_rule_source": "engine.backtest.signal_to_positions",
     "historical_symbols": [
       "IF"
     ],
+    "identity_note": "universe is Strategy identity; Factor Lab backtests were symbol-bound",
+    "instrument_agnostic": false,
     "param_window": 250,
     "template_type": "momentum"
   },
-  "readme": "# Historical FactorLab Momentum w250 (sign)\n\nGENUINE_HISTORICAL_STRATEGY reconstruction.\n",
+  "readme": "# Historical FactorLab Momentum w250 (sign)\n\nORIGINAL historical identity (universe=['IF']).\n",
   "strategy_contract": {
     "abnormal": [
       "lookahead fills",
-      "rules not matching engine.backtest"
+      "silent instrument remap"
     ],
     "contract_id": "hist_fl_momentum_w250:v1:contract",
     "expected": [
       "positions follow sign(factor)",
-      "lagged returns avoid lookahead"
+      "instrument matches Spec universe for reproduction claims"
     ],
     "invalidation": [
-      "factor template semantics change",
-      "execution rule no longer sign(signal)",
-      "data trust fail on research dataset"
+      "universe instruments change without new derived version",
+      "labeling cross-instrument evidence as ORIGINAL_STRATEGY_REPRODUCTION"
     ],
     "retirement": [
-      "superseded by Spec revision",
-      "hypothesis invalidated"
+      "superseded by Spec revision"
     ],
-    "risk": "Unit ±1 position; fee/slippage via CostConfig; no stop in historical engine",
+    "risk": "Unit ±1; historical FactorLab costs; no stop",
     "schema_version": "2.0",
     "strategy_id": "hist_fl_momentum_w250",
     "version": "v1",
@@ -137,10 +136,9 @@
     ],
     "when_not": [
       "env:LIVE",
-      "ambiguous=true",
-      "invented_rules=true"
+      "claim_original_reproduction_on_wrong_instrument=true"
     ],
-    "why": "Recovered from historical Factor Lab user/project backtests; platform execution contract preserved"
+    "why": "integrity-corrected identity / derived instrument version"
   },
   "strategy_spec": {
     "compatibility": {
@@ -194,9 +192,9 @@
       "ai_generated": false,
       "ambiguous": false,
       "author": "quantlab_reconstruction",
-      "change_reason": "historical_semantics_recovery",
+      "change_reason": "integrity_restore_historical_universe",
       "created_by": "qln6_phase_a_reconstruction",
-      "description": "Reconstructed from Factor Lab historical backtests. Signal=momentum{'window': 250}; execution=sign(signal) per engine.backtest (ORIGINAL platform contract). Historical symbols=['IF']. ",
+      "description": "Reconstructed from Factor Lab historical backtests. Signal=momentum{'window': 250}; execution=sign(signal) per engine.backtest (ORIGINAL platform contract). Historical symbols=['IF'].  [INTEGRITY] universe restored to historical symbols; CU/MA evidence is not original reproduction.",
       "display_name_zh": null,
       "tags": [
         "GENUINE_HISTORICAL_STRATEGY",
@@ -207,12 +205,13 @@
     },
     "parameters": {
       "values": {
-        "evidence_instrument": "CU",
         "execution_rule": "sign(signal)",
         "execution_rule_source": "engine.backtest.signal_to_positions",
         "historical_symbols": [
           "IF"
         ],
+        "identity_note": "universe is Strategy identity; Factor Lab backtests were symbol-bound",
+        "instrument_agnostic": false,
         "param_window": 250,
         "template_type": "momentum"
       }
@@ -301,7 +300,7 @@
       "asset_class": "FUTURES",
       "base_currency": null,
       "instruments": [
-        "CU"
+        "IF"
       ],
       "quote_currency": null,
       "synthetic_formula": null,

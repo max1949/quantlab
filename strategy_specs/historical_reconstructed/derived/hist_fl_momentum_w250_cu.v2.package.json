@@ -6,7 +6,7 @@
       "bars"
     ],
     "source_policy": "HISTORICAL_PARQUET_MARKET_DATA",
-    "warmup": 25
+    "warmup": 255
   },
   "escape_hatch": null,
   "invariants": {
@@ -64,22 +64,22 @@
         "severity": "deny"
       }
     ],
-    "strategy_id": "hist_fl_momentum_w20",
-    "version": "v1"
+    "strategy_id": "hist_fl_momentum_w250",
+    "version": "v1.1"
   },
   "lineage": {
-    "child_kind": null,
-    "content_hash": "68c2ef43062a5144b66a59685c6dfa24838fb60d9d5a4c04e28d67cfe5dca024",
-    "derived_from": "factor_lab_historical_backtest",
+    "child_kind": "logic_changing_child",
+    "content_hash": "88e363518d2d15b5df8066dff116a783975c378c13d740d5ad3f998e683ec498",
+    "derived_from": "hist_fl_momentum_w250@v1",
     "family_id": "factorlab_momentum",
     "fork_of": null,
-    "notes": "",
-    "parent_version": null,
-    "strategy_id": "hist_fl_momentum_w20",
-    "version": "v1"
+    "notes": "classes={'identity': 3, 'metadata_only': 7, 'parameter': 4, 'breaking_semantic': 2}",
+    "parent_version": "v1",
+    "strategy_id": "hist_fl_momentum_w250",
+    "version": "v1.1"
   },
   "manifest": {
-    "content_hash": "987c5e9bc6bed4ec2e671f458e14d75cdb47df82f4cb72fdeaba2c76e24df889",
+    "content_hash": "1baac58247be24871c8959584552769249caf537bebe2cf9761f59117a182236",
     "files": [
       "README.md",
       "data_requirements.json",
@@ -92,28 +92,32 @@
     ],
     "format": "quantlab.strategy_package",
     "format_version": "1.0",
-    "strategy_id": "hist_fl_momentum_w20",
-    "version": "v1"
+    "strategy_id": "hist_fl_momentum_w250",
+    "version": "v1.1"
   },
   "parameters": {
+    "cross_instrument_of": [
+      "IF"
+    ],
+    "evidence_instrument": "CU",
     "execution_rule": "sign(signal)",
     "execution_rule_source": "engine.backtest.signal_to_positions",
     "historical_symbols": [
-      "AU",
-      "RB"
+      "IF"
     ],
     "identity_note": "universe is Strategy identity; Factor Lab backtests were symbol-bound",
     "instrument_agnostic": false,
-    "param_window": 20,
-    "template_type": "momentum"
+    "param_window": 250,
+    "template_type": "momentum",
+    "validation_class": "DERIVED_STRATEGY_VERSION"
   },
-  "readme": "# Historical FactorLab Momentum w20 (sign)\n\nORIGINAL historical identity (universe=['AU', 'RB']).\n",
+  "readme": "# Historical FactorLab Momentum w250 (sign) [CU derived]\n\nDERIVED_STRATEGY_VERSION from hist_fl_momentum_w250@v1; CROSS_INSTRUMENT_VALIDATION ['IF'] → CU. Not original reproduction.\n",
   "strategy_contract": {
     "abnormal": [
       "lookahead fills",
       "silent instrument remap"
     ],
-    "contract_id": "hist_fl_momentum_w20:v1:contract",
+    "contract_id": "hist_fl_momentum_w250:v1.1:contract",
     "expected": [
       "positions follow sign(factor)",
       "instrument matches Spec universe for reproduction claims"
@@ -127,8 +131,8 @@
     ],
     "risk": "Unit ±1; historical FactorLab costs; no stop",
     "schema_version": "2.0",
-    "strategy_id": "hist_fl_momentum_w20",
-    "version": "v1",
+    "strategy_id": "hist_fl_momentum_w250",
+    "version": "v1.1",
     "what": "FactorLab momentum → sign(signal) timing on futures",
     "when": [
       "env:BACKTEST",
@@ -162,7 +166,7 @@
         "bars"
       ],
       "source_policy": "HISTORICAL_PARQUET_MARKET_DATA",
-      "warmup": 25
+      "warmup": 255
     },
     "execution": {
       "assumptions": {
@@ -178,14 +182,14 @@
     },
     "extension_points": [],
     "identity": {
-      "derived_from": "factor_lab_historical_backtest",
+      "derived_from": "hist_fl_momentum_w250@v1",
       "family_id": "factorlab_momentum",
       "fork_of": null,
-      "name": "Historical FactorLab Momentum w20 (sign)",
-      "parent_version": null,
+      "name": "Historical FactorLab Momentum w250 (sign) [CU derived]",
+      "parent_version": "v1",
       "schema_version": "2.0",
-      "strategy_id": "hist_fl_momentum_w20",
-      "version": "v1"
+      "strategy_id": "hist_fl_momentum_w250",
+      "version": "v1.1"
     },
     "implementation_ref": null,
     "invariant_ids": [],
@@ -193,29 +197,36 @@
       "ai_generated": false,
       "ambiguous": false,
       "author": "quantlab_reconstruction",
-      "change_reason": "integrity_restore_historical_universe",
+      "change_reason": "instrument_universe_change_breaking_semantic",
       "created_by": "qln6_phase_a_reconstruction",
-      "description": "Reconstructed from Factor Lab historical backtests. Signal=momentum{'window': 20}; execution=sign(signal) per engine.backtest (ORIGINAL platform contract). Historical symbols=['AU', 'RB'].  [INTEGRITY] universe restored to historical symbols; CU/MA evidence is not original reproduction.",
+      "description": "Derived from hist_fl_momentum_w250@v1 by changing universe ['IF'] → [CU]. Trading rules/params unchanged. NOT original reproduction.",
       "display_name_zh": null,
       "tags": [
         "GENUINE_HISTORICAL_STRATEGY",
         "factor_lab",
-        "momentum"
+        "momentum",
+        "DERIVED_STRATEGY_VERSION",
+        "CROSS_INSTRUMENT_VALIDATION",
+        "CU"
       ],
       "user_approved": false
     },
     "parameters": {
       "values": {
+        "cross_instrument_of": [
+          "IF"
+        ],
+        "evidence_instrument": "CU",
         "execution_rule": "sign(signal)",
         "execution_rule_source": "engine.backtest.signal_to_positions",
         "historical_symbols": [
-          "AU",
-          "RB"
+          "IF"
         ],
         "identity_note": "universe is Strategy identity; Factor Lab backtests were symbol-bound",
         "instrument_agnostic": false,
-        "param_window": 20,
-        "template_type": "momentum"
+        "param_window": 250,
+        "template_type": "momentum",
+        "validation_class": "DERIVED_STRATEGY_VERSION"
       }
     },
     "position_sizing": {
@@ -246,7 +257,7 @@
         {
           "params": {
             "params": {
-              "window": 20
+              "window": 250
             },
             "side": "long",
             "template_type": "momentum"
@@ -258,7 +269,7 @@
         {
           "params": {
             "params": {
-              "window": 20
+              "window": 250
             },
             "side": "short",
             "template_type": "momentum"
@@ -270,7 +281,7 @@
         {
           "params": {
             "params": {
-              "window": 20
+              "window": 250
             },
             "template_type": "momentum"
           },
@@ -302,8 +313,7 @@
       "asset_class": "FUTURES",
       "base_currency": null,
       "instruments": [
-        "AU",
-        "RB"
+        "CU"
       ],
       "quote_currency": null,
       "synthetic_formula": null,

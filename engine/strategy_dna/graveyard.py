@@ -8,6 +8,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from engine.validation.graveyard import append_reject
+
 
 class GraveyardIndex(BaseModel):
     entries: list[dict[str, Any]] = Field(default_factory=list)
@@ -33,6 +35,30 @@ def index_reject(
         "gates": gates or {},
         "status": "KILLED_OR_REJECTED",
     }
+
+
+def persist_reject(
+    *,
+    strategy_id: str,
+    version: str,
+    reason: str,
+    gates: dict[str, Any] | None = None,
+    market: str = "",
+    timeframe: str = "1d",
+    hypothesis: str = "",
+    path: Path | str | None = None,
+) -> Path:
+    """Dual-write into validation graveyard JSONL (append-only SSOT)."""
+    payload = {
+        "strategy_id": strategy_id,
+        "strategy_version": version,
+        "hypothesis": hypothesis or reason,
+        "market": market,
+        "timeframe": timeframe,
+        "validation_results": {"gates": gates or {}, "qln6": True},
+        "failure_reason": reason,
+    }
+    return append_reject(payload, path=Path(path) if path else None)
 
 
 def load_legacy_graveyard(path: Path | str | None = None) -> list[dict[str, Any]]:

@@ -1,28 +1,35 @@
-"""QLN-6 Strategy DNA / memory / genealogy tests."""
+"""QLN-6 Strategy DNA / memory / genealogy / finalize tests."""
 
 from __future__ import annotations
 
 import json
 from pathlib import Path
 
+import pytest
+
+from engine.strategies.v2.errors import SpecV2Error
+from engine.strategies.v2.package import import_package
 from engine.strategy_dna import (
     GenealogyGraph,
+    MemoryRecord,
     ResearchBudget,
     ResearchMemory,
-    MemoryRecord,
     assert_within_budget,
     build_dna_from_spec_v2,
+    committee_review,
+    evidence_decision_to_memory_outcome,
+    finalize_research_outcome,
     link_parent_child,
 )
-from engine.strategy_dna.committee import committee_review
 from engine.strategy_dna.counterfactual import CounterfactualRequest, propose_counterfactual
 from engine.strategy_dna.similarity import dna_similarity
-from engine.strategies.v2.package import import_package
+from engine.validation.graveyard import list_rejects
 
 
 ROOT = Path(__file__).resolve().parents[2]
 PKG = ROOT / "strategy_specs" / "historical_reconstructed" / "hist_fl_momentum_w250.v2.package.json"
 PKG2 = ROOT / "strategy_specs" / "historical_reconstructed" / "hist_fl_rsi_w14.v2.package.json"
+HE_PKG = ROOT / "strategy_specs" / "historical_reconstructed" / "hist_fl_momentum_w20.v2.package.json"
 
 
 def test_dna_and_genealogy_from_reconstructed_packages():
@@ -92,6 +99,16 @@ def test_budget_and_counterfactual_forbid_optimize_until_pass():
     assert denied.status == "DENIED"
 
 
+def test_budget_optimize_until_pass_raises():
+    with pytest.raises(SpecV2Error, match="OPTIMIZE_UNTIL_PASS"):
+        assert_within_budget(ResearchBudget(optimize_until_pass=True), created=0)
+
+
+def test_budget_exceed_raises():
+    with pytest.raises(SpecV2Error, match="research budget exceeded"):
+        assert_within_budget(ResearchBudget(max_new_candidates=2), created=3)
+
+
 def test_committee_allows_no_edge():
     opinions = committee_review({"decision": "KILL", "reasons": ["hard fail: oos"]})
     roles = {o.role for o in opinions}
@@ -99,9 +116,56 @@ def test_committee_allows_no_edge():
     assert any(o.allows_no_edge for o in opinions)
 
 
-def test_phase_a_results_artifact_exists():
-    p = ROOT / "docs" / "governance" / "qln6" / "artifacts" / "phase_a_evidence_results.json"
-    assert p.exists()
-    data = json.loads(p.read_text(encoding="utf-8"))
-    assert data["GENUINE_HISTORICAL_STRATEGIES_RECOVERED"] == 4
-    assert data["HIGHER_EVIDENCE_STRATEGY_COUNT"] >= 2
+def test_kill_maps_to_no_edge_found():
+    assert evidence_decision_to_memory_outcome("KILL") == "NO_EDGE_FOUND"
+    assert evidence_decision_to_memory_outcome("PROMOTE") == "PROMOTE"
+
+
+def test_finalize_kill_persists_memory_and_graveyard(tmp_path):
+    mem_path = tmp_path / "memory.jsonl"
+    gy_path = tmp_path / "rejects.jsonl"
+    result = finalize_research_outcome(
+        strategy_id="hist_fl_mean_reversion_w20",
+        version="v1",
+        evidence_decision="KILL",
+        reasons=["hard gate fail: oos"],
+        gates={"oos": "FAIL"},
+        market="RB",
+        memory=ResearchMemory(mem_path),
+        persist_graveyard_path=gy_path,
+        persist=True,
+    )
+    assert result.memory_outcome == "NO_EDGE_FOUND"
+    assert result.negative_result is True
+    assert result.recommendation["continue_optimize"] is False
+    assert "继续优化" not in result.recommendation.get("message", "")
+    assert result.memory_persisted and result.graveyard_persisted
+    negs = ResearchMemory(mem_path).negative_results()
+    assert len(negs) == 1
+    assert negs[0].outcome == "NO_EDGE_FOUND"
+    rejects = list_rejects(path=gy_path)
+    assert len(rejects) == 1
+    assert rejects[0]["strategy_id"] == "hist_fl_mean_reversion_w20"
+
+
+def test_finalize_promote_no_graveyard(tmp_path):
+    result = finalize_research_outcome(
+        strategy_id="hist_fl_rsi_w14",
+        version="v1",
+        evidence_decision="PROMOTE",
+        reasons=["gates pass"],
+        memory=ResearchMemory(tmp_path / "m.jsonl"),
+        persist_graveyard_path=tmp_path / "g.jsonl",
+    )
+    assert result.memory_outcome == "PROMOTE"
+    assert result.graveyard_persisted is False
+    assert not (tmp_path / "g.jsonl").exists()
+
+
+def test_entry_he_packages_exist():
+    assert HE_PKG.exists() and PKG2.exists()
+    art = ROOT / "docs" / "governance" / "qln6" / "artifacts" / "original_recovery_and_derived_research.json"
+    assert art.exists()
+    data = json.loads(art.read_text(encoding="utf-8"))
+    assert data["TOTAL_HIGHER_EVIDENCE_STRATEGY_COUNT"] >= 2
+    assert data["QLN_6_ENTRY_GATE"] == "PASS"
