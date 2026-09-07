@@ -6,7 +6,8 @@ TITLE=Experiment Ledger / Data Trust / Reproducibility Core
 QLN_3=PASS
 REPRODUCIBILITY_CORE=PASS
 QLN_3_FORMAL_CLOSURE=PASS
-FORMAL_GIT_CLOSURE=PENDING
+FORMAL_GIT_CLOSURE=YES
+QLN_3_FINAL_COMMIT=64d7a64029fc626d8881e91e58c4436a92b4b512
 CAMPAIGN=QUANTLAB_QLN_3_TO_10_AUTONOMOUS_CAMPAIGN
 UNAUTHORIZED_SCOPE_EXPANSION=NO
 QLN_3_STRUCTURAL_DB_CHANGE_REQUIRED=NO
@@ -40,9 +41,10 @@ NO_SILENT_TEST_LOSS=YES
 ## Final Git Seal
 
 ```text
-QLN_3_FINAL_COMMIT=PENDING_SEAL
+QLN_3_FINAL_COMMIT=64d7a64029fc626d8881e91e58c4436a92b4b512
+QLN_3_ARTIFACTS_COMMITTED=YES
 ```
 
 ## Campaign continuation
 
-QLN-4 Entry Gate will be evaluated after this formal git seal. Preauthorization covers QLN-4; Entry does not require forged Paper/Live evidence — it requires QLN-3 REPRODUCE=PASS (satisfied).
+QLN-4 Entry Gate evaluated after this formal git seal. Preauthorization covers QLN-4; Entry does not require forged Paper/Live evidence — it requires QLN-3 REPRODUCE=PASS (satisfied).

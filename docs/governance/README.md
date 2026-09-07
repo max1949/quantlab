@@ -12,6 +12,8 @@ This directory holds Owner-approved governance SSOT documents.
 | [qln0/](./qln0/) | **QLN-0 PASS** (read-only) | Capability / fragmentation / gap / test / alignment ledgers + reconciliation report |
 | [qln1/](./qln1/) | **QLN-1 PASS** | Canonical Domain Foundation (`engine/domain`) + contracts / legacy / engine boundary |
 | [qln2/](./qln2/) | **QLN-2 PASS** | Strategy Spec v2 / Contract / Invariants / Portable Package / Adapter Compiler |
+| [qln3/](./qln3/) | **QLN-3 PASS** | Experiment Ledger / Data Trust / Reproducibility Core |
+| [campaigns/](./campaigns/) | **ACTIVE** | Owner-preauthorized QLN-3→QLN-10 continuous campaign ledger |
 | [autonomous-engineering/](./autonomous-engineering/) (pack **v1.0**) | **CANONICAL** | Bounded autonomous engineering loop for Owner-approved QLN phases only |
 | `QUANTLAB_NAUTILUS_CAPABILITY_LEDGER.md` | Superseded location | Use `qln0/QUANTLAB_QLN0_CAPABILITY_ASSET_LEDGER.md` as QLN-0 output |
 | `QUANTLAB_PHASE_GATE_LEDGER.md` | Not yet created | Planned phase gate ledger |
