@@ -11,6 +11,7 @@ This directory holds Owner-approved governance SSOT documents.
 | [Amendment No. 1](./amendments/QUANTLAB_CONSTITUTION_AMENDMENT_001_PRODUCT_VALUE_COMMERCIAL_DOCTRINE.md) | **CANONICAL** | Product Value & Commercial Doctrine — Prove Before Capital |
 | [qln0/](./qln0/) | **QLN-0 PASS** (read-only) | Capability / fragmentation / gap / test / alignment ledgers + reconciliation report |
 | [qln1/](./qln1/) | **QLN-1 PASS** | Canonical Domain Foundation (`engine/domain`) + contracts / legacy / engine boundary |
+| [qln2/](./qln2/) | **QLN-2 PASS** | Strategy Spec v2 / Contract / Invariants / Portable Package / Adapter Compiler |
 | [autonomous-engineering/](./autonomous-engineering/) (pack **v1.0**) | **CANONICAL** | Bounded autonomous engineering loop for Owner-approved QLN phases only |
 | `QUANTLAB_NAUTILUS_CAPABILITY_LEDGER.md` | Superseded location | Use `qln0/QUANTLAB_QLN0_CAPABILITY_ASSET_LEDGER.md` as QLN-0 output |
 | `QUANTLAB_PHASE_GATE_LEDGER.md` | Not yet created | Planned phase gate ledger |

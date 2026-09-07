@@ -1,0 +1,286 @@
+{
+  "data_requirements": {
+    "custom_data": [],
+    "frequency": "15m",
+    "required": [
+      "bars"
+    ],
+    "source_policy": "SYNTHETIC_GOLDEN",
+    "warmup": 50
+  },
+  "escape_hatch": null,
+  "invariants": {
+    "rules": [
+      {
+        "description": "Forbid unbounded post-loss size escalation",
+        "enabled": true,
+        "id": "INV_NO_MARTINGALE",
+        "kind": "no_martingale",
+        "params": {
+          "forbid_types": [
+            "martingale"
+          ]
+        },
+        "severity": "deny"
+      },
+      {
+        "description": "Forbid unbounded averaging down on losing positions",
+        "enabled": true,
+        "id": "INV_NO_UNBOUNDED_AVG_DOWN",
+        "kind": "no_unbounded_averaging_down",
+        "params": {
+          "max_adds_on_loss": 0
+        },
+        "severity": "deny"
+      },
+      {
+        "description": "Default research max open positions",
+        "enabled": true,
+        "id": "INV_MAX_OPEN_POS",
+        "kind": "max_open_positions",
+        "params": {
+          "max": 1
+        },
+        "severity": "deny"
+      },
+      {
+        "description": "No new risk when data is stale",
+        "enabled": true,
+        "id": "INV_STALE_DATA_NO_RISK",
+        "kind": "no_new_risk_on_stale_data",
+        "params": {
+          "declared": true
+        },
+        "severity": "deny"
+      },
+      {
+        "description": "No new risk when execution state is unknown",
+        "enabled": true,
+        "id": "INV_UNKNOWN_EXEC_NO_RISK",
+        "kind": "no_new_risk_on_unknown_execution_state",
+        "params": {
+          "declared": true
+        },
+        "severity": "deny"
+      }
+    ],
+    "strategy_id": "golden_01_ema_trend",
+    "version": "v1"
+  },
+  "lineage": {
+    "child_kind": null,
+    "content_hash": "7992091eda11996507028b8350e0b8e1a2d4b9b65cd9dcb1e93dbed49feec280",
+    "derived_from": null,
+    "family_id": "golden_01_ema_trend",
+    "fork_of": null,
+    "notes": "",
+    "parent_version": null,
+    "strategy_id": "golden_01_ema_trend",
+    "version": "v1"
+  },
+  "manifest": {
+    "content_hash": "971f7fc4b1ed8ea515140081938611470ab3b2f7a7d6f6f7c2c22ad18e92c8d7",
+    "files": [
+      "README.md",
+      "data_requirements.json",
+      "invariants.json",
+      "lineage.json",
+      "manifest.json",
+      "parameters.json",
+      "strategy_contract.json",
+      "strategy_spec.json"
+    ],
+    "format": "quantlab.strategy_package",
+    "format_version": "1.0",
+    "strategy_id": "golden_01_ema_trend",
+    "version": "v1"
+  },
+  "parameters": {
+    "ema_fast": 10,
+    "ema_slow": 20
+  },
+  "readme": "# Golden EMA Trend\n\nPhase-1/2 golden EMA cross strategy specification\n",
+  "strategy_contract": {
+    "abnormal": [
+      "orders without signal",
+      "risk limit breach",
+      "unknown execution state"
+    ],
+    "contract_id": "golden_01_ema_trend:v1:contract",
+    "expected": [
+      "signals only when entry conditions hold",
+      "respect risk limits"
+    ],
+    "invalidation": [
+      "persistent adverse alpha vs declared hypothesis",
+      "invariant violation under research validation",
+      "data quality gate fail for required series"
+    ],
+    "retirement": [
+      "lifecycle RETIRED",
+      "hypothesis invalidated",
+      "superseded by newer family version"
+    ],
+    "risk": "daily_loss_limit=None;max_drawdown=None;max_open_positions=1",
+    "schema_version": "2.0",
+    "strategy_id": "golden_01_ema_trend",
+    "version": "v1",
+    "what": "Phase-1/2 golden EMA cross strategy specification",
+    "when": [
+      "env:BACKTEST"
+    ],
+    "when_not": [
+      "env:LIVE_without_approval",
+      "ambiguous=true",
+      "stale_data=true"
+    ],
+    "why": "Migrated from Spec v1; research hypothesis retained as description/name"
+  },
+  "strategy_spec": {
+    "compatibility": {
+      "permitted_environments": [
+        "BACKTEST"
+      ],
+      "required_broker_capabilities": [],
+      "required_data_capabilities": [],
+      "required_engine_features": [
+        "ema_cross"
+      ]
+    },
+    "contract_id": "golden_01_ema_trend:v1:contract",
+    "data_requirements": {
+      "custom_data": [],
+      "frequency": "15m",
+      "required": [
+        "bars"
+      ],
+      "source_policy": "SYNTHETIC_GOLDEN",
+      "warmup": 50
+    },
+    "execution": {
+      "assumptions": {
+        "fee_model": "model_default",
+        "fill_model": "next_bar_or_engine_default",
+        "latency_assumption": "zero_or_modeled",
+        "slippage_model": "model_default"
+      },
+      "order_type": "MARKET",
+      "reduce_only": false,
+      "retry_policy": "none",
+      "time_in_force": "GTC"
+    },
+    "extension_points": [],
+    "identity": {
+      "derived_from": null,
+      "family_id": "golden_01_ema_trend",
+      "fork_of": null,
+      "name": "Golden EMA Trend",
+      "parent_version": null,
+      "schema_version": "2.0",
+      "strategy_id": "golden_01_ema_trend",
+      "version": "v1"
+    },
+    "implementation_ref": null,
+    "invariant_ids": [
+      "INV_NO_MARTINGALE",
+      "INV_NO_UNBOUNDED_AVG_DOWN",
+      "INV_MAX_OPEN_POS",
+      "INV_STALE_DATA_NO_RISK",
+      "INV_UNKNOWN_EXEC_NO_RISK"
+    ],
+    "metadata": {
+      "ai_generated": false,
+      "ambiguous": false,
+      "author": "quantlab",
+      "change_reason": "initial golden",
+      "created_by": "phase2",
+      "description": "Phase-1/2 golden EMA cross strategy specification",
+      "display_name_zh": null,
+      "tags": [],
+      "user_approved": false
+    },
+    "parameters": {
+      "values": {
+        "ema_fast": 10,
+        "ema_slow": 20
+      }
+    },
+    "position_sizing": {
+      "capital_allocation_ceiling": null,
+      "max_position": null,
+      "risk_per_trade": null,
+      "trade_size": "1000000",
+      "type": "fixed"
+    },
+    "regime": {
+      "classifier_ref": null,
+      "enabled": false,
+      "forbidden": [],
+      "intended": []
+    },
+    "risk": {
+      "daily_loss_limit": null,
+      "exposure_limit": null,
+      "leverage_limit": null,
+      "max_consecutive_losses": null,
+      "max_drawdown": null,
+      "max_open_positions": 1,
+      "risk_per_trade": null
+    },
+    "signal_logic": {
+      "allowed_direction": "both",
+      "entry_long": [
+        {
+          "params": {
+            "direction": "up",
+            "fast": 10,
+            "slow": 20
+          },
+          "type": "ema_cross"
+        }
+      ],
+      "entry_short": [
+        {
+          "params": {
+            "direction": "down",
+            "fast": 10,
+            "slow": 20
+          },
+          "type": "ema_cross"
+        }
+      ],
+      "exit": [],
+      "filters": [],
+      "signal_priority": []
+    },
+    "stop_loss": {
+      "trailing": false,
+      "trailing_value": null,
+      "type": "none",
+      "value": null
+    },
+    "take_profit": {
+      "type": "none",
+      "value": null
+    },
+    "timeframe": {
+      "bar_boundary": "left_open_right_closed",
+      "bar_type": "bars",
+      "calendar": null,
+      "session": null,
+      "timeframe": "15m",
+      "timezone": "UTC"
+    },
+    "universe": {
+      "asset_class": "FX",
+      "base_currency": null,
+      "instruments": [
+        "EUR/USD"
+      ],
+      "quote_currency": null,
+      "synthetic_formula": null,
+      "venue": "SIM",
+      "venue_class": "SIMULATED"
+    }
+  }
+}

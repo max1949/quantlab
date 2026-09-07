@@ -1,0 +1,288 @@
+{
+  "data_requirements": {
+    "custom_data": [],
+    "frequency": "1m",
+    "required": [
+      "bars"
+    ],
+    "source_policy": "PUBLIC_MARKET_DATA",
+    "warmup": 50
+  },
+  "escape_hatch": null,
+  "invariants": {
+    "rules": [
+      {
+        "description": "Forbid unbounded post-loss size escalation",
+        "enabled": true,
+        "id": "INV_NO_MARTINGALE",
+        "kind": "no_martingale",
+        "params": {
+          "forbid_types": [
+            "martingale"
+          ]
+        },
+        "severity": "deny"
+      },
+      {
+        "description": "Forbid unbounded averaging down on losing positions",
+        "enabled": true,
+        "id": "INV_NO_UNBOUNDED_AVG_DOWN",
+        "kind": "no_unbounded_averaging_down",
+        "params": {
+          "max_adds_on_loss": 0
+        },
+        "severity": "deny"
+      },
+      {
+        "description": "Default research max open positions",
+        "enabled": true,
+        "id": "INV_MAX_OPEN_POS",
+        "kind": "max_open_positions",
+        "params": {
+          "max": 1
+        },
+        "severity": "deny"
+      },
+      {
+        "description": "No new risk when data is stale",
+        "enabled": true,
+        "id": "INV_STALE_DATA_NO_RISK",
+        "kind": "no_new_risk_on_stale_data",
+        "params": {
+          "declared": true
+        },
+        "severity": "deny"
+      },
+      {
+        "description": "No new risk when execution state is unknown",
+        "enabled": true,
+        "id": "INV_UNKNOWN_EXEC_NO_RISK",
+        "kind": "no_new_risk_on_unknown_execution_state",
+        "params": {
+          "declared": true
+        },
+        "severity": "deny"
+      }
+    ],
+    "strategy_id": "golden_btc_ema_trend",
+    "version": "v1"
+  },
+  "lineage": {
+    "child_kind": null,
+    "content_hash": "074950ffcc415599b22be0197dd32949c87edc1d0ebd710528f546c3793d379e",
+    "derived_from": null,
+    "family_id": "golden_btc_ema_trend",
+    "fork_of": null,
+    "notes": "",
+    "parent_version": null,
+    "strategy_id": "golden_btc_ema_trend",
+    "version": "v1"
+  },
+  "manifest": {
+    "content_hash": "d2d759105f376c3996c1919495265ec82473965a8aef8910925d4879ee6cc801",
+    "files": [
+      "README.md",
+      "data_requirements.json",
+      "invariants.json",
+      "lineage.json",
+      "manifest.json",
+      "parameters.json",
+      "strategy_contract.json",
+      "strategy_spec.json"
+    ],
+    "format": "quantlab.strategy_package",
+    "format_version": "1.0",
+    "strategy_id": "golden_btc_ema_trend",
+    "version": "v1"
+  },
+  "parameters": {
+    "ema_fast": 10,
+    "ema_slow": 20
+  },
+  "readme": "# BTC EMA Trend\n\nPhase-6 BTC paper sandbox golden spec\n",
+  "strategy_contract": {
+    "abnormal": [
+      "orders without signal",
+      "risk limit breach",
+      "unknown execution state"
+    ],
+    "contract_id": "golden_btc_ema_trend:v1:contract",
+    "expected": [
+      "signals only when entry conditions hold",
+      "respect risk limits"
+    ],
+    "invalidation": [
+      "persistent adverse alpha vs declared hypothesis",
+      "invariant violation under research validation",
+      "data quality gate fail for required series"
+    ],
+    "retirement": [
+      "lifecycle RETIRED",
+      "hypothesis invalidated",
+      "superseded by newer family version"
+    ],
+    "risk": "daily_loss_limit=5000.0;max_drawdown=0.15;max_open_positions=1",
+    "schema_version": "2.0",
+    "strategy_id": "golden_btc_ema_trend",
+    "version": "v1",
+    "what": "Phase-6 BTC paper sandbox golden spec",
+    "when": [
+      "env:PAPER",
+      "env:SHADOW"
+    ],
+    "when_not": [
+      "env:LIVE_without_approval",
+      "ambiguous=true",
+      "stale_data=true"
+    ],
+    "why": "Migrated from Spec v1; research hypothesis retained as description/name"
+  },
+  "strategy_spec": {
+    "compatibility": {
+      "permitted_environments": [
+        "PAPER",
+        "SHADOW"
+      ],
+      "required_broker_capabilities": [],
+      "required_data_capabilities": [],
+      "required_engine_features": [
+        "ema_cross"
+      ]
+    },
+    "contract_id": "golden_btc_ema_trend:v1:contract",
+    "data_requirements": {
+      "custom_data": [],
+      "frequency": "1m",
+      "required": [
+        "bars"
+      ],
+      "source_policy": "PUBLIC_MARKET_DATA",
+      "warmup": 50
+    },
+    "execution": {
+      "assumptions": {
+        "fee_model": "model_default",
+        "fill_model": "next_bar_or_engine_default",
+        "latency_assumption": "zero_or_modeled",
+        "slippage_model": "sandbox_default"
+      },
+      "order_type": "MARKET",
+      "reduce_only": false,
+      "retry_policy": "none",
+      "time_in_force": "GTC"
+    },
+    "extension_points": [],
+    "identity": {
+      "derived_from": null,
+      "family_id": "golden_btc_ema_trend",
+      "fork_of": null,
+      "name": "BTC EMA Trend",
+      "parent_version": null,
+      "schema_version": "2.0",
+      "strategy_id": "golden_btc_ema_trend",
+      "version": "v1"
+    },
+    "implementation_ref": null,
+    "invariant_ids": [
+      "INV_NO_MARTINGALE",
+      "INV_NO_UNBOUNDED_AVG_DOWN",
+      "INV_MAX_OPEN_POS",
+      "INV_STALE_DATA_NO_RISK",
+      "INV_UNKNOWN_EXEC_NO_RISK"
+    ],
+    "metadata": {
+      "ai_generated": false,
+      "ambiguous": false,
+      "author": "quantlab",
+      "change_reason": "phase6 btc paper",
+      "created_by": "phase6",
+      "description": "Phase-6 BTC paper sandbox golden spec",
+      "display_name_zh": null,
+      "tags": [],
+      "user_approved": true
+    },
+    "parameters": {
+      "values": {
+        "ema_fast": 10,
+        "ema_slow": 20
+      }
+    },
+    "position_sizing": {
+      "capital_allocation_ceiling": null,
+      "max_position": null,
+      "risk_per_trade": null,
+      "trade_size": "0.01",
+      "type": "fixed"
+    },
+    "regime": {
+      "classifier_ref": null,
+      "enabled": false,
+      "forbidden": [],
+      "intended": []
+    },
+    "risk": {
+      "daily_loss_limit": 5000.0,
+      "exposure_limit": 100000.0,
+      "leverage_limit": null,
+      "max_consecutive_losses": 5,
+      "max_drawdown": 0.15,
+      "max_open_positions": 1,
+      "risk_per_trade": null
+    },
+    "signal_logic": {
+      "allowed_direction": "both",
+      "entry_long": [
+        {
+          "params": {
+            "direction": "up",
+            "fast": 10,
+            "slow": 20
+          },
+          "type": "ema_cross"
+        }
+      ],
+      "entry_short": [
+        {
+          "params": {
+            "direction": "down",
+            "fast": 10,
+            "slow": 20
+          },
+          "type": "ema_cross"
+        }
+      ],
+      "exit": [],
+      "filters": [],
+      "signal_priority": []
+    },
+    "stop_loss": {
+      "trailing": false,
+      "trailing_value": null,
+      "type": "none",
+      "value": null
+    },
+    "take_profit": {
+      "type": "none",
+      "value": null
+    },
+    "timeframe": {
+      "bar_boundary": "left_open_right_closed",
+      "bar_type": "bars",
+      "calendar": null,
+      "session": null,
+      "timeframe": "1m",
+      "timezone": "UTC"
+    },
+    "universe": {
+      "asset_class": "CRYPTO",
+      "base_currency": null,
+      "instruments": [
+        "BTCUSDT"
+      ],
+      "quote_currency": null,
+      "synthetic_formula": null,
+      "venue": "BINANCE_SANDBOX",
+      "venue_class": "SIMULATED"
+    }
+  }
+}
