@@ -38,6 +38,7 @@ export default function PaperExecutionPanel({
   const paperCoach = useLocale((s) => s.dict.firstPaperOrderCoach);
   const notify = useUi((s) => s.notify);
   const qc = useQueryClient();
+  /* QLN-5: legacy mastery paper path — SOFT_RETIRE; official Paper is /paper (PaperTrading). */
 
   const [symbol, setSymbol] = useState(symbolProp || "RB");
   const [side, setSide] = useState<"buy" | "sell">("buy");
@@ -123,6 +124,9 @@ export default function PaperExecutionPanel({
   return (
     <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900/40">
       <h4 className="font-medium">{l4.execTitle}</h4>
+      <p className="mb-2 rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-100">
+        旧版模拟下单（已软退役）。正式模拟交易请使用主导航「模拟交易」页面（PaperRun / Spec 路径）。
+      </p>
       <p className="mb-3 text-sm text-slate-500">
         {factorId ? l4.execDescLinked : l4.execDesc}
       </p>

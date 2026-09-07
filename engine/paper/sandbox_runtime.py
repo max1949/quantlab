@@ -1,4 +1,8 @@
-"""Sandbox paper runtime — tick loop for paper-runner process."""
+"""Sandbox paper runtime — NON-CANONICAL scaffold (QLN-5 SOFT_RETIRE).
+
+Official Paper path is PaperRun → scripts/paper_runner.py → engine/nautilus/paper_node.py.
+This module remains for historical tests only and must not be Evidence authority.
+"""
 
 from __future__ import annotations
 
@@ -15,6 +19,9 @@ from engine.paper.recovery import RecoverySnapshot, should_allow_new_entry
 from engine.paper.risk_policy import PaperRiskPolicy, evaluate_risk
 from engine.paper.signal_engine import EmaSignalEngine, SignalDecision
 from engine.trading.execution_environment import assert_environment_allowed
+
+
+PAPER_PATH_DISPOSITION = "SOFT_RETIRE"
 
 
 class PaperRunStore(Protocol):

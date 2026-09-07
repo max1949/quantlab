@@ -332,6 +332,26 @@ def _finalize_run_evaluation(db: Session, run: PaperRun) -> None:
     metrics = dict(run.metrics or {})
     metrics["paper_evaluation"] = evaluation.to_dict()
     metrics["parity_status"] = comparison.get("parity_status")
+    # QLN-5: bind Paper evaluation → Experiment Ledger (append-only; best-effort record id)
+    try:
+        from engine.domain.hashing import HashKind, compute_hash
+        from engine.experiment.ledger import ExperimentLedger
+        from engine.paper.ledger_bridge import append_paper_evaluation_to_ledger
+
+        ds_hash = compute_hash(
+            HashKind.DATASET,
+            {"paper_run_id": str(run.id), "performance_summary": perf},
+        )
+        rec = append_paper_evaluation_to_ledger(
+            evaluation,
+            ledger=ExperimentLedger(),
+            dataset_hash=ds_hash,
+            random_seed=0,
+        )
+        metrics["experiment_id"] = rec.experiment_id
+        metrics["experiment_content_hash"] = rec.content_hash
+    except Exception as exc:  # noqa: BLE001 — do not block Paper lifecycle on ledger I/O
+        metrics["experiment_ledger_error"] = str(exc)[:240]
     run.metrics = metrics
     db.add(
         PaperRunEvent(
