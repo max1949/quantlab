@@ -42,12 +42,14 @@ STOP=YES
 |---|---|
 | QLN-5 PASS | YES (pending seal) |
 | Owner preauthorization QLN-6 | YES (campaign) |
-| Multiple strategies at higher Evidence stages (E2+) with real research demand | **NO** — only golden/synthetic research assets; no multi-strategy Evidence portfolio |
-| Counterfactual/DNA justified by real demand | **NO** without invention |
+| Multiple strategies at higher Evidence stages (E2+) with real research demand | **NO** — `GENUINE_STRATEGY_COUNT=0` (Factor Lab demand exists; not Strategy Specs) |
+| Counterfactual/DNA justified by real demand | **NO** without Strategy Spec intake |
 
 ```text
 QLN_6_ENTRY_GATE=HOLD
 CAMPAIGN_BLOCKED_BY_REAL_WORLD_EVIDENCE=YES
+REAL_RESEARCH_DEMAND=YES
+GENUINE_STRATEGY_DISCOVERY=EXHAUSTED
 ```
 
-Do not invent strategies, fake users, or synthetic “research demand” to unblock.
+Do not invent Strategy Specs from Factor templates to unblock.
