@@ -1,0 +1,104 @@
+{
+  "HISTORICAL_BACKTESTS_INSPECTED": 23,
+  "DISTINCT_DEFINITIONS_RECOVERED": 4,
+  "GENUINE_HISTORICAL_STRATEGIES_RECOVERED": 4,
+  "packages": [
+    "strategy_specs\\historical_reconstructed\\hist_fl_momentum_w20.v2.package.json",
+    "strategy_specs\\historical_reconstructed\\hist_fl_momentum_w250.v2.package.json",
+    "strategy_specs\\historical_reconstructed\\hist_fl_mean_reversion_w20.v2.package.json",
+    "strategy_specs\\historical_reconstructed\\hist_fl_rsi_w14.v2.package.json"
+  ],
+  "evaluations": [
+    {
+      "strategy_id": "hist_fl_momentum_w20",
+      "decision": "KILL",
+      "reality_score": 20.8333,
+      "research_debt": 100.0,
+      "gates": {
+        "backtest": "PASS",
+        "oos": "FAIL",
+        "walk_forward": "FAIL",
+        "fee_stress": "FAIL",
+        "slippage_stress": "FAIL",
+        "parameter_sensitivity": "FAIL",
+        "regime_split": "PASS",
+        "extreme_period": "PASS"
+      },
+      "reasons": [
+        "KILL: hard gate fail: oos, walk_forward, fee_stress, slippage_stress, parameter_sensitivity"
+      ],
+      "data_trust": "PASS",
+      "higher_evidence": false
+    },
+    {
+      "strategy_id": "hist_fl_momentum_w250",
+      "decision": "HOLD",
+      "reality_score": 91.0072,
+      "research_debt": 18.0,
+      "gates": {
+        "backtest": "PASS",
+        "oos": "PASS",
+        "walk_forward": "PASS",
+        "fee_stress": "PASS",
+        "slippage_stress": "PASS",
+        "parameter_sensitivity": "INSUFFICIENT",
+        "regime_split": "PASS",
+        "extreme_period": "PASS"
+      },
+      "reasons": [
+        "HOLD: insufficient evidence: parameter_sensitivity",
+        "do not retune thresholds to chase PASS"
+      ],
+      "data_trust": "PASS",
+      "higher_evidence": true
+    },
+    {
+      "strategy_id": "hist_fl_mean_reversion_w20",
+      "decision": "KILL",
+      "reality_score": 41.1712,
+      "research_debt": 90.0,
+      "gates": {
+        "backtest": "PASS",
+        "oos": "PASS",
+        "walk_forward": "FAIL",
+        "fee_stress": "FAIL",
+        "slippage_stress": "FAIL",
+        "parameter_sensitivity": "FAIL",
+        "regime_split": "PASS",
+        "extreme_period": "PASS"
+      },
+      "reasons": [
+        "KILL: hard gate fail: walk_forward, fee_stress, slippage_stress, parameter_sensitivity"
+      ],
+      "data_trust": "PASS",
+      "higher_evidence": false
+    },
+    {
+      "strategy_id": "hist_fl_rsi_w14",
+      "decision": "PROMOTE",
+      "reality_score": 97.6457,
+      "research_debt": 25.0,
+      "gates": {
+        "backtest": "PASS",
+        "oos": "PASS",
+        "walk_forward": "PASS",
+        "fee_stress": "PASS",
+        "slippage_stress": "PASS",
+        "parameter_sensitivity": "PASS",
+        "regime_split": "PASS",
+        "extreme_period": "PASS"
+      },
+      "reasons": [
+        "PROMOTE: core gates PASS; reality_score>=60.0; debt=25.0"
+      ],
+      "data_trust": "PASS",
+      "higher_evidence": true
+    }
+  ],
+  "PROMOTE": 1,
+  "HOLD": 1,
+  "KILL": 2,
+  "HIGHER_EVIDENCE_STRATEGY_COUNT": 2,
+  "STRATEGIES_FULLY_EVALUATED": 4,
+  "NO_EDGE_FOUND": 2
+}

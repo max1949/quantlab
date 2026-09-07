@@ -1,0 +1,312 @@
+{
+  "data_requirements": {
+    "custom_data": [],
+    "frequency": "1d",
+    "required": [
+      "bars"
+    ],
+    "source_policy": "HISTORICAL_PARQUET_MARKET_DATA",
+    "warmup": 19
+  },
+  "escape_hatch": null,
+  "invariants": {
+    "rules": [
+      {
+        "description": "Forbid unbounded post-loss size escalation",
+        "enabled": true,
+        "id": "INV_NO_MARTINGALE",
+        "kind": "no_martingale",
+        "params": {
+          "forbid_types": [
+            "martingale"
+          ]
+        },
+        "severity": "deny"
+      },
+      {
+        "description": "Forbid unbounded averaging down on losing positions",
+        "enabled": true,
+        "id": "INV_NO_UNBOUNDED_AVG_DOWN",
+        "kind": "no_unbounded_averaging_down",
+        "params": {
+          "max_adds_on_loss": 0
+        },
+        "severity": "deny"
+      },
+      {
+        "description": "Default research max open positions",
+        "enabled": true,
+        "id": "INV_MAX_OPEN_POS",
+        "kind": "max_open_positions",
+        "params": {
+          "max": 1
+        },
+        "severity": "deny"
+      },
+      {
+        "description": "No new risk when data is stale",
+        "enabled": true,
+        "id": "INV_STALE_DATA_NO_RISK",
+        "kind": "no_new_risk_on_stale_data",
+        "params": {
+          "declared": true
+        },
+        "severity": "deny"
+      },
+      {
+        "description": "No new risk when execution state is unknown",
+        "enabled": true,
+        "id": "INV_UNKNOWN_EXEC_NO_RISK",
+        "kind": "no_new_risk_on_unknown_execution_state",
+        "params": {
+          "declared": true
+        },
+        "severity": "deny"
+      }
+    ],
+    "strategy_id": "hist_fl_rsi_w14",
+    "version": "v1"
+  },
+  "lineage": {
+    "child_kind": null,
+    "content_hash": "229c7c322c15f7cc9654ac10b1158cf346e2a385d0bdfc4e9e71d1bd90e08771",
+    "derived_from": "factor_lab_historical_backtest",
+    "family_id": "factorlab_rsi",
+    "fork_of": null,
+    "notes": "",
+    "parent_version": null,
+    "strategy_id": "hist_fl_rsi_w14",
+    "version": "v1"
+  },
+  "manifest": {
+    "content_hash": "785c3810368657eeda70dd3c5542f6137bed69611f900154a54dfbe8735f797f",
+    "files": [
+      "README.md",
+      "data_requirements.json",
+      "invariants.json",
+      "lineage.json",
+      "manifest.json",
+      "parameters.json",
+      "strategy_contract.json",
+      "strategy_spec.json"
+    ],
+    "format": "quantlab.strategy_package",
+    "format_version": "1.0",
+    "strategy_id": "hist_fl_rsi_w14",
+    "version": "v1"
+  },
+  "parameters": {
+    "evidence_instrument": "CU",
+    "execution_rule": "sign(signal)",
+    "execution_rule_source": "engine.backtest.signal_to_positions",
+    "historical_symbols": [
+      "AU"
+    ],
+    "param_window": 14,
+    "template_type": "rsi"
+  },
+  "readme": "# Historical FactorLab RSI w14 (sign of raw RSI)\n\nGENUINE_HISTORICAL_STRATEGY reconstruction.\n",
+  "strategy_contract": {
+    "abnormal": [
+      "lookahead fills",
+      "rules not matching engine.backtest"
+    ],
+    "contract_id": "hist_fl_rsi_w14:v1:contract",
+    "expected": [
+      "positions follow sign(factor)",
+      "lagged returns avoid lookahead"
+    ],
+    "invalidation": [
+      "factor template semantics change",
+      "execution rule no longer sign(signal)",
+      "data trust fail on research dataset"
+    ],
+    "retirement": [
+      "superseded by Spec revision",
+      "hypothesis invalidated"
+    ],
+    "risk": "Unit ±1 position; fee/slippage via CostConfig; no stop in historical engine",
+    "schema_version": "2.0",
+    "strategy_id": "hist_fl_rsi_w14",
+    "version": "v1",
+    "what": "FactorLab rsi → sign(signal) timing on futures",
+    "when": [
+      "env:BACKTEST",
+      "env:PAPER",
+      "data:historical_parquet"
+    ],
+    "when_not": [
+      "env:LIVE",
+      "ambiguous=true",
+      "invented_rules=true"
+    ],
+    "why": "Recovered from historical Factor Lab user/project backtests; platform execution contract preserved"
+  },
+  "strategy_spec": {
+    "compatibility": {
+      "permitted_environments": [
+        "BACKTEST",
+        "PAPER"
+      ],
+      "required_broker_capabilities": [],
+      "required_data_capabilities": [],
+      "required_engine_features": [
+        "factor_sign",
+        "rsi"
+      ]
+    },
+    "contract_id": null,
+    "data_requirements": {
+      "custom_data": [],
+      "frequency": "1d",
+      "required": [
+        "bars"
+      ],
+      "source_policy": "HISTORICAL_PARQUET_MARKET_DATA",
+      "warmup": 19
+    },
+    "execution": {
+      "assumptions": {
+        "fee_model": "turnover_fee_rate",
+        "fill_model": "lagged_position_bar_return",
+        "latency_assumption": "signal_t_affects_position_t_plus_1",
+        "slippage_model": "turnover_bps"
+      },
+      "order_type": "MARKET",
+      "reduce_only": false,
+      "retry_policy": "none",
+      "time_in_force": "GTC"
+    },
+    "extension_points": [],
+    "identity": {
+      "derived_from": "factor_lab_historical_backtest",
+      "family_id": "factorlab_rsi",
+      "fork_of": null,
+      "name": "Historical FactorLab RSI w14 (sign of raw RSI)",
+      "parent_version": null,
+      "schema_version": "2.0",
+      "strategy_id": "hist_fl_rsi_w14",
+      "version": "v1"
+    },
+    "implementation_ref": null,
+    "invariant_ids": [],
+    "metadata": {
+      "ai_generated": false,
+      "ambiguous": false,
+      "author": "quantlab_reconstruction",
+      "change_reason": "historical_semantics_recovery",
+      "created_by": "qln6_phase_a_reconstruction",
+      "description": "Reconstructed from Factor Lab historical backtests. Signal=rsi{'window': 14}; execution=sign(signal) per engine.backtest (ORIGINAL platform contract). Historical symbols=['AU']. Historical engine used np.sign(raw RSI); RSI∈(0,100) ⇒ nearly always +1. Preserved as ORIGINAL.",
+      "display_name_zh": null,
+      "tags": [
+        "GENUINE_HISTORICAL_STRATEGY",
+        "factor_lab",
+        "rsi"
+      ],
+      "user_approved": false
+    },
+    "parameters": {
+      "values": {
+        "evidence_instrument": "CU",
+        "execution_rule": "sign(signal)",
+        "execution_rule_source": "engine.backtest.signal_to_positions",
+        "historical_symbols": [
+          "AU"
+        ],
+        "param_window": 14,
+        "template_type": "rsi"
+      }
+    },
+    "position_sizing": {
+      "capital_allocation_ceiling": null,
+      "max_position": null,
+      "risk_per_trade": null,
+      "trade_size": "1",
+      "type": "fixed"
+    },
+    "regime": {
+      "classifier_ref": null,
+      "enabled": false,
+      "forbidden": [],
+      "intended": []
+    },
+    "risk": {
+      "daily_loss_limit": null,
+      "exposure_limit": null,
+      "leverage_limit": null,
+      "max_consecutive_losses": null,
+      "max_drawdown": null,
+      "max_open_positions": 1,
+      "risk_per_trade": null
+    },
+    "signal_logic": {
+      "allowed_direction": "both",
+      "entry_long": [
+        {
+          "params": {
+            "params": {
+              "window": 14
+            },
+            "side": "long",
+            "template_type": "rsi"
+          },
+          "type": "factor_sign"
+        }
+      ],
+      "entry_short": [
+        {
+          "params": {
+            "params": {
+              "window": 14
+            },
+            "side": "short",
+            "template_type": "rsi"
+          },
+          "type": "factor_sign"
+        }
+      ],
+      "exit": [
+        {
+          "params": {
+            "params": {
+              "window": 14
+            },
+            "template_type": "rsi"
+          },
+          "type": "factor_sign_flat_or_flip"
+        }
+      ],
+      "filters": [],
+      "signal_priority": []
+    },
+    "stop_loss": {
+      "trailing": false,
+      "trailing_value": null,
+      "type": "none",
+      "value": null
+    },
+    "take_profit": {
+      "type": "none",
+      "value": null
+    },
+    "timeframe": {
+      "bar_boundary": "left_open_right_closed",
+      "bar_type": "bars",
+      "calendar": null,
+      "session": null,
+      "timeframe": "1d",
+      "timezone": "UTC"
+    },
+    "universe": {
+      "asset_class": "FUTURES",
+      "base_currency": null,
+      "instruments": [
+        "CU"
+      ],
+      "quote_currency": null,
+      "synthetic_formula": null,
+      "venue": "CN_FUTURES_RESEARCH",
+      "venue_class": "SIMULATED"
+    }
+  }
+}

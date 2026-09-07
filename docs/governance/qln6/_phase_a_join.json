@@ -1,0 +1,945 @@
+[
+  {
+    "bt_id": "e9bb76e2-7997-4e07-97ac-1de3fa1cd080",
+    "symbol": "RB",
+    "status": "success",
+    "factor_id": "6b1608bf-e50f-4876-9347-aed3f4b82ba3",
+    "factor_name": "mom_011624",
+    "kind": "template",
+    "template_type": "momentum",
+    "project_id": null,
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 20
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": -0.45766575035285917,
+      "total_return": -0.28342470629834493,
+      "trade_count": 47,
+      "max_drawdown": -0.3488293040583883
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "RB",
+    "snap_hash": "27e7c55776fd4ee0aa113bf260053ae4a0057e6ae0170dffd17517e57b1e758a",
+    "snap_rows": "504",
+    "snap_start": "2023-01-02",
+    "snap_end": "2024-12-05"
+  },
+  {
+    "bt_id": "8776d7a1-5d23-4aa0-afc5-b322717575f2",
+    "symbol": "RB",
+    "status": "success",
+    "factor_id": "f3adc7c5-207d-4fde-9d76-5fbf2d96a4d7",
+    "factor_name": "r-mom",
+    "kind": "template",
+    "template_type": "momentum",
+    "project_id": null,
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 20
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": -0.45766575035285917,
+      "total_return": -0.28342470629834493,
+      "trade_count": 47,
+      "max_drawdown": -0.3488293040583883
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "RB",
+    "snap_hash": "27e7c55776fd4ee0aa113bf260053ae4a0057e6ae0170dffd17517e57b1e758a",
+    "snap_rows": "504",
+    "snap_start": "2023-01-02",
+    "snap_end": "2024-12-05"
+  },
+  {
+    "bt_id": "4b8e0f93-9522-4e13-b5a5-8a35627e999f",
+    "symbol": "RB",
+    "status": "success",
+    "factor_id": "6b39c1d6-fada-4812-94b8-4898156cc3f7",
+    "factor_name": "mom-live15799",
+    "kind": "template",
+    "template_type": "momentum",
+    "project_id": "e65a0c9a-84cd-4ce2-9919-fc59f0173fea",
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 20
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": -0.45766575035285917,
+      "total_return": -0.28342470629834493,
+      "trade_count": 47,
+      "max_drawdown": -0.3488293040583883
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "RB",
+    "snap_hash": "27e7c55776fd4ee0aa113bf260053ae4a0057e6ae0170dffd17517e57b1e758a",
+    "snap_rows": "504",
+    "snap_start": "2023-01-02",
+    "snap_end": "2024-12-05"
+  },
+  {
+    "bt_id": "97391d3e-1cef-4cdb-a12f-2987dc6a46de",
+    "symbol": "AU",
+    "status": "success",
+    "factor_id": "b2bbdce8-2eb0-4e5e-9bd5-ea8cedd87ad7",
+    "factor_name": "momentum-AU-ee317d",
+    "kind": "template",
+    "template_type": "momentum",
+    "project_id": "a83690a6-d21b-49a5-ab0b-f0aa308425d4",
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 20
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": -0.13109757645505332,
+      "total_return": -0.15891931855169228,
+      "trade_count": 49,
+      "max_drawdown": -0.5642780461338325
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "AU",
+    "snap_hash": "d8c98400fba69547d55c7d00305e942a597b83987d58347b2e319012767587b3",
+    "snap_rows": "504",
+    "snap_start": "2023-01-02",
+    "snap_end": "2024-12-05"
+  },
+  {
+    "bt_id": "a1a68b07-4459-4692-9ab7-3c26041aa907",
+    "symbol": "AU",
+    "status": "success",
+    "factor_id": "587638c9-58b5-4fe6-ba6d-b109c2fe253b",
+    "factor_name": "momentum-AU-6c6306",
+    "kind": "template",
+    "template_type": "momentum",
+    "project_id": "62b5f681-365c-45ec-b738-fc5a48cbf276",
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 20
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": -0.13109757645505332,
+      "total_return": -0.15891931855169228,
+      "trade_count": 49,
+      "max_drawdown": -0.5642780461338325
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "AU",
+    "snap_hash": "d8c98400fba69547d55c7d00305e942a597b83987d58347b2e319012767587b3",
+    "snap_rows": "504",
+    "snap_start": "2023-01-02",
+    "snap_end": "2024-12-05"
+  },
+  {
+    "bt_id": "0ce794a9-21b9-441a-95a9-71d49ed506f0",
+    "symbol": "RB",
+    "status": "success",
+    "factor_id": "3998dfb0-0f27-404e-b1b2-51aaabf59909",
+    "factor_name": "mean_reversion-RB-0d702b",
+    "kind": "template",
+    "template_type": "mean_reversion",
+    "project_id": "5d946fff-82b4-48db-9193-43add35c9833",
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 20
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": 0.03060247680624098,
+      "total_return": -0.057181566514346804,
+      "trade_count": 67,
+      "max_drawdown": -0.4362919361136266
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "RB",
+    "snap_hash": "27e7c55776fd4ee0aa113bf260053ae4a0057e6ae0170dffd17517e57b1e758a",
+    "snap_rows": "504",
+    "snap_start": "2023-01-02",
+    "snap_end": "2024-12-05"
+  },
+  {
+    "bt_id": "133c4451-5537-43c5-ab7a-b5ececec8dd3",
+    "symbol": "AU",
+    "status": "success",
+    "factor_id": "191dcbf4-7bc7-4e59-a8c8-af8002ae2fc0",
+    "factor_name": "momentum-AU-9ac2ee",
+    "kind": "template",
+    "template_type": "momentum",
+    "project_id": "11bc98e8-ae86-4de6-90ff-236fdd05ee1c",
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 20
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": -0.13109757645505332,
+      "total_return": -0.15891931855169228,
+      "trade_count": 49,
+      "max_drawdown": -0.5642780461338325
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "AU",
+    "snap_hash": "d8c98400fba69547d55c7d00305e942a597b83987d58347b2e319012767587b3",
+    "snap_rows": "504",
+    "snap_start": "2023-01-02",
+    "snap_end": "2024-12-05"
+  },
+  {
+    "bt_id": "d1bbcc85-256d-4c34-af8b-a083286a4b4c",
+    "symbol": "AU",
+    "status": "success",
+    "factor_id": "3fa85bd1-e39f-4473-9407-019a9388568d",
+    "factor_name": "RSI 强弱",
+    "kind": "template",
+    "template_type": "rsi",
+    "project_id": "d8ebfcee-b248-4e86-8218-c2946944b97c",
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 14
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": 0.9462173056363304,
+      "total_return": 2.169730771992815,
+      "trade_count": 1,
+      "max_drawdown": -0.30190854361470465
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "AU",
+    "snap_hash": "7a34b5ae2238712c428a83f6578b7c418c37f8baa9347c8cc21d047cdead6f54",
+    "snap_rows": "2055",
+    "snap_start": "2018-01-02",
+    "snap_end": "2026-06-26"
+  },
+  {
+    "bt_id": "48155061-1d30-4370-a5dd-57fb830d75a1",
+    "symbol": "RB",
+    "status": "success",
+    "factor_id": "4f9301f7-0e56-4eed-bfeb-9968ac9a473b",
+    "factor_name": "mean_reversion-RB-864a89",
+    "kind": "template",
+    "template_type": "mean_reversion",
+    "project_id": "781d8842-b8c3-42ac-b48a-b08514bb1c74",
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 20
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": -0.0780511370378994,
+      "total_return": -0.29109365142894494,
+      "trade_count": 239,
+      "max_drawdown": -0.4733447783275746
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "RB",
+    "snap_hash": "7c69b15619638f3b4624c8741859af758a459cabe5856d41dfa3b248578067e8",
+    "snap_rows": "2055",
+    "snap_start": "2018-01-02",
+    "snap_end": "2026-06-26"
+  },
+  {
+    "bt_id": "ecc6f1e6-5c7a-41bb-a585-1709251573a6",
+    "symbol": "AU",
+    "status": "success",
+    "factor_id": "e98219d5-71ad-45cc-9c05-cae696935581",
+    "factor_name": "momentum-AU-70aac8",
+    "kind": "template",
+    "template_type": "momentum",
+    "project_id": "b0af2006-7368-4cfc-9d28-b1c1fcb4c95e",
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 20
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": 0.14561005279541336,
+      "total_return": 0.08811424837887172,
+      "trade_count": 211,
+      "max_drawdown": -0.3776209883228254
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "AU",
+    "snap_hash": "7a34b5ae2238712c428a83f6578b7c418c37f8baa9347c8cc21d047cdead6f54",
+    "snap_rows": "2055",
+    "snap_start": "2018-01-02",
+    "snap_end": "2026-06-26"
+  },
+  {
+    "bt_id": "8f398bc7-0af0-4038-9cc3-ac0cb55c1fa6",
+    "symbol": "AU",
+    "status": "success",
+    "factor_id": "765a5a5b-05e1-47e7-baee-42d30d09f963",
+    "factor_name": "动量因子",
+    "kind": "template",
+    "template_type": "momentum",
+    "project_id": "0b6f2d27-3514-4902-ae3b-a4e46cff03a2",
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 20
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": 0.14561005279541336,
+      "total_return": 0.08811424837887172,
+      "trade_count": 211,
+      "max_drawdown": -0.3776209883228254
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "AU",
+    "snap_hash": "7a34b5ae2238712c428a83f6578b7c418c37f8baa9347c8cc21d047cdead6f54",
+    "snap_rows": "2055",
+    "snap_start": "2018-01-02",
+    "snap_end": "2026-06-26"
+  },
+  {
+    "bt_id": "246b0667-ea91-4e81-8cd2-fbd059f813a1",
+    "symbol": "AU",
+    "status": "success",
+    "factor_id": "96be7bab-2293-4b1c-bc26-7392ce397e1b",
+    "factor_name": "momentum-AU-155e8c",
+    "kind": "template",
+    "template_type": "momentum",
+    "project_id": "228aff81-475b-40e2-ac37-3131924af080",
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 20
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": 0.14561005279541336,
+      "total_return": 0.08811424837887172,
+      "trade_count": 211,
+      "max_drawdown": -0.3776209883228254
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "AU",
+    "snap_hash": "7a34b5ae2238712c428a83f6578b7c418c37f8baa9347c8cc21d047cdead6f54",
+    "snap_rows": "2055",
+    "snap_start": "2018-01-02",
+    "snap_end": "2026-06-26"
+  },
+  {
+    "bt_id": "d95ba4f2-b788-48a8-891b-b33425f26b7b",
+    "symbol": "AU",
+    "status": "success",
+    "factor_id": "ad9e27bc-0b6f-4ea9-a28a-96485cb41602",
+    "factor_name": "动量因子",
+    "kind": "template",
+    "template_type": "momentum",
+    "project_id": "e320e282-6f27-4a9e-9018-d6826eebeeef",
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 20
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": 0.14561005279541336,
+      "total_return": 0.08811424837887172,
+      "trade_count": 211,
+      "max_drawdown": -0.3776209883228254
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "AU",
+    "snap_hash": "7a34b5ae2238712c428a83f6578b7c418c37f8baa9347c8cc21d047cdead6f54",
+    "snap_rows": "2055",
+    "snap_start": "2018-01-02",
+    "snap_end": "2026-06-26"
+  },
+  {
+    "bt_id": "64264d59-9b72-48fe-9369-ae0783e046a6",
+    "symbol": "AU",
+    "status": "success",
+    "factor_id": "f6b23422-bacd-4255-a5ad-65323c738db3",
+    "factor_name": "momentum-AU-fd1dc0",
+    "kind": "template",
+    "template_type": "momentum",
+    "project_id": "3dcc4329-3b9f-4386-822a-2233d415aafa",
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 20
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": 0.14561005279541336,
+      "total_return": 0.08811424837887172,
+      "trade_count": 211,
+      "max_drawdown": -0.3776209883228254
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "AU",
+    "snap_hash": "7a34b5ae2238712c428a83f6578b7c418c37f8baa9347c8cc21d047cdead6f54",
+    "snap_rows": "2055",
+    "snap_start": "2018-01-02",
+    "snap_end": "2026-06-26"
+  },
+  {
+    "bt_id": "e539db58-3a9f-44ab-bb18-8f0fe32fa11d",
+    "symbol": "AU",
+    "status": "success",
+    "factor_id": "1a49ff97-3070-4348-a6a3-d3a7494b6fa9",
+    "factor_name": "momentum-AU-b79c61",
+    "kind": "template",
+    "template_type": "momentum",
+    "project_id": "965100cc-bd19-49c6-bdfa-c1af087d57ba",
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 20
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": 0.14561005279541336,
+      "total_return": 0.08811424837887172,
+      "trade_count": 211,
+      "max_drawdown": -0.3776209883228254
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "AU",
+    "snap_hash": "7a34b5ae2238712c428a83f6578b7c418c37f8baa9347c8cc21d047cdead6f54",
+    "snap_rows": "2055",
+    "snap_start": "2018-01-02",
+    "snap_end": "2026-06-26"
+  },
+  {
+    "bt_id": "a243d4c5-3f73-4641-9a17-2ef46cd9da76",
+    "symbol": "AU",
+    "status": "success",
+    "factor_id": "a1b1a6e1-6bde-41a2-affc-8678c23ac6b5",
+    "factor_name": "momentum-AU-53b6bd",
+    "kind": "template",
+    "template_type": "momentum",
+    "project_id": "c4c4d2f5-94bf-4aea-9397-45f79623852a",
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 20
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": 0.14561005279541336,
+      "total_return": 0.08811424837887172,
+      "trade_count": 211,
+      "max_drawdown": -0.3776209883228254
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "AU",
+    "snap_hash": "7a34b5ae2238712c428a83f6578b7c418c37f8baa9347c8cc21d047cdead6f54",
+    "snap_rows": "2055",
+    "snap_start": "2018-01-02",
+    "snap_end": "2026-06-26"
+  },
+  {
+    "bt_id": "86b24036-8a2e-4882-9c35-d7db138fc7d6",
+    "symbol": "AU",
+    "status": "success",
+    "factor_id": "73978bcb-2410-4455-8c83-e98a5797fbf2",
+    "factor_name": "momentum-AU-021e7a",
+    "kind": "template",
+    "template_type": "momentum",
+    "project_id": "33c8b879-5741-4911-9d98-b07ce58d5670",
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 20
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": 0.14561005279541336,
+      "total_return": 0.08811424837887172,
+      "trade_count": 211,
+      "max_drawdown": -0.3776209883228254
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "AU",
+    "snap_hash": "7a34b5ae2238712c428a83f6578b7c418c37f8baa9347c8cc21d047cdead6f54",
+    "snap_rows": "2055",
+    "snap_start": "2018-01-02",
+    "snap_end": "2026-06-26"
+  },
+  {
+    "bt_id": "79310625-51ba-4a86-ad4a-9b63c37e47dd",
+    "symbol": "AU",
+    "status": "success",
+    "factor_id": "dcb15fbe-841f-4271-8cb9-f286b0bf2b69",
+    "factor_name": "momentum-AU-511241",
+    "kind": "template",
+    "template_type": "momentum",
+    "project_id": "1240073c-2c34-4598-8ec2-ee51c15bf3b5",
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 20
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": 0.14561005279541336,
+      "total_return": 0.08811424837887172,
+      "trade_count": 211,
+      "max_drawdown": -0.3776209883228254
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "AU",
+    "snap_hash": "7a34b5ae2238712c428a83f6578b7c418c37f8baa9347c8cc21d047cdead6f54",
+    "snap_rows": "2055",
+    "snap_start": "2018-01-02",
+    "snap_end": "2026-06-26"
+  },
+  {
+    "bt_id": "5f0ac48d-5d61-4099-ac81-e07553829838",
+    "symbol": "RB",
+    "status": "success",
+    "factor_id": "a09894c0-bcd3-4fc7-9bf2-1fbb000d5924",
+    "factor_name": "momentum-RB-79958f",
+    "kind": "template",
+    "template_type": "momentum",
+    "project_id": "e93eba4d-277e-46ee-8e2e-a54231d0978d",
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 20
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": 0.06547821788682857,
+      "total_return": -0.08289874418606646,
+      "trade_count": 200,
+      "max_drawdown": -0.38229794768164693
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "RB",
+    "snap_hash": "7c69b15619638f3b4624c8741859af758a459cabe5856d41dfa3b248578067e8",
+    "snap_rows": "2055",
+    "snap_start": "2018-01-02",
+    "snap_end": "2026-06-26"
+  },
+  {
+    "bt_id": "a084f3b9-e1fe-4892-bc90-bd5adee8a137",
+    "symbol": "AU",
+    "status": "success",
+    "factor_id": "f40d7018-e34d-4156-b8db-df58aa6fc246",
+    "factor_name": "momentum-AU-29175e",
+    "kind": "template",
+    "template_type": "momentum",
+    "project_id": "3a1bcac6-a0b0-4741-a03f-ddee738b5ea8",
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 20
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": 0.14561005279541336,
+      "total_return": 0.08811424837887172,
+      "trade_count": 211,
+      "max_drawdown": -0.3776209883228254
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "AU",
+    "snap_hash": "7a34b5ae2238712c428a83f6578b7c418c37f8baa9347c8cc21d047cdead6f54",
+    "snap_rows": "2055",
+    "snap_start": "2018-01-02",
+    "snap_end": "2026-06-26"
+  },
+  {
+    "bt_id": "188e2c7b-1b3f-4cd3-b2f4-c65dd4043b1d",
+    "symbol": "IF",
+    "status": "success",
+    "factor_id": "75b682fc-38d5-49bf-bae7-895ad5c592cd",
+    "factor_name": "动量因子",
+    "kind": "template",
+    "template_type": "momentum",
+    "project_id": "297ee069-3ad6-4009-8840-16a8a483ed67",
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 250
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": -0.018909087411823382,
+      "total_return": -0.16375150969312735,
+      "trade_count": 42,
+      "max_drawdown": -0.44304180830372186
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "IF",
+    "snap_hash": "cefbc938130bf15af7752c738d74766e7565da43a9fa3cad35eee8d51351feeb",
+    "snap_rows": "2057",
+    "snap_start": "2018-01-02",
+    "snap_end": "2026-06-29"
+  },
+  {
+    "bt_id": "7108a25c-e41d-4192-b3aa-63452eaa54b0",
+    "symbol": "RB",
+    "status": "success",
+    "factor_id": "57500be7-893a-4a3c-82d2-6d526e6b32ca",
+    "factor_name": "momentum-RB-023301",
+    "kind": "template",
+    "template_type": "momentum",
+    "project_id": "2607b1d1-de5a-4562-a751-5da298fdb746",
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 20
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": 0.06511128579662676,
+      "total_return": -0.08349176148694837,
+      "trade_count": 200,
+      "max_drawdown": -0.38229794768164693
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "RB",
+    "snap_hash": "45858bc2aa0b2bbfab04ec7e2b600458416e0695839855167b1e812affe4020c",
+    "snap_rows": "2056",
+    "snap_start": "2018-01-02",
+    "snap_end": "2026-06-29"
+  },
+  {
+    "bt_id": "d179b3e8-4139-4fb5-80b8-0cb72e64f20c",
+    "symbol": "AU",
+    "status": "success",
+    "factor_id": "269a0959-3917-4bfb-b67b-f05e4b0bd712",
+    "factor_name": "momentum-AU-60a5c3",
+    "kind": "template",
+    "template_type": "momentum",
+    "project_id": "7e37e117-d146-42c8-af5c-122f7d21d2b3",
+    "project_name": null,
+    "spec": {
+      "params": {
+        "window": 20
+      }
+    },
+    "cost": {
+      "fee_rate": 0.0005,
+      "slippage_bps": 1.0
+    },
+    "metrics": {
+      "sharpe": 0.15670293250617312,
+      "total_return": 0.10467183254055734,
+      "trade_count": 211,
+      "max_drawdown": -0.3776209883228254
+    },
+    "report_keys": [
+      "conclusion",
+      "grade",
+      "hypothesis",
+      "markdown",
+      "method",
+      "results"
+    ],
+    "report_sample": {},
+    "snap_timeframe": "1d",
+    "snap_symbol": "AU",
+    "snap_hash": "1f6e141d73fae08e1fa97fa6c218df1d464ec84bda9feeb3fb50df201446a9b9",
+    "snap_rows": "2058",
+    "snap_start": "2018-01-02",
+    "snap_end": "2026-07-01"
+  }
+]
