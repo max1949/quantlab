@@ -340,23 +340,26 @@ def seal_factor_sign_paper_run(db: Any, user: Any, paper_out: dict[str, Any]) ->
         compiled_strategy_hash=str(paper_out.get("strategy_spec_hash") or ""),
         environment="SANDBOX",
         instrument=str(paper_out.get("instrument") or "RB"),
-        venue="CN_FUTURES_RESEARCH",
-        data_provider="historical_parquet",
+        # Prod paper_runs columns are tight (some VARCHAR(16)); keep short codes only.
+        venue="CN_FUT_RES",
+        data_provider="hist_parquet",
         status=PaperRunStatus.STOPPED.value,
-        engine="FACTOR_SIGN_PAPER_RUNTIME",
-        engine_version="factor_sign_paper_adapter_v1",
+        engine="FS_PAPER",
+        engine_version="fs_v1",
         realized_pnl=float((paper_out.get("snapshot") or {}).get("realized_pnl") or 0),
         current_balance=float((paper_out.get("snapshot") or {}).get("equity") or 100_000),
         metrics={
             "trade_count": (paper_out.get("snapshot") or {}).get("trade_count"),
             "parity": paper_out.get("parity"),
             "PAPER_RUNTIME": "CANONICAL",
+            "engine_full": "FACTOR_SIGN_PAPER_RUNTIME",
+            "adapter_full": "factor_sign_paper_adapter_v1",
         },
         effective_config={"path": "factor_sign_adapter", "LEGACY_PAPER_ORDERS_USED": "NO"},
         run_manifest={"kind": "factor_sign_ui_seal"},
         started_at=datetime.now(timezone.utc),
         ended_at=datetime.now(timezone.utc),
-        stop_reason="factor_sign_batch_complete",
+        stop_reason="fs_batch_done",
     )
     db.add(run)
     db.flush()
