@@ -1,0 +1,37 @@
+# QLN-4 Acceptance Ledger
+
+```text
+PHASE=QLN-4
+QLN_4=PASS
+EVIDENCE_VALIDATION_PIPELINE=PASS
+CANONICAL_BACKTEST=PASS
+OOS=PASS
+WALK_FORWARD=PASS
+FEE_STRESS=PASS
+SLIPPAGE_STRESS=PASS
+PARAMETER_SENSITIVITY=PASS
+REGIME_SPLIT=PASS
+EXTREME_PERIOD_TEST=PASS
+REALITY_SCORE=PASS
+RESEARCH_DEBT=PASS
+PROMOTION_RULES=PASS
+KILL_RULES=PASS
+DECISION_IN={PROMOTE,HOLD,KILL}
+THRESHOLDS_FROZEN=YES
+THRESHOLD_RELAXATION=NO
+LIVE_EXECUTION=DENY
+SIMILAR_ISSUE_AUDIT=PASS
+UNAUTHORIZED_SCOPE_EXPANSION=NO
+QLN_5_STARTED=NO
+```
+
+## Gate detail
+
+| Gate | Evidence | Result |
+|---|---|---|
+| Pipeline emits explainable decision | `EvidenceReport.decision` + `reasons` | PASS |
+| PROMOTE/HOLD/KILL | `apply_promotion_kill_rules` | PASS |
+| Empty neighborhood cannot PROMOTE | sensitivity forced INSUFFICIENT | PASS |
+| Hard FAIL → KILL | unit test | PASS |
+| Thresholds version-pinned | `qln4_evidence_thr_v1` | PASS |
+| live_execution | always DENY in report | PASS |
