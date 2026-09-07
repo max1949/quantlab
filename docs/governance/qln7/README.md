@@ -1,12 +1,7 @@
-# QLN-7 — Portfolio Intelligence & Governor
+# QLN-7 README
 
 ```text
-STATUS=QLN_7_STARTED
-QLN_7_STARTED=YES
-QLN_6=PASS
+QLN_7=PASS
 ```
 
-| Doc | Role |
-|---|---|
-| [Work Ledger](./QUANTLAB_QLN7_WORK_LEDGER.md) | **Current** |
-| [Campaign](../campaigns/QUANTLAB_QLN3_TO_10_CAMPAIGN_LEDGER.md) | Continuity |
+See Acceptance + Formal Closure.

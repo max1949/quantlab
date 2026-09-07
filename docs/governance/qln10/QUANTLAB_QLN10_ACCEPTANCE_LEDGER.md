@@ -1,0 +1,18 @@
+# QLN-10 Acceptance Ledger
+
+```text
+PHASE=QLN-10
+QLN_10=PASS
+LIVE_READINESS=PASS
+CANARY_CAPITAL_CONTRACT=PASS
+OPERATOR_ACTION_CARD=PASS
+EMERGENCY_STOP_DRILL=COVERED_VIA_QLN9
+BROKER_MATRIX=PASS
+QLN_11_AUTO_ENTER=DENY
+REAL_MONEY=NO
+LIVE_STARTED=NO
+```
+
+## Rule
+
+`LIVE_READINESS=PASS` only means engineering may **request** Owner Live Approval. It does **not** authorize QLN-11 Limited Live Pilot.
