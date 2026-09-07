@@ -437,7 +437,7 @@ def project_quality_payload(db: Session, project_id: uuid.UUID, *, locale: str =
         else QualityVerdict(passed=False, reasons=["项目下还没有因子"], scorecard={})
     )
     if paper_verdict.passed:
-        hints.append("已通过模拟盘毕业线 — 可一键提交 Paper 订单并开启真实跟踪。")
+        hints.append("已通过模拟盘毕业线 — 可在「模拟交易」运行正式 PaperRun 并跟踪（不涉及真钱）。")
     elif paper_verdict.reasons and verdict.passed:
         hints.append("发布线已通过，但模拟盘毕业线更严 — 请按下方 Paper 清单继续优化。")
 

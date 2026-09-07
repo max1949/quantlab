@@ -22,8 +22,9 @@ export default function Layout() {
 
   const navItems = [
     { to: "/app", label: t.nav.workspace, auth: true },
+    { to: "/evidence", label: t.nav.evidenceOs || "证据系统", auth: true },
     { to: "/paper", label: t.nav.paperTrading || "模拟交易", auth: true },
-    { to: "/ai-strategy", label: t.nav.aiStrategy || "AI创建策略", auth: true },
+    { to: "/projects", label: t.nav.myProjects, auth: true },
     { to: "/feed", label: t.nav.feed, auth: false },
     { to: "/leaderboards", label: t.nav.leaderboards, auth: false },
     { to: "/orgs", label: t.nav.orgLibrary, auth: true },
@@ -112,8 +113,14 @@ export default function Layout() {
                     <MenuLink to="/projects" onClick={() => setMenuOpen(false)}>
                       {t.nav.myProjects}
                     </MenuLink>
-                    <MenuLink to="/experiments" onClick={() => setMenuOpen(false)}>
-                      {t.nav.myExperiments}
+                    <MenuLink to="/evidence" onClick={() => setMenuOpen(false)}>
+                      {t.nav.evidenceOs || "证据系统"}
+                    </MenuLink>
+                    <MenuLink to="/factor-scans" onClick={() => setMenuOpen(false)}>
+                      {t.nav.factorScans || "参数扫描"}
+                    </MenuLink>
+                    <MenuLink to="/ai-strategy" onClick={() => setMenuOpen(false)}>
+                      {t.nav.aiStrategyTool || "AI 研究工具"}
                     </MenuLink>
                     <MenuLink to="/me/following" onClick={() => setMenuOpen(false)}>
                       {t.nav.following}

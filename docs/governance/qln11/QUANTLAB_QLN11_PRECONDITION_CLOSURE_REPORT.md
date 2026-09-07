@@ -1,0 +1,18 @@
+# QLN-11 Precondition Closure Report
+
+```text
+ACTIVITY=QLN_11_PRECONDITION_CLOSURE
+QLN_11_STARTED=NO
+REAL_MONEY=NO
+ORDERS_CREATED=NO
+```
+
+| Gate | Result |
+|---|---|
+| BROKER_LIVE_CAPABILITY | HOLD |
+| PAPER_QUALIFIED | NO |
+| SHADOW_CONTINUOUS_EVIDENCE | HOLD |
+| QLN_11_RECOMMENDATION | HOLD |
+
+Probes: `docs/governance/qln11/artifacts/`  
+Updated package: `QUANTLAB_QLN11_OWNER_LIVE_PILOT_DECISION_PACKAGE.md`

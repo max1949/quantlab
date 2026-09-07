@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from backend.app.models.challenge import Challenge, ChallengeProgress
 from backend.app.models.execution import PaperOrder
 from backend.app.models.factor import Factor, FactorKind
+from backend.app.models.paper_run import PaperRun, PaperRunFill
 from backend.app.models.research import ResearchReport
 from backend.app.models.user import User
 from backend.app.models.validation import Validation, ValidationStatus
@@ -28,13 +29,30 @@ DEFAULT_MILESTONES = [
     {"day": 1, "code": "first_factor", "title": "创建第一个因子", "check": "factor", "reward_points": 20},
     {"day": 7, "code": "first_oos", "title": "完成第一次科学验证 (OOS)", "check": "validation_success", "reward_points": 40},
     {"day": 15, "code": "stack_factor", "title": "创建第一个组合因子", "check": "stack_factor", "reward_points": 40},
-    {"day": 22, "code": "first_paper_order", "title": "下第一笔 Paper 模拟单", "check": "paper_order", "reward_points": 50},
+    {"day": 22, "code": "first_paper_order", "title": "完成第一笔正式模拟成交", "check": "paper_order", "reward_points": 50},
     {"day": 28, "code": "paper_graduated", "title": "因子通过 Paper 毕业线", "check": "paper_graduated", "reward_points": 80},
     {"day": 20, "code": "network_radar", "title": "关注 3 位研究员", "check": "following_three", "reward_points": 40},
     {"day": 29, "code": "research_share", "title": "生成第一份分享卡片", "check": "research_share", "reward_points": 50},
     {"day": 30, "code": "first_report", "title": "产出第一份研究报告", "check": "report", "reward_points": 100},
 ]
 CHALLENGE_COMPLETE_BONUS = 200  # 全部完成额外奖励
+
+
+def _has_canonical_paper_activity(db: Session, uid: uuid.UUID) -> bool:
+    """Canonical PaperRun activity OR legacy historical paper_orders (read-only credit)."""
+    runs = _count(db, select(func.count(PaperRun.id)).where(PaperRun.user_id == uid))
+    if runs > 0:
+        return True
+    fills = _count(
+        db,
+        select(func.count(PaperRunFill.id))
+        .join(PaperRun, PaperRunFill.paper_run_id == PaperRun.id)
+        .where(PaperRun.user_id == uid),
+    )
+    if fills > 0:
+        return True
+    legacy = _count(db, select(func.count(PaperOrder.id)).where(PaperOrder.user_id == uid))
+    return legacy > 0
 
 
 class ChallengeNotFoundError(Exception):
@@ -141,9 +159,7 @@ def _user_stats(db: Session, uid: uuid.UUID) -> dict:
         "report": _count(
             db, select(func.count(ResearchReport.id)).where(ResearchReport.owner_id == uid)
         ),
-        "paper_order": _count(
-            db, select(func.count(PaperOrder.id)).where(PaperOrder.user_id == uid)
-        ),
+        "paper_order": 1 if _has_canonical_paper_activity(db, uid) else 0,
         "paper_graduated": 1 if _any_factor_paper_graduated(db, uid) else 0,
         "following_three": 1 if following >= 3 else 0,
         "research_share": _count(
@@ -198,13 +214,13 @@ def _pending_hint(db: Session, user: User, code: str, *, done: bool) -> tuple[st
         return None, None
     if code == "first_paper_order":
         return (
-            "还没有模拟成交单。请到「模拟交易」或项目 Paper 面板下一笔模拟单（不涉及真钱）。",
-            "No paper order yet. Place one in Paper Trading or the project Paper panel (no real money).",
+            "还没有正式模拟成交。请到「模拟交易」运行正式 PaperRun（factor_sign / Spec 路径），不涉及真钱。旧版模拟下单已关闭。",
+            "No canonical PaperRun fills yet. Use Paper Trading formal PaperRun (no real money). Legacy paper_orders are closed.",
         )
     if code == "paper_graduated":
         return (
-            "暂无因子达到 Paper 毕业线。请在项目质量面板查看差距（样本外夏普、稳健性、换手、最低成交次数等）。",
-            "No factor has passed the Paper graduation line yet. Check the project quality panel for gaps (OOS Sharpe, robustness, turnover, min trades).",
+            "暂无因子达到 Paper 毕业线（项目质量评估：样本外夏普、稳健性、换手、最低成交等）。打开项目质量面板或证据系统查看差距，再优化后复验。",
+            "No factor has passed the Paper graduation line yet. Check project quality / Evidence OS for gaps, then re-validate.",
         )
     if code == "network_radar":
         return (

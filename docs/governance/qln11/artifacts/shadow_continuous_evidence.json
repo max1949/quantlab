@@ -1,0 +1,1916 @@
+{
+  "SHADOW_CONTINUOUS_EVIDENCE": "PASS",
+  "PAPER_QUALIFIED_INPUT": "YES",
+  "window_bars": 504,
+  "min_bars_required": 252,
+  "not_smoke": true,
+  "not_60_bar_research_dry_run": true,
+  "divergences": 0,
+  "signal_parity_bars": 504,
+  "intended_order_parity_bars": 504,
+  "position_state_parity_bars": 504,
+  "divergence_detector_injection": "PASS",
+  "dead_man": {
+    "trip_on_stale": true,
+    "ok_on_fresh": true
+  },
+  "reconciliation": {
+    "status": "PASS",
+    "expected_positions": {
+      "RB": 1.0
+    },
+    "actual_positions": {
+      "RB": 1.0
+    },
+    "drifts": []
+  },
+  "restart_recovery_events": 1,
+  "flight_events": 504,
+  "flight_path": "C:\\Users\\Administrator\\quantlab\\docs\\governance\\qln11\\artifacts\\shadow_flight_continuous.jsonl",
+  "replay_count": 504,
+  "loss_attribution": {
+    "loss_events": [
+      {
+        "event_id": "cont-20",
+        "pnl": -60.0,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-22",
+        "pnl": -893.6046661825239,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-23",
+        "pnl": -65.03165861756133,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-24",
+        "pnl": -1968.7964895039331,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-27",
+        "pnl": -1368.38520231047,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-28",
+        "pnl": -1864.1402415311604,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-29",
+        "pnl": -1348.0471916008682,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-31",
+        "pnl": -4216.712706980223,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-33",
+        "pnl": -1702.5833648378903,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-36",
+        "pnl": -1816.6637754338299,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-37",
+        "pnl": -558.9734693642531,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-38",
+        "pnl": -670.7681632371095,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-41",
+        "pnl": -978.2035713874502,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-42",
+        "pnl": -558.9734693642531,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-43",
+        "pnl": -4108.454999827256,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-46",
+        "pnl": -251.53806121391244,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-47",
+        "pnl": -922.306224451022,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-51",
+        "pnl": -810.5115305781655,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-53",
+        "pnl": -419.2301020231971,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-54",
+        "pnl": -950.2548979192361,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-56",
+        "pnl": -223.32108048041118,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-58",
+        "pnl": -1252.095791450629,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-61",
+        "pnl": -383.3475995215558,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-64",
+        "pnl": -2526.9725510090066,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-65",
+        "pnl": -1397.589830222365,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-66",
+        "pnl": -1241.9907158909773,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-67",
+        "pnl": -27.854410603409633,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-69",
+        "pnl": -1659.1125081665086,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-70",
+        "pnl": -562.3804810789006,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-71",
+        "pnl": -166.66726359179302,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-72",
+        "pnl": -166.06175128085306,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-73",
+        "pnl": -82.72976639059198,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-74",
+        "pnl": -165.15978725078458,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-75",
+        "pnl": -411.40616082814813,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-76",
+        "pnl": -516.423971098935,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-79",
+        "pnl": -869.7234105739044,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-80",
+        "pnl": -523.0745594658656,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-81",
+        "pnl": -2065.9618281464936,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-84",
+        "pnl": -1770.2304511561088,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-87",
+        "pnl": -1457.1704024292994,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-91",
+        "pnl": -738.8052452200645,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-92",
+        "pnl": -467.8165077607846,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-93",
+        "pnl": -130.08216257000458,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-95",
+        "pnl": -1299.7271074753953,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-104",
+        "pnl": -1297.990184313312,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-105",
+        "pnl": -911.8053153591463,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-106",
+        "pnl": -183.83632816252066,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-107",
+        "pnl": -1069.6527817842725,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-109",
+        "pnl": -459.68845156869793,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-111",
+        "pnl": -434.15020425932016,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-115",
+        "pnl": -1583.3713331810286,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-117",
+        "pnl": -127.69123654685973,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-118",
+        "pnl": -536.3031934968021,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-119",
+        "pnl": -1430.1418493248057,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-121",
+        "pnl": -689.5326773530251,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-122",
+        "pnl": -76.6147419281042,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-128",
+        "pnl": -638.6604887127614,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-130",
+        "pnl": -1752.4259910907713,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-136",
+        "pnl": -615.5977023254527,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-140",
+        "pnl": -469.18305702706857,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-141",
+        "pnl": -819.2438193521812,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-142",
+        "pnl": -399.2322743202094,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-143",
+        "pnl": -1432.2801335191325,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-146",
+        "pnl": -384.83903200576606,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-148",
+        "pnl": -1324.391306513382,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-149",
+        "pnl": -428.236389996222,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-154",
+        "pnl": -302.80261825614434,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-156",
+        "pnl": -1781.360306848539,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-160",
+        "pnl": -1467.2210756252607,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-167",
+        "pnl": -1072.332234350586,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-169",
+        "pnl": -1797.5218946110544,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-172",
+        "pnl": -797.8240250976232,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-176",
+        "pnl": -607.6130850058544,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-179",
+        "pnl": -1799.149251408904,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-181",
+        "pnl": -1385.9739855066146,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-186",
+        "pnl": -87.78072214015992,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-192",
+        "pnl": -435.90397281262267,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-195",
+        "pnl": -1467.428970106048,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-197",
+        "pnl": -499.6354006525362,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-198",
+        "pnl": -185.34793917484058,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-200",
+        "pnl": -525.5006809454644,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-202",
+        "pnl": -31.03406208436354,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-203",
+        "pnl": -651.2762904312403,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-205",
+        "pnl": -153.81077423218812,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-207",
+        "pnl": -183.9548013857857,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-208",
+        "pnl": -91.60850737460714,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-211",
+        "pnl": -17.740769922937034,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-217",
+        "pnl": -123.55770221509738,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-218",
+        "pnl": -339.78368109150324,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-224",
+        "pnl": -741.3462132905697,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-225",
+        "pnl": -247.1154044301802,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-230",
+        "pnl": -1019.3510432745243,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-233",
+        "pnl": -3336.057959807542,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-235",
+        "pnl": -988.4616177207499,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-236",
+        "pnl": -3397.8368109150906,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-237",
+        "pnl": -61.77885110754869,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-241",
+        "pnl": -92.66827666132303,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-242",
+        "pnl": -556.0096599679237,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-245",
+        "pnl": -1112.0193199358473,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-246",
+        "pnl": -1019.3510432745243,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-247",
+        "pnl": -30.889425553774345,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-248",
+        "pnl": -1136.2984084211057,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-250",
+        "pnl": -188.54876899435476,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-253",
+        "pnl": -599.7442796084069,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-256",
+        "pnl": -571.0470392935968,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-257",
+        "pnl": -972.1548110611766,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-259",
+        "pnl": -63.265660324294004,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-261",
+        "pnl": -349.9760669107636,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-262",
+        "pnl": -821.3776097153022,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-267",
+        "pnl": -1123.4955416416487,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-268",
+        "pnl": -282.4316582501342,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-269",
+        "pnl": -1052.3282063935185,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-271",
+        "pnl": -642.0358702847734,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-274",
+        "pnl": -917.1941004068212,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-277",
+        "pnl": -1734.6219411987404,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-280",
+        "pnl": -752.9797952148365,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-281",
+        "pnl": -216.21415954327676,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-285",
+        "pnl": -482.36071832968446,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-287",
+        "pnl": -256.74079845535744,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-288",
+        "pnl": -63.847937481230474,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-289",
+        "pnl": -669.5232603975164,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-290",
+        "pnl": -94.33681253319082,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-292",
+        "pnl": -1722.564206462077,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-294",
+        "pnl": -1300.6263896814635,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-300",
+        "pnl": -420.3982741372165,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-302",
+        "pnl": -321.2488213223842,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-304",
+        "pnl": -536.8895631079504,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-306",
+        "pnl": -340.285670093479,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-308",
+        "pnl": -222.43597827920166,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-309",
+        "pnl": -635.5313665119902,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-310",
+        "pnl": -751.8336065836629,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-311",
+        "pnl": -338.0651296227443,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-313",
+        "pnl": -651.9796298453439,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-314",
+        "pnl": -333.7287103320996,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-316",
+        "pnl": -645.9416660992283,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-321",
+        "pnl": -555.1170948542422,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-322",
+        "pnl": -1048.5545125024655,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-323",
+        "pnl": -1356.9528985326033,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-325",
+        "pnl": -1480.3122529446555,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-326",
+        "pnl": -277.5585474271211,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-328",
+        "pnl": -215.61981557683612,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-329",
+        "pnl": -205.24494227620016,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-331",
+        "pnl": -183.3989048855583,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-335",
+        "pnl": -275.09835732833017,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-336",
+        "pnl": -275.0983573283156,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-338",
+        "pnl": -122.11921746646112,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-341",
+        "pnl": -217.29303104439168,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-342",
+        "pnl": -2461.1104807097436,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-343",
+        "pnl": -558.4672612761497,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-344",
+        "pnl": -705.4323300330434,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-346",
+        "pnl": -205.75109625962796,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-348",
+        "pnl": -58.786027502748766,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-350",
+        "pnl": -676.0393162816617,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-351",
+        "pnl": -962.1273977265664,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-352",
+        "pnl": -176.14645280926197,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-353",
+        "pnl": -204.713033462147,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-354",
+        "pnl": -632.5583306286135,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-356",
+        "pnl": -488.6743492679234,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-357",
+        "pnl": -193.9634728894307,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-358",
+        "pnl": -1082.6020198724873,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-359",
+        "pnl": -813.7088015540357,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-360",
+        "pnl": -946.0795823199296,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-361",
+        "pnl": -28.025253482483095,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-362",
+        "pnl": -308.07883523327473,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-367",
+        "pnl": -57.74624260178825,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-369",
+        "pnl": -144.5546904684452,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-371",
+        "pnl": -1438.1210724670964,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-373",
+        "pnl": -114.62217234082345,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-375",
+        "pnl": -200.06558333340217,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-377",
+        "pnl": -114.02486826220411,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-378",
+        "pnl": -369.61670914488786,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-379",
+        "pnl": -873.9726301677001,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-384",
+        "pnl": -55.731664143837406,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-386",
+        "pnl": -222.92665657536418,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-387",
+        "pnl": -139.3291603596008,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-388",
+        "pnl": -334.38998486305354,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-390",
+        "pnl": -250.79248864729016,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-391",
+        "pnl": -362.25581693496497,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-392",
+        "pnl": -111.46332828768936,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-393",
+        "pnl": -111.46332828767481,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-395",
+        "pnl": -501.58497729456576,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-396",
+        "pnl": -27.86583207192598,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-397",
+        "pnl": -390.12164900689095,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-399",
+        "pnl": -354.9549689321284,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-400",
+        "pnl": -76.23849110673473,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-401",
+        "pnl": -604.0484264805564,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-402",
+        "pnl": -83.35040456023125,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-403",
+        "pnl": -27.729676379996818,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-405",
+        "pnl": -250.37339149494073,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-406",
+        "pnl": -829.7367201223533,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-408",
+        "pnl": -1158.722027598793,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-411",
+        "pnl": -132.14687264124223,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-413",
+        "pnl": -26.429374528248445,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-414",
+        "pnl": -370.0112433954637,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-419",
+        "pnl": -264.29374528248445,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-421",
+        "pnl": -819.3106103756727,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-423",
+        "pnl": -52.85874905649689,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-424",
+        "pnl": -607.8756141496997,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-425",
+        "pnl": -687.1637377344305,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-426",
+        "pnl": -52.85874905649689,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-427",
+        "pnl": -396.4406179237121,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-428",
+        "pnl": -370.0112433954637,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-429",
+        "pnl": -285.4795319043187,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-430",
+        "pnl": -1418.6524458982894,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-431",
+        "pnl": -1935.802806229316,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-433",
+        "pnl": -25.54846098566486,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-434",
+        "pnl": -331.91878137143794,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-435",
+        "pnl": -481.11810887737374,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-436",
+        "pnl": -75.05738997893059,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-439",
+        "pnl": -202.69155068411783,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-442",
+        "pnl": -608.4522026080522,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-444",
+        "pnl": -557.6838308279112,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-445",
+        "pnl": -224.98469781354652,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-454",
+        "pnl": -52.77375615586061,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-459",
+        "pnl": -269.2240387235652,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-461",
+        "pnl": -750.8724327347591,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-465",
+        "pnl": -974.0822003724606,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-466",
+        "pnl": -660.6841245784162,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-472",
+        "pnl": -53.08928564933012,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-474",
+        "pnl": -53.33071298376308,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-476",
+        "pnl": -53.88801210578822,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-480",
+        "pnl": -199.33693291974487,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-481",
+        "pnl": -198.40139250375796,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-482",
+        "pnl": -677.0483066501911,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-485",
+        "pnl": -533.4520584472193,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-488",
+        "pnl": -363.76006165480067,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-489",
+        "pnl": -27.740242997489986,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-490",
+        "pnl": -194.05293327613617,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-492",
+        "pnl": -415.5482279121934,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-493",
+        "pnl": -192.0037480507308,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-494",
+        "pnl": -737.1741701707506,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-495",
+        "pnl": -232.63150136898912,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-500",
+        "pnl": -614.1564896269701,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      },
+      {
+        "event_id": "cont-501",
+        "pnl": -854.4785942636081,
+        "why": "sign(signal)+lag Paper↔Shadow continuous twin",
+        "risk": {
+          "max_open": 1
+        }
+      }
+    ],
+    "total_loss": -156279.8089792023,
+    "n_loss_events": 234
+  },
+  "behavior_parity": "PASS",
+  "reasons": [
+    "continuous Paper↔Shadow twin PASS over 504 bars with QLN-8 stack"
+  ],
+  "ORDERS_CREATED": "NO",
+  "REAL_MONEY": "NO",
+  "BROKER_LIVE_CAPABILITY": "HOLD"
+}

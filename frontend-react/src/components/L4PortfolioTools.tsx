@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import PaperExecutionPanel from "./PaperExecutionPanel";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   getEntitlements,
@@ -17,8 +16,6 @@ const SYMBOLS = ["RB", "AU", "IF"];
 
 export default function L4PortfolioTools({
   projectId,
-  paperFactorId,
-  paperSymbol,
 }: {
   projectId: string;
   paperFactorId?: string | null;
@@ -93,7 +90,20 @@ export default function L4PortfolioTools({
         </div>
       )}
       {!locked && (
-        <PaperExecutionPanel factorId={paperFactorId} symbol={paperSymbol} projectId={projectId} />
+        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/60 p-4 text-sm dark:border-amber-900 dark:bg-amber-950/30">
+          <p className="font-medium text-amber-900 dark:text-amber-100">旧版模拟下单已关闭</p>
+          <p className="mt-1 text-amber-800 dark:text-amber-200">
+            请勿再使用 paper_orders / QMT / vn.py 路径。正式路径：先完成证据判定，再进入「模拟交易」PaperRun。
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link to="/evidence" className="btn-primary text-sm">
+              去看证据判定 →
+            </Link>
+            <Link to="/paper" className="btn text-sm">
+              正式模拟交易 →
+            </Link>
+          </div>
+        </div>
       )}
     </div>
   );

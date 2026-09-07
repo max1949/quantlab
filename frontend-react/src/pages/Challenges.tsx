@@ -15,13 +15,18 @@ import { useUi } from "../store/ui";
 import { ErrorBox, PageTitle, Spinner } from "../components/ui";
 import ChallengeNetworkCoachPanel from "../components/ChallengeNetworkCoachPanel";
 
+/**
+ * Milestone CTAs — product semantics:
+ * - paper_graduated: quality gate (assess_factor_paper), NOT legacy paper_orders
+ * - first_paper_order: canonical PaperRun fills
+ */
 const MILESTONE_CTA: Record<string, { to: string; label: string }> = {
   first_factor: { to: "/templates", label: "去创建因子" },
   first_oos: { to: "/projects", label: "去做验证" },
   stack_factor: { to: "/projects", label: "去组合因子" },
   network_radar: { to: "/feed?focus=follow", label: "去关注研究员" },
-  first_paper_order: { to: "/paper", label: "去下模拟单" },
-  paper_graduated: { to: "/paper", label: "查看模拟毕业线" },
+  first_paper_order: { to: "/paper", label: "去正式模拟交易" },
+  paper_graduated: { to: "/projects", label: "查看项目质量 / 毕业线差距" },
   research_share: { to: "/projects", label: "去生成分享卡" },
   first_report: { to: "/projects", label: "去写研究报告" },
 };
@@ -83,6 +88,9 @@ export default function Challenges() {
     onError: (e) => notify(apiErrorMessage(e, t.certNotReady), "error"),
   });
 
+  const list = challenges.data ?? [];
+  const multi = list.length > 1;
+
   return (
     <div>
       <PageTitle title={t.title} subtitle={t.subtitle} />
@@ -92,22 +100,46 @@ export default function Challenges() {
         <Spinner />
       ) : challenges.isError ? (
         <ErrorBox message={apiErrorMessage(challenges.error)} />
-      ) : challenges.data && challenges.data.length > 0 ? (
+      ) : list.length > 0 ? (
         <>
-          <div className="mb-4 flex flex-wrap gap-2">
-            {challenges.data.map((c) => (
-              <button
-                key={c.code}
-                onClick={() => setCode(c.code)}
-                className={`rounded-lg px-4 py-2 text-sm font-medium ${
-                  code === c.code
-                    ? "bg-brand-600 text-white"
-                    : "bg-white text-slate-600 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700"
-                }`}
+          {/*
+            Product semantic: challenge codes are a *selector tab* when multiple exist.
+            With a single challenge (or already selected), do NOT render a primary CTA-looking button
+            that no-ops when clicked — that was the dead-click UX.
+          */}
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            {multi ? (
+              list.map((c) => {
+                const selected = code === c.code;
+                return (
+                  <button
+                    key={c.code}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => {
+                      if (!selected) setCode(c.code);
+                    }}
+                    className={`rounded-lg px-4 py-2 text-sm font-medium ${
+                      selected
+                        ? "cursor-default bg-brand-600 text-white"
+                        : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700"
+                    }`}
+                  >
+                    {c.title}
+                    {selected ? " · 当前" : ""}
+                  </button>
+                );
+              })
+            ) : (
+              <div
+                className="inline-flex items-center rounded-lg bg-brand-50 px-4 py-2 text-sm font-medium text-brand-800 ring-1 ring-brand-200 dark:bg-brand-950 dark:text-brand-100 dark:ring-brand-800"
+                role="status"
+                aria-label="当前挑战"
               >
-                {c.title}
-              </button>
-            ))}
+                {list[0].title}
+                <span className="ml-2 text-xs font-normal text-brand-600 dark:text-brand-300">当前挑战</span>
+              </div>
+            )}
           </div>
 
           {progress.isLoading ? (
@@ -122,6 +154,7 @@ export default function Challenges() {
             <div className="card text-center">
               <p className="text-slate-600 dark:text-slate-300">{t.enrollHint}</p>
               <button
+                type="button"
                 className="btn-primary mt-3"
                 disabled={enroll.isPending}
                 onClick={() => enroll.mutate()}
@@ -154,8 +187,8 @@ function ProgressView({
   return (
     <div>
       <div className="card">
-        <div className="flex items-center justify-between gap-3">
-          <div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
             <p className="font-semibold text-slate-800 dark:text-slate-100">{data.title}</p>
             <p className="text-sm text-slate-400">
               {t.completed(data.completed_count, data.total, data.reward_points)}
@@ -172,8 +205,15 @@ function ProgressView({
             </span>
           ) : (
             <button
-              className="btn-primary"
+              type="button"
+              className={
+                allDone
+                  ? "btn-primary shrink-0"
+                  : "shrink-0 cursor-not-allowed rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-400 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-500 dark:ring-slate-700"
+              }
               disabled={!allDone || claiming}
+              title={!allDone ? "完成全部里程碑后可领取" : undefined}
+              aria-disabled={!allDone || claiming}
               onClick={onClaim}
             >
               {allDone ? t.claimCert : t.claimCertLocked}
@@ -191,10 +231,16 @@ function ProgressView({
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
         {data.milestones.map((m) => {
           const cta = !m.completed ? MILESTONE_CTA[m.code] : null;
+          const secondary =
+            !m.completed && m.code === "paper_graduated"
+              ? { to: "/evidence", label: "打开证据系统了解判定" }
+              : !m.completed && m.code === "first_paper_order"
+                ? { to: "/evidence", label: "先看证据再模拟" }
+                : null;
           return (
             <div
               key={m.code}
-              className={`card flex items-center justify-between gap-2 ${
+              className={`card flex items-start justify-between gap-2 ${
                 m.completed
                   ? "border-emerald-200 bg-emerald-50/40 dark:border-emerald-900 dark:bg-emerald-950/30"
                   : ""
@@ -222,12 +268,22 @@ function ProgressView({
                   </p>
                 ) : null}
                 {cta ? (
-                  <Link
-                    to={cta.to}
-                    className="mt-1 inline-block text-xs font-medium text-brand-600 underline dark:text-brand-300"
-                  >
-                    {cta.label} →
-                  </Link>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <Link
+                      to={cta.to}
+                      className="inline-block rounded-md bg-brand-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-brand-700"
+                    >
+                      {cta.label} →
+                    </Link>
+                    {secondary ? (
+                      <Link
+                        to={secondary.to}
+                        className="inline-block text-xs font-medium text-brand-600 underline dark:text-brand-300"
+                      >
+                        {secondary.label} →
+                      </Link>
+                    ) : null}
+                  </div>
                 ) : null}
               </div>
               <span className="badge shrink-0">+{m.reward_points}</span>

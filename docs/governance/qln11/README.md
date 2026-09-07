@@ -1,0 +1,18 @@
+# QLN-11
+
+```text
+QLN_11_STARTED=NO
+QLN_11_RECOMMENDATION=HOLD
+BROKER_LIVE_CAPABILITY=HOLD
+PAPER_QUALIFIED=YES
+SHADOW_CONTINUOUS_EVIDENCE=PASS
+FACTOR_SIGN_PAPER_ADAPTER=PASS
+REAL_MONEY=NO
+OWNER_BROKER_INPUT_REQUIRED=YES
+```
+
+| Doc | Role |
+|---|---|
+| [Owner Decision Package](./QUANTLAB_QLN11_OWNER_LIVE_PILOT_DECISION_PACKAGE.md) | **Current** |
+| [Paper/Shadow Precondition Engineering](./QUANTLAB_QLN11_PAPER_SHADOW_PRECONDITION_ENGINEERING.md) | This round closure |
+| [artifacts/](./artifacts/) | broker / paper / shadow JSON |

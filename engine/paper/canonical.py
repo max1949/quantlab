@@ -24,12 +24,21 @@ PAPER_PATH_REGISTRY: dict[str, dict[str, Any]] = {
             "frontend-react/src/pages/PaperTrading.tsx",
         ],
         "api": "/paper-sandbox/*",
-        "notes": "Official Spec→runtime_params→PaperRun path",
+        "notes": "Official Spec→runtime_params→PaperRun path (EMA/Nautilus)",
+    },
+    "factor_sign_paper": {
+        "disposition": PaperPathDisposition.CANONICAL.value,
+        "paths": [
+            "engine/strategies/v2/factor_sign_adapter.py",
+            "engine/paper/factor_sign_runtime.py",
+            "scripts/factor_sign_paper_qualify.py",
+        ],
+        "notes": "Canonical PaperRuntimeContract for factor_sign Specs (sign+lag); not Factor Lab; not paper_orders",
     },
     "runtime_params": {
         "disposition": PaperPathDisposition.CANONICAL.value,
         "paths": ["engine/strategies/runtime_params.py"],
-        "notes": "SSOT for Backtest+Paper params",
+        "notes": "SSOT for EMA Backtest+Paper params",
     },
     "paper_orders": {
         "disposition": PaperPathDisposition.SOFT_RETIRE.value,

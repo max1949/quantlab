@@ -16,6 +16,17 @@ export default defineConfig({
       },
     },
   },
+  preview: {
+    port: 5199,
+    proxy: {
+      // Browser acceptance against prod API without deploying FE yet
+      "/api": {
+        target: "https://q.ziyingke.com",
+        changeOrigin: true,
+        secure: true,
+      },
+    },
+  },
   build: {
     outDir: "dist",
     emptyOutDir: true,

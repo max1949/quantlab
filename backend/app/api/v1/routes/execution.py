@@ -74,39 +74,16 @@ def create_paper_order(
     current_user: Annotated[User, Depends(require_feature("paper_trading"))],
     db: Annotated[Session, Depends(get_db)],
 ) -> PaperOrderOut:
-    try:
-        order = exs.submit_paper_order(
-            db,
-            current_user,
-            symbol=payload.symbol,
-            side=payload.side,
-            notional_cny=payload.notional_cny,
-            factor_id=payload.factor_id,
-            signal_value=payload.signal_value,
-            note=payload.note,
-            channel=payload.channel,
-            acknowledge_risk=payload.acknowledge_risk,
-        )
-    except exs.ExecutionError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
-    audit_service.log(
-        db,
-        actor_id=current_user.id,
-        action="execution.paper.submit",
-        resource_type="paper_order",
-        resource_id=str(order.id),
-        detail={
-            "symbol": order.symbol,
-            "side": order.side,
-            "notional_cny": float(order.notional_cny),
-            "channel": order.channel,
-            "external_ref": order.external_ref,
-            "regime": order.regime,
-            "regime_fit_score": order.regime_fit_score,
-        },
+    # P0 soft-retire: legacy paper_orders must not compete with canonical PaperRun.
+    # History remains listable via GET /execution/paper/orders.
+    raise HTTPException(
+        status_code=status.HTTP_410_GONE,
+        detail=(
+            "旧版「模拟下单」(paper_orders) 已关闭，不再接受新订单。"
+            "请前往「模拟交易」使用正式 PaperRun（Spec → 模拟成交）。"
+            "历史订单仍可查询。实盘未开放。"
+        ),
     )
-    out = PaperOrderOut(**exs.order_to_dict(order))
-    return out.model_copy(update={"academy_rewards": getattr(order, "academy_rewards", [])})
 
 
 @router.post(

@@ -146,6 +146,14 @@ export default function Experiments() {
     <div>
       <PageTitle title={e.title} subtitle={e.subtitle} />
 
+      <div className="mb-4 mt-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm dark:border-slate-700 dark:bg-slate-900">
+        本页是<strong>参数扫描</strong>历史，不是实验账本。封印实验、数据信任与复现请前往{" "}
+        <Link className="font-medium text-brand-700 underline" to="/evidence">
+          证据系统 → 实验账本
+        </Link>
+        。
+      </div>
+
       <div className="mb-4 flex flex-wrap items-end gap-3">
         <label className="text-sm">
           <span className="mb-1 block text-xs text-slate-500">{e.filterSymbol}</span>

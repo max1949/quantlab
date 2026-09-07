@@ -1371,54 +1371,19 @@ export async function retryOrgFailedAlertDeliveries(orgId: string): Promise<{ re
   return data;
 }
 
-// ---- paper sandbox (Phase 6) ----
+// ---- paper sandbox (Phase 6) — BTC demo bootstrap RETIRED ----
+/** @deprecated Use research-os factor_sign PaperRun. Throws Chinese error if called. */
 export async function registerPaperReady(): Promise<void> {
-  await api.post("/paper-sandbox/paper-ready", {
-    spec: {
-      strategy: { id: "golden_btc_ema_trend", version: "v1", name: "BTC EMA", author: "quantlab", status: "RESEARCH" },
-      market: { instrument: "BTCUSDT", venue: "BINANCE_SANDBOX", asset_class: "CRYPTO", timeframe: "1m" },
-      data: { required: ["bars"], warmup: 50, frequency: "1m" },
-      entry: { long: { conditions: [{ type: "ema_cross", params: { fast: 10, slow: 20, direction: "up" } }] }, short: { conditions: [{ type: "ema_cross", params: { fast: 10, slow: 20, direction: "down" } }] } },
-      exit: { conditions: [] },
-      stop_loss: { type: "none" },
-      take_profit: { type: "none" },
-      position_sizing: { type: "fixed", trade_size: "10000" },
-      risk: { max_open_positions: 1 },
-      execution: { order_type: "MARKET" },
-      regime: { enabled: false, allow: [], deny: [], filters: [] },
-      validation: { required_tests: [] },
-      deployment: { permitted_environments: ["SANDBOX"] },
-    },
-    compiled_hash: "demo",
-    data_gate_status: "PASS",
-    backtest_pass: true,
-    validation_pass: true,
-    robustness_pass: true,
-  });
+  throw new Error(
+    "旧版「启动 BTC 模拟」已退役。请使用「模拟交易」页的正式模拟（factor_sign → PaperRun）。",
+  );
 }
 
+/** @deprecated */
 export async function createPaperSandboxRun(): Promise<{ id: string }> {
-  const { data } = await api.post("/paper-sandbox/runs", {
-    spec: {
-      strategy: { id: "golden_btc_ema_trend", version: "v1", name: "BTC EMA", author: "quantlab", status: "RESEARCH" },
-      market: { instrument: "BTCUSDT", venue: "BINANCE_SANDBOX", asset_class: "CRYPTO", timeframe: "1m" },
-      data: { required: ["bars"], warmup: 50, frequency: "1m" },
-      entry: { long: { conditions: [{ type: "ema_cross", params: { fast: 10, slow: 20, direction: "up" } }] }, short: { conditions: [{ type: "ema_cross", params: { fast: 10, slow: 20, direction: "down" } }] } },
-      exit: { conditions: [] },
-      stop_loss: { type: "none" },
-      take_profit: { type: "none" },
-      position_sizing: { type: "fixed", trade_size: "10000" },
-      risk: { max_open_positions: 1 },
-      execution: { order_type: "MARKET" },
-      regime: { enabled: false, allow: [], deny: [], filters: [] },
-      validation: { required_tests: [] },
-      deployment: { permitted_environments: ["SANDBOX"] },
-    },
-    environment: "SANDBOX",
-    instrument: "BTCUSDT",
-    data_provider: "synthetic",
-  });
-  return data;
+  throw new Error(
+    "旧版 BTC 沙盒演示已退役，避免服务器错误。请使用正式模拟交易。",
+  );
 }
 
 export async function startPaperRun(runId: string) {

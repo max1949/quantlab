@@ -35,6 +35,7 @@ import OrgDetail from "./pages/OrgDetail";
 import OrgInvite from "./pages/OrgInvite";
 import AiCreateStrategy from "./pages/AiCreateStrategy";
 import PaperTrading from "./pages/PaperTrading";
+import EvidenceOs from "./pages/EvidenceOs";
 import NotFound from "./pages/NotFound";
 
 export default function App() {
@@ -79,6 +80,7 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/app" element={<Dashboard />} />
+            <Route path="/evidence" element={<EvidenceOs />} />
             <Route path="/ai-strategy" element={<AiCreateStrategy />} />
             <Route path="/paper" element={<PaperTrading />} />
             <Route path="/handbook" element={<BeginnerHandbookPage />} />
@@ -87,6 +89,7 @@ export default function App() {
             <Route path="/projects" element={<Projects />} />
             <Route path="/projects/:id" element={<ProjectDetail />} />
             <Route path="/experiments" element={<Experiments />} />
+            <Route path="/factor-scans" element={<Experiments />} />
             <Route path="/orgs" element={<OrgLibrary />} />
             <Route path="/orgs/:id" element={<OrgDetail />} />
             <Route path="/challenges" element={<Challenges />} />

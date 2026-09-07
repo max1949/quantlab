@@ -1,181 +1,159 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  getPaperSandboxDashboard,
-  startPaperRun,
-  stopPaperRun,
-  killPaperRun,
-  createPaperSandboxRun,
-  registerPaperReady,
-} from "../api/endpoints";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Link, useSearchParams } from "react-router-dom";
+import { runOsFactorSignPaper, listOsStrategies } from "../api/researchOs";
 import { useLocale } from "../store/locale";
 import { useUi } from "../store/ui";
 import { apiErrorMessage } from "../api/client";
+import { useState } from "react";
 
+/**
+ * Canonical Paper Trading page.
+ * BTC EMA sandbox bootstrap was retired — it 500'd / confused users after PaperRun closure.
+ * Only factor_sign → PaperRuntimeContract path remains as primary action.
+ */
 export default function PaperTrading() {
   const notify = useUi((s) => s.notify);
   const t = useLocale((s) => s.dict);
-  const qc = useQueryClient();
+  const [params] = useSearchParams();
+  const [strategyId, setStrategyId] = useState(params.get("strategy") || "hist_fl_momentum_w20");
+  const [instrument, setInstrument] = useState(params.get("instrument") || "RB");
+  const [fsResult, setFsResult] = useState<Record<string, unknown> | null>(null);
+  const [showRetiredNote, setShowRetiredNote] = useState(false);
 
-  const demoRunId = sessionStorage.getItem("paper_run_id") || "";
+  const strategies = useQuery({ queryKey: ["os-strategies"], queryFn: listOsStrategies });
 
-  const dashboard = useQuery({
-    queryKey: ["paper-dashboard", demoRunId],
-    queryFn: () => getPaperSandboxDashboard(demoRunId),
-    enabled: Boolean(demoRunId),
-    refetchInterval: (q) => {
-      const status = String((q.state.data as { status?: string } | undefined)?.status || "").toUpperCase();
-      if (status === "RUNNING" || status === "STARTING") return 3000;
-      return false;
+  const factorSign = useMutation({
+    mutationFn: () => runOsFactorSignPaper({ strategy_id: strategyId, instrument, bars: 400 }),
+    onSuccess: (data) => {
+      setFsResult(data);
+      notify("正式模拟完成（不涉及真实资金）", "success");
     },
+    onError: (e) => notify(apiErrorMessage(e, "正式模拟未能完成，请稍后重试或先打开证据系统"), "error"),
   });
 
-  const bootstrap = useMutation({
-    mutationFn: async () => {
-      await registerPaperReady();
-      const run = await createPaperSandboxRun();
-      await startPaperRun(run.id);
-      sessionStorage.setItem("paper_run_id", run.id);
-      return run.id;
-    },
-    onSuccess: () => {
-      notify("模拟交易已启动（不涉及真钱）", "success");
-      void qc.invalidateQueries({ queryKey: ["paper-dashboard"] });
-    },
-    onError: (e) => notify(apiErrorMessage(e, "启动失败"), "error"),
-  });
-
-  const stopMut = useMutation({
-    mutationFn: () => stopPaperRun(demoRunId),
-    onSuccess: () => {
-      notify("已请求优雅停止", "success");
-      void dashboard.refetch();
-    },
-    onError: (e) => notify(apiErrorMessage(e, "停止失败"), "error"),
-  });
-
-  const killMut = useMutation({
-    mutationFn: () => killPaperRun(demoRunId),
-    onSuccess: () => {
-      notify("已强制终止模拟（Kill Switch）", "info");
-      void dashboard.refetch();
-    },
-    onError: (e) => notify(apiErrorMessage(e, "终止失败"), "error"),
-  });
-
-  const d = dashboard.data;
-  const statusUpper = String(d?.status || "").toUpperCase();
-  const isActive = statusUpper === "RUNNING" || statusUpper === "STARTING";
+  const opts = (strategies.data?.items || []).filter((x) => !x.error);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <div className="mb-6 rounded-xl border-2 border-amber-400 bg-amber-50 p-4 text-center dark:border-amber-600 dark:bg-amber-950/40">
         <p className="text-2xl font-bold text-amber-900 dark:text-amber-100">模拟交易，不涉及真实资金</p>
-        <p className="mt-1 text-sm text-amber-800 dark:text-amber-200">SANDBOX · Nautilus 模拟执行 · BTCUSDT · 实盘未开放</p>
+        <p className="mt-1 text-sm text-amber-800 dark:text-amber-200">
+          正式路径：策略规格 → factor_sign 适配器 → PaperRun。旧版 paper_orders / BTC 演示沙盒已关闭。实盘未开放。
+        </p>
       </div>
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-semibold">{t.nav?.paperTrading || "模拟交易"}</h1>
-        <div className="flex flex-wrap gap-2">
-          <button type="button" className="btn-primary" disabled={bootstrap.isPending} onClick={() => bootstrap.mutate()}>
-            {bootstrap.isPending ? "启动中…" : demoRunId ? "重新启动 BTC 模拟" : "启动 BTC 模拟"}
-          </button>
-          {demoRunId && isActive ? (
-            <>
-              <button
-                type="button"
-                className="btn text-sm"
-                disabled={stopMut.isPending}
-                onClick={() => stopMut.mutate()}
-              >
-                {stopMut.isPending ? "停止中…" : "停止"}
-              </button>
-              <button
-                type="button"
-                className="btn text-sm text-rose-700"
-                disabled={killMut.isPending}
-                onClick={() => killMut.mutate()}
-              >
-                {killMut.isPending ? "终止中…" : "强制终止"}
-              </button>
-            </>
-          ) : null}
-        </div>
+        <Link to="/evidence" className="btn text-sm">
+          先去证据判定 →
+        </Link>
       </div>
 
-      {dashboard.isError ? (
-        <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-100">
-          无法读取模拟状态：{apiErrorMessage(dashboard.error)}。可尝试重新启动，或检查登录是否过期。
-        </div>
-      ) : null}
-
-      {d ? (
-        <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900/40">
-          <div className="text-lg font-medium">{d.strategy_name} · {d.strategy_version}</div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Stat label="状态" value={d.status_zh || d.status || "—"} />
-            <Stat label="运行时间" value={d.uptime_zh} />
-            <Stat label="权益 (Equity)" value={d.equity_zh || d.simulated_balance_zh} />
-            <Stat label="累计盈亏" value={d.total_pnl_zh} />
-            <Stat label="未实现盈亏" value={d.unrealized_pnl_zh || "—"} />
-            <Stat label="最大回撤" value={d.max_drawdown_zh || "—"} />
-            <Stat label="当前持仓" value={d.position_zh} />
-            <Stat label="当前风险" value={d.risk_zh} />
-            <Stat label="数据源" value={d.data_provider || "synthetic"} />
-            <Stat label="数据连接" value={d.data_connection_zh} />
+      <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900/40">
+        <p className="text-sm text-slate-600 dark:text-slate-300">
+          选择策略规格，运行 canonical 正式模拟。用于挑战「正式模拟成交」里程碑与观察净值，不是实盘。
+        </p>
+        {strategies.isError ? (
+          <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-100">
+            无法加载策略列表：{apiErrorMessage(strategies.error)}。请确认已登录，或稍后重试。
           </div>
-          {d.parity_status ? (
-            <div className="text-sm text-slate-600 dark:text-slate-300">
-              回测/模拟一致性：<span className="font-medium">{d.parity_status}</span>
-            </div>
-          ) : null}
-          <div className="text-sm text-slate-500">异常：{d.alert_count}</div>
-          {d.orders_zh?.length ? (
-            <div>
-              <h3 className="mb-2 font-medium">最近订单</h3>
-              <ul className="space-y-2 text-sm">
-                {d.orders_zh.map((o: { label_zh: string; price: string; quantity: string; trigger_reason: string }, i: number) => (
-                  <li key={i} className="rounded-lg border border-slate-100 p-3 dark:border-slate-800">
-                    <div className="font-medium">{o.label_zh}</div>
-                    <div className="text-slate-500">价格：{o.price} · 数量：{o.quantity}</div>
-                    <div className="text-slate-500">触发原因：{o.trigger_reason}</div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-          {Array.isArray(d.research_feedback_zh) && d.research_feedback_zh.length > 0 ? (
-            <div>
-              <h3 className="mb-2 font-medium">研究反馈</h3>
-              <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700 dark:text-slate-300">
-                {d.research_feedback_zh.map((line: string, i: number) => (
-                  <li key={i}>{line}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-          {Array.isArray(d.backtest_vs_paper_zh) && d.backtest_vs_paper_zh.length > 0 ? (
-            <div>
-              <h3 className="mb-2 font-medium">回测 vs 模拟</h3>
-              <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700 dark:text-slate-300">
-                {d.backtest_vs_paper_zh.map((line: string, i: number) => (
-                  <li key={i}>{line}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
+        ) : null}
+        <div className="flex flex-wrap gap-3">
+          <select
+            className="input min-w-[12rem]"
+            value={strategyId}
+            onChange={(e) => setStrategyId(e.target.value)}
+            disabled={factorSign.isPending}
+          >
+            {opts.length === 0 ? <option value={strategyId}>{strategyId}</option> : null}
+            {opts.map((s) => (
+              <option key={String(s.strategy_id)} value={String(s.strategy_id)}>
+                {String(s.strategy_id)}
+              </option>
+            ))}
+          </select>
+          <select
+            className="input"
+            value={instrument}
+            onChange={(e) => setInstrument(e.target.value)}
+            disabled={factorSign.isPending}
+          >
+            <option value="RB">螺纹钢 RB</option>
+            <option value="AU">黄金 AU</option>
+            <option value="IF">股指 IF</option>
+          </select>
+          <button
+            type="button"
+            className="btn-primary"
+            disabled={factorSign.isPending}
+            onClick={() => factorSign.mutate()}
+          >
+            {factorSign.isPending ? "模拟中…" : "运行正式模拟"}
+          </button>
         </div>
-      ) : (
-        <p className="text-slate-500">点击「启动 BTC 模拟」开始纸面沙盒体验。这是模拟盘，不会连接真实交易所账户。</p>
-      )}
-    </div>
-  );
-}
 
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800/50">
-      <div className="text-xs text-slate-500">{label}</div>
-      <div className="text-base font-medium">{value}</div>
+        {factorSign.isError ? (
+          <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-100">
+            {apiErrorMessage(factorSign.error, "正式模拟失败")}
+            <p className="mt-1 text-xs">建议：打开证据系统确认策略规格，或更换标的后重试。不会创建真实订单。</p>
+          </div>
+        ) : null}
+
+        {fsResult && (
+          <div className="space-y-2 text-sm">
+            <div>
+              运行时：{String((fsResult as { PAPER_RUNTIME?: string }).PAPER_RUNTIME)} · 旧路径：
+              {String((fsResult as { LEGACY_PAPER_ORDERS_USED?: string }).LEGACY_PAPER_ORDERS_USED)}
+            </div>
+            <div>
+              语义一致性：
+              {String(
+                (fsResult as { parity?: { FACTOR_SIGN_SPEC_TO_PAPER_SEMANTIC_PARITY?: string } }).parity
+                  ?.FACTOR_SIGN_SPEC_TO_PAPER_SEMANTIC_PARITY,
+              )}
+            </div>
+            <div>
+              成交：{String((fsResult as { snapshot?: { trade_count?: number } }).snapshot?.trade_count)} · 权益：
+              {String((fsResult as { snapshot?: { equity?: number } }).snapshot?.equity)}
+            </div>
+            <p className="text-slate-500">
+              {String(
+                (fsResult as { explain_zh?: { next_zh?: string } }).explain_zh?.next_zh ||
+                  "可返回挑战查看进度，或打开影子对照。",
+              )}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Link to="/challenges" className="btn text-sm">
+                返回挑战 →
+              </Link>
+              <Link to="/evidence" className="btn text-sm">
+                证据 / 影子对照 →
+              </Link>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="mt-6 rounded-xl border border-dashed border-slate-300 p-4 text-sm dark:border-slate-600">
+        <button
+          type="button"
+          className="font-medium text-slate-700 underline dark:text-slate-200"
+          onClick={() => setShowRetiredNote((v) => !v)}
+        >
+          {showRetiredNote ? "收起" : "为什么没有「启动 BTC 模拟」？"}
+        </button>
+        {showRetiredNote ? (
+          <div className="mt-2 space-y-2 text-slate-600 dark:text-slate-300">
+            <p>
+              旧的「启动 BTC 模拟」走的是硬编码 EMA 沙盒演示，在正式 PaperRun 收口后容易触发服务器错误，且不能代表你的策略晋级路径。
+            </p>
+            <p>
+              该入口已退役。请使用上方「运行正式模拟」。旧版 paper_orders / QMT / vn.py 新单同样已关闭。
+            </p>
+            <p className="text-xs text-slate-500">REAL_MONEY=NO · LEGACY_PAPER_PATH_REINTRODUCED=NO</p>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

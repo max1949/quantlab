@@ -29,6 +29,7 @@ from backend.app.api.v1.routes import (
     public,
     public_feed,
     research,
+    research_os,
     researchers,
     tasks,
     users,
@@ -72,5 +73,6 @@ api_router.include_router(admin_ops.router, prefix="/admin/ops", tags=["admin"])
 api_router.include_router(paper_runs.router, prefix="/paper-sandbox", tags=["paper-sandbox"])
 api_router.include_router(portfolio.router, prefix="/portfolio", tags=["portfolio"])
 api_router.include_router(execution.router, prefix="/execution", tags=["execution"])
+api_router.include_router(research_os.router, prefix="/research-os", tags=["research-os"])
 
 # 后续 Sprint: Nautilus sandbox/paper (LIVE gated); QMT optional

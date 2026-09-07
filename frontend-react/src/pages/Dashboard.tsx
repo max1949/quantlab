@@ -51,6 +51,16 @@ export default function Dashboard() {
         <BeginnerHandbookStrip />
       </div>
 
+      <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4 dark:border-emerald-900 dark:bg-emerald-950/30">
+        <p className="font-semibold text-emerald-900 dark:text-emerald-100">先证明，再下注</p>
+        <p className="mt-1 text-sm text-emerald-800 dark:text-emerald-200">
+          策略 → 实验账本 → 证据判定 → 建议晋级/暂缓/淘汰 → 正式模拟 → 影子对照 → 实盘资格（申请≠已允许）
+        </p>
+        <Link to="/evidence" className="btn-primary mt-3 inline-block text-sm">
+          打开证据操作系统 →
+        </Link>
+      </div>
+
       <div className="mt-6">
         <DashboardIncubationCoachStack onFirstMentorVisibilityChange={setFirstMentorVisible} />
       </div>

@@ -1,0 +1,86 @@
+{
+  "strategy_id": "hist_fl_momentum_w20",
+  "version": "v1",
+  "instrument": "RB",
+  "PAPER_QUALIFIED": "YES",
+  "FACTOR_SIGN_PAPER_ADAPTER": "PASS",
+  "FACTOR_SIGN_SPEC_TO_PAPER_SEMANTIC_PARITY": "PASS",
+  "PAPER_RUNTIME": "CANONICAL",
+  "LEGACY_PAPER_ORDERS_USED": "NO",
+  "ORDERS_CREATED": "NO",
+  "REAL_MONEY": "NO",
+  "BROKER_LIVE_CAPABILITY": "HOLD",
+  "bars": 4047,
+  "dataset_hash": "780d8c09ab0cf98b0ad8b78c7d4f60b5e6ce12c5acc417c2c34a0ced03c1c43c",
+  "contract": {
+    "strategy_id": "hist_fl_momentum_w20",
+    "strategy_version": "v1",
+    "strategy_spec_hash": "68c2ef43062a5144b66a59685c6dfa24838fb60d9d5a4c04e28d67cfe5dca024",
+    "adapter_version": "factor_sign_paper_adapter_v1",
+    "generator_version": "spec_compiler_factor_sign_v1",
+    "template_type": "momentum",
+    "factor_params": {
+      "window": 20
+    },
+    "instrument": "RB",
+    "timeframe": "1d",
+    "trade_size": "1",
+    "allowed_direction": "both",
+    "max_open_positions": 1,
+    "fee_rate": 0.0005,
+    "slippage_bps": 1.0,
+    "cost_source": "engine.cost_model.CostConfig (bound via execution_rule_source)",
+    "execution_rule": "sign(signal)",
+    "lag_rule": "signal_t_affects_position_t_plus_1",
+    "stop_loss_type": "none",
+    "take_profit_type": "none",
+    "permitted_environments": [
+      "BACKTEST",
+      "PAPER"
+    ]
+  },
+  "checks": {
+    "signal": true,
+    "intended_orders": true,
+    "fills": true,
+    "positions": true,
+    "equity": true,
+    "risk": true,
+    "kill_switch": true,
+    "restart_recovery": true,
+    "experiment_ledger_linkage": true,
+    "evidence_linkage": true
+  },
+  "evaluation_status": "COMPLETE",
+  "experiment_id": "ql_exp_7e380aa280584a17b59f6aa7573c9dbe",
+  "evidence_path": "C:\\Users\\Administrator\\quantlab\\docs\\governance\\qln11\\artifacts\\paper_runs\\fs-paper-rb-primary.json",
+  "primary_trade_count": 365,
+  "primary_equity": 220857.0311648737,
+  "kill_events": 1,
+  "recovery_events": 1,
+  "parity_detail": {
+    "FACTOR_SIGN_SPEC_TO_PAPER_SEMANTIC_PARITY": "PASS",
+    "position_mismatches": 0,
+    "lag_position_mismatches": 0,
+    "bars_compared": 4047,
+    "backtest_metrics": {
+      "total_return": 1.1989682291292594,
+      "annual_return": 0.05029043067918426,
+      "annual_volatility": 0.23777797813390686,
+      "sharpe": 0.32512208278972254,
+      "max_drawdown": -0.38642290317550243,
+      "win_rate": 0.49937764500871296,
+      "trade_count": 365,
+      "turnover": 711.0,
+      "periods": 4047
+    },
+    "cost_source": "engine.cost_model.CostConfig (bound via execution_rule_source)",
+    "risk_violations": []
+  },
+  "reasons": [
+    "canonical factor_sign PaperRun evidence complete on genuine RB history"
+  ],
+  "synthetic_pass": "NO",
+  "legacy_paper_orders": "NOT_USED",
+  "sandbox_runtime_used": "NO"
+}

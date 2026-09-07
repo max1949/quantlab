@@ -1,0 +1,73 @@
+{
+  "BROKER_LIVE_CAPABILITY": "HOLD",
+  "venues_probed": [
+    {
+      "venue": "SIMULATED",
+      "matrix": {
+        "venue": "SIMULATED",
+        "supports_paper": true,
+        "supports_shadow": true,
+        "supports_live": false,
+        "supports_canary": false,
+        "notes": []
+      },
+      "verified_checks": {
+        "supports_live": false,
+        "supports_canary": false,
+        "market_data": true,
+        "order_submit_cancel": false,
+        "position_query": false,
+        "account_equity_query": false,
+        "reconciliation_support": false,
+        "idempotency_recovery": false,
+        "credential_isolation": true,
+        "env_boundary_sandbox_vs_live": true,
+        "market_data_class": "SANDBOX_SYNTHETIC_OR_PUBLIC",
+        "order_submit_cancel_sandbox_only": true
+      },
+      "venue_live_canary_verified": false,
+      "notes": []
+    },
+    {
+      "venue": "CN_FUTURES_RESEARCH",
+      "matrix": {
+        "venue": "CN_FUTURES_RESEARCH",
+        "supports_paper": true,
+        "supports_shadow": true,
+        "supports_live": false,
+        "supports_canary": false,
+        "notes": [
+          "research parquet only"
+        ]
+      },
+      "verified_checks": {
+        "supports_live": false,
+        "supports_canary": false,
+        "market_data": true,
+        "order_submit_cancel": false,
+        "position_query": false,
+        "account_equity_query": false,
+        "reconciliation_support": false,
+        "idempotency_recovery": false,
+        "credential_isolation": true,
+        "env_boundary_sandbox_vs_live": true,
+        "market_data_class": "RESEARCH_PARQUET_NOT_BROKER"
+      },
+      "venue_live_canary_verified": false,
+      "notes": [
+        "research parquet only"
+      ]
+    }
+  ],
+  "ORDERS_CREATED": "NO",
+  "REAL_MONEY": "NO",
+  "owner_must_provide": [
+    "Named Live futures broker / venue ID",
+    "Dedicated Canary sub-account (isolated from main)",
+    "API credentials via Secrets Plane (not git)",
+    "Documented APIs: order submit/cancel, position query, account/equity, reconcile",
+    "Idempotent client order ids + recovery semantics",
+    "Sandbox vs Live environment boundary attestation",
+    "Written approval to set supports_canary=true after engineering wire-up"
+  ]
+}

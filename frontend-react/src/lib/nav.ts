@@ -19,6 +19,7 @@ export function stageToRoute(
     case "run_backtest":
     case "run_validation":
     case "run_paper":
+      return "/evidence";
     case "revalidate_decay":
     case "generate_report":
     case "publish_share":
