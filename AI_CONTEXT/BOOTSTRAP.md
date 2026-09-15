@@ -3,8 +3,13 @@
 ```text
 DERIVED_CONTEXT=YES
 CANONICAL_AUTHORITY=NO
-AS_OF_COMMIT=c9c8b72
+AI_CONTEXT_PROTOCOL_VERSION=1.1
+CONTEXT_BASE_HEAD=c759bc4
+PROD_RUNTIME_HEAD=NOT_STAMPED_IN_PACK
+CURRENT_REPO_HEAD=RUNTIME_DERIVED
+SELF_REFERENTIAL_HEAD_REFRESH=DENY
 AS_OF_DATE=2026-09-15
+DISTILL_PARENT_FOR_PRODUCT_TRUTH=c9c8b72
 TARGET_RECOVERY=5_TO_10_MIN
 ```
 
@@ -23,43 +28,51 @@ PRODUCT_FIRST_VALUE=UNPROVEN (REAL_HUMAN_SAMPLE_SIZE=0)
 NEXT_SAFE_ACTION=Schedule 1–3 real non-quant novice sessions; record human_sessions; pattern-analysis only — no Golden Path expansion from imagined UX
 ```
 
-## Read order (do not skip)
+## Freshness (do this first)
+
+1. `CONTEXT_BASE_HEAD=c759bc4` (AI_CONTEXT protocol land)  
+2. `CURRENT_REPO_HEAD=$(git rev-parse HEAD)` live  
+3. Diff since base: **AI_CONTEXT-only** → `CONTEXT_FRESHNESS=OK`  
+4. Material constitution/governance/product/runtime change → `AI_CONTEXT_STALE=YES`; canonical wins  
+
+Do **not** commit solely to equalize stored HEAD with live HEAD.
+
+## Read order
 
 1. This file  
 2. [PROJECT_STATE.md](./PROJECT_STATE.md)  
-3. [CURSOR_HANDOFF.md](./CURSOR_HANDOFF.md) *(if executing)* or [CHATGPT_HANDOFF.md](./CHATGPT_HANDOFF.md) *(if planning)*  
+3. [CURSOR_HANDOFF.md](./CURSOR_HANDOFF.md) or [CHATGPT_HANDOFF.md](./CHATGPT_HANDOFF.md)  
 4. [LAST_ITERATIONS.md](./LAST_ITERATIONS.md)  
-5. Only then open linked **canonical** docs below as needed  
+5. Linked canonicals only as needed  
 
-Stop after step 4 unless the task requires deeper detail. Do **not** re-read months of chat or every QLN folder.
-
-## Canonical sources (authority)
+## Canonical sources
 
 | Need | Canonical path |
 |------|----------------|
 | Root SSOT | `docs/governance/QUANTLAB_CONSTITUTION.md` |
 | Governance index | `docs/governance/README.md` |
 | Amendments | `docs/governance/amendments/` |
-| Quant Factory domain | `docs/governance/quant-factory/` (**not** parallel SSOT) |
+| Quant Factory domain | `docs/governance/quant-factory/` |
 | Current product gate | `docs/governance/quant-factory/REALITY_EVIDENCE_GATE.md` |
 | Capability truth | `docs/governance/quant-factory/CURRENT_CAPABILITY_LEDGER.md` |
-| Company memory (compact) | `docs/governance/quant-factory/COMPANY_MEMORY_INDEX.md` |
-| QLN campaign state | `docs/governance/campaigns/QUANTLAB_QLN3_TO_10_CAMPAIGN_LEDGER.md` |
-| Precedence stamp | `docs/governance/quant-factory/QUANT_FACTORY_GOVERNANCE_RECONCILIATION.md` |
+| Company memory | `docs/governance/quant-factory/COMPANY_MEMORY_INDEX.md` |
+| QLN campaign | `docs/governance/campaigns/QUANTLAB_QLN3_TO_10_CAMPAIGN_LEDGER.md` |
+| Protocol | [AI_CONTEXT_PROTOCOL_V1.md](./AI_CONTEXT_PROTOCOL_V1.md) |
 
 ```text
 PRECEDENCE=ROOT_CONSTITUTION > QLN_SAFETY > QUANT_FACTORY_DOMAIN_RULES > IMPLEMENTATION
 SECOND_PARALLEL_SSOT=NO
 ```
 
-## Recovery checklist (must answer without hunting)
-
-After this pack, you should output:
+## Recovery checklist
 
 ```text
 PROJECT=
 CURRENT_PHASE=
-CURRENT_HEAD=
+CONTEXT_BASE_HEAD=
+CURRENT_REPO_HEAD=
+PROD_RUNTIME_HEAD=
+CONTEXT_FRESHNESS=
 CURRENT_RUNTIME_STATE=
 CURRENT_OWNER_GATE=
 TOP_3_CURRENT_PRIORITIES=
@@ -70,14 +83,6 @@ NEXT_SAFE_ACTION=
 CANONICAL_SOURCES=
 ```
 
-If you cannot fill these from AI_CONTEXT + linked canonicals alone → bootstrap is incomplete; distill further. Do not invent answers from chat memory.
-
 ## Stale-doc warning
 
-`docs/governance/README.md` “Current defaults (§43)” can lag campaign / Factory reality. Prefer:
-
-- Campaign ledger for QLN status  
-- `REALITY_EVIDENCE_GATE.md` + latest `QUANT_FACTORY_ITERATION_*.md` for Factory product track  
-- Live `git rev-parse HEAD` + feature flags in `backend/app/core/config.py` for runtime  
-
-On conflict: **canonical + live repo win**; update AI_CONTEXT.
+Prefer campaign ledger + Reality Gate + live `git`/`config.py` over lagged governance README §43. Canonical wins.

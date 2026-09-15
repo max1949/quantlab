@@ -3,9 +3,13 @@
 ```text
 DERIVED_CONTEXT=YES
 CANONICAL_AUTHORITY=NO
+AI_CONTEXT_PROTOCOL_VERSION=1.1
 REPO_WINS_ON_CONFLICT=YES
 PARALLEL_GOVERNANCE=NO
 CHAT_TRANSCRIPT_PERSISTED=NO
+SELF_REFERENTIAL_HEAD_REFRESH=DENY
+STATIC_CURRENT_HEAD_IN_TRACKED_CONTEXT=DENY
+CURRENT_REPO_HEAD_RUNTIME_DERIVED=YES
 ```
 
 ## Purpose
@@ -63,7 +67,7 @@ At end of each formal iteration, **check** whether these need refresh:
 
 `PROJECT_STATE` · `LAST_ITERATIONS` · `CHATGPT_HANDOFF` · `CURSOR_HANDOFF`
 
-Do **not** update for trivial edits, cosmetic commits, or to bump “last updated” alone.
+Do **not** update for trivial edits, cosmetic commits, timestamp-only bumps, or self-referential HEAD equality (`SELF_REFERENTIAL_HEAD_REFRESH=DENY`).
 
 ## Freshness
 
@@ -72,8 +76,12 @@ Every state-bearing file must carry:
 ```text
 DERIVED_CONTEXT=YES
 CANONICAL_AUTHORITY=NO
-AS_OF_COMMIT=<git short sha>
+CONTEXT_BASE_HEAD=<sha>
 AS_OF_DATE=<YYYY-MM-DD>
+PROD_RUNTIME_HEAD=<sha|NOT_STAMPED_IN_PACK>
+CURRENT_REPO_HEAD=RUNTIME_DERIVED
 ```
+
+`CURRENT_REPO_HEAD` is never authoritative static content — always `git rev-parse HEAD` at bootstrap.
 
 When in doubt, re-read canonical paths listed in BOOTSTRAP — not prior chat memory.

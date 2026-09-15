@@ -3,7 +3,12 @@
 ```text
 DERIVED_CONTEXT=YES
 CANONICAL_AUTHORITY=NO
-AS_OF_COMMIT=c9c8b72
+AI_CONTEXT_PROTOCOL_VERSION=1.1
+CONTEXT_BASE_HEAD=c759bc4
+DISTILL_PARENT_FOR_PRODUCT_TRUTH=c9c8b72
+PROD_RUNTIME_HEAD=NOT_STAMPED_IN_PACK
+CURRENT_REPO_HEAD=RUNTIME_DERIVED
+SELF_REFERENTIAL_HEAD_REFRESH=DENY
 AS_OF_DATE=2026-09-15
 BRANCH=master
 ```
@@ -30,15 +35,17 @@ Canonical:
 ## Git / deploy
 
 ```text
-CURRENT_HEAD=c9c8b72e90b2f587d2cd7f616c86b75202420595
-CURRENT_HEAD_SHORT=c9c8b72
-CURRENT_HEAD_MSG=fix(ui): responsive header capacity model for ZH/EN without overlap
+CONTEXT_BASE_HEAD=c759bc4
+DISTILL_PARENT_FOR_PRODUCT_TRUTH=c9c8b72
+CURRENT_REPO_HEAD=RUNTIME_DERIVED
+PROD_RUNTIME_HEAD=NOT_STAMPED_IN_PACK
 QLN10_SEAL_COMMIT=1a1d36f (campaign ledger)
-WORKING_TREE=DIRTY — large uncommitted Factor Gym / QF governance / engine packages present at AS_OF_DATE
+WORKING_TREE_MAY_BE_DIRTY=YES — large uncommitted Factor Gym / QF packages may exist; not prod truth
 PRODUCTION_CHANGE_DEFAULT=DENY
+SELF_REFERENTIAL_HEAD_REFRESH=DENY
 ```
 
-Re-verify HEAD with `git rev-parse HEAD` before any deploy claim. Do not treat chat “last deploy” as truth.
+Derive `CURRENT_REPO_HEAD` with `git rev-parse HEAD`. Do not treat chat “last deploy” as truth. Do not commit solely to bump a stored HEAD field.
 
 ## Runtime / flags
 

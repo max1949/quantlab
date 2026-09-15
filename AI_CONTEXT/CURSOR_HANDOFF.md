@@ -3,9 +3,10 @@
 ```text
 DERIVED_CONTEXT=YES
 CANONICAL_AUTHORITY=NO
-AS_OF_COMMIT=c9c8b72
+AI_CONTEXT_PROTOCOL_VERSION=1.1
 AS_OF_DATE=2026-09-15
 AUDIENCE=Cursor / Codex / Claude Code / coding agents
+SELF_REFERENTIAL_HEAD_REFRESH=DENY
 ```
 
 ## REPO
@@ -13,7 +14,9 @@ AUDIENCE=Cursor / Codex / Claude Code / coding agents
 ```text
 PATH=C:\Users\Administrator\quantlab
 BRANCH=master
-HEAD=c9c8b72 (re-verify: git rev-parse HEAD)
+CONTEXT_BASE_HEAD=c759bc4
+CURRENT_REPO_HEAD=RUNTIME_DERIVED
+PROD_RUNTIME_HEAD=NOT_STAMPED_IN_PACK
 ```
 
 ## ARCHITECTURE (map only)

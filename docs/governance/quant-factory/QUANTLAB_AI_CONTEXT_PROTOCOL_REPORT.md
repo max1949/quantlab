@@ -127,6 +127,18 @@ Portable method: `AI_CONTEXT/AI_CONTEXT_PROTOCOL_V1.md`.
 ALREADY_EQUIVALENT=NO (none had AI_CONTEXT bootstrap pack)
 ```
 
+## Protocol version
+
+```text
+AI_CONTEXT_PROTOCOL_VERSION=1.1
+SELF_REFERENTIAL_HEAD_REFRESH=DENY
+STATIC_CURRENT_HEAD_IN_TRACKED_CONTEXT=DENY
+CURRENT_REPO_HEAD_RUNTIME_DERIVED=YES
+CONTEXT_BASE_HEAD=c759bc4
+```
+
+V1.1 corrects freshness: do not require stored worktree HEAD == live HEAD; AI_CONTEXT-only commits do not auto-stale.
+
 ## Owner next steps (optional)
 
 1. Review `AI_CONTEXT/` and rule; commit when ready (suggested scope: `AI_CONTEXT/**`, `.cursor/rules/ai-context-continuity.mdc`, this report).  
