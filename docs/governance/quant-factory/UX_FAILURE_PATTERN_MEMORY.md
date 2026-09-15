@@ -48,6 +48,12 @@ IC / IR / Size exposure folded behind「查看专业数据」.
 
 Observer must not explain Factor/IC/IR/Memory/Scientific Core unless stuck; assist → `HUMAN_ASSIST_REQUIRED=YES`.
 
+### UX_RULE_SINGLE_ACCESS_GATE
+
+Never gate Factor Gym (or similar) on global `enabled` in the frontend while nav/API
+use a different predicate. Consume only `FACTOR_GYM_ACCESS_ALLOWED` /
+`isFactorGymAccessAllowed`. See `ENGINEERING_MEMORY_ACCESS_GATES.md`.
+
 ## Log template
 
 ```yaml
@@ -80,6 +86,30 @@ regression_test: test_factor_scan_ux_consistency.py + errorScope.regression.mjs
 status: FIXED
 ```
 
+### UX_FAILURE_DUPLICATE_FRONTEND_GATE (2026-09-15)
+
+```yaml
+pattern_id: UX_FAILURE_DUPLICATE_FRONTEND_GATE
+observed_in_sessions: [prod_ziyingke_controlled_entry_2026-09-15]
+stage: idea_submit
+user_words: 研究入门路径尚未开启。请联系管理员，或先使用「证据系统」专业模式。
+rca: |
+  ENTRY_AUTH=PASS (nav + /factor-gym) but GOLDEN_PATH_AUTH=FAIL.
+  FE submitIdea / mount re-gated on status.enabled (global flag OFF) while
+  allowlist entitlement already allowed. Duplicate Gate ≠ canonical resolver.
+  Old bundle index-D1R7Ecmn.js; feature-flag mistaken for entitlement.
+minimal_fix: |
+  resolve_factor_gym_access → FACTOR_GYM_ACCESS_ALLOWED; FE isFactorGymAccessAllowed;
+  no pre-submit enabled check; Open Beta later auth-all. Preserve gate fix.
+  ENGINEERING_MEMORY_ACCESS_GATES.md + FACTOR_GYM_GOLDEN_PATH_GATE_FIX.md
+regression_test: |
+  test_factor_gym_controlled_entry.py
+  test_factor_gym_api.py
+  test_factor_gym_golden_path_access.py
+status: FIXED
+```
+
+### UX_FAILURE_ENTRY_NOT_FINDABLE
 
 ```yaml
 pattern_id: UX_FAILURE_ENTRY_NOT_FINDABLE
@@ -87,7 +117,9 @@ observed_in_sessions: [pre_session_blocker]
 stage: entry
 user_words: REAL_USER_CANNOT_FIND_FACTOR_GYM=YES
 rca: QUANTLAB_FACTOR_GYM=false + prod route undeployed/404; Gym buried or unavailable — not novice skill failure
-minimal_fix: FACTOR_GYM_CONTROLLED_TEST_ENTRY (allowlist/token; primary nav for testers only; 测试版 label)
-regression_test: backend/tests/test_factor_gym_controlled_entry.py + test_factor_gym_api allowlist/token
-status: FIXED_PENDING_PROD_DEPLOY
+minimal_fix: |
+  Controlled test entry then Open Beta (FACTOR_GYM_OPEN_BETA) for authenticated users;
+  nav label Factor Gym（测试版）. Allowlist no longer product dependency.
+regression_test: backend/tests/test_factor_gym_controlled_entry.py + test_factor_gym_api.py + test_factor_gym_golden_path_access.py
+status: FIXED
 ```

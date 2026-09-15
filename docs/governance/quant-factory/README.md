@@ -21,6 +21,7 @@ PHASE_0=PASS
 | [QUANT_FACTORY_ITERATION_005_QF10.md](./QUANT_FACTORY_ITERATION_005_QF10.md) | Factor Vault v0 |
 | [QUANT_FACTORY_ITERATION_006_QF11A.md](./QUANT_FACTORY_ITERATION_006_QF11A.md) | Real Human First Value Gate |
 | [QUANT_FACTORY_ITERATION_007_REALITY_GATE.md](./QUANT_FACTORY_ITERATION_007_REALITY_GATE.md) | Reality Evidence Gate maintenance |
+| [ENGINEERING_MEMORY_ACCESS_GATES.md](./ENGINEERING_MEMORY_ACCESS_GATES.md) | Flag≠entitlement; canonical resolver; no duplicate FE Gate |
 | [FACTOR_GYM_OPEN_BETA.md](./FACTOR_GYM_OPEN_BETA.md) | Open Beta: all authenticated users (not formal GA) |
 | [REAL_USER_GOLDEN_PATH_REACHABILITY.md](./REAL_USER_GOLDEN_PATH_REACHABILITY.md) | Permanent Gate: entry ≠ golden path |
 | [FACTOR_GYM_GOLDEN_PATH_GATE_FIX.md](./FACTOR_GYM_GOLDEN_PATH_GATE_FIX.md) | P0 controlled entry vs capability Gate fix |

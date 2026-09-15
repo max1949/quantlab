@@ -2,6 +2,8 @@
 
 ```text
 PHASE=QF-11A
+MODE=REAL_HUMAN_SESSION_COLLECTION
+FACTOR_GYM_OPEN_BETA=PASS
 REAL_HUMAN_EVIDENCE=PENDING
 PRODUCT_FIRST_VALUE=UNPROVEN
 FIRST_VALUE_PRODUCT_VALIDATED=NO
@@ -19,6 +21,8 @@ REAL_MONEY=DENY
 ## Behavior acceptance (not interview)
 
 Cohort: 1–3 non-quant novices (undergrad OK; no Python; no prior guide).
+Open Beta: any normal logged-in QuantLab user may enter Factor Gym（测试版）;
+observation still follows this protocol — access ≠ First Value validated.
 
 Brief only:
 
@@ -36,7 +40,12 @@ REAL_USER_ENTRY_REACHABILITY=PASS
 REAL_USER_GOLDEN_PATH_REACHABILITY=PASS   # see REAL_USER_GOLDEN_PATH_REACHABILITY.md
 ```
 
-Page visible ≠ Golden Path usable. Do not begin observation until controlled tester completes Idea→Experiment→Result.
+Page visible ≠ Golden Path usable. Do not begin observation until a real user
+completes Idea→Experiment→Result on the current build (prod accept already PASS
+for Open Beta; re-check after any access/Gate change).
+
+Engineering memory (do not re-litigate): `ENGINEERING_MEMORY_ACCESS_GATES.md`,
+`UX_FAILURE_DUPLICATE_FRONTEND_GATE`.
 
 ## Session ledger
 
