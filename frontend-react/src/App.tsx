@@ -36,6 +36,7 @@ import OrgInvite from "./pages/OrgInvite";
 import AiCreateStrategy from "./pages/AiCreateStrategy";
 import PaperTrading from "./pages/PaperTrading";
 import EvidenceOs from "./pages/EvidenceOs";
+import FactorGym from "./pages/FactorGym";
 import NotFound from "./pages/NotFound";
 
 export default function App() {
@@ -80,6 +81,7 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/app" element={<Dashboard />} />
+            <Route path="/factor-gym" element={<FactorGym />} />
             <Route path="/evidence" element={<EvidenceOs />} />
             <Route path="/ai-strategy" element={<AiCreateStrategy />} />
             <Route path="/paper" element={<PaperTrading />} />

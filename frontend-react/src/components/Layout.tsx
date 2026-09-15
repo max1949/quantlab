@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { api } from "../api/client";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -27,10 +28,44 @@ export default function Layout() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [moreOpenMobile, setMoreOpenMobile] = useState(false);
+  const [gymEntry, setGymEntry] = useState<{ enabled: boolean; test_entry: boolean; label: string } | null>(
+    null,
+  );
   const t = useLocale((s) => s.dict);
   const levelName = useLevelLabel(user?.level ?? 0);
   const moreBtnId = useId();
   const morePanelId = useId();
+
+  useEffect(() => {
+    if (!user) {
+      setGymEntry(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await api.get<{
+          enabled: boolean;
+          allowed?: boolean;
+          test_entry?: boolean;
+          label?: string;
+        }>("/factor-gym/status");
+        if (!cancelled) {
+          const open = Boolean(data.allowed ?? data.enabled);
+          setGymEntry({
+            enabled: open,
+            test_entry: Boolean(data.test_entry),
+            label: data.label || (data.test_entry ? "Factor Gym（测试版）" : "Factor Gym"),
+          });
+        }
+      } catch {
+        if (!cancelled) setGymEntry({ enabled: false, test_entry: false, label: "Factor Gym" });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   const primary: NavItem[] = user
     ? [
@@ -39,6 +74,10 @@ export default function Layout() {
         { to: "/paper", label: t.nav.paperTrading || "模拟交易" },
         { to: "/projects", label: t.nav.myProjects },
         { to: "/challenges", label: t.nav.challenges },
+        // Controlled test entry: visible only when allowlisted / token / global flag
+        ...(gymEntry?.enabled
+          ? [{ to: "/factor-gym", label: gymEntry.label || "Factor Gym（测试版）" }]
+          : []),
       ]
     : [
         { to: "/feed", label: t.nav.feed },
@@ -48,6 +87,7 @@ export default function Layout() {
 
   const secondary: NavItem[] = user
     ? [
+        // Factor Gym only in More when enabled but NOT already in primary (never for non-testers)
         { to: "/feed", label: t.nav.feed },
         { to: "/leaderboards", label: t.nav.leaderboards },
         { to: "/orgs", label: t.nav.orgLibrary },

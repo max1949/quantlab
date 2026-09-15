@@ -77,7 +77,7 @@ minimal_fix: |
   store template_type=stack; domain-scoped apiErrorMessage; clear stale
   results/errors on mutate; AI aux errors scoped. See FACTOR_SCAN_ERROR_SCOPE_FIX.md
 regression_test: test_factor_scan_ux_consistency.py + errorScope.regression.mjs
-status: FIXED_PENDING_PROD_DEPLOY
+status: FIXED
 ```
 
 
