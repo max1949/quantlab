@@ -1,0 +1,44 @@
+---
+description: AI_CONTEXT material-update protocol — derived handoff only; repo/governance remain SSOT
+alwaysApply: true
+---
+
+# AI_CONTEXT continuity (QuantLab)
+
+```text
+DERIVED_CONTEXT=YES
+CANONICAL_AUTHORITY=NO
+Repo > docs/governance/** > AI_CONTEXT/ > chat
+```
+
+## Bootstrap
+
+New / cold sessions: read `AI_CONTEXT/BOOTSTRAP.md` first, then `PROJECT_STATE.md` + the agent handoff. Do not reconstruct project truth from chat history.
+
+## When to update AI_CONTEXT
+
+Only on **material** change:
+
+- phase / gate / Owner Gate
+- P0/P1 open or close
+- capability, feature flag, runtime, or deploy truth
+- architecture decision or significant HOLD
+- important failure / RCA
+- formal iteration closure
+
+At formal iteration end: **check** whether `PROJECT_STATE`, `LAST_ITERATIONS`, `CHATGPT_HANDOFF`, `CURSOR_HANDOFF` need refresh.
+
+## When not to update
+
+Trivial edits, cosmetic commits, log dumps, or timestamp-only bumps.
+
+## Hard forbids
+
+- Chat transcripts / chain-of-thought in AI_CONTEXT
+- Copying Constitution, Ledgers, or full governance bodies into AI_CONTEXT
+- Creating a parallel SSOT under `AI_CONTEXT/`
+- Letting stale handoff override code, runtime, or `docs/governance/**`
+
+On conflict: fix AI_CONTEXT; never “fix” canonical truth from derived memory.
+
+Indexes (`DECISION_INDEX`, `FAILURE_INDEX`, `CAPABILITY_INDEX`) stay **link-only**.
