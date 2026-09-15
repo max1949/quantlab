@@ -10,6 +10,7 @@ interface UiState {
   toasts: Toast[];
   notify: (message: string, kind?: Toast["kind"]) => void;
   dismiss: (id: number) => void;
+  clearErrorToasts: () => void;
 }
 
 let seq = 1;
@@ -25,5 +26,8 @@ export const useUi = create<UiState>((set) => ({
   },
   dismiss(id) {
     set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) }));
+  },
+  clearErrorToasts() {
+    set((s) => ({ toasts: s.toasts.filter((t) => t.kind !== "error") }));
   },
 }));

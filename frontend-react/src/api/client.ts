@@ -1,4 +1,7 @@
 import axios, { AxiosError } from "axios";
+import { serverErrorCopy, type ApiErrorDomain } from "./errorScope";
+
+export type { ApiErrorDomain };
 
 // 统一 axios 实例: 自动注入 JWT, 401 自动登出。
 export const api = axios.create({
@@ -7,6 +10,7 @@ export const api = axios.create({
 });
 
 const TOKEN_KEY = "ql_token";
+const GYM_TEST_TOKEN_KEY = "ql_factor_gym_test_token";
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
@@ -17,11 +21,25 @@ export function setToken(token: string | null): void {
   else localStorage.removeItem(TOKEN_KEY);
 }
 
+export function getFactorGymTestToken(): string | null {
+  return sessionStorage.getItem(GYM_TEST_TOKEN_KEY);
+}
+
+export function setFactorGymTestToken(token: string | null): void {
+  if (token) sessionStorage.setItem(GYM_TEST_TOKEN_KEY, token);
+  else sessionStorage.removeItem(GYM_TEST_TOKEN_KEY);
+}
+
 api.interceptors.request.use((config) => {
   const token = getToken();
   if (token) {
     config.headers = config.headers ?? {};
     config.headers.Authorization = `Bearer ${token}`;
+  }
+  const gymTest = getFactorGymTestToken();
+  if (gymTest) {
+    config.headers = config.headers ?? {};
+    config.headers["X-Factor-Gym-Test-Token"] = gymTest;
   }
   try {
     const raw = localStorage.getItem("ql-locale");
@@ -59,7 +77,11 @@ api.interceptors.response.use(
   },
 );
 
-export function apiErrorMessage(err: unknown, fallback = "请求失败"): string {
+export function apiErrorMessage(
+  err: unknown,
+  fallback = "请求失败",
+  domain: ApiErrorDomain = "generic",
+): string {
   if (axios.isAxiosError(err)) {
     const detail = (err.response?.data as { detail?: unknown } | undefined)
       ?.detail;
@@ -87,7 +109,8 @@ export function apiErrorMessage(err: unknown, fallback = "请求失败"): string
         : "请求未通过业务校验。请检查输入或先完成前置步骤。";
     }
     if (status && status >= 500) {
-      return "服务暂时异常。请稍后重试；若持续出现，请联系运维。不会创建真实订单。";
+      // Domain-scoped copy: never attach paper-trading "real order" warning to research/scan.
+      return serverErrorCopy(domain);
     }
     if (!err.response) {
       return "网络连接失败，请检查网络后重试。";

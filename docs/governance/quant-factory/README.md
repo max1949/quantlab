@@ -21,6 +21,9 @@ PHASE_0=PASS
 | [QUANT_FACTORY_ITERATION_005_QF10.md](./QUANT_FACTORY_ITERATION_005_QF10.md) | Factor Vault v0 |
 | [QUANT_FACTORY_ITERATION_006_QF11A.md](./QUANT_FACTORY_ITERATION_006_QF11A.md) | Real Human First Value Gate |
 | [QUANT_FACTORY_ITERATION_007_REALITY_GATE.md](./QUANT_FACTORY_ITERATION_007_REALITY_GATE.md) | Reality Evidence Gate maintenance |
+| [FACTOR_SCAN_ERROR_SCOPE_FIX.md](./FACTOR_SCAN_ERROR_SCOPE_FIX.md) | P1 scan SUCCESS+fatal toast RCA/fix |
+| [FACTOR_GYM_CONTROLLED_TEST_ENTRY.md](./FACTOR_GYM_CONTROLLED_TEST_ENTRY.md) | Controlled test entry (not public) |
+| [FACTOR_GYM_CONTROLLED_PROD_DEPLOY_STAMP.md](./FACTOR_GYM_CONTROLLED_PROD_DEPLOY_STAMP.md) | Controlled entry prod deploy stamp |
 | [REALITY_EVIDENCE_GATE.md](./REALITY_EVIDENCE_GATE.md) | Current product gate (no imagined UX) |
 | [COMPANY_MEMORY_INDEX.md](./COMPANY_MEMORY_INDEX.md) | Compacted company memory |
 | [../../../AI_CONTEXT/](../../../AI_CONTEXT/) | **Derived** AI bootstrap / handoff (not SSOT) |

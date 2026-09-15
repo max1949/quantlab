@@ -28,7 +28,8 @@ export default function PaperTrading() {
       setFsResult(data);
       notify("正式模拟完成（不涉及真实资金）", "success");
     },
-    onError: (e) => notify(apiErrorMessage(e, "正式模拟未能完成，请稍后重试或先打开证据系统"), "error"),
+    onError: (e) =>
+      notify(apiErrorMessage(e, "正式模拟未能完成，请稍后重试或先打开证据系统", "trading"), "error"),
   });
 
   const opts = (strategies.data?.items || []).filter((x) => !x.error);

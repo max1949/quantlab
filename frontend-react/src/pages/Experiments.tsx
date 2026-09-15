@@ -61,7 +61,7 @@ export default function Experiments() {
       setCompareResult(data);
       notify(fs.compareDone, "success");
     },
-    onError: (err) => notify(apiErrorMessage(err, fs.compareFail), "error"),
+    onError: (err) => notify(apiErrorMessage(err, fs.compareFail, "auxiliary"), "error"),
   });
 
   const aiBatch = useMutation({
@@ -70,7 +70,7 @@ export default function Experiments() {
       setAiInsight(res.content);
       notify(ai.done, "success");
     },
-    onError: (err) => notify(apiErrorMessage(err, ai.fail), "error"),
+    onError: (err) => notify(apiErrorMessage(err, ai.scanFailScoped, "auxiliary"), "info"),
   });
 
   const apply = useMutation({
@@ -80,7 +80,7 @@ export default function Experiments() {
       void qc.invalidateQueries({ queryKey: ["factor-scans"] });
       void qc.invalidateQueries({ queryKey: ["factors"] });
     },
-    onError: (err) => notify(apiErrorMessage(err, fs.applyFail), "error"),
+    onError: (err) => notify(apiErrorMessage(err, fs.applyFail, "scan"), "error"),
   });
 
   const applyAndValidate = useMutation({
@@ -105,7 +105,7 @@ export default function Experiments() {
       void qc.invalidateQueries({ queryKey: ["backtests"] });
       void qc.invalidateQueries({ queryKey: ["validations"] });
     },
-    onError: (err) => notify(apiErrorMessage(err, fs.validateFail), "error"),
+    onError: (err) => notify(apiErrorMessage(err, fs.validateFail, "scan"), "error"),
   });
 
   const aiReview = useMutation({
@@ -114,7 +114,7 @@ export default function Experiments() {
       setAiInsight(res.content);
       notify(ai.done, "success");
     },
-    onError: (err) => notify(apiErrorMessage(err, ai.fail), "error"),
+    onError: (err) => notify(apiErrorMessage(err, ai.scanFailScoped, "auxiliary"), "info"),
   });
 
   function toggleCompare(id: string) {

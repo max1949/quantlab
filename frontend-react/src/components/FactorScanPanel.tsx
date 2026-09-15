@@ -31,6 +31,7 @@ export default function FactorScanPanel({ projectId, symbol, timeframe, factors 
   const ai = useLocale((x) => x.dict.aiReview);
   const lk = useLocale((x) => x.dict.locked);
   const notify = useUi((x) => x.notify);
+  const clearErrorToasts = useUi((x) => x.clearErrorToasts);
   const qc = useQueryClient();
   const ent = useQuery({ queryKey: ["entitlements"], queryFn: getEntitlements });
   const templates = useQuery({ queryKey: ["factor-templates"], queryFn: getFactorTemplates });
@@ -53,6 +54,8 @@ export default function FactorScanPanel({ projectId, symbol, timeframe, factors 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [compareResult, setCompareResult] = useState<FactorScanCompare | null>(null);
   const [aiInsight, setAiInsight] = useState<string | null>(null);
+  const [aiScopedError, setAiScopedError] = useState<string | null>(null);
+  const [scanFatalError, setScanFatalError] = useState<string | null>(null);
 
   const activeScan = lastScan;
 
@@ -91,10 +94,19 @@ export default function FactorScanPanel({ projectId, symbol, timeframe, factors 
         search_mode: searchMode,
       });
     },
+    onMutate: () => {
+      // CASE B: clear stale fatal error + previous result so fail cannot coexist with old success.
+      clearErrorToasts();
+      setScanFatalError(null);
+      setAiScopedError(null);
+      setAiInsight(null);
+      setCompareResult(null);
+      setLastScan(null);
+    },
     onSuccess: (data) => {
       setLastScan(data);
-      setCompareResult(null);
-      setAiInsight(null);
+      setScanFatalError(null);
+      clearErrorToasts();
       notify(s.done, "success");
       if (data.academy_rewards?.length) {
         notify(s.academyXp(data.academy_rewards[0].awarded_xp), "success");
@@ -102,7 +114,13 @@ export default function FactorScanPanel({ projectId, symbol, timeframe, factors 
       void qc.invalidateQueries({ queryKey: ["factor-scans", projectId] });
       void qc.invalidateQueries({ queryKey: ["factor-scans", "all"] });
     },
-    onError: (e) => notify(apiErrorMessage(e, s.fail), "error"),
+    onError: (e) => {
+      // Main scan failure only — scan-domain copy, never trading "real order" warning.
+      const msg = apiErrorMessage(e, s.fail, "scan");
+      setScanFatalError(msg);
+      setLastScan(null);
+      notify(msg, "error");
+    },
   });
 
   const apply = useMutation({
@@ -114,7 +132,7 @@ export default function FactorScanPanel({ projectId, symbol, timeframe, factors 
       void qc.invalidateQueries({ queryKey: ["factor-scans", projectId] });
       void qc.invalidateQueries({ queryKey: ["factor-scans", "all"] });
     },
-    onError: (e) => notify(apiErrorMessage(e, s.applyFail), "error"),
+    onError: (e) => notify(apiErrorMessage(e, s.applyFail, "scan"), "error"),
   });
 
   const applyAndValidate = useMutation({
@@ -140,7 +158,7 @@ export default function FactorScanPanel({ projectId, symbol, timeframe, factors 
         });
       }, 500);
     },
-    onError: (e) => notify(apiErrorMessage(e, s.validateFail), "error"),
+    onError: (e) => notify(apiErrorMessage(e, s.validateFail, "scan"), "error"),
   });
 
   const compare = useMutation({
@@ -149,16 +167,26 @@ export default function FactorScanPanel({ projectId, symbol, timeframe, factors 
       setCompareResult(data);
       notify(s.compareDone, "success");
     },
-    onError: (e) => notify(apiErrorMessage(e, s.compareFail), "error"),
+    onError: (e) => notify(apiErrorMessage(e, s.compareFail, "auxiliary"), "error"),
   });
 
   const aiReview = useMutation({
     mutationFn: () => reviewFactorScan(activeScan!.id),
+    onMutate: () => {
+      setAiScopedError(null);
+    },
     onSuccess: (res) => {
       setAiInsight(res.content);
+      setAiScopedError(null);
       notify(ai.done, "success");
     },
-    onError: (e) => notify(apiErrorMessage(e, ai.fail), "error"),
+    onError: (e) => {
+      // CASE A / C: auxiliary failure must stay scoped — never global fatal "service down".
+      const scoped = apiErrorMessage(e, ai.scanFailScoped, "auxiliary");
+      setAiScopedError(scoped);
+      // info toast only; do not emit fatal error toast that contradicts SUCCESS results
+      notify(scoped, "info");
+    },
   });
 
   const historyRows = useMemo(
@@ -178,6 +206,8 @@ export default function FactorScanPanel({ projectId, symbol, timeframe, factors 
   function loadHistory(row: FactorScan) {
     setLastScan(row);
     setAiInsight(null);
+    setAiScopedError(null);
+    setScanFatalError(null);
     setCompareResult(null);
   }
 
@@ -318,6 +348,12 @@ export default function FactorScanPanel({ projectId, symbol, timeframe, factors 
 
       {scan.isPending && <Spinner />}
 
+      {scanFatalError && (
+        <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-100">
+          {scanFatalError}
+        </p>
+      )}
+
       {historyRows.length > 0 && (
         <div className="mt-4">
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
@@ -455,6 +491,12 @@ export default function FactorScanPanel({ projectId, symbol, timeframe, factors 
               </tbody>
             </table>
           </div>
+
+          {aiScopedError && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50/80 px-3 py-2 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+              {aiScopedError}
+            </div>
+          )}
 
           {aiInsight && (
             <div className="rounded-lg border border-brand-200 bg-brand-50/50 p-4 text-sm text-slate-700 dark:border-brand-900 dark:bg-brand-950/30 dark:text-slate-200">

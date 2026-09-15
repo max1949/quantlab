@@ -209,7 +209,9 @@ def test_stack_weight_scan(client, db_session):
     assert res.status_code == 201, res.text
     body = res.json()
     assert body["results"]
-    assert body["template_type"].startswith("stack:")
+    # Must fit Postgres VARCHAR(64); legacy stack:uuid,uuid was 79 chars and 500'd in prod.
+    assert body["template_type"] == "stack"
+    assert len(body["template_type"]) <= 64
     assert "组合" in body["coach_summary"] or "权重" in body["coach_summary"]
     assert body["results"][0]["params"].get("weights")
 

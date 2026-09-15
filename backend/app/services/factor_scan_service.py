@@ -30,6 +30,12 @@ class ScanError(Exception):
     pass
 
 
+def _is_stack_template(template_type: str | None) -> bool:
+    """True for current 'stack' rows and legacy 'stack:uuid,uuid' rows."""
+    tt = (template_type or "").strip()
+    return tt == "stack" or tt.startswith("stack:")
+
+
 def _ic_horizon(timeframe: str) -> int:
     return IC_HORIZON_BY_TF.get(timeframe, 1)
 
@@ -177,7 +183,10 @@ def _run_stack_scan(
     dq = assess_ohlcv_quality(ohlcv, timeframe)
     if dq.get("warnings"):
         coach = f"【数据质量】{'；'.join(dq['warnings'][:2])} {coach}"
-    template_key = f"stack:{factors[0].id},{factors[1].id}"
+    # Persist as short "stack" — "stack:{uuid},{uuid}" is 79 chars and overflows
+    # factor_scans.template_type VARCHAR(64) on Postgres (SQLite tests do not enforce).
+    # Component IDs remain in results[].params.weights for apply.
+    template_key = "stack"
     scan = FactorScan(
         owner_id=user.id,
         project_id=project_id,
@@ -395,7 +404,7 @@ def apply_scan(
     if not params:
         raise ScanError("参数为空")
     factor_name = name or f"{scan.template_type}-{scan.symbol}-scan{rank}"
-    if scan.template_type.startswith("stack:"):
+    if _is_stack_template(scan.template_type):
         weights = params.get("weights")
         if not weights:
             raise ScanError("组合权重为空")
