@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
+import { isFactorGymAccessAllowed, type FactorGymStatus } from "../lib/factorGymAccess";
 import { useAuth } from "../store/auth";
 import { useLocale } from "../store/locale";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -28,7 +29,7 @@ export default function Layout() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [moreOpenMobile, setMoreOpenMobile] = useState(false);
-  const [gymEntry, setGymEntry] = useState<{ enabled: boolean; test_entry: boolean; label: string } | null>(
+  const [gymEntry, setGymEntry] = useState<{ accessAllowed: boolean; test_entry: boolean; label: string } | null>(
     null,
   );
   const t = useLocale((s) => s.dict);
@@ -44,22 +45,16 @@ export default function Layout() {
     let cancelled = false;
     (async () => {
       try {
-        const { data } = await api.get<{
-          enabled: boolean;
-          allowed?: boolean;
-          test_entry?: boolean;
-          label?: string;
-        }>("/factor-gym/status");
+        const { data } = await api.get<FactorGymStatus>("/factor-gym/status");
         if (!cancelled) {
-          const open = Boolean(data.allowed ?? data.enabled);
           setGymEntry({
-            enabled: open,
-            test_entry: Boolean(data.test_entry),
-            label: data.label || (data.test_entry ? "Factor Gym（测试版）" : "Factor Gym"),
+            accessAllowed: isFactorGymAccessAllowed(data),
+            test_entry: Boolean(data.test_entry ?? data.open_beta ?? true),
+            label: data.label || "Factor Gym（测试版）",
           });
         }
       } catch {
-        if (!cancelled) setGymEntry({ enabled: false, test_entry: false, label: "Factor Gym" });
+        if (!cancelled) setGymEntry({ accessAllowed: false, test_entry: false, label: "Factor Gym（测试版）" });
       }
     })();
     return () => {
@@ -74,8 +69,8 @@ export default function Layout() {
         { to: "/paper", label: t.nav.paperTrading || "模拟交易" },
         { to: "/projects", label: t.nav.myProjects },
         { to: "/challenges", label: t.nav.challenges },
-        // Controlled test entry: visible only when allowlisted / token / global flag
-        ...(gymEntry?.enabled
+        // Open Beta: visible for authenticated users when status allows
+        ...(gymEntry?.accessAllowed
           ? [{ to: "/factor-gym", label: gymEntry.label || "Factor Gym（测试版）" }]
           : []),
       ]

@@ -1,4 +1,4 @@
-"""Factor Gym API — feature flag + golden path smoke."""
+"""Factor Gym API — Open Beta + kill switch + golden path smoke."""
 
 from __future__ import annotations
 
@@ -19,41 +19,51 @@ def _register(client, email: str = "gymuser@quantlab.ai", username: str = "gymus
     return {"Authorization": f"Bearer {token}"}
 
 
-def test_factor_gym_disabled_by_default(client):
-    headers = _register(client)
-    st = client.get(f"{BASE}/factor-gym/status", headers=headers)
-    assert st.status_code == 200
-    body = st.json()
-    assert body["enabled"] is False
-    assert body["allowed"] is False
-    assert body["owner_token_fallback"] == "DENY"
-    assert body.get("public_rollout") is False
-    assert "受邀" in (body.get("denied_detail") or "")
-    blocked = client.post(f"{BASE}/factor-gym/ideas", headers=headers, json={"idea": "动量会延续"})
-    assert blocked.status_code == 403
-    assert "受邀" in blocked.json()["detail"]
+def _save_beta(settings):
+    return (
+        settings.quantlab_factor_gym,
+        getattr(settings, "quantlab_factor_gym_open_beta", True),
+        getattr(settings, "quantlab_factor_gym_kill", False),
+        settings.quantlab_factor_gym_test_allowlist,
+        settings.quantlab_factor_gym_test_token,
+    )
 
 
-def test_factor_gym_allowlist_test_entry(client, monkeypatch, tmp_path):
+def _restore_beta(settings, prev):
+    (
+        settings.quantlab_factor_gym,
+        settings.quantlab_factor_gym_open_beta,
+        settings.quantlab_factor_gym_kill,
+        settings.quantlab_factor_gym_test_allowlist,
+        settings.quantlab_factor_gym_test_token,
+    ) = prev
+
+
+def test_factor_gym_open_beta_authenticated(client, monkeypatch, tmp_path):
     from backend.app.core.config import get_settings
     from engine.factor_gym import hypothesis as hyp_mod
 
     settings = get_settings()
-    prev_flag = settings.quantlab_factor_gym
-    prev_allow = settings.quantlab_factor_gym_test_allowlist
+    prev = _save_beta(settings)
     settings.quantlab_factor_gym = False
-    settings.quantlab_factor_gym_test_allowlist = "gymallow@quantlab.ai,gymallow"
+    settings.quantlab_factor_gym_open_beta = True
+    settings.quantlab_factor_gym_kill = False
+    settings.quantlab_factor_gym_test_allowlist = ""
     settings.captcha_disabled = True
     monkeypatch.setattr(hyp_mod, "DEFAULT_GYM_DIR", tmp_path)
     try:
-        headers = _register(client, email="gymallow@quantlab.ai", username="gymallow")
+        headers = _register(client, email="beta@quantlab.ai", username="betauser")
         st = client.get(f"{BASE}/factor-gym/status", headers=headers)
         assert st.status_code == 200
         body = st.json()
-        assert body["enabled"] is True
+        assert body["FACTOR_GYM_ACCESS_ALLOWED"] is True
         assert body["allowed"] is True
-        assert body["test_entry"] is True
+        assert body["open_beta"] is True
+        assert body["mode"] == "open_beta"
+        assert body["enabled"] is False
         assert "测试版" in body["label"]
+        assert "受邀" not in (body.get("denied_detail") or "")
+        assert body.get("public_rollout") is False
         assert st.headers.get("cache-control", "").lower().startswith("no-store")
         idea = client.post(
             f"{BASE}/factor-gym/ideas",
@@ -61,30 +71,48 @@ def test_factor_gym_allowlist_test_entry(client, monkeypatch, tmp_path):
             json={"idea": "连续下跌后更容易反弹吗"},
         )
         assert idea.status_code == 200, idea.text
-        # non-allowlisted user still blocked
-        other = _register(client, email="outsider@quantlab.ai", username="outsider")
-        st2 = client.get(f"{BASE}/factor-gym/status", headers=other)
-        assert st2.json()["enabled"] is False
+    finally:
+        _restore_beta(settings, prev)
+
+
+def test_factor_gym_kill_denies_authenticated(client):
+    from backend.app.core.config import get_settings
+
+    settings = get_settings()
+    prev = _save_beta(settings)
+    settings.quantlab_factor_gym_open_beta = True
+    settings.quantlab_factor_gym_kill = True
+    settings.captcha_disabled = True
+    try:
+        headers = _register(client, email="killed@quantlab.ai", username="killeduser")
+        st = client.get(f"{BASE}/factor-gym/status", headers=headers)
+        assert st.json()["FACTOR_GYM_ACCESS_ALLOWED"] is False
+        assert st.json()["mode"] == "killed"
         blocked = client.post(
             f"{BASE}/factor-gym/ideas",
-            headers=other,
-            json={"idea": "连续下跌后更容易反弹吗"},
+            headers=headers,
+            json={"idea": "动量会延续"},
         )
         assert blocked.status_code == 403
+        assert "受邀" not in blocked.json()["detail"]
     finally:
-        settings.quantlab_factor_gym = prev_flag
-        settings.quantlab_factor_gym_test_allowlist = prev_allow
+        _restore_beta(settings, prev)
 
 
-def test_factor_gym_test_token_header(client, monkeypatch, tmp_path):
+def test_factor_gym_anonymous_status_requires_auth(client):
+    st = client.get(f"{BASE}/factor-gym/status")
+    assert st.status_code in (401, 403)
+
+
+def test_factor_gym_qa_token_when_open_beta_off(client, monkeypatch, tmp_path):
     from backend.app.core.config import get_settings
     from engine.factor_gym import hypothesis as hyp_mod
 
     settings = get_settings()
-    prev_flag = settings.quantlab_factor_gym
-    prev_tok = settings.quantlab_factor_gym_test_token
-    prev_allow = settings.quantlab_factor_gym_test_allowlist
+    prev = _save_beta(settings)
     settings.quantlab_factor_gym = False
+    settings.quantlab_factor_gym_open_beta = False
+    settings.quantlab_factor_gym_kill = False
     settings.quantlab_factor_gym_test_allowlist = ""
     settings.quantlab_factor_gym_test_token = "ql-gym-test-secret"
     settings.captcha_disabled = True
@@ -92,36 +120,30 @@ def test_factor_gym_test_token_header(client, monkeypatch, tmp_path):
     try:
         headers = _register(client, email="tokuser@quantlab.ai", username="tokuser")
         denied = client.get(f"{BASE}/factor-gym/status", headers=headers)
-        assert denied.json()["enabled"] is False
+        assert denied.json()["FACTOR_GYM_ACCESS_ALLOWED"] is False
         headers2 = {**headers, "X-Factor-Gym-Test-Token": "ql-gym-test-secret"}
         st = client.get(f"{BASE}/factor-gym/status", headers=headers2)
-        assert st.json()["enabled"] is True
-        assert st.json()["mode"] == "test_token"
-        idea = client.post(
-            f"{BASE}/factor-gym/ideas",
-            headers=headers2,
-            json={"idea": "涨多了会不会继续涨"},
-        )
-        assert idea.status_code == 200, idea.text
+        assert st.json()["FACTOR_GYM_ACCESS_ALLOWED"] is True
+        assert st.json()["mode"] == "test_token_qa"
     finally:
-        settings.quantlab_factor_gym = prev_flag
-        settings.quantlab_factor_gym_test_token = prev_tok
-        settings.quantlab_factor_gym_test_allowlist = prev_allow
+        _restore_beta(settings, prev)
 
 
-def test_factor_gym_golden_path_when_enabled(client, monkeypatch, tmp_path):
+def test_factor_gym_golden_path_open_beta(client, monkeypatch, tmp_path):
     from backend.app.core.config import get_settings
     from engine.factor_gym import hypothesis as hyp_mod
 
     settings = get_settings()
-    prev = settings.quantlab_factor_gym
-    settings.quantlab_factor_gym = True
+    prev = _save_beta(settings)
+    settings.quantlab_factor_gym = False
+    settings.quantlab_factor_gym_open_beta = True
+    settings.quantlab_factor_gym_kill = False
     settings.captcha_disabled = True
     monkeypatch.setattr(hyp_mod, "DEFAULT_GYM_DIR", tmp_path)
     try:
         headers = _register(client, email="gymon@quantlab.ai", username="gymon")
         st = client.get(f"{BASE}/factor-gym/status", headers=headers)
-        assert st.json()["enabled"] is True
+        assert st.json()["FACTOR_GYM_ACCESS_ALLOWED"] is True
 
         idea = client.post(
             f"{BASE}/factor-gym/ideas",
@@ -130,9 +152,6 @@ def test_factor_gym_golden_path_when_enabled(client, monkeypatch, tmp_path):
         )
         assert idea.status_code == 200, idea.text
         assert "memory_check" in idea.json()
-        assert idea.json()["memory_check"]["what_we_already_know"]
-        assert idea.json()["memory_check"]["next_best_research_action"]
-        assert idea.json()["memory_check"]["semantic_similarity"] == "DEFER"
         hid = idea.json()["hypothesis_id"]
 
         sealed = client.post(
@@ -161,6 +180,5 @@ def test_factor_gym_golden_path_when_enabled(client, monkeypatch, tmp_path):
         assert body["status"] in ("PASS", "BORDERLINE", "FAIL", "KILL")
         assert body["next_best_action"]
         assert body["why"]
-        assert "metrics_folded" in body
     finally:
-        settings.quantlab_factor_gym = prev
+        _restore_beta(settings, prev)

@@ -126,6 +126,15 @@ class Settings(BaseSettings):
     quantlab_nautilus_backtest: bool = True
     quantlab_sandbox: bool = True
     quantlab_live: bool = False
+    # Factor Gym: legacy force-on (not formal GA). Prefer open_beta.
+    quantlab_factor_gym: bool = False
+    # Open Beta — all authenticated users (Owner-approved). Not public rollout.
+    quantlab_factor_gym_open_beta: bool = True
+    # Emergency kill — denies everyone (including Open Beta).
+    quantlab_factor_gym_kill: bool = False
+    # Internal QA only when open_beta is off (not a product access path).
+    quantlab_factor_gym_test_allowlist: str = ""
+    quantlab_factor_gym_test_token: str = ""
 
 
 @lru_cache

@@ -1,7 +1,7 @@
-"""E2E: Factor Gym Golden Path under controlled entry (global flag OFF).
+"""E2E: Factor Gym Golden Path under Open Beta.
 
-REAL_USER_ENTRY_REACHABILITY alone is insufficient —
-REAL_USER_GOLDEN_PATH_REACHABILITY must also PASS before human sessions.
+REAL_USER_GOLDEN_PATH_REACHABILITY still required before claiming First Value.
+PRODUCT_FIRST_VALUE stays UNPROVEN until reality evidence closes.
 """
 
 from __future__ import annotations
@@ -22,11 +22,32 @@ def _register(client, email: str, username: str):
     return {"Authorization": f"Bearer {r.json()['access_token']}"}
 
 
+def _save(settings):
+    return (
+        settings.quantlab_factor_gym,
+        getattr(settings, "quantlab_factor_gym_open_beta", True),
+        getattr(settings, "quantlab_factor_gym_kill", False),
+        settings.quantlab_factor_gym_test_allowlist,
+        settings.quantlab_factor_gym_test_token,
+    )
+
+
+def _restore(settings, prev):
+    (
+        settings.quantlab_factor_gym,
+        settings.quantlab_factor_gym_open_beta,
+        settings.quantlab_factor_gym_kill,
+        settings.quantlab_factor_gym_test_allowlist,
+        settings.quantlab_factor_gym_test_token,
+    ) = prev
+
+
 def _golden_path(client, headers):
     st = client.get(f"{BASE}/factor-gym/status", headers=headers)
     assert st.status_code == 200
+    assert st.json()["FACTOR_GYM_ACCESS_ALLOWED"] is True
     assert st.json()["allowed"] is True
-    assert st.json()["enabled"] is True
+    assert "测试版" in st.json()["label"]
 
     idea = client.post(
         f"{BASE}/factor-gym/ideas",
@@ -78,96 +99,82 @@ def _golden_path(client, headers):
     return result
 
 
-def test_case1_allowlist_full_golden_path(client, monkeypatch, tmp_path):
-    """CASE 1: Global OFF + allowlist user → full Idea→…→Result."""
+def test_case1_open_beta_authenticated_golden_path(client, monkeypatch, tmp_path):
+    """CASE 1: Open Beta + any authenticated user → full Idea→…→Result."""
     from backend.app.core.config import get_settings
     from engine.factor_gym import hypothesis as hyp_mod
 
     settings = get_settings()
-    prev = (settings.quantlab_factor_gym, settings.quantlab_factor_gym_test_allowlist, settings.quantlab_factor_gym_test_token)
+    prev = _save(settings)
     settings.quantlab_factor_gym = False
-    settings.quantlab_factor_gym_test_allowlist = "case1@quantlab.ai,case1"
-    settings.quantlab_factor_gym_test_token = ""
+    settings.quantlab_factor_gym_open_beta = True
+    settings.quantlab_factor_gym_kill = False
+    settings.quantlab_factor_gym_test_allowlist = ""
     settings.captcha_disabled = True
     monkeypatch.setattr(hyp_mod, "DEFAULT_GYM_DIR", tmp_path)
     try:
         headers = _register(client, "case1@quantlab.ai", "case1")
+        st = client.get(f"{BASE}/factor-gym/status", headers=headers)
+        assert st.json()["mode"] == "open_beta"
         _golden_path(client, headers)
         vault = client.get(f"{BASE}/factor-gym/vault", headers=headers)
         assert vault.status_code == 200
     finally:
-        settings.quantlab_factor_gym, settings.quantlab_factor_gym_test_allowlist, settings.quantlab_factor_gym_test_token = prev
+        _restore(settings, prev)
 
 
-def test_case2_test_token_full_golden_path(client, monkeypatch, tmp_path):
-    """CASE 2: Global OFF + valid test token → full Golden Path."""
-    from backend.app.core.config import get_settings
-    from engine.factor_gym import hypothesis as hyp_mod
-
-    settings = get_settings()
-    prev = (settings.quantlab_factor_gym, settings.quantlab_factor_gym_test_allowlist, settings.quantlab_factor_gym_test_token)
-    settings.quantlab_factor_gym = False
-    settings.quantlab_factor_gym_test_allowlist = ""
-    settings.quantlab_factor_gym_test_token = "case2-gym-secret"
-    settings.captcha_disabled = True
-    monkeypatch.setattr(hyp_mod, "DEFAULT_GYM_DIR", tmp_path)
-    try:
-        headers = _register(client, "case2@quantlab.ai", "case2")
-        headers = {**headers, "X-Factor-Gym-Test-Token": "case2-gym-secret"}
-        _golden_path(client, headers)
-    finally:
-        settings.quantlab_factor_gym, settings.quantlab_factor_gym_test_allowlist, settings.quantlab_factor_gym_test_token = prev
-
-
-def test_case3_ordinary_user_denied(client, monkeypatch):
-    """CASE 3: Global OFF + ordinary user → status denied + API 403."""
+def test_case2_kill_switch_denies(client):
+    """CASE 2: Emergency kill → authenticated denied."""
     from backend.app.core.config import get_settings
 
     settings = get_settings()
-    prev = (settings.quantlab_factor_gym, settings.quantlab_factor_gym_test_allowlist, settings.quantlab_factor_gym_test_token)
-    settings.quantlab_factor_gym = False
-    settings.quantlab_factor_gym_test_allowlist = "someone-else"
-    settings.quantlab_factor_gym_test_token = "not-for-you"
+    prev = _save(settings)
+    settings.quantlab_factor_gym_open_beta = True
+    settings.quantlab_factor_gym_kill = True
     settings.captcha_disabled = True
     try:
-        headers = _register(client, "normie@quantlab.ai", "normie")
+        headers = _register(client, "killed@quantlab.ai", "killed2")
         st = client.get(f"{BASE}/factor-gym/status", headers=headers)
-        assert st.json()["allowed"] is False
-        assert st.json()["enabled"] is False
+        assert st.json()["FACTOR_GYM_ACCESS_ALLOWED"] is False
         ideas = client.post(
             f"{BASE}/factor-gym/ideas",
             headers=headers,
             json={"idea": "随便一个市场想法即可"},
         )
         assert ideas.status_code == 403
-        run = client.post(
-            f"{BASE}/factor-gym/experiments/run",
-            headers=headers,
-            json={
-                "hypothesis_id": "HYP-X",
-                "predicted_direction": "unclear",
-            },
-        )
-        assert run.status_code == 403
     finally:
-        settings.quantlab_factor_gym, settings.quantlab_factor_gym_test_allowlist, settings.quantlab_factor_gym_test_token = prev
+        _restore(settings, prev)
 
 
-def test_case4_global_on_preserved(client, monkeypatch, tmp_path):
-    """CASE 4: Global ON → existing intended behavior preserved."""
+def test_case3_anonymous_denied(client):
+    """CASE 3: Anonymous → API denied."""
+    st = client.get(f"{BASE}/factor-gym/status")
+    assert st.status_code in (401, 403)
+    ideas = client.post(
+        f"{BASE}/factor-gym/ideas",
+        json={"idea": "随便一个市场想法即可"},
+    )
+    assert ideas.status_code in (401, 403)
+
+
+def test_case4_legacy_global_on_still_works(client, monkeypatch, tmp_path):
+    """CASE 4: Legacy QUANTLAB_FACTOR_GYM=true with open_beta off still allows auth users."""
     from backend.app.core.config import get_settings
     from engine.factor_gym import hypothesis as hyp_mod
 
     settings = get_settings()
-    prev = settings.quantlab_factor_gym
+    prev = _save(settings)
     settings.quantlab_factor_gym = True
+    settings.quantlab_factor_gym_open_beta = False
+    settings.quantlab_factor_gym_kill = False
     settings.captcha_disabled = True
     monkeypatch.setattr(hyp_mod, "DEFAULT_GYM_DIR", tmp_path)
     try:
         headers = _register(client, "globalon@quantlab.ai", "globalon")
         st = client.get(f"{BASE}/factor-gym/status", headers=headers)
+        assert st.json()["FACTOR_GYM_ACCESS_ALLOWED"] is True
         assert st.json()["mode"] == "global"
-        assert st.json()["test_entry"] is False
+        assert "测试版" in st.json()["label"]
         _golden_path(client, headers)
     finally:
-        settings.quantlab_factor_gym = prev
+        _restore(settings, prev)

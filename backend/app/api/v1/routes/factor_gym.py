@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
@@ -20,6 +21,7 @@ from engine.factor_gym import (
     run_gym_experiment,
     seal_and_save,
 )
+from engine.factor_gym.hypothesis import HypothesisContract
 from engine.factor_gym.reproduce import reproduce_from_ir_dict
 from engine.research_memory import append_hit_ledger, memory_check, memory_metrics_snapshot
 
@@ -36,7 +38,7 @@ def require_gym_access(
 ) -> dict[str, Any]:
     """Canonical API gate — same resolver as GET /status (no second Gate)."""
     access = resolve_factor_gym_access(user, test_token=_token_from_request(request))
-    if not access["allowed"]:
+    if not access["FACTOR_GYM_ACCESS_ALLOWED"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=access.get("denied_detail") or DENIED_DETAIL_INVITE_ONLY,
@@ -87,6 +89,64 @@ class ReproduceIn(BaseModel):
 
 _DRAFTS: dict[str, Any] = {}
 _MEMORY_HITS: dict[str, Any] = {}
+_DRAFT_DIR = Path("data") / "factor_gym" / "drafts"
+
+
+def _persist_draft(draft: Any) -> None:
+    """Cross-worker draft share (uvicorn --workers > 1)."""
+    _DRAFTS[draft.hypothesis_id] = draft
+    _DRAFT_DIR.mkdir(parents=True, exist_ok=True)
+    (_DRAFT_DIR / f"{draft.hypothesis_id}.json").write_text(
+        draft.model_dump_json(), encoding="utf-8"
+    )
+
+
+def _load_draft(hypothesis_id: str) -> Any | None:
+    if hypothesis_id in _DRAFTS:
+        return _DRAFTS[hypothesis_id]
+    path = _DRAFT_DIR / f"{hypothesis_id}.json"
+    if not path.is_file():
+        return None
+    draft = HypothesisContract.model_validate_json(path.read_text(encoding="utf-8"))
+    _DRAFTS[hypothesis_id] = draft
+    return draft
+
+
+def _drop_draft(hypothesis_id: str) -> None:
+    _DRAFTS.pop(hypothesis_id, None)
+    path = _DRAFT_DIR / f"{hypothesis_id}.json"
+    if path.is_file():
+        path.unlink()
+
+
+def _load_memory_hit(hit_id: str) -> dict[str, Any] | None:
+    if hit_id in _MEMORY_HITS:
+        return _MEMORY_HITS[hit_id]
+    from engine.research_memory import DEFAULT_HIT_LEDGER
+    import json
+
+    path = Path(DEFAULT_HIT_LEDGER)
+    if not path.is_file():
+        return None
+    found: dict[str, Any] | None = None
+    with path.open("r", encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line:
+                continue
+            row = json.loads(line)
+            if row.get("hit_id") == hit_id:
+                found = row
+    if not found:
+        return None
+    meta = {
+        "idea": found.get("query") or "",
+        "classification": found.get("classification"),
+        "block_rerun": found.get("classification") == "EXACT_DUPLICATE",
+        "user_id": None,
+    }
+    _MEMORY_HITS[hit_id] = meta
+    return meta
 
 
 @router.get("/status")
@@ -100,7 +160,7 @@ def gym_status(
     # Prevent browser/CDN caching a denied payload over an allowlisted session.
     response.headers["Cache-Control"] = "no-store"
     access = resolve_factor_gym_access(_user, test_token=_token_from_request(request))
-    if access["allowed"]:
+    if access["FACTOR_GYM_ACCESS_ALLOWED"]:
         emit_telemetry(
             "factor_gym_test_entry_opened" if access["test_entry"] else "factor_gym_opened",
             {
@@ -109,9 +169,14 @@ def gym_status(
                 "test_entry": access["test_entry"],
             },
         )
+    access_allowed = bool(access["FACTOR_GYM_ACCESS_ALLOWED"])
     return {
-        "allowed": bool(access["allowed"]),
-        "enabled": bool(access["enabled"]),
+        # Canonical access decision — FE/nav/API must use this, never global enabled alone.
+        "FACTOR_GYM_ACCESS_ALLOWED": access_allowed,
+        "allowed": access_allowed,
+        "enabled": bool(access["enabled"]),  # legacy flag only
+        "global_enabled": bool(access["global_enabled"]),
+        "open_beta": bool(access.get("open_beta")),
         "test_entry": bool(access["test_entry"]),
         "mode": access["mode"],
         "label": access["label"],
@@ -121,9 +186,10 @@ def gym_status(
         "byok": "DEFER_UNTIL_SECRET_VAULT_READY",
         "semantic_similarity": "DEFER",
         "memory_metrics": memory_metrics_snapshot(),
-        "controlled_test_entry": True,
+        "controlled_test_entry": False,
         "denied_detail": access.get("denied_detail"),
     }
+
 
 
 
@@ -157,7 +223,7 @@ def api_memory_decision(
     user: Annotated[User, Depends(get_current_user)],
     _access: GymAccess,
 ) -> dict[str, Any]:
-    meta = _MEMORY_HITS.get(body.hit_id)
+    meta = _load_memory_hit(body.hit_id)
     if meta is None:
         raise HTTPException(status_code=404, detail="memory hit not found")
     check = memory_check(meta["idea"])
@@ -187,7 +253,7 @@ def create_idea(
 
     emit_telemetry("idea_submitted", {"user_id": str(user.id)})
     draft = draft_from_idea(body.idea, author_user_id=str(user.id), ai_assistance=False)
-    _DRAFTS[draft.hypothesis_id] = draft
+    _persist_draft(draft)
     check = memory_check(body.idea)
     hit_id = append_hit_ledger(
         idea=body.idea,
@@ -230,7 +296,7 @@ def seal_hypothesis(
     user: Annotated[User, Depends(get_current_user)],
     _access: GymAccess,
 ) -> dict[str, Any]:
-    draft = _DRAFTS.get(body.hypothesis_id)
+    draft = _load_draft(body.hypothesis_id)
     if draft is None:
         raise HTTPException(status_code=404, detail="draft hypothesis not found; POST /ideas first")
     updated = draft.model_copy(
@@ -246,7 +312,7 @@ def seal_hypothesis(
     )
     store = HypothesisStore()
     sealed = seal_and_save(updated, store)
-    _DRAFTS.pop(body.hypothesis_id, None)
+    _drop_draft(body.hypothesis_id)
     return sealed.model_dump()
 
 
@@ -256,9 +322,9 @@ def run_experiment(
     user: Annotated[User, Depends(get_current_user)],
     _access: GymAccess,
 ) -> dict[str, Any]:
-    if body.memory_hit_id and body.memory_hit_id in _MEMORY_HITS:
-        meta = _MEMORY_HITS[body.memory_hit_id]
-        if meta.get("block_rerun") and not body.force_despite_duplicate:
+    if body.memory_hit_id:
+        meta = _load_memory_hit(body.memory_hit_id)
+        if meta and meta.get("block_rerun") and not body.force_despite_duplicate:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail={

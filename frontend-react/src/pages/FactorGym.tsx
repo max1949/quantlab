@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { api, setFactorGymTestToken } from "../api/client";
+import { isFactorGymAccessAllowed, type FactorGymStatus } from "../lib/factorGymAccess";
 
 type Step = "idea" | "memory" | "predict" | "result";
 
@@ -112,23 +113,16 @@ export default function FactorGym() {
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await api.get<{
-          enabled: boolean;
-          allowed?: boolean;
-          test_entry?: boolean;
-          label?: string;
-          mode?: string;
-          denied_detail?: string | null;
-        }>("/factor-gym/status");
-        const open = Boolean(data.allowed ?? data.enabled);
+        const { data } = await api.get<FactorGymStatus>("/factor-gym/status");
+        const open = isFactorGymAccessAllowed(data);
         if (!open) {
-          setError(data.denied_detail || "该功能目前仅对受邀测试用户开放。");
+          setError(data.denied_detail || "请先登录后使用 Factor Gym（测试版）。");
           setTestEntry(false);
           return;
         }
-        setTestEntry(Boolean(data.test_entry));
-        setPageLabel(data.label || (data.test_entry ? "Factor Gym（测试版）" : "Factor Gym"));
-        if (data.test_entry) {
+        setTestEntry(Boolean(data.test_entry ?? data.open_beta ?? true));
+        setPageLabel(data.label || "Factor Gym（测试版）");
+        if (data.test_entry || data.open_beta) {
           await emitEvent("factor_gym_test_entry_opened", { mode: data.mode });
         } else {
           await emitEvent("factor_gym_opened");
@@ -144,9 +138,8 @@ export default function FactorGym() {
     setError(null);
     setBusy(true);
     try {
-      // Do NOT re-gate on /status here — that duplicated Gate blocked allowlisted
-      // testers when status was stale/cached while nav already showed entry.
-      // Canonical gate is the API require_gym_access resolver.
+      // Canonical gate is API require_gym_access / FACTOR_GYM_ACCESS_ALLOWED.
+      // Never re-check status.enabled here (global OFF ≠ access denied).
       const { data } = await api.post<IdeaOut>("/factor-gym/ideas", { idea });
       await api.post("/factor-gym/hypotheses/seal", {
         hypothesis_id: data.hypothesis_id,
@@ -167,7 +160,7 @@ export default function FactorGym() {
         ?.data?.detail;
       const http = (e as { response?: { status?: number } })?.response?.status;
       if (http === 403 || http === 503) {
-        setError(typeof detail === "string" && detail.trim() ? detail : "该功能目前仅对受邀测试用户开放。");
+        setError(typeof detail === "string" && detail.trim() ? detail : "请先登录后使用 Factor Gym（测试版）。");
       } else {
         setError(String(detail || "没法开始，请稍后再试"));
       }
@@ -309,7 +302,7 @@ export default function FactorGym() {
       </h1>
       {testEntry && (
         <p className="mt-2 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
-          测试版入口 · 仅受邀测试者可见 · 不是正式公开发布
+          测试版 · 不是正式发布 · 用于收集真实研究反馈
         </p>
       )}
       <p className="mt-2 text-sm text-slate-500">用一句话提出想法，一步一步做完第一次规范研究。</p>
